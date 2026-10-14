@@ -30,7 +30,15 @@ No LLM API is free, so it is outside the free-tier baseline.
 **D9 · Project layout** (2026-10-14)
 Next.js 16 with `src/` directory, npm, Convex functions in `convex/` at the repo root.
 
+**D10 · Clean code, colocated tests and 80% coverage** (2026-10-14)
+Every code file has a colocated test file; Vitest enforces 80% coverage; exceptions are listed with reasons in `docs/engineering.md`. Business logic is pure TypeScript so it can be tested without Convex or React. Tools: Vitest, convex-test, React Testing Library. Names explain code; no per-file header comments. Code quality takes priority over the internal deadlines.
+
+**D11 · File structure** (pending)
+To be designed together before M1 code is written.
+
 ## Open questions
+
+- [ ] Zod: drop it and use Convex validators as the single source of question shapes, or keep Zod (D4)?
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)
 - [ ] UI language: Swedish only, or Swedish and English?

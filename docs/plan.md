@@ -7,9 +7,11 @@ Two deadlines:
 
 The quiz is written in production from day one, so nothing has to be moved from the development database later.
 
+The dates are internal targets. Code quality (`docs/engineering.md`) wins if they conflict; the hard goal is hosting the quiz in early December.
+
 ## Next up
 
-M1: Convex schema for quizzes, rounds and questions.
+Design the file structure together (D11), then set up Vitest with the coverage threshold, then the M1 schema.
 
 ## Milestones
 
@@ -20,6 +22,9 @@ M1: Convex schema for quizzes, rounds and questions.
 - [x] Convex dev deployment created and linked (`.env.local`)
 
 ### M1 · Authoring live (due 2026-10-21)
+- [x] Engineering standards (`docs/engineering.md`)
+- [ ] File structure agreed (D11)
+- [ ] Vitest, convex-test and React Testing Library set up, 80% threshold enforced
 - [ ] Convex schema: quizzes, rounds, questions
 - [ ] Zod shapes for the first question types: multiple choice, free text, numeric (tolerance tiers)
 - [ ] Host passphrase gate
