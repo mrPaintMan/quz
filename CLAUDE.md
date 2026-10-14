@@ -15,14 +15,14 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 
 - The user steers through conversation and mostly does not read the code. Explain changes as behaviour and trade-offs, not diffs.
 - Plan first: for each new instruction, propose an approach (what changes, which parts of the app, trade-offs, how you will verify it) and wait for a go or no-go before editing. Inside an approved plan, carry on without asking about each detail; come back if the plan has to change. Reading and investigating need no approval.
-- Briefly explain Convex, Zod and non-obvious TypeScript when they come up; the user is new to Convex and Zod.
+- Briefly explain Convex and non-obvious TypeScript when they come up; the user is new to Convex.
 - Verify your own work: run `npm run build` and `npm run lint`, and check UI changes in the browser pane (the TV, phone and admin views).
 - Ask the user about product choices. Decide implementation details yourself and record notable ones in `docs/decisions.md`.
 - At the end of a work chunk, update `docs/plan.md` (tick items, set "Next up") and add any new decision to `docs/decisions.md`.
 
 ## Stack
 
-Next.js (App Router) + TypeScript, Convex (database, real-time, file storage), Tailwind CSS, Zod. Hosted on Vercel Hobby; free tiers only, except a custom domain.
+Next.js (App Router) + TypeScript, Convex (database, real-time, file storage), Tailwind CSS. Hosted on Vercel Hobby; free tiers only, except a custom domain.
 
 ## Commands
 
@@ -33,7 +33,8 @@ Next.js (App Router) + TypeScript, Convex (database, real-time, file storage), T
 ## Conventions
 
 - Convex functions and schema live in `convex/`. Scores are computed from `answers` and `adjustments`, never stored twice.
-- One Zod discriminated union per question type, shared by the editor and the grader.
+- Question shapes are Convex validators in `convex/questions/content.ts`, the single source of truth; `src/domain` imports only their types.
+- File structure and dependency rules: see `docs/engineering.md`.
 - Host-only Convex functions check the host passphrase (env var).
 
 <!-- convex-ai-start -->

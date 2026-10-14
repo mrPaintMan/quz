@@ -35,7 +35,63 @@ Exceptions to the test rules are made on purpose and listed here with a reason. 
 | `src/app/layout.tsx` | Root shell with providers only, no logic |
 | `src/app/ConvexClientProvider.tsx` | Wires the Convex client, no logic |
 | `**/*.d.ts`, type-only files | No runtime code to test |
+| `src/app/**/page.tsx` | Thin routes: read params, render one feature component |
+| `convex/schema.ts`, `convex/**/table.ts` | Declarations only; exercised by every Convex function test |
 
 ## File structure
 
-To be agreed together before M1 code is written; see D11 in `docs/decisions.md` once decided. This section will say where each kind of code belongs.
+Agreed in D11. Three layers, with dependencies pointing inward toward the domain:
+
+| Layer | Folder | What it holds | May import |
+|---|---|---|---|
+| Domain | `src/domain/` | Pure quiz rules: grading, scoring, normalizing | Nothing at runtime; types only from `convex/` |
+| Backend | `convex/` | Tables, validators, queries, mutations | `src/domain/` |
+| Frontend | `src/features/`, `src/app/` | Screens and UI | `src/domain/`, `src/components/ui/`, the Convex `api` |
+
+```
+convex/
+  schema.ts                      # combines the tables from each folder
+  quizzes/  rounds/  questions/  # one folder per table:
+    table.ts                     #   table definition + its validators
+    queries.ts                   #   reads
+    mutations.ts                 #   writes
+  questions/content.ts           # validators per question type: the single source of shapes
+  auth/requireHost.ts            # passphrase check used by host functions
+
+src/
+  domain/
+    grading/                     # gradeNumeric.ts, gradeFreeText.ts, normalizeAnswer.ts …
+    scoring/
+  features/
+    host/                        # the two hosts
+      authoring/  liveControl/  hostGate/
+    player/                      # teams on their phones
+      join/  answering/
+    tv/                          # the shared screen
+      questionStage/  leaderboard/
+    shared/                      # used by more than one audience
+  components/ui/                 # shadcn/ui primitives
+  app/                           # routes only
+```
+
+Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
+
+### Rules
+
+1. **Dependencies point inward:** `app` → `features` → `domain`, and `convex` → `domain`. `domain` imports only types from `convex/`, never runtime code.
+2. **Route files are thin.** A `page.tsx` reads its params and renders one feature component; no logic.
+3. **Convex functions are thin.** Check the host, load data, call domain logic, write. Rules live in `src/domain`.
+4. **No imports across audiences or between features.** Code needed in more than one place moves to `features/shared/`, `src/domain/` or `src/components/ui/`.
+5. **Naming:** components `PascalCase.tsx`, everything else `camelCase.ts`. A file is named after its one main export. Functions start with a verb (`gradeNumeric`, `requireHost`).
+6. **No barrel files.** No `index.ts` that only re-exports; import from the real file.
+7. **Flat feature folders** until one holds about 8 files; add sub-folders when needed, not up front.
+8. **Rules 1 and 4 are enforced by ESLint** import restrictions, not only by this document.
+9. **Audience names, not device names** (`host`, `player`, `tv`): the split is who uses it and for what, not screen size.
+
+### Where does it go?
+
+- A rule about how many points an answer gets → `src/domain/grading/`.
+- A new field on questions → `convex/questions/table.ts` (or `content.ts` for type-specific content).
+- A form the hosts use to write questions → `src/features/host/authoring/`.
+- Something both the TV and the phones display → `src/features/shared/`.
+- A new URL → `src/app/…/page.tsx` that renders a feature component.

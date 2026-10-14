@@ -11,22 +11,23 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Design the file structure together (D11), then set up Vitest with the coverage threshold, then the M1 schema.
+Set up Vitest, convex-test, React Testing Library and the ESLint import rules, then the M1 schema.
 
 ## Milestones
 
 ### M0 · Setup
 - [x] Next.js + TypeScript + Tailwind scaffold
-- [x] Convex and Zod installed, Convex provider wired into the root layout
+- [x] Convex installed, Convex provider wired into the root layout
 - [x] Context docs: `CLAUDE.md`, `docs/`
 - [x] Convex dev deployment created and linked (`.env.local`)
 
 ### M1 · Authoring live (due 2026-10-21)
 - [x] Engineering standards (`docs/engineering.md`)
-- [ ] File structure agreed (D11)
+- [x] File structure agreed (D11)
 - [ ] Vitest, convex-test and React Testing Library set up, 80% threshold enforced
+- [ ] ESLint import rules for the dependency direction
 - [ ] Convex schema: quizzes, rounds, questions
-- [ ] Zod shapes for the first question types: multiple choice, free text, numeric (tolerance tiers)
+- [ ] Question content validators for the first types: multiple choice, free text, numeric (tolerance tiers)
 - [ ] Host passphrase gate
 - [ ] shadcn/ui set up
 - [ ] Admin: create a quiz, add and reorder rounds and questions, attach images
@@ -63,3 +64,4 @@ Design the file structure together (D11), then set up Vitest with the coverage t
 ## Log
 
 - 2026-10-14: Project scaffolded; Convex dev deployment linked; context docs created. Plan reordered so authoring goes live first, due 2026-10-21.
+- 2026-10-15: Engineering standards and file structure agreed (D10–D12); Zod dropped.

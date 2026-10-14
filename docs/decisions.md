@@ -14,7 +14,7 @@ Vercel functions cannot hold WebSocket connections, so live sync needs a separat
 Security is not a goal. Teams join by QR code and team name; the team id is kept in localStorage so a phone can rejoin after a refresh.
 
 **D4 · Tailwind CSS + shadcn/ui, Zod, qrcode.react** (2026-10-04)
-Zod: one discriminated union per question type, shared by editor and grader. QR codes are generated in the browser, no external service.
+Zod: one discriminated union per question type, shared by editor and grader (Zod part replaced by D12). QR codes are generated in the browser, no external service.
 
 **D5 · Long videos as YouTube or unlisted links; images and audio in Convex storage** (2026-10-04)
 
@@ -33,12 +33,13 @@ Next.js 16 with `src/` directory, npm, Convex functions in `convex/` at the repo
 **D10 · Clean code, colocated tests and 80% coverage** (2026-10-14)
 Every code file has a colocated test file; Vitest enforces 80% coverage; exceptions are listed with reasons in `docs/engineering.md`. Business logic is pure TypeScript so it can be tested without Convex or React. Tools: Vitest, convex-test, React Testing Library. Names explain code; no per-file header comments. Code quality takes priority over the internal deadlines.
 
-**D11 · File structure** (pending)
-To be designed together before M1 code is written.
+**D11 · File structure: domain, backend and audience-based features** (2026-10-15)
+Three layers with dependencies pointing inward: `src/domain` (pure rules), `convex/` (one folder per table, reads and writes in separate files), `src/features` (UI). Features are grouped by audience (`host`, `player`, `tv`, plus `shared`) and by feature inside each. Audience rather than device names, because the split is who uses it and for what, not screen size. Route files in `src/app` stay thin. Details and rules in `docs/engineering.md`.
+
+**D12 · No Zod; Convex validators are the single source of shapes** (2026-10-15)
+Convex needs its own validators for the schema and function arguments anyway; Zod would describe every question shape twice. The domain imports only the inferred types, so it stays free of Convex at runtime. Replaces the Zod part of D4.
 
 ## Open questions
-
-- [ ] Zod: drop it and use Convex validators as the single source of question shapes, or keep Zod (D4)?
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)
 - [ ] UI language: Swedish only, or Swedish and English?
