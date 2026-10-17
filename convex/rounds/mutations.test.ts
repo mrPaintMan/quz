@@ -30,7 +30,7 @@ describe("addRound", () => {
     });
     await expect(
       t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "questions", title: "En till" }),
-    ).rejects.toThrow("högst 50 ronder");
+    ).rejects.toThrow("högst 50 omgångar");
   });
 });
 

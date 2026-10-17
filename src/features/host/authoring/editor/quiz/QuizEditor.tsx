@@ -74,7 +74,7 @@ export function QuizEditor({ quizId }: { quizId: Id<"quizzes"> }) {
               onDeleted={() => selectRound(tree.rounds[0]._id)}
             />
           ) : (
-            <p className="text-muted-foreground">Börja med att lägga till en rond.</p>
+            <p className="text-muted-foreground">Börja med att lägga till en omgång.</p>
           )}
         </div>
         <main ref={questionColumn} className="min-w-0 flex-1 basis-96 scroll-mt-2 p-4 md:p-6">

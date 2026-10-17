@@ -17,7 +17,7 @@ export function MatchEditor({ content, onChange }: QuestionEditorProps<"match">)
     <div className="flex flex-col gap-4">
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-medium">
-          Rätta par · lagen ser högra sidan blandad. Samma sak får finnas flera gånger till höger.
+          Korrekta par · Den högra sidan blandas för deltagarna
         </legend>
         {pairs.map((pair, index) => (
           <div key={index} className="flex flex-wrap items-center gap-2 sm:flex-nowrap">

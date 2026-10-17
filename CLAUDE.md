@@ -10,6 +10,7 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 - `docs/decisions.md`: decisions already made and why, plus open questions. Don't reopen a decision without saying so.
 - `docs/plan.md`: milestones, what is done and what is next. Start each session here.
 - `docs/deploy.md`: how production (Convex + Vercel) is set up.
+- `docs/copy.md`: the Swedish words the UI uses (omgång, deltagarna, alternativ …). Follow it for any user-facing text.
 - `docs/engineering.md`: code standards (clean code, colocated tests, 80% coverage, exceptions). Read before writing code; they take priority over deadlines.
 
 ## How we work
@@ -19,6 +20,7 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 - Briefly explain Convex and non-obvious TypeScript when they come up; the user is new to Convex.
 - Verify your own work: run the checks below, and check UI changes in the browser pane (the TV, phone and admin views).
 - Ask the user about product choices. Decide implementation details yourself and record notable ones in `docs/decisions.md`.
+- Each new coding topic gets its own branch and pull request to `main`; never commit straight to `main`, which deploys to production (quz.nu). Merge only when the user says so.
 - Before every push, run the code-review skill once on the commits about to be pushed (`origin/main..HEAD`). Fix real bugs in existing code and cheap fixes; skip findings about future code or pure style (YAGNI) with a reason; ask the user about product decisions. Fixes are verified by the checks, not reviewed again, unless a fix grows bigger than the original change.
 - At the end of a work chunk, update `docs/plan.md` (tick items, set "Next up") and add any new decision to `docs/decisions.md`.
 

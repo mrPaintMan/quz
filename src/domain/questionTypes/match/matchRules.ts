@@ -28,7 +28,7 @@ export const matchRules: QuestionTypeRules<MatchContent> = {
     // The right side may repeat (two songs by the same artist); the left side is what teams draw from.
     ...problemIf(
       hasDuplicates(content.pairs.map((pair) => pair.left)),
-      "Varje sak i vänstra listan får bara finnas en gång.",
+      "Varje alternativ i vänstra listan får bara finnas en gång.",
     ),
     ...problemIfNotPositive(content.pointsPerPair),
   ],

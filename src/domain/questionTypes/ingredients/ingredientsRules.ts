@@ -18,7 +18,7 @@ export const ingredientsRules: QuestionTypeRules<IngredientsContent> = {
   requiresTimeLimit: false,
   createEmptyContent: () => ({
     type: "ingredients",
-    items: Array.from({ length: 3 }, () => ({ spellings: [] })),
+    items: [],
     pointsPerItem: 1,
     fuzzy: true,
   }),

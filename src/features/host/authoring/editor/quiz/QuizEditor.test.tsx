@@ -63,7 +63,7 @@ describe("QuizEditor", () => {
   it("guides an empty quiz to its first round", () => {
     tree.mockReturnValue({ quiz, rounds: [] });
     renderEditor();
-    expect(screen.getByText("Börja med att lägga till en rond.")).toBeInTheDocument();
+    expect(screen.getByText("Börja med att lägga till en omgång.")).toBeInTheDocument();
     expect(screen.getByLabelText("Quizets namn")).toHaveValue("Julquiz 2026");
     expect(screen.getByText("Sparat just nu")).toBeInTheDocument();
   });

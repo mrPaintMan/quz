@@ -4,7 +4,7 @@ import { describeActionError } from "./describeActionError";
 
 describe("describeActionError", () => {
   it("shows the message our Convex functions give", () => {
-    expect(describeActionError(new ConvexError("En rond kan ha högst 50 ronder."))).toBe("En rond kan ha högst 50 ronder.");
+    expect(describeActionError(new ConvexError("Ett quiz kan ha högst 50 omgångar."))).toBe("Ett quiz kan ha högst 50 omgångar.");
   });
 
   it.each([new Error("fetch failed"), new ConvexError({ code: 1 }), "oops"])("falls back to a general message for %o", (error) => {

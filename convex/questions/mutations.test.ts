@@ -40,7 +40,7 @@ describe("addQuestion", () => {
     const { t, paSparet } = await setupQuiz();
     await expect(
       t.mutation(api.questions.mutations.addQuestion, { ...host, roundId: paSparet, type: "freeText" }),
-    ).rejects.toThrow("passar inte i den här ronden");
+    ).rejects.toThrow("passar inte i den här omgången");
   });
 
   it("refuses more than 100 questions in a round", async () => {
@@ -108,7 +108,7 @@ describe("changeQuestionType", () => {
     const questionId = await addActivity(julmat, "Pepparkakshus");
     await expect(
       t.mutation(api.questions.mutations.changeQuestionType, { ...host, questionId, type: "paSparet" }),
-    ).rejects.toThrow("passar inte i den här ronden");
+    ).rejects.toThrow("passar inte i den här omgången");
   });
 });
 
@@ -137,7 +137,7 @@ describe("moveQuestion", () => {
     const a = await addActivity(julmat, "A");
     await expect(
       t.mutation(api.questions.mutations.moveQuestion, { ...host, questionId: a, toRoundId: paSparet, toIndex: 0 }),
-    ).rejects.toThrow("passar inte i den här ronden");
+    ).rejects.toThrow("passar inte i den här omgången");
   });
 
   it("refuses moving into another quiz", async () => {

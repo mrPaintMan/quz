@@ -48,9 +48,9 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
   const isPaSparet = round.kind === "paSparet";
 
   return (
-    <section className="flex flex-col gap-3" aria-label="Rondens frågor">
+    <section className="flex flex-col gap-3" aria-label="Omgångens frågor">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={titleId}>{isPaSparet ? "På spåret-rondens namn" : "Rondens namn och tema"}</Label>
+        <Label htmlFor={titleId}>{isPaSparet ? "Omgångens namn" : "Omgångens namn och tema"}</Label>
         <Input id={titleId} value={title} onChange={(event) => setTitle(event.target.value)} className="text-base font-semibold" />
         {renameFailed && (
           <p role="alert" className="text-sm text-destructive">
@@ -101,8 +101,8 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
       </div>
       <div className="pt-2">
         <ConfirmButton
-          title={`Ta bort ${round.title || "ronden"}?`}
-          description={`Ronden och dess ${round.questions.length} frågor tas bort. Det går inte att ångra.`}
+          title={`Ta bort ${round.title || "omgången"}?`}
+          description={`Omgången och dess ${round.questions.length} frågor tas bort. Det går inte att ångra.`}
           confirmLabel="Ta bort"
           size="sm"
           onConfirm={() =>
@@ -112,7 +112,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
             })
           }
         >
-          Ta bort rond
+          Ta bort omgång
         </ConfirmButton>
       </div>
     </section>
