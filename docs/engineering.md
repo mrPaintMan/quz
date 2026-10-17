@@ -37,6 +37,7 @@ Exceptions to the test rules are made on purpose and listed here with a reason. 
 | `src/app/layout.tsx` | Root shell with providers only, no logic |
 | `src/app/ConvexClientProvider.tsx` | Wires the Convex client, no logic |
 | `**/*.d.ts`, type-only files | No runtime code to test |
+| `**/*.setup.ts` | Shared test setup, only runs inside tests |
 | `src/app/**/page.tsx` | Thin routes: read params, render one feature component |
 | `convex/schema.ts`, `convex/**/table.ts` | Declarations only; exercised by every Convex function test |
 
@@ -97,7 +98,7 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 7. **Flat feature folders** until one holds about 8 files; add sub-folders when needed, not up front.
 8. **Rules 1 and 4 are enforced by ESLint** import restrictions in `eslint.config.mjs`, not only by this document.
 9. **Audience names, not device names** (`host`, `player`, `tv`): the split is who uses it and for what, not screen size.
-10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features and domain code don't use `../` imports (enforced by ESLint), so the boundary rules can see where an import points. `convex/tsconfig.json` declares the same aliases, so Convex can typecheck and bundle domain code it imports. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
+10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features and domain code don't use `../` imports (enforced by ESLint), so the boundary rules can see where an import points. `convex/tsconfig.json` declares the same aliases, so Convex can typecheck and bundle domain code it imports. Inside `convex/` itself, files import each other relatively (`../auth/hostFunctions`), as Convex's generated code does; anything from `src/` is imported with `@/`. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
 11. **Question types extend through registries (D14).** A type's parts live in a `<type>/` folder in each layer. Each layer has one `registry.ts` mapping every type to its part, typed `Record<QuestionType, …>`, so a new type does not compile until every part exists. Shared code never switches on the question type; it asks the registry.
 
 ### Where does it go?
@@ -107,4 +108,6 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 - A form the hosts use to write questions → `src/features/host/authoring/`.
 - Something both the TV and the phones display → `src/features/shared/`.
 - A new URL → `src/app/…/page.tsx` that renders a feature component.
+- A host-only Convex function → `hostQuery` / `hostMutation` from `convex/auth/hostFunctions.ts`, never plain `query` / `mutation`.
+- A field that can be "not filled in yet" → `null` in the validator (for example `correctIndex`), never a fake default that hides the editor's warning.
 - A new question type → a `<type>/` folder and a registry entry in each layer: validators in `convex/questions/types/`, grader in `src/domain/questionTypes/`, editor, answer input, TV display. The compiler lists what is missing.

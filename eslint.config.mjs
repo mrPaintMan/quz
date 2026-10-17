@@ -43,6 +43,10 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    // Allows `const { _id, ...fields } = doc` to copy a document without its system fields.
+    rules: { "@typescript-eslint/no-unused-vars": ["warn", { ignoreRestSiblings: true }] },
+  },
+  {
     files: ["src/domain/**/*.{ts,tsx}"],
     ignores: ["**/*.test.{ts,tsx}"],
     rules: restrictImports([convexRuntime, uiAndFramework, parentFolders]),

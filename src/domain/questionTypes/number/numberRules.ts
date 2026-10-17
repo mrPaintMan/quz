@@ -57,9 +57,14 @@ function highestPoints(scoring: Scoring): number {
 
 export const numberRules: QuestionTypeRules<NumberContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "number",
+    answer: null,
+    scoring: { mode: "tiers", tiers: [{ within: 0, points: 1 }] },
+  }),
   maxPoints: (content) => highestPoints(content.scoring),
   findProblems: (content) => [
-    ...problemIf(!Number.isFinite(content.answer), "Ange det rätta svaret."),
+    ...problemIf(content.answer === null || !Number.isFinite(content.answer), "Ange det rätta svaret."),
     ...(content.scoring.mode === "tiers"
       ? findTierProblems(content.scoring.tiers)
       : findRankProblems(content.scoring.pointsByRank)),

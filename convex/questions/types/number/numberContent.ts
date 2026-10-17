@@ -12,6 +12,7 @@ const closestScoring = v.object({
 
 export const numberContent = v.object({
   type: v.literal("number"),
-  answer: v.number(),
+  // null until the hosts enter the correct answer.
+  answer: v.union(v.number(), v.null()),
   scoring: v.union(tierScoring, closestScoring),
 });

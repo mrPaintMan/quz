@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M1: propose the host passphrase gate and the Convex queries and mutations for quizzes, rounds and questions.
+M1: propose the admin UI: shadcn/ui setup, login screen, quiz list and the editor layout. Set `HOST_PASSPHRASE` on the dev deployment first.
 
 ## Milestones
 
@@ -28,8 +28,9 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 - [x] Convex schema: quizzes, rounds (question round, På spåret), questions (D18)
 - [x] Content validators for every question type, with the type registry (D14)
 - [x] Domain rules per type: max points and problems, `findQuestionProblems` (D20)
-- [ ] Convex queries and mutations: quizzes, rounds, questions (create, update, reorder, delete, copy)
-- [ ] Host passphrase gate
+- [x] Convex queries and mutations: quizzes, rounds, questions (create, update, reorder, delete, copy), media upload (D22)
+- [x] Host passphrase gate, backend (D21)
+- [ ] Login screen for the passphrase
 - [ ] shadcn/ui set up, Swedish UI texts
 - [ ] Quiz list; create and copy a quiz
 - [ ] Editor: rounds (add, reorder by drag), questions (add, reorder, delete), autosave
@@ -73,3 +74,4 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 - 2026-10-17: Schema, content validators for all 11 types and domain rules (max points, problems) with tests; D18–D20.
 - 2026-10-17: Fixes from the first code review: NaN-safe checks, duplicate and tier-order warnings, map zoom check, alias imports in the domain (verified to bundle in Convex).
 - 2026-10-17: Second review fixes (match allows a shared right side, placing order, margin message, duplicate options); review workflow set to one round per push.
+- 2026-10-17: Editor backend: passphrase wrapper, quiz/round/question/media functions with tests (D21, D22).

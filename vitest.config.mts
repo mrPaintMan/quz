@@ -7,6 +7,7 @@ const fromRoot = (path: string) => fileURLToPath(new URL(path, import.meta.url))
 // Keep in sync with the exceptions table in docs/engineering.md.
 const coverageExceptions = [
   "**/*.test.{ts,tsx}",
+  "**/*.setup.ts",
   "**/*.d.ts",
   "convex/_generated/**",
   "convex/schema.ts",

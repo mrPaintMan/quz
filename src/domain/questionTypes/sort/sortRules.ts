@@ -11,6 +11,13 @@ const MIN_ITEMS = 2;
 
 export const sortRules: QuestionTypeRules<SortContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "sort",
+    items: ["", ""],
+    firstLabel: "Först",
+    lastLabel: "Sist",
+    pointsPerItem: 1,
+  }),
   maxPoints: (content) => content.items.length * content.pointsPerItem,
   findProblems: (content) => [
     ...problemIf(content.items.length < MIN_ITEMS, `Lägg till minst ${MIN_ITEMS} saker att sortera.`),

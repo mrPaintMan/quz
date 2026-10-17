@@ -61,4 +61,8 @@ describe("multipleChoiceRules", () => {
     const options = [validContent.options[0], { text: "sverige ", imageId: null }];
     expect(messagesFor({ ...validContent, options })).toEqual(["Två alternativ har samma text."]);
   });
+
+  it("asks for the correct option until one is chosen", () => {
+    expect(messagesFor({ ...validContent, correctIndex: null })).toEqual(["Välj vilket alternativ som är rätt."]);
+  });
 });

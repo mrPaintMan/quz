@@ -63,6 +63,12 @@ Open lists ("all capitals") can't have a complete answer key. Grading therefore 
 **D20 · Question schema is permissive; completeness is a domain check** (2026-10-17)
 Autosave stores half-written questions, so the Convex validators check shapes only. `findQuestionProblems` in `src/domain/questions/` lists what is missing (in Swedish), using each type's `findProblems` through the registry; the editor shows these and "Starta quiz" refuses to start while any remain. Max points are computed per type (`maxQuestionPoints`), not stored; `null` means no fixed maximum (open lists).
 
+**D21 · Host passphrase via `process.env` and a `convex-helpers` wrapper** (2026-10-17)
+`HOST_PASSPHRASE` is a Convex env var read with `process.env`, not declared with `defineApp({ env })`: that API is marked beta and unstable in Convex 1.46. `hostQuery` / `hostMutation` (built with `customQuery` / `customMutation` from `convex-helpers`) add a `hostPassphrase` argument to every host function and check it before the handler runs. The admin view keeps the passphrase in localStorage until the host logs out. An unset or empty `HOST_PASSPHRASE` refuses everything.
+
+**D22 · Editor backend behaviour** (2026-10-17)
+A new quiz starts empty. New questions start from their type's `createEmptyContent`. Fields with no honest default (`correctIndex`, the number `answer`, the map `target`) are `null` until filled in. Changing a question's type replaces its content with an empty draft (the UI confirms first). Updates patch only the given fields, so the two hosts don't overwrite each other's work on different fields. Ordering uses plain positions rewritten on move or delete. Bounded reads: 50 quizzes, 50 rounds per quiz, 100 questions per round. A På spåret round holds only På spåret questions. Copied quizzes share media files; files are never deleted in M1.
+
 ## Open questions
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)

@@ -4,7 +4,9 @@ import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositiv
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type MapPinContent = ContentOf<"mapPin">;
-type Coordinates = MapPinContent["target"];
+type Coordinates = MapPinContent["initialView"]["center"];
+
+const SWEDEN = { lat: 62, lng: 15 };
 
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 20;
@@ -19,9 +21,16 @@ function isOnEarth({ lat, lng }: Coordinates): boolean {
 
 export const mapPinRules: QuestionTypeRules<MapPinContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "mapPin",
+    target: null,
+    radiusMeters: 50_000,
+    points: 1,
+    initialView: { center: SWEDEN, zoom: 4 },
+  }),
   maxPoints: (content) => content.points,
   findProblems: (content) => [
-    ...problemIf(!isOnEarth(content.target), "Placera målet på kartan."),
+    ...problemIf(content.target === null || !isOnEarth(content.target), "Placera målet på kartan."),
     ...problemIfNotPositive(content.radiusMeters, "Radien måste vara större än 0."),
     ...problemIfNotPositive(content.points),
     ...problemIf(!isOnEarth(content.initialView.center), "Välj var kartan ska börja."),

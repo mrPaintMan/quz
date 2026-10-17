@@ -110,4 +110,8 @@ describe("numberRules", () => {
   it("allows placings that share points", () => {
     expect(messagesFor({ ...closestContent, scoring: { mode: "closest", pointsByRank: [3, 3, 1] } })).toEqual([]);
   });
+
+  it("asks for the correct answer until it is entered", () => {
+    expect(messagesFor({ ...tiersContent, answer: null })).toEqual(["Ange det rätta svaret."]);
+  });
 });

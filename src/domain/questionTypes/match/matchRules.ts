@@ -11,6 +11,14 @@ const MIN_PAIRS = 2;
 
 export const matchRules: QuestionTypeRules<MatchContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "match",
+    pairs: [
+      { left: "", right: "" },
+      { left: "", right: "" },
+    ],
+    pointsPerPair: 1,
+  }),
   maxPoints: (content) => content.pairs.length * content.pointsPerPair,
   findProblems: (content) => [
     ...problemIf(content.pairs.length < MIN_PAIRS, `Lägg till minst ${MIN_PAIRS} par.`),

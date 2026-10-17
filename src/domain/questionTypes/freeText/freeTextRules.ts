@@ -21,6 +21,12 @@ function findFieldProblems(content: FreeTextContent) {
 
 export const freeTextRules: QuestionTypeRules<FreeTextContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "freeText",
+    fields: [{ label: "", acceptedAnswers: [] }],
+    pointsPerField: 1,
+    fuzzy: true,
+  }),
   maxPoints: (content) => content.fields.length * content.pointsPerField,
   findProblems: (content) => [
     ...problemIf(
