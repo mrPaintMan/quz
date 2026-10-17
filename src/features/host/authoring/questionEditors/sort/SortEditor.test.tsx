@@ -39,4 +39,10 @@ describe("SortEditor", () => {
     await userEvent.type(screen.getByLabelText("Poäng per rätt placering"), "0");
     expect(onChange.mock.lastCall?.[0].pointsPerItem).toBe(10);
   });
+
+  it("suggests Störst and Minst as end labels", () => {
+    render(<SortEditor content={{ ...content, firstLabel: "", lastLabel: "" }} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Högst upp betyder")).toHaveAttribute("placeholder", "Störst");
+    expect(screen.getByLabelText("Längst ner betyder")).toHaveAttribute("placeholder", "Minst");
+  });
 });
