@@ -98,7 +98,7 @@ describe("QuizEditor", () => {
     expect(screen.getByLabelText("Fråga som visas på TV:n")).toHaveValue("Lussekatter");
     await userEvent.click(screen.getByText("Glögg"));
     expect(screen.getByLabelText("Fråga som visas på TV:n")).toHaveValue("Glögg");
-    await userEvent.click(screen.getByText("2. Julfilmer"));
+    await userEvent.click(screen.getByRole("button", { name: /2\. Julfilmer/ }));
     expect(screen.getByText("Välj eller lägg till en fråga.")).toBeInTheDocument();
   });
 });

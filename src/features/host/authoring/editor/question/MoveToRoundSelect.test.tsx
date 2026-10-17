@@ -13,8 +13,8 @@ describe("MoveToRoundSelect", () => {
     const onMove = vi.fn();
     render(<MoveToRoundSelect currentRoundId={"r1" as Id<"rounds">} questionType="activity" rounds={rounds} onMove={onMove} />);
     const options = screen.getAllByRole("option").map((option) => option.textContent);
-    expect(options).toEqual(["Välj rond…", "Julfilmer"]);
-    await userEvent.selectOptions(screen.getByLabelText("Flytta till rond"), "Julfilmer");
+    expect(options).toEqual(["Välj rond…", "2. Julfilmer"]);
+    await userEvent.selectOptions(screen.getByLabelText("Flytta till rond"), "2. Julfilmer");
     expect(onMove).toHaveBeenCalledWith("r2");
   });
 

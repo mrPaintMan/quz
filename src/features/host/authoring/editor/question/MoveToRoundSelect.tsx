@@ -16,7 +16,10 @@ type MoveToRoundSelectProps = {
 // Lists only the other rounds this type fits in; hidden when there are none.
 export function MoveToRoundSelect({ currentRoundId, questionType, rounds, onMove }: MoveToRoundSelectProps) {
   const id = useId();
-  const targets = rounds.filter((round) => round._id !== currentRoundId && isTypeAllowedInRound(round.kind, questionType));
+  // Numbered like the round list, so rounds with the same title can be told apart.
+  const targets = rounds
+    .map((round, index) => ({ round, label: `${index + 1}. ${round.title}` }))
+    .filter(({ round }) => round._id !== currentRoundId && isTypeAllowedInRound(round.kind, questionType));
   if (targets.length === 0) {
     return null;
   }
@@ -32,9 +35,9 @@ export function MoveToRoundSelect({ currentRoundId, questionType, rounds, onMove
         <option value="" disabled>
           Välj rond…
         </option>
-        {targets.map((round) => (
+        {targets.map(({ round, label }) => (
           <option key={round._id} value={round._id}>
-            {round.title}
+            {label}
           </option>
         ))}
       </select>

@@ -18,6 +18,9 @@ import { ProblemList } from "./ProblemList";
 import { QuestionTypeSelect } from "./QuestionTypeSelect";
 import { useAutosave } from "./useAutosave";
 
+// moveQuestion clamps the index, so this places a moved question last in its new round.
+const AT_END_OF_ROUND = Number.MAX_SAFE_INTEGER;
+
 type Draft = Pick<Doc<"questions">, "prompt" | "timeLimitSeconds" | "hostNotes" | "content">;
 
 function ContentEditor<T extends QuestionType>({
@@ -110,7 +113,7 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
           rounds={rounds}
           onMove={(toRoundId) =>
             run(async () => {
-              await moveQuestion({ questionId: question._id, toRoundId, toIndex: Number.MAX_SAFE_INTEGER });
+              await moveQuestion({ questionId: question._id, toRoundId, toIndex: AT_END_OF_ROUND });
               onMoved(toRoundId);
             })
           }

@@ -115,7 +115,7 @@ describe("QuestionEditor", () => {
     const onMoved = vi.fn();
     const julfilmer = { ...round, _id: "r2" as Id<"rounds">, title: "Julfilmer" };
     render(<QuestionEditor question={question} round={round} rounds={[round, julfilmer]} onDeleted={vi.fn()} onMoved={onMoved} />);
-    await userEvent.selectOptions(screen.getByLabelText("Flytta till rond"), "Julfilmer");
+    await userEvent.selectOptions(screen.getByLabelText("Flytta till rond"), "2. Julfilmer");
     await vi.waitFor(() => expect(onMoved).toHaveBeenCalledWith("r2"));
     expect(calls).toContainEqual({
       name: "move",
