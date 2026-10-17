@@ -39,6 +39,11 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 - [ ] Production Convex deployment and Vercel project, passphrase set as env var (steps in `docs/deploy.md`, needs the user's logins)
 - [ ] Both hosts can log in and save from their own devices
 
+### Follow-ups from M1
+- [ ] Drag and drop for reordering (up/down buttons for now, D25)
+- [ ] Clickable map for placing the map pin target (typed coordinates for now)
+- [ ] Moving a question to another round from the editor (the backend supports it)
+
 ### M2 · Live game loop
 - [ ] Convex schema: games, teams, answers (drafts and locks), adjustments
 - [ ] Screen sequence derived from the quiz (D15)
@@ -75,3 +80,4 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 - 2026-10-17: Fixes from the first code review: NaN-safe checks, duplicate and tier-order warnings, map zoom check, alias imports in the domain (verified to bundle in Convex).
 - 2026-10-17: Second review fixes (match allows a shared right side, placing order, margin message, duplicate options); review workflow set to one round per push.
 - 2026-10-17: Editor backend: passphrase wrapper, quiz/round/question/media functions with tests (D21, D22).
+- 2026-10-17: Admin UI on branch `m1`: login, quiz list, three-column editor with all 11 question type editors, autosave and media upload (D23–D25). Production deploy steps written in `docs/deploy.md`.

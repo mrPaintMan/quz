@@ -9,6 +9,7 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 - `docs/product.md`: what the app does, the question types and the constraints.
 - `docs/decisions.md`: decisions already made and why, plus open questions. Don't reopen a decision without saying so.
 - `docs/plan.md`: milestones, what is done and what is next. Start each session here.
+- `docs/deploy.md`: how production (Convex + Vercel) is set up.
 - `docs/engineering.md`: code standards (clean code, colocated tests, 80% coverage, exceptions). Read before writing code; they take priority over deadlines.
 
 ## How we work
