@@ -11,6 +11,7 @@ import { QuestionMediaField } from "@/features/host/authoring/media/QuestionMedi
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
+import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { ProblemList } from "./ProblemList";
 import { QuestionTypeSelect } from "./QuestionTypeSelect";
@@ -48,6 +49,7 @@ export function QuestionEditor({ question, round, onDeleted }: QuestionEditorPro
   const updateQuestion = useHostMutation(api.questions.mutations.updateQuestion);
   const changeQuestionType = useHostMutation(api.questions.mutations.changeQuestionType);
   const deleteQuestion = useHostMutation(api.questions.mutations.deleteQuestion);
+  const run = useRunAction();
 
   useAutosave(draft, (changes) => {
     updateQuestion({ questionId: question._id, ...changes }).then(
@@ -62,7 +64,7 @@ export function QuestionEditor({ question, round, onDeleted }: QuestionEditorPro
       <QuestionTypeSelect
         value={draft.content.type}
         roundKind={round.kind}
-        onChange={(type) => changeQuestionType({ questionId: question._id, type })}
+        onChange={(type) => run(() => changeQuestionType({ questionId: question._id, type }))}
       />
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="question-prompt">Fråga som visas på TV:n</Label>
@@ -102,10 +104,12 @@ export function QuestionEditor({ question, round, onDeleted }: QuestionEditorPro
           title="Ta bort frågan?"
           description="Frågan tas bort från ronden. Det går inte att ångra."
           confirmLabel="Ta bort"
-          onConfirm={async () => {
-            await deleteQuestion({ questionId: question._id });
-            onDeleted();
-          }}
+          onConfirm={() =>
+            run(async () => {
+              await deleteQuestion({ questionId: question._id });
+              onDeleted();
+            })
+          }
         >
           Ta bort fråga
         </ConfirmButton>

@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Doc, Id } from "@convex/_generated/dataModel";
+import { ActionErrorProvider } from "@/features/host/shared/ActionErrorProvider";
 import { HostSessionProvider } from "@/features/host/shared/HostSessionProvider";
 import { QuizList } from "./QuizList";
 
@@ -24,7 +25,9 @@ const quiz = (title: string, year: number): Doc<"quizzes"> => ({
 function renderList() {
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
-      <QuizList />
+      <ActionErrorProvider>
+        <QuizList />
+      </ActionErrorProvider>
     </HostSessionProvider>,
   );
 }
@@ -70,5 +73,14 @@ describe("QuizList", () => {
     await userEvent.click(screen.getByRole("button", { name: "Ta bort" }));
     await userEvent.click(await screen.findByRole("button", { name: "Ta bort" }));
     expect(mutation).toHaveBeenCalledWith({ quizId: "Julquiz 2026" });
+  });
+
+  it("tells the host when copying fails", async () => {
+    quizzes.mockReturnValue([quiz("Julquiz 2026", 2026)]);
+    mutation.mockRejectedValue(new Error("offline"));
+    renderList();
+    await userEvent.click(screen.getByRole("button", { name: "Kopiera" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Något gick fel");
+    expect(push).not.toHaveBeenCalled();
   });
 });

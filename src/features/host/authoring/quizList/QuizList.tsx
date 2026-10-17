@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
+import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { HostHeader } from "@/features/host/shared/HostHeader";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
@@ -17,12 +18,14 @@ export function QuizList() {
   const createQuiz = useHostMutation(api.quizzes.mutations.createQuiz);
   const copyQuiz = useHostMutation(api.quizzes.mutations.copyQuiz);
   const deleteQuiz = useHostMutation(api.quizzes.mutations.deleteQuiz);
+  const run = useRunAction();
   const openQuiz = (quizId: string) => router.push(`/admin/quizzes/${quizId}`);
 
-  async function copy(quiz: Doc<"quizzes">) {
-    const nextYear = quiz.year + 1;
-    openQuiz(await copyQuiz({ quizId: quiz._id, title: quiz.title.replace(String(quiz.year), String(nextYear)), year: nextYear }));
-  }
+  const copy = (quiz: Doc<"quizzes">) =>
+    run(async () => {
+      const nextYear = quiz.year + 1;
+      openQuiz(await copyQuiz({ quizId: quiz._id, title: quiz.title.replace(String(quiz.year), String(nextYear)), year: nextYear }));
+    });
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -32,7 +35,9 @@ export function QuizList() {
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6">
         <CreateQuizForm
           defaultYear={new Date(now).getFullYear()}
-          onCreate={async (quiz) => openQuiz(await createQuiz(quiz))}
+          onCreate={async (quiz) => {
+            await run(async () => openQuiz(await createQuiz(quiz)));
+          }}
         />
         {quizzes === undefined && <p className="text-muted-foreground">Hämtar quiz…</p>}
         {quizzes?.length === 0 && <p className="text-muted-foreground">Inga quiz ännu. Skapa det första ovan.</p>}
@@ -44,7 +49,7 @@ export function QuizList() {
                 quiz={quiz}
                 now={now}
                 onCopy={() => copy(quiz)}
-                onDelete={() => deleteQuiz({ quizId: quiz._id })}
+                onDelete={() => run(() => deleteQuiz({ quizId: quiz._id }))}
               />
             ))}
           </ul>

@@ -11,6 +11,7 @@ import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
 import { useAutosave } from "@/features/host/authoring/editor/question/useAutosave";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
+import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { QuestionListItem } from "./QuestionListItem";
 
@@ -41,7 +42,9 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
     );
   });
 
-  const move = (questionId: Id<"questions">, toIndex: number) => moveQuestion({ questionId, toRoundId: round._id, toIndex });
+  const run = useRunAction();
+  const move = (questionId: Id<"questions">, toIndex: number) =>
+    run(() => moveQuestion({ questionId, toRoundId: round._id, toIndex }));
   const isPaSparet = round.kind === "paSparet";
 
   return (
@@ -91,7 +94,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
         )}
         <Button
           variant="outline"
-          onClick={async () => onSelectQuestion(await addQuestion({ roundId: round._id, type: newType }))}
+          onClick={() => run(async () => onSelectQuestion(await addQuestion({ roundId: round._id, type: newType })))}
         >
           {isPaSparet ? "Lägg till resa" : "Lägg till fråga"}
         </Button>
@@ -102,10 +105,12 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           description={`Ronden och dess ${round.questions.length} frågor tas bort. Det går inte att ångra.`}
           confirmLabel="Ta bort"
           size="sm"
-          onConfirm={async () => {
-            await deleteRound({ roundId: round._id });
-            onDeleted();
-          }}
+          onConfirm={() =>
+            run(async () => {
+              await deleteRound({ roundId: round._id });
+              onDeleted();
+            })
+          }
         >
           Ta bort rond
         </ConfirmButton>

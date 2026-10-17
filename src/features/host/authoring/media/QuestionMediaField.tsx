@@ -3,6 +3,7 @@
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
+import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { FileButton } from "./FileButton";
 import { mediaKindOf } from "./mediaKindOf";
@@ -14,6 +15,7 @@ export function QuestionMediaField({ question }: { question: Doc<"questions"> })
   const uploadFile = useUploadFile();
   const setMedia = useHostMutation(api.media.mutations.setQuestionMedia);
   const removeMedia = useHostMutation(api.media.mutations.removeQuestionMedia);
+  const run = useRunAction();
 
   async function upload(file: File) {
     const kind = mediaKindOf(file.type);
@@ -34,7 +36,7 @@ export function QuestionMediaField({ question }: { question: Doc<"questions"> })
           {question.media ? "Byt fil" : "Lägg till fil"}
         </FileButton>
         {question.media && (
-          <Button variant="ghost" onClick={() => removeMedia({ questionId: question._id })}>
+          <Button variant="ghost" onClick={() => run(() => removeMedia({ questionId: question._id }))}>
             Ta bort fil
           </Button>
         )}

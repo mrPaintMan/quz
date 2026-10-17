@@ -118,5 +118,6 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 - Something both the TV and the phones display → `src/features/shared/`.
 - A new URL → `src/app/…/page.tsx` that renders a feature component.
 - A host-only Convex function → `hostQuery` / `hostMutation` from `convex/auth/hostFunctions.ts`, never plain `query` / `mutation`.
+- A host action triggered by a click (create, move, delete …) → wrap it in `useRunAction()` so a failure is shown to the host. Autosaves show their own failure next to the field.
 - A field that can be "not filled in yet" → `null` in the validator (for example `correctIndex`), never a fake default that hides the editor's warning.
 - A new question type → a `<type>/` folder and a registry entry in each layer: validators in `convex/questions/types/`, grader in `src/domain/questionTypes/`, editor, answer input, TV display. The compiler lists what is missing.

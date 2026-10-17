@@ -3,8 +3,10 @@
 import { useConvex, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { api } from "@convex/_generated/api";
+import { ActionErrorProvider } from "@/features/host/shared/ActionErrorProvider";
 import { HostSessionProvider } from "@/features/host/shared/HostSessionProvider";
 import { LoginForm } from "./LoginForm";
+import { SessionErrorBoundary } from "./SessionErrorBoundary";
 import { useStoredPassphrase } from "./useStoredPassphrase";
 
 function Checking() {
@@ -46,5 +48,11 @@ export function HostGate({ children }: { children: ReactNode }) {
   if (storedIsValid === undefined) {
     return <Checking />;
   }
-  return <HostSessionProvider session={session}>{children}</HostSessionProvider>;
+  return (
+    <HostSessionProvider session={session}>
+      <ActionErrorProvider>
+        <SessionErrorBoundary onWrongPassphrase={forget}>{children}</SessionErrorBoundary>
+      </ActionErrorProvider>
+    </HostSessionProvider>
+  );
 }
