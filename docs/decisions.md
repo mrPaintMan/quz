@@ -22,7 +22,7 @@ Zod: one discriminated union per question type, shared by editor and grader (Zod
 Computed from `answers` and `adjustments`. Reusing a quiz means copying it, so old results stay intact.
 
 **D7 · AI assist deferred** (2026-10-04)
-No LLM API is free, so it is outside the free-tier baseline.
+No LLM API is free, so it is outside the free-tier baseline. (Partly replaced by D19: an AI judge for list grading is accepted as a small paid cost.)
 
 **D8 · Repo docs are the source of truth for development** (2026-10-14)
 `docs/` holds product, decisions and plan. The claude.ai doc "Quz – Product & Tech Decisions" was the starting point and can be kept for discussing with the co-host.
@@ -54,6 +54,15 @@ Phones save drafts to the server while the team answers. Submitting locks the an
 **D17 · Product details settled from the wireframes and the user** (2026-10-17)
 Swedish-only UI. One team = one phone, with no player count. No hints on questions ("Visa ledtråd" dropped). Free text with 1–3 fields replaces the separate multi-part type. Free text uses fuzzy matching, with uncertain answers going to review. Map pin questions score if the pin is within a radius of the target, and the radius is shown at reveal. På spåret guesses lock when the brake is pulled. Some activities are answered in the app (ingredients, drawing). The wireframes are conceptual, not the final design.
 
+**D18 · Activities are a question type; rounds are question rounds or På spåret** (2026-10-17)
+An activity is a question (`activity`, with a max score; the prompt describes it) placed in a round like any other, usually last. Rounds have two kinds: `questions` and `paSparet`. Ingredients and drawing stay their own types: activities answered in the app.
+
+**D19 · Layered grading with review per unique answer and an optional AI judge** (2026-10-17)
+Open lists ("all capitals") can't have a complete answer key. Grading therefore runs in layers: optional answer key (bulk paste, may be empty) → fuzzy matching → hosts judge each unique unknown item once for all teams, and the decision is added to the answer key → optional AI judge that pre-fills suggestions the hosts confirm. The domain grader stays pure and only returns correct / wrong / needs review; the AI judge is a separate Convex action that works on "needs review" items only, so a failed call changes nothing. Per-unique-answer review also applies to free text. Cost is a few cents to a few SEK per year; this needs an Anthropic API key as a Convex env var. The model is chosen when the judge is built (M3).
+
+**D20 · Question schema is permissive; completeness is a domain check** (2026-10-17)
+Autosave stores half-written questions, so the Convex validators check shapes only. `findQuestionProblems` in `src/domain/questions/` lists what is missing (in Swedish), using each type's `findProblems` through the registry; the editor shows these and "Starta quiz" refuses to start while any remain. Max points are computed per type (`maxQuestionPoints`), not stored; `null` means no fixed maximum (open lists).
+
 ## Open questions
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)
@@ -61,10 +70,12 @@ Swedish-only UI. One team = one phone, with no player count. No hints on questio
 - [ ] AI assist: draft whole rounds from a theme, or only suggest single questions and wrong options?
 - [ ] Map pin: which map and tiles (free source such as OpenStreetMap), and one map style for all questions?
 - [ ] Fuzzy matching: how close counts as correct, and how close goes to review?
+- [ ] AI judge model: Claude Haiku 5.5 (cheapest) or Claude Opus 5.5 (default)? Decide in M3.
 
 ## Resolved questions
 
 - [x] UI language → Swedish only (D17).
 - [x] På spåret: change a guess after locking? → No, locked when the brake is pulled (D17). A wrong guess scores 0 (assumed, confirm when building).
 - [x] Free-text grading → fuzzy matching plus host review (D17).
-- [x] Activities in the app → yes for ingredients and drawing; others scored by hand (D17).
+- [x] Activities in the app → yes for ingredients and drawing; others scored by hand (D17, D18).
+- [x] Grading open lists → layered grading, review per unique answer, optional AI judge with host confirmation (D19).

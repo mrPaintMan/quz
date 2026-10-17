@@ -57,13 +57,15 @@ convex/
     table.ts                     #   table definition + its validators
     queries.ts                   #   reads
     mutations.ts                 #   writes
-  questions/types/<type>/        # one folder per question type: content and answer validators
+  questions/types/<type>/        # one folder per question type: <type>Content.ts (later its answer validator)
+  questions/questionContent.ts   # union of all content validators, and the QuestionContent / QuestionType types
   auth/requireHost.ts            # passphrase check used by host functions
 
 src/
   domain/
-    questionTypes/<type>/        # grader for one type: gradeMapPin.ts …
-    questionTypes/registry.ts    # type → grader, typed Record<QuestionType, …>
+    questionTypes/<type>/        # rules for one type: <type>Rules.ts (max points, problems), later its grader
+    questionTypes/registry.ts    # type → rules, typed as a complete map over QuestionType
+    questions/                   # cross-type functions using the registry: findQuestionProblems, maxQuestionPoints
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/  matching/          # leaderboard, fuzzy text matching …
   features/

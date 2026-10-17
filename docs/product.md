@@ -25,8 +25,7 @@ The wireframes in the claude.ai design canvas "Quz wireframes" (https://claude.a
 
 | Round kind | Contents |
 |---|---|
-| Question round | A theme and its questions |
-| Activity | A description; scored by hand, or answered in the app with an activity question type (ingredients, drawing) |
+| Question round | A title (the theme) and its questions. An activity is a question too, usually the last one in a round |
 | På spåret | One or more trips, each a På spåret question |
 
 ## Question types
@@ -40,12 +39,12 @@ Every question has: a prompt shown on the TV, points, an optional time limit, op
 | Guess the number | Typing a number on a number pad | Auto: tolerance tiers (for example ±1 for 3p) or closest wins (top 3 get 3/2/1) |
 | Sort | Dragging items into order | Auto, points per item in the right position |
 | Match | Drawing lines between two lists | Auto, points per correct pair |
-| List as many as you can | Typing items one at a time; duplicates are refused; submits itself when the time runs out | Auto per correct item (for example 0.5p each), uncertain ones to review |
+| List as many as you can | Typing items one at a time; duplicates are refused; submits itself when the time runs out | Per correct item (for example 0.5p each). Layered: an optional answer key (pasted in bulk, may be empty for open lists), fuzzy matching against it, then the hosts review each unique unknown item once for all teams, optionally with AI suggestions to confirm (see "Grading") |
 | Ingredients | Filling in unordered fields (for example the 5 ingredients of a drink) | Auto per correct item, order doesn't matter |
 | Drawing | Drawing with a finger; submits itself when the time runs out | Hosts score by hand; drawings are shown on the TV during review |
 | Map pin | Placing a pin on a map | Auto: points if the pin is within a set radius of the target. The target and the radius are shown on the map when the answer is revealed |
 | På spåret | Writing a guess, then pulling the emergency brake while clues 10, 8, 6, 4, 2 are revealed | Points locked at the clue level when the brake is pulled; a wrong guess scores 0 |
-| Activity (manual) | Nothing in the app | Hosts enter points per team |
+| Activity | Nothing in the app; the TV shows the prompt and the phones show that an activity is going on | Hosts enter points per team, up to a set maximum |
 
 ## The night
 
@@ -62,6 +61,13 @@ The TV and the phones follow one screen sequence, derived from the quiz:
 4. **Between rounds:** leaderboard and, when the hosts choose, the score graph.
 
 På spåret: the hosts reveal the clues one at a time; each team's guess stores the clue level at which it pulled the brake.
+
+## Grading
+
+- Automatic grading gives each answer, or each item of an answer, one of: correct, wrong, needs review.
+- **Review is per unique answer, not per team.** If four teams wrote "Oslo", the hosts judge "Oslo" once and the decision applies to all four. A decision on a list or free-text question is also added to that question's answer key, so a copied quiz keeps it.
+- **AI judge (optional, per list question):** when the question locks, the unknown items are sent to Claude, which suggests correct, wrong or unsure for each. Suggestions are shown in the review queue and only count once the hosts confirm them; unsure items stay open. If the call fails, everything stays in the review queue as usual.
+- Hosts can always override any grading.
 
 ## Behaviour
 

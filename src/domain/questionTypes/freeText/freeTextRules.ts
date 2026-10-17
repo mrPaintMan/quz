@@ -1,0 +1,32 @@
+import type { ContentOf } from "@convex/questions/questionContent";
+import { hasSpelling } from "../hasSpelling";
+import { problemIf } from "../problemIf";
+import type { QuestionTypeRules } from "../questionTypeRules";
+
+type FreeTextContent = ContentOf<"freeText">;
+
+const MIN_FIELDS = 1;
+const MAX_FIELDS = 3;
+
+function findFieldProblems(content: FreeTextContent) {
+  const single = content.fields.length === 1;
+  return content.fields.flatMap((field, index) =>
+    problemIf(
+      !hasSpelling(field.acceptedAnswers),
+      single ? "Lägg till minst ett godkänt svar." : `Delfråga ${index + 1} saknar godkänt svar.`,
+    ),
+  );
+}
+
+export const freeTextRules: QuestionTypeRules<FreeTextContent> = {
+  requiresTimeLimit: false,
+  maxPoints: (content) => content.fields.length * content.pointsPerField,
+  findProblems: (content) => [
+    ...problemIf(
+      content.fields.length < MIN_FIELDS || content.fields.length > MAX_FIELDS,
+      `Frågan ska ha ${MIN_FIELDS}–${MAX_FIELDS} svarsfält.`,
+    ),
+    ...findFieldProblems(content),
+    ...problemIf(content.pointsPerField <= 0, "Poängen måste vara större än 0."),
+  ],
+};

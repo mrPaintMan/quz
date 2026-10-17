@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M1: propose the Convex schema and the content shape of every question type, for the user's review before any code.
+M1: propose the host passphrase gate and the Convex queries and mutations for quizzes, rounds and questions.
 
 ## Milestones
 
@@ -25,8 +25,10 @@ M1: propose the Convex schema and the content shape of every question type, for 
 - [x] ESLint import rules, pre-commit hook, CI on GitHub Actions (D13)
 
 ### M1 · Authoring live (due 2026-10-28)
-- [ ] Convex schema: quizzes, rounds (question, activity, På spåret), questions
-- [ ] Content validators for every question type, with the type registry (D14)
+- [x] Convex schema: quizzes, rounds (question round, På spåret), questions (D18)
+- [x] Content validators for every question type, with the type registry (D14)
+- [x] Domain rules per type: max points and problems, `findQuestionProblems` (D20)
+- [ ] Convex queries and mutations: quizzes, rounds, questions (create, update, reorder, delete, copy)
 - [ ] Host passphrase gate
 - [ ] shadcn/ui set up, Swedish UI texts
 - [ ] Quiz list; create and copy a quiz
@@ -46,7 +48,8 @@ M1: propose the Convex schema and the content shape of every question type, for 
 
 ### M3 · Answering and grading, all types
 - [ ] Answer input, TV display and grader for each question type
-- [ ] Fuzzy text matching and the review queue
+- [ ] Fuzzy text matching and the review queue, per unique answer (D19)
+- [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
 - [ ] Host overrides and manual points
 - [ ] Leaderboard on the TV and admin, own score on phones
 
@@ -67,3 +70,4 @@ M1: propose the Convex schema and the content shape of every question type, for 
 - 2026-10-15: Engineering standards and file structure agreed (D10–D12); Zod dropped.
 - 2026-10-17: Test tooling, import rules, pre-commit hook and CI in place (D13).
 - 2026-10-17: Wireframes reviewed: product doc rewritten, D14–D17 added, "Authoring live" moved to 2026-10-28.
+- 2026-10-17: Schema, content validators for all 11 types and domain rules (max points, problems) with tests; D18–D20.
