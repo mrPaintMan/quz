@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { formatSavedAgo } from "@/domain/time/formatSavedAgo";
@@ -21,6 +21,15 @@ export function QuizEditor({ quizId }: { quizId: Id<"quizzes"> }) {
   const now = useNow();
   const [selectedRoundId, setSelectedRoundId] = useState<Id<"rounds"> | null>(null);
   const [selectedQuestionId, setSelectedQuestionId] = useState<Id<"questions"> | null>(null);
+  const questionColumn = useRef<HTMLElement>(null);
+
+  // On a phone the columns stack, so bring the question editor into view when a question is picked.
+  const selectQuestion = (questionId: Id<"questions">) => {
+    setSelectedQuestionId(questionId);
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      questionColumn.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   if (tree === undefined) {
     return <p className="p-8 text-center text-muted-foreground">Hämtar quizet…</p>;
@@ -61,14 +70,14 @@ export function QuizEditor({ quizId }: { quizId: Id<"quizzes"> }) {
               key={round._id}
               round={round}
               selectedQuestionId={question?._id ?? null}
-              onSelectQuestion={setSelectedQuestionId}
+              onSelectQuestion={selectQuestion}
               onDeleted={() => selectRound(tree.rounds[0]._id)}
             />
           ) : (
             <p className="text-muted-foreground">Börja med att lägga till en rond.</p>
           )}
         </div>
-        <main className="min-w-0 flex-1 basis-96 p-4 md:p-6">
+        <main ref={questionColumn} className="min-w-0 flex-1 basis-96 scroll-mt-2 p-4 md:p-6">
           {round && question ? (
             <QuestionEditor
               key={`${question._id}:${question.content.type}`}

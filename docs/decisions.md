@@ -69,12 +69,21 @@ Autosave stores half-written questions, so the Convex validators check shapes on
 **D22 · Editor backend behaviour** (2026-10-17)
 A new quiz starts empty. New questions start from their type's `createEmptyContent`. Fields with no honest default (`correctIndex`, the number `answer`, the map `target`) are `null` until filled in. Changing a question's type replaces its content with an empty draft (the UI confirms first). Updates patch only the given fields, so the two hosts don't overwrite each other's work on different fields. Ordering uses plain positions rewritten on move or delete. Bounded reads: 50 quizzes, 50 rounds per quiz, 100 questions per round. A På spåret round holds only På spåret questions. Copied quizzes share media files; files are never deleted in M1.
 
+**D23 · Import boundaries per audience; features may use sub-folders** (2026-10-17)
+Features now need sub-folders (11 type editors), which the old rule (no `../`, no importing another feature by alias) made impossible. ESLint now blocks imports between audiences (`host`, `player`, `tv`) and allows a feature's own audience, so a feature can import its own sub-folders by alias, and `<audience>/shared/` holds what several features of one audience use. Separation between features inside one audience is checked in review. `eslint-plugin-boundaries` is still the upgrade path if that proves too loose (replaces the D13 note).
+
+**D24 · Dark plum-and-gold theme, Swedish document, client-rendered admin** (2026-10-17)
+shadcn/ui (Base UI preset) with the wireframes' palette as tokens in `globals.css`, dark only; `<html lang="sv">`. The admin area renders in the browser behind `HostGate`, so Next's automatic instant-navigation validation is set to `manual-warning` (it only reported dropped client segments). `npm run typecheck` runs `next typegen` first, so route types exist in CI and the pre-commit hook.
+
+**D25 · Editor interaction choices for M1** (2026-10-17)
+Reordering rounds, questions, items and pairs uses up/down buttons rather than drag and drop: accessible by keyboard, works on phones, and needs no extra library; drag can come later. Map pin targets are typed as coordinates with a link to check them in OpenStreetMap; a clickable map comes with the map question's phone view (M4). Question editors keep a local draft and autosave 600 ms after typing stops (and on leaving the question); the whole draft is saved, so two hosts on the same question get last-save-wins. Type pickers use native `<select>` for simplicity and testability.
+
 ## Open questions
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)
 - [ ] Large media such as the På spåret film: upload (1 GB free storage) or link to YouTube?
 - [ ] AI assist: draft whole rounds from a theme, or only suggest single questions and wrong options?
-- [ ] Map pin: which map and tiles (free source such as OpenStreetMap), and one map style for all questions?
+- [ ] Map pin: which map and tiles for the phone view (free source such as OpenStreetMap), and one map style for all questions? (Authoring uses typed coordinates, D25.)
 - [ ] Fuzzy matching: how close counts as correct, and how close goes to review?
 - [ ] AI judge model: Claude Haiku 5.5 (cheapest) or Claude Opus 5.5 (default)? Decide in M3.
 

@@ -43,7 +43,10 @@ function renderEditor() {
 }
 
 describe("QuizEditor", () => {
-  beforeEach(() => tree.mockReset());
+  beforeEach(() => {
+    tree.mockReset();
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as unknown as typeof window.matchMedia;
+  });
 
   it("says it is loading", () => {
     tree.mockReturnValue(undefined);
@@ -63,6 +66,24 @@ describe("QuizEditor", () => {
     expect(screen.getByText("Börja med att lägga till en rond.")).toBeInTheDocument();
     expect(screen.getByLabelText("Quizets namn")).toHaveValue("Julquiz 2026");
     expect(screen.getByText("Sparat just nu")).toBeInTheDocument();
+  });
+
+  it("scrolls to the question editor when a question is picked on a phone", async () => {
+    tree.mockReturnValue({
+      quiz,
+      rounds: [round("r1", "Julmat", [question("q1", "r1", "Lussekatter"), question("q2", "r1", "Glögg")])],
+    });
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    window.matchMedia = vi.fn().mockReturnValue({ matches: true }) as unknown as typeof window.matchMedia;
+    renderEditor();
+    await userEvent.click(screen.getByText("Glögg"));
+    expect(scrollIntoView).toHaveBeenCalled();
+
+    window.matchMedia = vi.fn().mockReturnValue({ matches: false }) as unknown as typeof window.matchMedia;
+    scrollIntoView.mockClear();
+    await userEvent.click(screen.getByText("Lussekatter"));
+    expect(scrollIntoView).not.toHaveBeenCalled();
   });
 
   it("opens the first question and follows the selection between rounds and questions", async () => {

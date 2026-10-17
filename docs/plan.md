@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M1: propose the admin UI: shadcn/ui setup, login screen, quiz list and the editor layout. Set `HOST_PASSPHRASE` on the dev deployment first.
+Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the admin online. After that, M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -30,13 +30,13 @@ M1: propose the admin UI: shadcn/ui setup, login screen, quiz list and the edito
 - [x] Domain rules per type: max points and problems, `findQuestionProblems` (D20)
 - [x] Convex queries and mutations: quizzes, rounds, questions (create, update, reorder, delete, copy), media upload (D22)
 - [x] Host passphrase gate, backend (D21)
-- [ ] Login screen for the passphrase
-- [ ] shadcn/ui set up, Swedish UI texts
-- [ ] Quiz list; create and copy a quiz
-- [ ] Editor: rounds (add, reorder by drag), questions (add, reorder, delete), autosave
-- [ ] Editor per question type
-- [ ] Media: upload images, audio and video clips to Convex storage
-- [ ] Production Convex deployment and Vercel project, passphrase set as env var
+- [x] Login screen for the passphrase
+- [x] shadcn/ui set up, Swedish UI texts, wireframe theme (D24)
+- [x] Quiz list; create, copy and delete a quiz
+- [x] Editor: rounds (add, rename, reorder, delete), questions (add, reorder, delete), autosave (D25)
+- [x] Editor per question type (all 11)
+- [x] Media: upload images, audio and video clips to Convex storage
+- [ ] Production Convex deployment and Vercel project, passphrase set as env var (steps in `docs/deploy.md`, needs the user's logins)
 - [ ] Both hosts can log in and save from their own devices
 
 ### M2 · Live game loop

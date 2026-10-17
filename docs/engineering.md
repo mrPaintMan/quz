@@ -60,20 +60,29 @@ convex/
     mutations.ts                 #   writes
   questions/types/<type>/        # one folder per question type: <type>Content.ts (later its answer validator)
   questions/questionContent.ts   # union of all content validators, and the QuestionContent / QuestionType types
-  auth/requireHost.ts            # passphrase check used by host functions
+  auth/                          # passphrase check and hostQuery / hostMutation wrappers (D21)
+  media/                         # upload URLs, attaching media, media URLs
+  shared/                        # small helpers used by several tables, such as getOrThrow
 
 src/
   domain/
     questionTypes/<type>/        # rules for one type: <type>Rules.ts (max points, problems), later its grader
     questionTypes/registry.ts    # type → rules, typed as a complete map over QuestionType
-    questions/                   # cross-type functions using the registry: findQuestionProblems, maxQuestionPoints
+    questions/                   # cross-type functions using the registry: findQuestionProblems, maxQuestionPoints, createEmptyContent
+    rounds/  ordering/  text/  time/ # which types fit a round, list moves, number and answer-key text, "Sparat för …"
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/  matching/          # leaderboard, fuzzy text matching …
   features/
     host/                        # the two hosts
+      shared/                    # host session, useHostQuery / useHostMutation, header, confirm button
+      hostGate/                  # login screen and passphrase check
       authoring/
-        questionEditors/<type>/  # editor for one type, plus registry.ts
-      liveControl/  hostGate/  scoreHistory/
+        quizList/                # /admin: list, create, copy, delete
+        editor/quiz|rounds|question/  # /admin/quizzes/[quizId]: the three editor columns and autosave
+        questionEditors/<type>/  # editor for one type, plus registry.ts (label + editor per type)
+        questionEditors/fields/  # form fields shared by the type editors
+        media/                   # uploads and previews
+      liveControl/  scoreHistory/
     player/                      # teams on their phones
       join/
       answering/<type>/          # answer input for one type, plus registry.ts
@@ -92,7 +101,7 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 1. **Dependencies point inward:** `app` → `features` → `domain`, and `convex` → `domain`. `domain` imports only types from `convex/`, never runtime code.
 2. **Route files are thin.** A `page.tsx` reads its params and renders one feature component; no logic.
 3. **Convex functions are thin.** Check the host, load data, call domain logic, write. Rules live in `src/domain`.
-4. **No imports across audiences or between features.** Code needed in more than one place moves to `features/shared/`, `src/domain/` or `src/components/ui/`.
+4. **No imports across audiences.** ESLint blocks `host`, `player` and `tv` from importing each other; code they share goes in `features/shared/`, `src/domain/` or `src/components/ui/`. Within an audience, code several features use goes in `<audience>/shared/` (such as `host/shared/`); features otherwise keep to themselves, which review checks rather than lint (D23).
 5. **Naming:** components `PascalCase.tsx`, everything else `camelCase.ts`. A file is named after its one main export. Functions start with a verb (`gradeNumeric`, `requireHost`).
 6. **No barrel files.** No `index.ts` that only re-exports; import from the real file.
 7. **Flat feature folders** until one holds about 8 files; add sub-folders when needed, not up front.
