@@ -90,11 +90,24 @@ describe("numberRules", () => {
     ]);
   });
 
-  it("flags a margin and points that are not numbers", () => {
-    const scoring = { mode: "tiers" as const, tiers: [{ within: Number.NaN, points: Number.NaN }] };
+  it("asks for a missing margin and points without reporting a collision", () => {
+    const scoring = {
+      mode: "tiers" as const,
+      tiers: [{ within: 1, points: 3 }, { within: Number.NaN, points: Number.NaN }],
+    };
     expect(messagesFor({ ...tiersContent, scoring })).toEqual([
-      "Poängnivå 1: marginalen kan inte vara negativ.",
-      "Poängnivå 1: poängen måste vara större än 0.",
+      "Poängnivå 2: ange en marginal.",
+      "Poängnivå 2: poängen måste vara större än 0.",
     ]);
+  });
+
+  it("flags a lower placing that gives more points than the one above", () => {
+    expect(messagesFor({ ...closestContent, scoring: { mode: "closest", pointsByRank: [1, 3, 2] } })).toEqual([
+      "En lägre placering kan inte ge fler poäng än den före.",
+    ]);
+  });
+
+  it("allows placings that share points", () => {
+    expect(messagesFor({ ...closestContent, scoring: { mode: "closest", pointsByRank: [3, 3, 1] } })).toEqual([]);
   });
 });

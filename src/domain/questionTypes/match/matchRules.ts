@@ -17,9 +17,10 @@ export const matchRules: QuestionTypeRules<MatchContent> = {
     ...content.pairs.flatMap((pair, index) =>
       problemIf(isBlank(pair.left) || isBlank(pair.right), `Par ${index + 1} saknar text på en av sidorna.`),
     ),
+    // The right side may repeat (two songs by the same artist); the left side is what teams draw from.
     ...problemIf(
-      hasDuplicates(content.pairs.map((pair) => pair.left)) || hasDuplicates(content.pairs.map((pair) => pair.right)),
-      "Varje sak får bara finnas en gång på varje sida.",
+      hasDuplicates(content.pairs.map((pair) => pair.left)),
+      "Varje sak i vänstra listan får bara finnas en gång.",
     ),
     ...problemIfNotPositive(content.pointsPerPair),
   ],

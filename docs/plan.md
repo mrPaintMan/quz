@@ -48,7 +48,7 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 
 ### M3 · Answering and grading, all types
 - [ ] Answer input, TV display and grader for each question type
-- [ ] Fuzzy text matching and the review queue, per unique answer (D19)
+- [ ] Fuzzy text matching and the review queue, per unique answer (D19). Use one shared answer normalizer for grading and for the editor's duplicate checks (`hasDuplicates`), so they can't disagree
 - [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
 - [ ] Host overrides and manual points
 - [ ] Leaderboard on the TV and admin, own score on phones
@@ -72,3 +72,4 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 - 2026-10-17: Wireframes reviewed: product doc rewritten, D14–D17 added, "Authoring live" moved to 2026-10-28.
 - 2026-10-17: Schema, content validators for all 11 types and domain rules (max points, problems) with tests; D18–D20.
 - 2026-10-17: Fixes from the first code review: NaN-safe checks, duplicate and tier-order warnings, map zoom check, alias imports in the domain (verified to bundle in Convex).
+- 2026-10-17: Second review fixes (match allows a shared right side, placing order, margin message, duplicate options); review workflow set to one round per push.

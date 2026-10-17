@@ -1,4 +1,5 @@
 import type { ContentOf } from "@convex/questions/questionContent";
+import { hasDuplicates } from "@/domain/questionTypes/hasDuplicates";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
@@ -31,6 +32,7 @@ export const multipleChoiceRules: QuestionTypeRules<MultipleChoiceContent> = {
   findProblems: (content) => [
     ...problemIf(content.options.length < MIN_OPTIONS, `Lägg till minst ${MIN_OPTIONS} alternativ.`),
     ...findOptionProblems(content),
+    ...problemIf(hasDuplicates(content.options.map((option) => option.text)), "Två alternativ har samma text."),
     ...problemIf(!hasValidCorrectIndex(content), "Välj vilket alternativ som är rätt."),
     ...problemIfNotPositive(content.points),
   ],
