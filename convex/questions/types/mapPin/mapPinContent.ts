@@ -4,7 +4,8 @@ const coordinates = v.object({ lat: v.number(), lng: v.number() });
 
 export const mapPinContent = v.object({
   type: v.literal("mapPin"),
-  target: coordinates,
+  // null until the hosts place the target on the map.
+  target: v.union(coordinates, v.null()),
   radiusMeters: v.number(),
   points: v.number(),
   initialView: v.object({ center: coordinates, zoom: v.number() }),

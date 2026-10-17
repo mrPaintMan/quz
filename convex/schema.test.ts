@@ -1,14 +1,12 @@
-/// <reference types="vite/client" />
-import { convexTest } from "convex-test";
 import { describe, expect, it } from "vitest";
 import type { QuestionContent } from "./questions/questionContent";
-import schema from "./schema";
-
-const modules = import.meta.glob("./**/*.ts");
+import { setupConvexTest } from "./test.setup";
 
 const oneOfEachType: QuestionContent[] = [
   { type: "multipleChoice", options: [{ text: "Sverige", imageId: null }], correctIndex: 0, points: 2 },
+  { type: "multipleChoice", options: [], correctIndex: null, points: 1 },
   { type: "freeText", fields: [{ label: "", acceptedAnswers: ["kanel"] }], pointsPerField: 1, fuzzy: true },
+  { type: "number", answer: null, scoring: { mode: "tiers", tiers: [] } },
   { type: "number", answer: 66, scoring: { mode: "tiers", tiers: [{ within: 6, points: 1 }] } },
   { type: "number", answer: 600000, scoring: { mode: "closest", pointsByRank: [3, 2, 1] } },
   { type: "sort", items: ["A", "B"], firstLabel: "Äldst", lastLabel: "Nyast", pointsPerItem: 1 },
@@ -28,7 +26,7 @@ const oneOfEachType: QuestionContent[] = [
 ];
 
 async function insertQuestion(content: unknown) {
-  const t = convexTest(schema, modules);
+  const t = setupConvexTest();
   return t.run(async (ctx) => {
     const quizId = await ctx.db.insert("quizzes", { title: "Julquiz 2026", year: 2026, updatedAt: 0 });
     const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Julmat", kind: "questions" });

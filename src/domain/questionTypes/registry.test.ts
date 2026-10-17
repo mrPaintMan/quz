@@ -12,4 +12,8 @@ describe("rulesFor", () => {
     const content: ContentOf<"activity"> = { type: "activity", maxPoints: 5 };
     expect(rulesFor(content).maxPoints(content)).toBe(5);
   });
+
+  it.each(Object.entries(questionTypeRules))("creates empty %s content of its own type", (type, rules) => {
+    expect(rules.createEmptyContent().type).toBe(type);
+  });
 });

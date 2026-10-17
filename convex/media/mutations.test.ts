@@ -1,0 +1,38 @@
+import { describe, expect, it } from "vitest";
+import { api } from "../_generated/api";
+import { host, setupConvexTest } from "../test.setup";
+
+async function setupQuestionWithFile() {
+  const t = setupConvexTest();
+  const quizId = await t.mutation(api.quizzes.mutations.createQuiz, { ...host, title: "Julquiz", year: 2026 });
+  const roundId = await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "questions", title: "Julmusik" });
+  const questionId = await t.mutation(api.questions.mutations.addQuestion, { ...host, roundId, type: "freeText" });
+  const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["bild"])));
+  const mediaOf = async () => (await t.run((ctx) => ctx.db.get("questions", questionId)))?.media;
+  return { t, questionId, storageId, mediaOf };
+}
+
+describe("generateUploadUrl", () => {
+  it("gives the editor a URL to upload a file to", async () => {
+    const t = setupConvexTest();
+    await expect(t.mutation(api.media.mutations.generateUploadUrl, host)).resolves.toEqual(expect.any(String));
+  });
+});
+
+describe("setQuestionMedia", () => {
+  it("attaches an uploaded file to the question", async () => {
+    const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, kind: "image", storageId });
+    expect(await mediaOf()).toEqual({ kind: "image", storageId });
+  });
+});
+
+describe("removeQuestionMedia", () => {
+  it("detaches the file from the question but keeps it in storage", async () => {
+    const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, kind: "audio", storageId });
+    await t.mutation(api.media.mutations.removeQuestionMedia, { ...host, questionId });
+    expect(await mediaOf()).toBeNull();
+    expect(await t.run((ctx) => ctx.storage.getUrl(storageId))).not.toBeNull();
+  });
+});

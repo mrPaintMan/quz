@@ -8,12 +8,20 @@ import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules
 type PaSparetContent = ContentOf<"paSparet">;
 type Clue = PaSparetContent["clues"][number];
 
+const CLUE_POINTS = [10, 8, 6, 4, 2];
+
 function isDescending(clues: Clue[]): boolean {
   return clues.every((clue, index) => index === 0 || clue.points < clues[index - 1].points);
 }
 
 export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "paSparet",
+    acceptedAnswers: [],
+    fuzzy: true,
+    clues: CLUE_POINTS.map((points) => ({ text: "", points })),
+  }),
   maxPoints: (content) => Math.max(0, ...content.clues.map((clue) => clue.points)),
   findProblems: (content) => [
     ...problemIf(!hasSpelling(content.acceptedAnswers), "Ange resmålet."),

@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M1: propose the host passphrase gate and the Convex queries and mutations for quizzes, rounds and questions.
+Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the admin online. After that, M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -28,15 +28,23 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 - [x] Convex schema: quizzes, rounds (question round, På spåret), questions (D18)
 - [x] Content validators for every question type, with the type registry (D14)
 - [x] Domain rules per type: max points and problems, `findQuestionProblems` (D20)
-- [ ] Convex queries and mutations: quizzes, rounds, questions (create, update, reorder, delete, copy)
-- [ ] Host passphrase gate
-- [ ] shadcn/ui set up, Swedish UI texts
-- [ ] Quiz list; create and copy a quiz
-- [ ] Editor: rounds (add, reorder by drag), questions (add, reorder, delete), autosave
-- [ ] Editor per question type
-- [ ] Media: upload images, audio and video clips to Convex storage
-- [ ] Production Convex deployment and Vercel project, passphrase set as env var
+- [x] Convex queries and mutations: quizzes, rounds, questions (create, update, reorder, delete, copy), media upload (D22)
+- [x] Host passphrase gate, backend (D21)
+- [x] Login screen for the passphrase
+- [x] shadcn/ui set up, Swedish UI texts, wireframe theme (D24)
+- [x] Quiz list; create, copy and delete a quiz
+- [x] Editor: rounds (add, rename, reorder, delete), questions (add, reorder, delete), autosave (D25)
+- [x] Editor per question type (all 11)
+- [x] Media: upload images, audio and video clips to Convex storage
+- [ ] Production Convex deployment and Vercel project, passphrase set as env var (steps in `docs/deploy.md`, needs the user's logins)
 - [ ] Both hosts can log in and save from their own devices
+
+### Follow-ups from M1
+- [ ] Drag and drop for reordering (up/down buttons for now, D25)
+- [ ] Clickable map for placing the map pin target (typed coordinates for now)
+- [x] Moving a question to another round from the editor
+- [x] Show a message when creating, copying, deleting or moving fails (`ActionErrorProvider`)
+- [x] Send the host back to the login screen, instead of a blank page, if the passphrase changes on the server while logged in (`SessionErrorBoundary`)
 
 ### M2 · Live game loop
 - [ ] Convex schema: games, teams, answers (drafts and locks), adjustments
@@ -73,3 +81,6 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 - 2026-10-17: Schema, content validators for all 11 types and domain rules (max points, problems) with tests; D18–D20.
 - 2026-10-17: Fixes from the first code review: NaN-safe checks, duplicate and tier-order warnings, map zoom check, alias imports in the domain (verified to bundle in Convex).
 - 2026-10-17: Second review fixes (match allows a shared right side, placing order, margin message, duplicate options); review workflow set to one round per push.
+- 2026-10-17: Editor backend: passphrase wrapper, quiz/round/question/media functions with tests (D21, D22).
+- 2026-10-17: Admin UI on branch `m1`: login, quiz list, three-column editor with all 11 question type editors, autosave and media upload (D23–D25). Production deploy steps written in `docs/deploy.md`.
+- 2026-10-17: Error messages for failed host actions, a session error boundary, and moving a question to another round (M1 follow-ups).

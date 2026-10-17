@@ -18,10 +18,11 @@ const uiAndFramework = {
   message: "Domain code is framework-free: no React, Next.js or UI imports.",
 };
 
-const otherFeatures = {
-  regex: "^@/features/(?!shared/)",
-  message: "Features don't import each other. Move shared code to features/shared, domain or components/ui.",
-};
+// Features may import their own audience and features/shared, never another audience (rule 4).
+const otherAudiences = (audience) => ({
+  regex: `^@/features/(?!shared/|${audience}/)`,
+  message: `Code in features/${audience} doesn't import other audiences. Move shared code to features/shared, domain or components/ui.`,
+});
 
 const parentFolders = {
   group: ["../*"],
@@ -43,14 +44,18 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    // Allows `const { _id, ...fields } = doc` to copy a document without its system fields.
+    rules: { "@typescript-eslint/no-unused-vars": ["warn", { ignoreRestSiblings: true }] },
+  },
+  {
     files: ["src/domain/**/*.{ts,tsx}"],
     ignores: ["**/*.test.{ts,tsx}"],
     rules: restrictImports([convexRuntime, uiAndFramework, parentFolders]),
   },
-  {
-    files: ["src/features/**/*.{ts,tsx}"],
-    rules: restrictImports([otherFeatures, parentFolders, convexInternals]),
-  },
+  ...["host", "player", "tv", "shared"].map((audience) => ({
+    files: [`src/features/${audience}/**/*.{ts,tsx}`],
+    rules: restrictImports([otherAudiences(audience), parentFolders, convexInternals]),
+  })),
   {
     files: ["convex/**/*.ts"],
     rules: restrictImports([frontendCode]),

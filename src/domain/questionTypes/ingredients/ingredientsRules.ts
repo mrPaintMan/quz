@@ -16,6 +16,12 @@ function spellingsShareAnItem(content: IngredientsContent): boolean {
 
 export const ingredientsRules: QuestionTypeRules<IngredientsContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "ingredients",
+    items: Array.from({ length: 3 }, () => ({ spellings: [] })),
+    pointsPerItem: 1,
+    fuzzy: true,
+  }),
   maxPoints: (content) => content.items.length * content.pointsPerItem,
   findProblems: (content) => [
     ...problemIf(content.items.length === 0, "Lägg till minst en ingrediens."),

@@ -18,16 +18,18 @@ function findOptionProblems(content: MultipleChoiceContent) {
   );
 }
 
-function hasValidCorrectIndex(content: MultipleChoiceContent) {
-  return (
-    Number.isInteger(content.correctIndex) &&
-    content.correctIndex >= 0 &&
-    content.correctIndex < content.options.length
-  );
+function hasValidCorrectIndex({ correctIndex, options }: MultipleChoiceContent) {
+  return correctIndex !== null && Number.isInteger(correctIndex) && correctIndex >= 0 && correctIndex < options.length;
 }
 
 export const multipleChoiceRules: QuestionTypeRules<MultipleChoiceContent> = {
   requiresTimeLimit: false,
+  createEmptyContent: () => ({
+    type: "multipleChoice",
+    options: Array.from({ length: 4 }, () => ({ text: "", imageId: null })),
+    correctIndex: null,
+    points: 1,
+  }),
   maxPoints: (content) => content.points,
   findProblems: (content) => [
     ...problemIf(content.options.length < MIN_OPTIONS, `Lägg till minst ${MIN_OPTIONS} alternativ.`),

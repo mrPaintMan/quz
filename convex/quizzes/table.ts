@@ -5,4 +5,4 @@ export const quizzesTable = defineTable({
   title: v.string(),
   year: v.number(),
   updatedAt: v.number(),
-});
+}).index("by_updatedAt", ["updatedAt"]);
