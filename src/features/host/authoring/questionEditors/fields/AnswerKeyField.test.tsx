@@ -13,4 +13,10 @@ describe("AnswerKeyField", () => {
     await userEvent.type(input, "{enter}Rom / Roma");
     expect(onChange).toHaveBeenLastCalledWith([{ spellings: ["Oslo"] }, { spellings: ["Rom", "Roma"] }]);
   });
+
+  it("shows a new key given from outside instead of old typed text", () => {
+    const { rerender } = render(<AnswerKeyField label="Facit" value={[{ spellings: ["Oslo"] }]} onChange={vi.fn()} />);
+    rerender(<AnswerKeyField label="Facit" value={[{ spellings: ["Rom", "Roma"] }]} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Facit")).toHaveValue("Rom / Roma");
+  });
 });

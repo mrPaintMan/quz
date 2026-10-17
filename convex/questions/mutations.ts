@@ -47,7 +47,8 @@ export const addQuestion = hostMutation({
   },
 });
 
-// Only the given fields change, so two hosts editing different fields don't overwrite each other.
+// Only the given fields change. Content of a type the question no longer has is a stale draft
+// (saved just as the type was changed) and is dropped, while the other fields are still saved.
 export const updateQuestion = hostMutation({
   args: {
     questionId: v.id("questions"),
@@ -56,11 +57,10 @@ export const updateQuestion = hostMutation({
     hostNotes: v.optional(v.string()),
     content: v.optional(questionContent),
   },
-  handler: async (ctx, { questionId, ...changes }) => {
+  handler: async (ctx, { questionId, content, ...otherChanges }) => {
     const question = await getOrThrow(ctx, "questions", questionId);
-    if (changes.content !== undefined && changes.content.type !== question.content.type) {
-      throw new ConvexError("Frågetypen byts med changeQuestionType.");
-    }
+    const isCurrentType = content !== undefined && content.type === question.content.type;
+    const changes = isCurrentType ? { ...otherChanges, content } : otherChanges;
     const definedChanges = Object.fromEntries(Object.entries(changes).filter(([, value]) => value !== undefined));
     await ctx.db.patch("questions", questionId, definedChanges);
     await touchQuiz(ctx, question.quizId);

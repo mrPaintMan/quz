@@ -25,4 +25,17 @@ describe("NumberField", () => {
     render(<NumberField label="Svar" value={null} onChange={vi.fn()} />);
     expect(screen.getByLabelText("Svar")).toHaveValue("");
   });
+
+  it("shows a new value given from outside instead of old typed text", () => {
+    const { rerender } = render(<NumberField label="Poäng" value={10} onChange={vi.fn()} />);
+    rerender(<NumberField label="Poäng" value={8} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Poäng")).toHaveValue("8");
+  });
+
+  it("keeps typed text that means the current value", async () => {
+    const { rerender } = render(<NumberField label="Poäng" value={null} onChange={vi.fn()} />);
+    await userEvent.type(screen.getByLabelText("Poäng"), "0,");
+    rerender(<NumberField label="Poäng" value={0} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Poäng")).toHaveValue("0,");
+  });
 });

@@ -19,9 +19,12 @@ export function ReadinessSummary({ rounds }: { rounds: RoundWithQuestions[] }) {
       <span className="text-sm text-muted-foreground" role="status">
         {summarize(rounds)}
       </span>
-      <Button disabled title="Spelläget byggs i nästa steg">
+      <Button disabled aria-describedby="start-quiz-hint">
         Starta quiz
       </Button>
+      <span id="start-quiz-hint" className="text-xs text-muted-foreground">
+        Spelläget kommer i nästa steg
+      </span>
     </div>
   );
 }

@@ -82,12 +82,16 @@ describe("updateQuestion", () => {
     });
   });
 
-  it("refuses content of another type", async () => {
-    const { t, julmat, addActivity } = await setupQuiz();
+  it("drops content of another type but still saves the other fields", async () => {
+    const { t, julmat, addActivity, getQuestion } = await setupQuiz();
     const questionId = await addActivity(julmat, "Pepparkakshus");
-    await expect(
-      t.mutation(api.questions.mutations.updateQuestion, { ...host, questionId, content: { type: "drawing", maxPoints: 1 } }),
-    ).rejects.toThrow("changeQuestionType");
+    await t.mutation(api.questions.mutations.updateQuestion, {
+      ...host,
+      questionId,
+      prompt: "Rita en tomte",
+      content: { type: "drawing", maxPoints: 1 },
+    });
+    expect(await getQuestion(questionId)).toMatchObject({ prompt: "Rita en tomte", content: { type: "activity" } });
   });
 });
 

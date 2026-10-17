@@ -2,7 +2,7 @@ import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "@convex/_generated/api";
-import { HostSessionProvider } from "./HostSession";
+import { HostSessionProvider } from "./HostSessionProvider";
 import { useHostQuery } from "./useHostQuery";
 
 const useQuery = vi.fn();

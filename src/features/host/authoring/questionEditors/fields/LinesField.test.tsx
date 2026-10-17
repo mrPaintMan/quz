@@ -13,4 +13,10 @@ describe("LinesField", () => {
     await userEvent.type(input, "{enter}kanelstång");
     expect(onChange).toHaveBeenLastCalledWith(["kanel", "kanelstång"]);
   });
+
+  it("shows new lines given from outside instead of old typed text", () => {
+    const { rerender } = render(<LinesField label="Svar" value={["a"]} onChange={vi.fn()} />);
+    rerender(<LinesField label="Svar" value={["b", "c"]} onChange={vi.fn()} />);
+    expect(screen.getByLabelText("Svar")).toHaveValue("b\nc");
+  });
 });

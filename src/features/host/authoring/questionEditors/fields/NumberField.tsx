@@ -14,10 +14,22 @@ type NumberFieldProps = {
   className?: string;
 };
 
-// Keeps the typed text locally so "0," can be typed on the way to "0,5".
+function sameNumber(a: number, b: number | null): boolean {
+  const missing = (n: number | null) => n === null || Number.isNaN(n);
+  return missing(a) ? missing(b) : a === b;
+}
+
+// Keeps the typed text locally so "0," can be typed on the way to "0,5", but shows the
+// current value whenever it changes from outside (for example when a row above is removed).
 export function NumberField({ label, value, onChange, className }: NumberFieldProps) {
   const id = useId();
   const [text, setText] = useState(() => formatDecimal(value));
+  const [shownValue, setShownValue] = useState(value);
+  // React's pattern for adjusting state when a prop changes: done during render, no effect.
+  if (!sameNumber(value ?? Number.NaN, shownValue)) {
+    setShownValue(value);
+    if (!sameNumber(parseDecimal(text), value)) setText(formatDecimal(value));
+  }
   return (
     <div className={`flex flex-col gap-1.5 ${className ?? ""}`}>
       <Label htmlFor={id}>{label}</Label>

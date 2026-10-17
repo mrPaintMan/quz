@@ -3,7 +3,7 @@
 import { useMutation } from "convex/react";
 import type { FunctionArgs, FunctionReference, FunctionReturnType, OptionalRestArgs } from "convex/server";
 import { useCallback } from "react";
-import { useHostSession } from "@/features/host/shared/HostSession";
+import { useHostSession } from "@/features/host/shared/HostSessionProvider";
 
 type HostMutation = FunctionReference<"mutation", "public", { hostPassphrase: string }>;
 

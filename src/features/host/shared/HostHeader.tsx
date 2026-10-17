@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { useHostSession } from "@/features/host/shared/HostSession";
+import { useHostSession } from "@/features/host/shared/HostSessionProvider";
 
 export function HostHeader({ children, actions }: { children: ReactNode; actions?: ReactNode }) {
   const { logOut } = useHostSession();

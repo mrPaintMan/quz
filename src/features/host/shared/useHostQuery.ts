@@ -2,7 +2,7 @@
 
 import { useQuery, type OptionalRestArgsOrSkip } from "convex/react";
 import type { FunctionArgs, FunctionReference, FunctionReturnType } from "convex/server";
-import { useHostSession } from "@/features/host/shared/HostSession";
+import { useHostSession } from "@/features/host/shared/HostSessionProvider";
 
 type HostQuery = FunctionReference<"query", "public", { hostPassphrase: string }>;
 type ArgsWithoutPassphrase<Q extends HostQuery> = Omit<FunctionArgs<Q>, "hostPassphrase">;

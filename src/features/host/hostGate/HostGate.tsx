@@ -3,7 +3,7 @@
 import { useConvex, useQuery } from "convex/react";
 import { useCallback, useEffect, useMemo, type ReactNode } from "react";
 import { api } from "@convex/_generated/api";
-import { HostSessionProvider } from "@/features/host/shared/HostSession";
+import { HostSessionProvider } from "@/features/host/shared/HostSessionProvider";
 import { LoginForm } from "./LoginForm";
 import { useStoredPassphrase } from "./useStoredPassphrase";
 

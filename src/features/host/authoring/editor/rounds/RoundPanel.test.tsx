@@ -5,12 +5,14 @@ import type { Doc, Id } from "@convex/_generated/dataModel";
 import { RoundPanel } from "./RoundPanel";
 
 const calls: { name: string; args: unknown }[] = [];
+let failRename = false;
 vi.mock("@/features/host/shared/useHostMutation", async () => {
   const { getFunctionName } = await vi.importActual<typeof import("convex/server")>("convex/server");
   return {
     useHostMutation: (reference: Parameters<typeof getFunctionName>[0]) => async (args: unknown) => {
       const name = getFunctionName(reference);
       calls.push({ name, args });
+      if (name.endsWith("renameRound") && failRename) throw new Error("offline");
       return name.endsWith("addQuestion") ? "new-question" : undefined;
     },
   };
@@ -42,6 +44,14 @@ const round = (kind: "questions" | "paSparet", questions: Doc<"questions">[]) =>
 describe("RoundPanel", () => {
   beforeEach(() => {
     calls.length = 0;
+    failRename = false;
+  });
+
+  it("says when the round's name could not be saved", async () => {
+    failRename = true;
+    render(<RoundPanel round={round("questions", [])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
+    await userEvent.type(screen.getByLabelText("Rondens namn och tema"), "!");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Kunde inte spara namnet.");
   });
 
   it("lists the questions and selects one", async () => {

@@ -1,6 +1,6 @@
 import { render, renderHook, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { HostSessionProvider, useHostSession } from "./HostSession";
+import { HostSessionProvider, useHostSession } from "./HostSessionProvider";
 
 function ShowPassphrase() {
   return <p>{useHostSession().passphrase}</p>;

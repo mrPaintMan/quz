@@ -55,4 +55,13 @@ describe("FreeTextEditor", () => {
     await userEvent.click(screen.getByRole("switch"));
     expect(onChange.mock.lastCall?.[0].fuzzy).toBe(false);
   });
+
+  it("shows the right answers in each field after a sub-question above is removed", () => {
+    const { rerender } = render(<FreeTextEditor content={threeFields} onChange={vi.fn()} />);
+    rerender(<FreeTextEditor content={{ ...threeFields, fields: [threeFields.fields[0], threeFields.fields[2]] }} onChange={vi.fn()} />);
+    expect(screen.getAllByLabelText("Godkända svar").map((field) => (field as HTMLTextAreaElement).value)).toEqual([
+      "Stortorget",
+      "",
+    ]);
+  });
 });

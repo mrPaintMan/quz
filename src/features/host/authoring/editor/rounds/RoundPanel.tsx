@@ -29,11 +29,17 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
   const [title, setTitle] = useState(round.title);
   const types = allowedQuestionTypes(round.kind);
   const [newType, setNewType] = useState<QuestionType>(types[0]);
+  const [renameFailed, setRenameFailed] = useState(false);
   const renameRound = useHostMutation(api.rounds.mutations.renameRound);
   const deleteRound = useHostMutation(api.rounds.mutations.deleteRound);
   const addQuestion = useHostMutation(api.questions.mutations.addQuestion);
   const moveQuestion = useHostMutation(api.questions.mutations.moveQuestion);
-  useAutosave(title, (value) => renameRound({ roundId: round._id, title: value }));
+  useAutosave(title, (value) => {
+    renameRound({ roundId: round._id, title: value }).then(
+      () => setRenameFailed(false),
+      () => setRenameFailed(true),
+    );
+  });
 
   const move = (questionId: Id<"questions">, toIndex: number) => moveQuestion({ questionId, toRoundId: round._id, toIndex });
   const isPaSparet = round.kind === "paSparet";
@@ -43,6 +49,11 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
       <div className="flex flex-col gap-1.5">
         <Label htmlFor={titleId}>{isPaSparet ? "På spåret-rondens namn" : "Rondens namn och tema"}</Label>
         <Input id={titleId} value={title} onChange={(event) => setTitle(event.target.value)} className="text-base font-semibold" />
+        {renameFailed && (
+          <p role="alert" className="text-sm text-destructive">
+            Kunde inte spara namnet.
+          </p>
+        )}
       </div>
       <ol className="flex flex-col gap-2">
         {round.questions.map((question, index) => (

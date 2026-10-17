@@ -43,6 +43,8 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 - [ ] Drag and drop for reordering (up/down buttons for now, D25)
 - [ ] Clickable map for placing the map pin target (typed coordinates for now)
 - [ ] Moving a question to another round from the editor (the backend supports it)
+- [ ] Show a message when creating, copying, deleting or moving fails (today only autosave failures are shown)
+- [ ] Send the host back to the login screen, instead of a blank page, if the passphrase changes on the server while logged in
 
 ### M2 · Live game loop
 - [ ] Convex schema: games, teams, answers (drafts and locks), adjustments

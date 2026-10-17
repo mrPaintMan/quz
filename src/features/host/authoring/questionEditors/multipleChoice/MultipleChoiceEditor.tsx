@@ -1,5 +1,6 @@
 "use client";
 
+import { useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { removeAt } from "@/domain/ordering/removeAt";
@@ -16,6 +17,7 @@ const LETTERS = "ABCDEF";
 
 export function MultipleChoiceEditor({ content, onChange }: QuestionEditorProps<"multipleChoice">) {
   const uploadFile = useUploadFile();
+  const radioGroup = useId();
   const { options, correctIndex } = content;
   type Option = (typeof options)[number];
   const updateOption = (index: number, option: Option) => onChange({ ...content, options: replaceAt(options, index, option) });
@@ -34,7 +36,7 @@ export function MultipleChoiceEditor({ content, onChange }: QuestionEditorProps<
             <div className="flex items-center gap-2">
               <input
                 type="radio"
-                name="correct-option"
+                name={radioGroup}
                 className="size-5 accent-primary"
                 aria-label={`Alternativ ${LETTERS[index]} är rätt`}
                 checked={correctIndex === index}

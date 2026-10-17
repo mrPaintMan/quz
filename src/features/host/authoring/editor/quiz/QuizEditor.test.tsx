@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Doc, Id } from "@convex/_generated/dataModel";
-import { HostSessionProvider } from "@/features/host/shared/HostSession";
+import { HostSessionProvider } from "@/features/host/shared/HostSessionProvider";
 import { QuizEditor } from "./QuizEditor";
 
 const tree = vi.fn();

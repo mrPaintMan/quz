@@ -16,6 +16,12 @@ type AnswerKeyFieldProps = {
 export function AnswerKeyField({ label, value, onChange }: AnswerKeyFieldProps) {
   const id = useId();
   const [text, setText] = useState(() => formatAnswerKey(value));
+  const [shownValue, setShownValue] = useState(formatAnswerKey(value));
+  // Typed text is kept while it means the same as the value; a change from outside replaces it.
+  if (formatAnswerKey(value) !== shownValue) {
+    setShownValue(formatAnswerKey(value));
+    if (formatAnswerKey(parseAnswerKey(text)) !== formatAnswerKey(value)) setText(formatAnswerKey(value));
+  }
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{label}</Label>

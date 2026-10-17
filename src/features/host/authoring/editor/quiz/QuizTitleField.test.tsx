@@ -14,4 +14,12 @@ describe("QuizTitleField", () => {
     await userEvent.type(screen.getByLabelText("Quizets namn"), " 2026");
     await vi.waitFor(() => expect(updateQuiz).toHaveBeenCalledWith({ quizId: "quiz", title: "Julquiz 2026" }));
   });
+
+  it("says when the name could not be saved", async () => {
+    updateQuiz.mockRejectedValueOnce(new Error("offline"));
+    const quiz = { _id: "quiz" as Id<"quizzes">, title: "Julquiz" } as Doc<"quizzes">;
+    render(<QuizTitleField quiz={quiz} />);
+    await userEvent.type(screen.getByLabelText("Quizets namn"), "!");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Kunde inte spara namnet.");
+  });
 });

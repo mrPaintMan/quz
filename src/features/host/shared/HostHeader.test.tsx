@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { HostHeader } from "./HostHeader";
-import { HostSessionProvider } from "./HostSession";
+import { HostSessionProvider } from "./HostSessionProvider";
 
 describe("HostHeader", () => {
   it("shows its content and actions and logs the host out", async () => {
