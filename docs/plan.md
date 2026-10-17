@@ -27,7 +27,7 @@ M1 Convex schema for quizzes, rounds and questions, with question content valida
 - [x] Vitest, convex-test and React Testing Library set up, 80% threshold enforced
 - [x] ESLint import rules for the dependency direction
 - [x] Pre-commit hook: lint, typecheck, tests with coverage
-- [ ] CI on GitHub Actions running the same checks
+- [x] CI on GitHub Actions: lint, typecheck, tests with coverage, build
 - [ ] Convex schema: quizzes, rounds, questions
 - [ ] Question content validators for the first types: multiple choice, free text, numeric (tolerance tiers)
 - [ ] Host passphrase gate
@@ -67,4 +67,4 @@ M1 Convex schema for quizzes, rounds and questions, with question content valida
 
 - 2026-10-14: Project scaffolded; Convex dev deployment linked; context docs created. Plan reordered so authoring goes live first, due 2026-10-21.
 - 2026-10-15: Engineering standards and file structure agreed (D10–D12); Zod dropped.
-- 2026-10-17: Test tooling, import rules and pre-commit hook in place (D13).
+- 2026-10-17: Test tooling, import rules, pre-commit hook and CI in place (D13).
