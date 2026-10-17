@@ -3,11 +3,12 @@
 import { ConvexError } from "convex/values";
 import { Component, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import { WRONG_PASSPHRASE_MESSAGE } from "@/domain/hostAccess/wrongPassphraseMessage";
 
 type SessionErrorBoundaryProps = { children: ReactNode; onWrongPassphrase: () => void };
 
 function isWrongPassphrase(error: unknown): boolean {
-  return error instanceof ConvexError && error.data === "Fel lösenord.";
+  return error instanceof ConvexError && error.data === WRONG_PASSPHRASE_MESSAGE;
 }
 
 // A host query that throws while rendering would otherwise blank the page. A changed

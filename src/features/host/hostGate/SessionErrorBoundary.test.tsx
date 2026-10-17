@@ -1,7 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SessionErrorBoundary } from "./SessionErrorBoundary";
 
 function Throws({ error }: { error: unknown }): never {
@@ -9,8 +9,15 @@ function Throws({ error }: { error: unknown }): never {
 }
 
 describe("SessionErrorBoundary", () => {
+  const originalLocation = window.location;
+
   beforeEach(() => {
     vi.spyOn(console, "error").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    Object.defineProperty(window, "location", { value: originalLocation, configurable: true });
+    vi.restoreAllMocks();
   });
 
   it("shows its children when nothing fails", () => {

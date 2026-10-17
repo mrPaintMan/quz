@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { describeActionError } from "@/features/host/shared/describeActionError";
 
@@ -22,10 +22,9 @@ export function ActionErrorProvider({ children }: { children: ReactNode }) {
       return undefined;
     }
   }, []);
-  const value = useMemo(() => run, [run]);
 
   return (
-    <ActionErrorContext.Provider value={value}>
+    <ActionErrorContext.Provider value={run}>
       {children}
       {message && (
         <div
