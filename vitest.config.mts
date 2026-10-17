@@ -13,7 +13,7 @@ const coverageExceptions = [
   "convex/schema.ts",
   "convex/**/table.ts",
   "src/components/ui/**",
-  "src/app/layout.tsx",
+  "src/app/**/layout.tsx",
   "src/app/ConvexClientProvider.tsx",
   "src/app/**/page.tsx",
 ];
