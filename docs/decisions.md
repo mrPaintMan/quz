@@ -42,12 +42,29 @@ Convex needs its own validators for the schema and function arguments anyway; Zo
 **D13 · Quality gate on every commit** (2026-10-17)
 A husky pre-commit hook runs `npm run lint`, `npm run typecheck` and `npm run test:coverage`, so the 80% threshold and the import rules are checked before code reaches GitHub. Boundary rules use typescript-eslint's `no-restricted-imports` (already part of Next.js's lint setup) instead of a separate plugin; revisit with `eslint-plugin-boundaries` if the rules need per-feature precision, for example once a feature gets sub-folders. Vitest 5 required `@types/node` 22, matching the local Node version.
 
+**D14 · Question type is the main axis of extension** (2026-10-17)
+About 11 types now, more in later years. Each type has the same set of parts: content validator (`convex/questions/`), answer validator, grader (`src/domain`), editor (host), answer input (player), TV display and review display. Within each layer, a type lives in its own folder (for example `src/domain/questionTypes/mapPin/`, `src/features/player/answering/mapPin/`), and each audience has a registry: a lookup from type to its part, typed as `Record<QuestionType, …>` so that adding a type fails to compile until every part exists. Adding a type means adding folders and registry entries, never editing shared code. Types stay split by audience (D11) rather than one folder per type across audiences, so rule 4 still holds. When per-type sub-folders arrive, the ESLint boundary rules move to `eslint-plugin-boundaries` (see D13).
+
+**D15 · The night is a screen sequence derived from the quiz** (2026-10-17)
+Lobby, rules, then show / answer / reveal per question, leaderboards between rounds, the score graph on demand. A pure domain function derives the sequence from the quiz; the game stores only its position in it, the timer (end time, or remaining time while paused) and media playback. The TV, phones and admin all render from that one state.
+
+**D16 · Answers are drafts until locked; grading has a review state** (2026-10-17)
+Phones save drafts to the server while the team answers. Submitting locks the answer; when a timer ends, the server locks every remaining draft as it is. Each graded answer is correct, wrong or needs review; the hosts settle reviews and can override anything. Scores stay derived (D6).
+
+**D17 · Product details settled from the wireframes and the user** (2026-10-17)
+Swedish-only UI. One team = one phone, with no player count. No hints on questions ("Visa ledtråd" dropped). Free text with 1–3 fields replaces the separate multi-part type. Free text uses fuzzy matching, with uncertain answers going to review. Map pin questions score if the pin is within a radius of the target, and the radius is shown at reveal. På spåret guesses lock when the brake is pulled. Some activities are answered in the app (ingredients, drawing). The wireframes are conceptual, not the final design.
+
 ## Open questions
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)
-- [ ] UI language: Swedish only, or Swedish and English?
-- [ ] På spåret: may a team change its guess after locking it, and does a wrong locked guess score zero?
-- [ ] Free-text grading: is exact match after normalization (case, spaces, åäö) enough, with the host fixing the rest?
 - [ ] Large media such as the På spåret film: upload (1 GB free storage) or link to YouTube?
 - [ ] AI assist: draft whole rounds from a theme, or only suggest single questions and wrong options?
-- [ ] Activities: support some digitally (drawing an answer, a timed maths question), or always score by hand?
+- [ ] Map pin: which map and tiles (free source such as OpenStreetMap), and one map style for all questions?
+- [ ] Fuzzy matching: how close counts as correct, and how close goes to review?
+
+## Resolved questions
+
+- [x] UI language → Swedish only (D17).
+- [x] På spåret: change a guess after locking? → No, locked when the brake is pulled (D17). A wrong guess scores 0 (assumed, confirm when building).
+- [x] Free-text grading → fuzzy matching plus host review (D17).
+- [x] Activities in the app → yes for ingredients and drawing; others scored by hand (D17).

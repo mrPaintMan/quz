@@ -57,20 +57,26 @@ convex/
     table.ts                     #   table definition + its validators
     queries.ts                   #   reads
     mutations.ts                 #   writes
-  questions/content.ts           # validators per question type: the single source of shapes
+  questions/types/<type>/        # one folder per question type: content and answer validators
   auth/requireHost.ts            # passphrase check used by host functions
 
 src/
   domain/
-    grading/                     # gradeNumeric.ts, gradeFreeText.ts, normalizeAnswer.ts …
-    scoring/
+    questionTypes/<type>/        # grader for one type: gradeMapPin.ts …
+    questionTypes/registry.ts    # type → grader, typed Record<QuestionType, …>
+    screenSequence/              # derives the TV screen order from a quiz (D15)
+    scoring/  matching/          # leaderboard, fuzzy text matching …
   features/
     host/                        # the two hosts
-      authoring/  liveControl/  hostGate/
+      authoring/
+        questionEditors/<type>/  # editor for one type, plus registry.ts
+      liveControl/  hostGate/  scoreHistory/
     player/                      # teams on their phones
-      join/  answering/
+      join/
+      answering/<type>/          # answer input for one type, plus registry.ts
     tv/                          # the shared screen
-      questionStage/  leaderboard/
+      screens/                   # lobby, rules, question, answer, leaderboard …
+      questionDisplays/<type>/   # TV display for one type, plus registry.ts
     shared/                      # used by more than one audience
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
@@ -88,8 +94,9 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 6. **No barrel files.** No `index.ts` that only re-exports; import from the real file.
 7. **Flat feature folders** until one holds about 8 files; add sub-folders when needed, not up front.
 8. **Rules 1 and 4 are enforced by ESLint** import restrictions in `eslint.config.mjs`, not only by this document.
-10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features don't use `../` imports, so the boundary rules can see where an import points. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
 9. **Audience names, not device names** (`host`, `player`, `tv`): the split is who uses it and for what, not screen size.
+10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features don't use `../` imports, so the boundary rules can see where an import points. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
+11. **Question types extend through registries (D14).** A type's parts live in a `<type>/` folder in each layer. Each layer has one `registry.ts` mapping every type to its part, typed `Record<QuestionType, …>`, so a new type does not compile until every part exists. Shared code never switches on the question type; it asks the registry.
 
 ### Where does it go?
 
@@ -98,3 +105,4 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 - A form the hosts use to write questions → `src/features/host/authoring/`.
 - Something both the TV and the phones display → `src/features/shared/`.
 - A new URL → `src/app/…/page.tsx` that renders a feature component.
+- A new question type → a `<type>/` folder and a registry entry in each layer: validators in `convex/questions/types/`, grader in `src/domain/questionTypes/`, editor, answer input, TV display. The compiler lists what is missing.
