@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Set up Vitest, convex-test, React Testing Library and the ESLint import rules, then the M1 schema.
+M1 Convex schema for quizzes, rounds and questions, with question content validators for the first three types.
 
 ## Milestones
 
@@ -24,8 +24,10 @@ Set up Vitest, convex-test, React Testing Library and the ESLint import rules, t
 ### M1 · Authoring live (due 2026-10-21)
 - [x] Engineering standards (`docs/engineering.md`)
 - [x] File structure agreed (D11)
-- [ ] Vitest, convex-test and React Testing Library set up, 80% threshold enforced
-- [ ] ESLint import rules for the dependency direction
+- [x] Vitest, convex-test and React Testing Library set up, 80% threshold enforced
+- [x] ESLint import rules for the dependency direction
+- [x] Pre-commit hook: lint, typecheck, tests with coverage
+- [ ] CI on GitHub Actions running the same checks
 - [ ] Convex schema: quizzes, rounds, questions
 - [ ] Question content validators for the first types: multiple choice, free text, numeric (tolerance tiers)
 - [ ] Host passphrase gate
@@ -65,3 +67,4 @@ Set up Vitest, convex-test, React Testing Library and the ESLint import rules, t
 
 - 2026-10-14: Project scaffolded; Convex dev deployment linked; context docs created. Plan reordered so authoring goes live first, due 2026-10-21.
 - 2026-10-15: Engineering standards and file structure agreed (D10–D12); Zod dropped.
+- 2026-10-17: Test tooling, import rules and pre-commit hook in place (D13).

@@ -16,7 +16,7 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 - The user steers through conversation and mostly does not read the code. Explain changes as behaviour and trade-offs, not diffs.
 - Plan first: for each new instruction, propose an approach (what changes, which parts of the app, trade-offs, how you will verify it) and wait for a go or no-go before editing. Inside an approved plan, carry on without asking about each detail; come back if the plan has to change. Reading and investigating need no approval.
 - Briefly explain Convex and non-obvious TypeScript when they come up; the user is new to Convex.
-- Verify your own work: run `npm run build` and `npm run lint`, and check UI changes in the browser pane (the TV, phone and admin views).
+- Verify your own work: run the checks below, and check UI changes in the browser pane (the TV, phone and admin views).
 - Ask the user about product choices. Decide implementation details yourself and record notable ones in `docs/decisions.md`.
 - At the end of a work chunk, update `docs/plan.md` (tick items, set "Next up") and add any new decision to `docs/decisions.md`.
 
@@ -28,7 +28,9 @@ Next.js (App Router) + TypeScript, Convex (database, real-time, file storage), T
 
 - `npx convex dev`: runs the Convex dev deployment and regenerates `convex/_generated`. Keep it running while developing.
 - `npm run dev`: Next.js dev server on http://localhost:3000.
-- `npm run build`, `npm run lint`: checks before calling something done.
+- `npm run lint`, `npm run typecheck`, `npm run test:coverage`: run by the pre-commit hook; all must pass.
+- `npm run test:watch`: tests in watch mode while developing.
+- `npm run build`: also run before calling something done.
 
 ## Conventions
 

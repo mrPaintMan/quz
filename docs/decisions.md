@@ -39,6 +39,9 @@ Three layers with dependencies pointing inward: `src/domain` (pure rules), `conv
 **D12 · No Zod; Convex validators are the single source of shapes** (2026-10-15)
 Convex needs its own validators for the schema and function arguments anyway; Zod would describe every question shape twice. The domain imports only the inferred types, so it stays free of Convex at runtime. Replaces the Zod part of D4.
 
+**D13 · Quality gate on every commit** (2026-10-17)
+A husky pre-commit hook runs `npm run lint`, `npm run typecheck` and `npm run test:coverage`, so the 80% threshold and the import rules are checked before code reaches GitHub. Boundary rules use typescript-eslint's `no-restricted-imports` (already part of Next.js's lint setup) instead of a separate plugin; revisit with `eslint-plugin-boundaries` if the rules need per-feature precision, for example once a feature gets sub-folders. Vitest 5 required `@types/node` 22, matching the local Node version.
+
 ## Open questions
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)

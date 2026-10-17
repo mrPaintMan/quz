@@ -22,6 +22,8 @@ The goal: anyone can open any file and understand what it is for and roughly how
 - **Tests read as documentation:** `describe` the unit, and name each case after the behaviour it checks ("gives 3 points within ±1").
 - **Tools:** Vitest; `convex-test` for Convex functions (in-memory database, edge-runtime environment); React Testing Library for components.
 - Convex skips any file in `convex/` whose name has more than one dot, so `*.test.ts` files there are never deployed.
+- Two Vitest projects: `convex/**` tests run in `edge-runtime` (Convex's runtime), `src/**` tests in `jsdom` (a simulated browser). Coverage counts every file under `src/` and `convex/`, including files with no tests yet.
+- The pre-commit hook (husky) runs lint, typecheck and tests with coverage; a commit fails if any of them fails. Don't bypass it with `--no-verify`.
 
 ## Exceptions
 
@@ -85,7 +87,8 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 5. **Naming:** components `PascalCase.tsx`, everything else `camelCase.ts`. A file is named after its one main export. Functions start with a verb (`gradeNumeric`, `requireHost`).
 6. **No barrel files.** No `index.ts` that only re-exports; import from the real file.
 7. **Flat feature folders** until one holds about 8 files; add sub-folders when needed, not up front.
-8. **Rules 1 and 4 are enforced by ESLint** import restrictions, not only by this document.
+8. **Rules 1 and 4 are enforced by ESLint** import restrictions in `eslint.config.mjs`, not only by this document.
+10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features don't use `../` imports, so the boundary rules can see where an import points. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
 9. **Audience names, not device names** (`host`, `player`, `tv`): the split is who uses it and for what, not screen size.
 
 ### Where does it go?
