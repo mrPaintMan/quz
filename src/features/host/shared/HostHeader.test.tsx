@@ -17,4 +17,13 @@ describe("HostHeader", () => {
     await userEvent.click(screen.getByRole("button", { name: "Logga ut" }));
     expect(logOut).toHaveBeenCalledOnce();
   });
+
+  it("shows the Quz name, linking to the quiz list", () => {
+    render(
+      <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
+        <HostHeader>Innehåll</HostHeader>
+      </HostSessionProvider>,
+    );
+    expect(screen.getByRole("link", { name: "Quz" })).toHaveAttribute("href", "/admin");
+  });
 });

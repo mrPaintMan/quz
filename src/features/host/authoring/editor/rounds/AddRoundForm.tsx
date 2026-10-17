@@ -16,30 +16,30 @@ export function AddRoundForm({ onAdd }: AddRoundFormProps) {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
-    await onAdd({ title: title.trim() || (kind === "paSparet" ? "På spåret" : "Ny rond"), kind });
+    await onAdd({ title: title.trim() || (kind === "paSparet" ? "På spåret" : "Ny omgång"), kind });
     setTitle("");
   }
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-2 rounded-xl border border-dashed p-3">
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={titleId}>Ny rond</Label>
+        <Label htmlFor={titleId}>Ny omgång</Label>
         <Input id={titleId} placeholder="Till exempel Julmusik" value={title} onChange={(event) => setTitle(event.target.value)} />
       </div>
       <div className="flex flex-col gap-1.5">
-        <Label htmlFor={kindId}>Sorts rond</Label>
+        <Label htmlFor={kindId}>Typ av omgång</Label>
         <select
           id={kindId}
           value={kind}
           onChange={(event) => setKind(event.target.value as RoundKind)}
           className="h-9 rounded-lg border bg-background px-3 text-sm"
         >
-          <option value="questions">Frågerond</option>
+          <option value="questions">Frågeomgång</option>
           <option value="paSparet">På spåret</option>
         </select>
       </div>
       <Button type="submit" variant="outline">
-        Lägg till rond
+        Lägg till omgång
       </Button>
     </form>
   );

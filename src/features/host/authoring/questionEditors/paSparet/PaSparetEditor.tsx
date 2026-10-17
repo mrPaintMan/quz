@@ -46,7 +46,7 @@ export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSpa
       </Button>
       <SwitchField
         label="Rätta med ungefärlig matchning"
-        description="Nästan rätt stavat räknas; osäkra svar hamnar hos er för granskning."
+        description="Nästan rättstavat räknas; osäkra svar hamnar hos er för granskning."
         checked={content.fuzzy}
         onChange={(fuzzy) => onChange({ ...content, fuzzy })}
       />

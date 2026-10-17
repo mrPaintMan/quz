@@ -14,7 +14,7 @@ export const addRound = hostMutation({
     await getOrThrow(ctx, "quizzes", quizId);
     const rounds = await roundsOfQuiz(ctx, quizId);
     if (rounds.length >= MAX_ROUNDS_PER_QUIZ) {
-      throw new ConvexError(`Ett quiz kan ha högst ${MAX_ROUNDS_PER_QUIZ} ronder.`);
+      throw new ConvexError(`Ett quiz kan ha högst ${MAX_ROUNDS_PER_QUIZ} omgångar.`);
     }
     const roundId = await ctx.db.insert("rounds", { quizId, kind, title, position: rounds.length });
     await touchQuiz(ctx, quizId);

@@ -29,8 +29,8 @@ export function RoundList({ quizId, rounds, selectedRoundId, onSelectRound }: Ro
   const move = (roundId: Id<"rounds">, toIndex: number) => run(() => moveRound({ roundId, toIndex }));
 
   return (
-    <nav aria-label="Ronder" className="flex flex-col gap-2">
-      <h2 className="text-sm font-medium text-muted-foreground">Ronder</h2>
+    <nav aria-label="Omgångar" className="flex flex-col gap-2">
+      <h2 className="text-sm font-medium text-muted-foreground">Omgångar</h2>
       <ol className="flex flex-col gap-1">
         {rounds.map((round, index) => (
           <li
@@ -49,7 +49,7 @@ export function RoundList({ quizId, rounds, selectedRoundId, onSelectRound }: Ro
               <span className="shrink-0 text-xs text-muted-foreground">{countLabel(round)}</span>
             </button>
             <RowButtons
-              name={`rond ${index + 1}`}
+              name={`omgång ${index + 1}`}
               onMoveUp={index > 0 ? () => move(round._id, index - 1) : undefined}
               onMoveDown={index < rounds.length - 1 ? () => move(round._id, index + 1) : undefined}
             />

@@ -50,7 +50,7 @@ Every question has: a prompt shown on the TV, points, an optional time limit, op
 
 The TV and the phones follow one screen sequence, derived from the quiz:
 
-1. **Lobby:** QR code, join word (for example quz.se/GLÖGG) and the teams that have joined, each with its own colour.
+1. **Lobby:** QR code, join word (for example quz.nu/GLÖGG) and the teams that have joined, each with its own colour.
 2. **Rules:** how the evening works and an overview (number of rounds, questions, activities, playing time).
 3. **For each question:**
    - **Show:** the TV shows the question and media, the phones show the answer input, the timer starts if there is one.

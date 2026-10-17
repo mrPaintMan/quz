@@ -23,16 +23,16 @@ describe("sortRules", () => {
   });
 
   it("asks for at least two items", () => {
-    expect(messagesFor({ ...validContent, items: ["Kalle Anka"] })).toEqual(["Lägg till minst 2 saker att sortera."]);
+    expect(messagesFor({ ...validContent, items: ["Kalle Anka"] })).toEqual(["Lägg till minst 2 alternativ att sortera."]);
   });
 
   it("flags an item without text", () => {
-    expect(messagesFor({ ...validContent, items: ["Kalle Anka", ""] })).toEqual(["Sak 2 saknar text."]);
+    expect(messagesFor({ ...validContent, items: ["Kalle Anka", ""] })).toEqual(["Alternativ 2 saknar text."]);
   });
 
   it("asks for the end labels", () => {
     expect(messagesFor({ ...validContent, lastLabel: "" })).toEqual([
-      "Ange vad början och slutet betyder, till exempel Äldst och Nyast.",
+      "Ange vad högst upp och längst ner betyder, till exempel Störst och Minst.",
     ]);
   });
 
@@ -42,7 +42,7 @@ describe("sortRules", () => {
 
   it("flags two items with the same text", () => {
     expect(messagesFor({ ...validContent, items: ["Ensam hemma", "ensam hemma "] })).toEqual([
-      "Två saker har samma text, så ordningen blir tvetydig.",
+      "Två alternativ har samma text, så ordningen blir tvetydig.",
     ]);
   });
 });

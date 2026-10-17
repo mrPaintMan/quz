@@ -50,9 +50,9 @@ describe("RoundList", () => {
 
   it("moves rounds up and down", async () => {
     render(<RoundList quizId={"quiz" as Id<"quizzes">} rounds={rounds} selectedRoundId={null} onSelectRound={vi.fn()} />);
-    expect(screen.queryByRole("button", { name: "Flytta upp rond 1" })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Flytta upp rond 3" }));
-    await userEvent.click(screen.getByRole("button", { name: "Flytta ned rond 1" }));
+    expect(screen.queryByRole("button", { name: "Flytta upp omgång 1" })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Flytta upp omgång 3" }));
+    await userEvent.click(screen.getByRole("button", { name: "Flytta ned omgång 1" }));
     expect(calls).toEqual([
       { name: "rounds/mutations:moveRound", args: { roundId: "c", toIndex: 1 } },
       { name: "rounds/mutations:moveRound", args: { roundId: "a", toIndex: 1 } },
@@ -62,8 +62,8 @@ describe("RoundList", () => {
   it("adds a round and selects it", async () => {
     const onSelectRound = vi.fn();
     render(<RoundList quizId={"quiz" as Id<"quizzes">} rounds={rounds} selectedRoundId={null} onSelectRound={onSelectRound} />);
-    await userEvent.type(screen.getByLabelText("Ny rond"), "Julfilmer");
-    await userEvent.click(screen.getByRole("button", { name: "Lägg till rond" }));
+    await userEvent.type(screen.getByLabelText("Ny omgång"), "Julfilmer");
+    await userEvent.click(screen.getByRole("button", { name: "Lägg till omgång" }));
     expect(calls).toContainEqual({ name: "rounds/mutations:addRound", args: { quizId: "quiz", title: "Julfilmer", kind: "questions" } });
     expect(onSelectRound).toHaveBeenCalledWith("new-round");
   });

@@ -9,7 +9,7 @@ export function ListEditor({ content, onChange }: QuestionEditorProps<"list">) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
-        Lagen skriver så många svar de kan tills tiden tar slut. Facit får vara ofullständigt: svar som inte finns där
+        Deltagarna skriver så många svar de kan tills tiden tar slut. Facit får vara ofullständigt: svar som inte finns där
         granskar ni en gång för alla lag.
       </p>
       <AnswerKeyField
@@ -20,7 +20,7 @@ export function ListEditor({ content, onChange }: QuestionEditorProps<"list">) {
       <NumberField label="Poäng per rätt svar" value={content.pointsPerItem} onChange={(pointsPerItem) => onChange({ ...content, pointsPerItem })} className="max-w-48" />
       <SwitchField
         label="Rätta med ungefärlig matchning"
-        description="Nästan rätt stavat räknas; osäkra svar hamnar hos er för granskning."
+        description="Nästan rättstavat räknas; osäkra svar hamnar hos er för granskning."
         checked={content.fuzzy}
         onChange={(fuzzy) => onChange({ ...content, fuzzy })}
       />

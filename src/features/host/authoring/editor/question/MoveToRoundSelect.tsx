@@ -25,7 +25,7 @@ export function MoveToRoundSelect({ currentRoundId, questionType, rounds, onMove
   }
   return (
     <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id}>Flytta till rond</Label>
+      <Label htmlFor={id}>Flytta till omgång</Label>
       <select
         id={id}
         value=""
@@ -33,7 +33,7 @@ export function MoveToRoundSelect({ currentRoundId, questionType, rounds, onMove
         className="h-9 max-w-72 rounded-lg border bg-background px-3 text-sm"
       >
         <option value="" disabled>
-          Välj rond…
+          Välj omgång…
         </option>
         {targets.map(({ round, label }) => (
           <option key={round._id} value={round._id}>

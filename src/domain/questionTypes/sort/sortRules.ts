@@ -14,16 +14,16 @@ export const sortRules: QuestionTypeRules<SortContent> = {
   createEmptyContent: () => ({
     type: "sort",
     items: ["", ""],
-    firstLabel: "Först",
-    lastLabel: "Sist",
+    firstLabel: "",
+    lastLabel: "",
     pointsPerItem: 1,
   }),
   maxPoints: (content) => content.items.length * content.pointsPerItem,
   findProblems: (content) => [
-    ...problemIf(content.items.length < MIN_ITEMS, `Lägg till minst ${MIN_ITEMS} saker att sortera.`),
-    ...content.items.flatMap((item, index) => problemIf(isBlank(item), `Sak ${index + 1} saknar text.`)),
-    ...problemIf(hasDuplicates(content.items), "Två saker har samma text, så ordningen blir tvetydig."),
-    ...problemIf(isBlank(content.firstLabel) || isBlank(content.lastLabel), "Ange vad början och slutet betyder, till exempel Äldst och Nyast."),
+    ...problemIf(content.items.length < MIN_ITEMS, `Lägg till minst ${MIN_ITEMS} alternativ att sortera.`),
+    ...content.items.flatMap((item, index) => problemIf(isBlank(item), `Alternativ ${index + 1} saknar text.`)),
+    ...problemIf(hasDuplicates(content.items), "Två alternativ har samma text, så ordningen blir tvetydig."),
+    ...problemIf(isBlank(content.firstLabel) || isBlank(content.lastLabel), "Ange vad högst upp och längst ner betyder, till exempel Störst och Minst."),
     ...problemIfNotPositive(content.pointsPerItem),
   ],
 };

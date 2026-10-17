@@ -120,7 +120,7 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
         />
         <ConfirmButton
           title="Ta bort frågan?"
-          description="Frågan tas bort från ronden. Det går inte att ångra."
+          description="Frågan tas bort från omgången. Det går inte att ångra."
           confirmLabel="Ta bort"
           onConfirm={() =>
             run(async () => {

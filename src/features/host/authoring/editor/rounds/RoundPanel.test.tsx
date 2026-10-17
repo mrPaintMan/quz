@@ -50,7 +50,7 @@ describe("RoundPanel", () => {
   it("says when the round's name could not be saved", async () => {
     failRename = true;
     render(<RoundPanel round={round("questions", [])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
-    await userEvent.type(screen.getByLabelText("Rondens namn och tema"), "!");
+    await userEvent.type(screen.getByLabelText("Omgångens namn och tema"), "!");
     expect(await screen.findByRole("alert")).toHaveTextContent("Kunde inte spara namnet.");
   });
 
@@ -93,7 +93,7 @@ describe("RoundPanel", () => {
 
   it("autosaves the round's name", async () => {
     render(<RoundPanel round={round("questions", [])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
-    await userEvent.type(screen.getByLabelText("Rondens namn och tema"), "!");
+    await userEvent.type(screen.getByLabelText("Omgångens namn och tema"), "!");
     await vi.waitFor(() =>
       expect(calls).toContainEqual({ name: "rounds/mutations:renameRound", args: { roundId: "r1", title: "Julmat!" } }),
     );
@@ -102,8 +102,8 @@ describe("RoundPanel", () => {
   it("deletes the round after confirmation", async () => {
     const onDeleted = vi.fn();
     render(<RoundPanel round={round("questions", [question("a", "A")])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={onDeleted} />);
-    await userEvent.click(screen.getByRole("button", { name: "Ta bort rond" }));
-    expect(await screen.findByText("Ronden och dess 1 frågor tas bort. Det går inte att ångra.")).toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Ta bort omgång" }));
+    expect(await screen.findByText("Omgången och dess 1 frågor tas bort. Det går inte att ångra.")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Ta bort" }));
     await act(async () => {});
     expect(calls).toContainEqual({ name: "rounds/mutations:deleteRound", args: { roundId: "r1" } });

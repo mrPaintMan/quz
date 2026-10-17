@@ -14,14 +14,14 @@ import { saveQuestionOrder } from "./saveQuestionOrder";
 
 function requireTypeAllowed(round: Doc<"rounds">, type: QuestionType): void {
   if (!isTypeAllowedInRound(round.kind, type)) {
-    throw new ConvexError("Den här frågetypen passar inte i den här ronden.");
+    throw new ConvexError("Den här frågetypen passar inte i den här omgången.");
   }
 }
 
 async function requireRoomIn(ctx: QueryCtx, roundId: Id<"rounds">): Promise<Doc<"questions">[]> {
   const questions = await questionsOfRound(ctx, roundId);
   if (questions.length >= MAX_QUESTIONS_PER_ROUND) {
-    throw new ConvexError(`En rond kan ha högst ${MAX_QUESTIONS_PER_ROUND} frågor.`);
+    throw new ConvexError(`En omgång kan ha högst ${MAX_QUESTIONS_PER_ROUND} frågor.`);
   }
   return questions;
 }

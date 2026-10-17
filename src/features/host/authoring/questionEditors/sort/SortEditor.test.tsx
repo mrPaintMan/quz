@@ -16,25 +16,25 @@ describe("SortEditor", () => {
   it("edits, reorders, adds and removes items", async () => {
     const onChange = vi.fn();
     render(<SortEditor content={content} onChange={onChange} />);
-    await userEvent.type(screen.getByLabelText("Sak 2"), "!");
+    await userEvent.type(screen.getByLabelText("Alternativ 2"), "!");
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Kalle Anka", "Ensam hemma!"]);
-    expect(screen.queryByRole("button", { name: "Flytta upp sak 1" })).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Flytta ned sak 1" }));
+    expect(screen.queryByRole("button", { name: "Flytta upp alternativ 1" })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Flytta ned alternativ 1" }));
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Ensam hemma", "Kalle Anka"]);
-    await userEvent.click(screen.getByRole("button", { name: "Flytta upp sak 2" }));
+    await userEvent.click(screen.getByRole("button", { name: "Flytta upp alternativ 2" }));
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Ensam hemma", "Kalle Anka"]);
-    await userEvent.click(screen.getByRole("button", { name: "Lägg till sak" }));
+    await userEvent.click(screen.getByRole("button", { name: "Lägg till alternativ" }));
     expect(onChange.mock.lastCall?.[0].items).toHaveLength(3);
-    await userEvent.click(screen.getByRole("button", { name: "Ta bort sak 1" }));
+    await userEvent.click(screen.getByRole("button", { name: "Ta bort alternativ 1" }));
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Ensam hemma"]);
   });
 
   it("edits the end labels and points", async () => {
     const onChange = vi.fn();
     render(<SortEditor content={content} onChange={onChange} />);
-    await userEvent.type(screen.getByLabelText("Början betyder"), "a");
+    await userEvent.type(screen.getByLabelText("Högst upp betyder"), "a");
     expect(onChange.mock.lastCall?.[0].firstLabel).toBe("Äldsta");
-    await userEvent.type(screen.getByLabelText("Slutet betyder"), "e");
+    await userEvent.type(screen.getByLabelText("Längst ner betyder"), "e");
     expect(onChange.mock.lastCall?.[0].lastLabel).toBe("Nyaste");
     await userEvent.type(screen.getByLabelText("Poäng per rätt placering"), "0");
     expect(onChange.mock.lastCall?.[0].pointsPerItem).toBe(10);

@@ -7,7 +7,7 @@ export function DrawingEditor({ content, onChange }: QuestionEditorProps<"drawin
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-muted-foreground">
-        Lagen ritar med fingret. Teckningen skickas när tiden tar slut, och ni poängsätter den själva.
+        Deltagarna ritar med fingret. Teckningen skickas när tiden tar slut, och ni poängsätter den själva.
       </p>
       <NumberField label="Maxpoäng" value={content.maxPoints} onChange={(maxPoints) => onChange({ ...content, maxPoints })} className="max-w-40" />
     </div>

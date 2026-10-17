@@ -4,7 +4,7 @@ Not done yet: these steps need your Convex and Vercel logins. Do them once, then
 
 ## 1. Convex production deployment
 
-1. Open the Convex dashboard, project **quz**, and switch to the **Production** deployment (it exists already, unused).
+1. The production deployment is `prod-eu` in **Europe (Ireland)**, the same region as dev. A deployment's region can't be changed later; a new one is created with `npx convex deployment create <name> --type prod --region eu --default` (only one default production deployment per project).
 2. Set the host passphrase on production. Choose a different one from dev:
 
    ```bash
@@ -32,6 +32,8 @@ Not done yet: these steps need your Convex and Vercel logins. Do them once, then
 2. Create the real quiz (for example "Julquiz 2026"), add a round and a question, reload: it should still be there.
 3. Log in from your fiancé's device too.
 
-## Later (M5)
+## 4. Domain
 
-- Custom domain (for example quz.se): **Vercel → Project → Settings → Domains**. This is the one accepted cost.
+`quz.nu` is bought at Loopia, with its nameservers pointing at Cloudflare. In Cloudflare, the records Vercel shows under **Project → Settings → Domains** are set to **DNS only** (grey cloud): proxying through Cloudflare breaks Vercel's certificate. `www.quz.nu` redirects to `quz.nu`, the primary domain.
+
+Don't use the Vercel Marketplace's Convex integration: it creates a separate Convex team instead of using this project.

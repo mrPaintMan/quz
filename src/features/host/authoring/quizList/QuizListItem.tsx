@@ -30,7 +30,7 @@ export function QuizListItem({ quiz, now, onCopy, onDelete }: QuizListItemProps)
         </Button>
         <ConfirmButton
           title={`Ta bort ${quiz.title}?`}
-          description="Alla ronder och frågor i quizet tas bort. Det går inte att ångra."
+          description="Alla omgångar och frågor i quizet tas bort. Det går inte att ångra."
           confirmLabel="Ta bort"
           onConfirm={onDelete}
         >

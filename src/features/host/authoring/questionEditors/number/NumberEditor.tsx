@@ -71,7 +71,7 @@ export function NumberEditor({ content, onChange }: QuestionEditorProps<"number"
 
       {scoring.mode === "closest" && (
         <div className="flex flex-col gap-3">
-          <p className="text-sm text-muted-foreground">Lagen närmast svaret får poäng i placeringsordning.</p>
+          <p className="text-sm text-muted-foreground">Poäng delas ut till de som kom närmast.</p>
           {scoring.pointsByRank.map((points, index) => (
             <div key={index} className="flex items-end gap-3">
               <NumberField

@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the admin online. After that, M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `copy-authoring` PR, both hosts try writing in production, then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -36,8 +36,8 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 - [x] Editor: rounds (add, rename, reorder, delete), questions (add, reorder, delete), autosave (D25)
 - [x] Editor per question type (all 11)
 - [x] Media: upload images, audio and video clips to Convex storage
-- [ ] Production Convex deployment and Vercel project, passphrase set as env var (steps in `docs/deploy.md`, needs the user's logins)
-- [ ] Both hosts can log in and save from their own devices
+- [x] Production Convex deployment (Ireland) and Vercel project, live at quz.nu
+- [ ] Both hosts can log in and save from their own devices (to confirm)
 
 ### Follow-ups from M1
 - [ ] Drag and drop for reordering (up/down buttons for now, D25)
@@ -69,7 +69,7 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 
 ### M5 · Polish and launch (late November)
 - [ ] Final visual design and Christmas theme, TV-sized layout
-- [ ] Custom domain
+- [x] Custom domain (quz.nu)
 - [ ] Dry run with a few friends on real phones
 
 ## Log
@@ -84,3 +84,4 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 - 2026-10-17: Editor backend: passphrase wrapper, quiz/round/question/media functions with tests (D21, D22).
 - 2026-10-17: Admin UI on branch `m1`: login, quiz list, three-column editor with all 11 question type editors, autosave and media upload (D23–D25). Production deploy steps written in `docs/deploy.md`.
 - 2026-10-17: Error messages for failed host actions, a session error boundary, and moving a question to another round (M1 follow-ups).
+- 2026-10-17: Production live at quz.nu (Convex prod in Ireland). Copy pass on the authoring flow: omgång, deltagarna, alternativ (`docs/copy.md`); one branch and PR per topic.

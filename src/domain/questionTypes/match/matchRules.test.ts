@@ -38,7 +38,7 @@ describe("matchRules", () => {
 
   it("flags the same value twice on the left side", () => {
     const pairs = [{ left: "Oslo", right: "Norge" }, { left: "oslo", right: "Sverige" }];
-    expect(messagesFor({ ...validContent, pairs })).toEqual(["Varje sak i vänstra listan får bara finnas en gång."]);
+    expect(messagesFor({ ...validContent, pairs })).toEqual(["Varje alternativ i vänstra listan får bara finnas en gång."]);
   });
 
   it("allows several items to share a partner on the right side", () => {
