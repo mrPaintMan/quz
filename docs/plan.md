@@ -42,7 +42,7 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 ### Follow-ups from M1
 - [ ] Drag and drop for reordering (up/down buttons for now, D25)
 - [ ] Clickable map for placing the map pin target (typed coordinates for now)
-- [ ] Moving a question to another round from the editor (the backend supports it)
+- [x] Moving a question to another round from the editor
 - [x] Show a message when creating, copying, deleting or moving fails (`ActionErrorProvider`)
 - [x] Send the host back to the login screen, instead of a blank page, if the passphrase changes on the server while logged in (`SessionErrorBoundary`)
 
@@ -83,4 +83,4 @@ Review and merge the `m1` pull request, then follow `docs/deploy.md` to put the 
 - 2026-10-17: Second review fixes (match allows a shared right side, placing order, margin message, duplicate options); review workflow set to one round per push.
 - 2026-10-17: Editor backend: passphrase wrapper, quiz/round/question/media functions with tests (D21, D22).
 - 2026-10-17: Admin UI on branch `m1`: login, quiz list, three-column editor with all 11 question type editors, autosave and media upload (D23–D25). Production deploy steps written in `docs/deploy.md`.
-- 2026-10-17: Error messages for failed host actions and a session error boundary (two follow-ups from the M1 review).
+- 2026-10-17: Error messages for failed host actions, a session error boundary, and moving a question to another round (M1 follow-ups).

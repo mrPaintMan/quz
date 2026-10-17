@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@convex/_generated/api";
-import type { Doc } from "@convex/_generated/dataModel";
+import type { Doc, Id } from "@convex/_generated/dataModel";
 import type { ContentOf, QuestionType } from "@convex/questions/questionContent";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,6 +13,7 @@ import { questionEditors } from "@/features/host/authoring/questionEditors/regis
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
+import { MoveToRoundSelect } from "./MoveToRoundSelect";
 import { ProblemList } from "./ProblemList";
 import { QuestionTypeSelect } from "./QuestionTypeSelect";
 import { useAutosave } from "./useAutosave";
@@ -34,11 +35,13 @@ function ContentEditor<T extends QuestionType>({
 type QuestionEditorProps = {
   question: Doc<"questions">;
   round: Doc<"rounds">;
+  rounds: Doc<"rounds">[];
   onDeleted: () => void;
+  onMoved: (roundId: Id<"rounds">) => void;
 };
 
 // Edits a local draft and autosaves it; remount with a new key when the question or its type changes.
-export function QuestionEditor({ question, round, onDeleted }: QuestionEditorProps) {
+export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: QuestionEditorProps) {
   const [draft, setDraft] = useState<Draft>(() => ({
     prompt: question.prompt,
     timeLimitSeconds: question.timeLimitSeconds,
@@ -49,6 +52,7 @@ export function QuestionEditor({ question, round, onDeleted }: QuestionEditorPro
   const updateQuestion = useHostMutation(api.questions.mutations.updateQuestion);
   const changeQuestionType = useHostMutation(api.questions.mutations.changeQuestionType);
   const deleteQuestion = useHostMutation(api.questions.mutations.deleteQuestion);
+  const moveQuestion = useHostMutation(api.questions.mutations.moveQuestion);
   const run = useRunAction();
 
   useAutosave(draft, (changes) => {
@@ -99,7 +103,18 @@ export function QuestionEditor({ question, round, onDeleted }: QuestionEditorPro
           Kunde inte spara. Kontrollera anslutningen; ändringen sparas igen vid nästa ändring.
         </p>
       )}
-      <div className="border-t pt-4">
+      <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
+        <MoveToRoundSelect
+          currentRoundId={round._id}
+          questionType={draft.content.type}
+          rounds={rounds}
+          onMove={(toRoundId) =>
+            run(async () => {
+              await moveQuestion({ questionId: question._id, toRoundId, toIndex: Number.MAX_SAFE_INTEGER });
+              onMoved(toRoundId);
+            })
+          }
+        />
         <ConfirmButton
           title="Ta bort frågan?"
           description="Frågan tas bort från ronden. Det går inte att ångra."

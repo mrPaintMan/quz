@@ -83,7 +83,12 @@ export function QuizEditor({ quizId }: { quizId: Id<"quizzes"> }) {
               key={`${question._id}:${question.content.type}`}
               question={question}
               round={round}
+              rounds={tree.rounds}
               onDeleted={() => setSelectedQuestionId(null)}
+              onMoved={(roundId) => {
+                setSelectedRoundId(roundId);
+                setSelectedQuestionId(question._id);
+              }}
             />
           ) : (
             <p className="text-muted-foreground">Välj eller lägg till en fråga.</p>

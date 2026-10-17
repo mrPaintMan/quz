@@ -12,6 +12,7 @@ vi.mock("@/features/host/shared/useHostMutation", async () => {
     "questions/mutations:updateQuestion": "update",
     "questions/mutations:changeQuestionType": "changeType",
     "questions/mutations:deleteQuestion": "delete",
+    "questions/mutations:moveQuestion": "move",
   };
   return {
     useHostMutation: (reference: Parameters<typeof getFunctionName>[0]) => async (args: unknown) => {
@@ -53,14 +54,14 @@ describe("QuestionEditor", () => {
   afterEach(() => vi.useRealTimers());
 
   it("shows the editor for the question's type and what is missing", () => {
-    render(<QuestionEditor question={question} round={round} onDeleted={vi.fn()} />);
+    render(<QuestionEditor question={question} round={round} rounds={[round]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
     expect(screen.getByLabelText("Frågetyp")).toHaveValue("activity");
     expect(screen.getByLabelText("Maxpoäng")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Skriv frågan som visas på TV:n.");
   });
 
   it("autosaves the prompt, time limit, notes and content together", async () => {
-    render(<QuestionEditor question={question} round={round} onDeleted={vi.fn()} />);
+    render(<QuestionEditor question={question} round={round} rounds={[round]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
     await userEvent.type(screen.getByLabelText("Fråga som visas på TV:n"), "Pepparkakshus");
     await userEvent.type(screen.getByLabelText("Tidsgräns i sekunder (tomt = ingen)"), "60");
     await userEvent.type(screen.getByLabelText("Anteckningar för domarna (visas inte på TV:n)"), "Bäst vinner");
@@ -81,20 +82,20 @@ describe("QuestionEditor", () => {
   });
 
   it("clears the time limit back to none", async () => {
-    render(<QuestionEditor question={{ ...question, timeLimitSeconds: 30 }} round={round} onDeleted={vi.fn()} />);
+    render(<QuestionEditor question={{ ...question, timeLimitSeconds: 30 }} round={round} rounds={[round]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
     await userEvent.clear(screen.getByLabelText("Tidsgräns i sekunder (tomt = ingen)"));
     await vi.waitFor(() => expect(calls.at(-1)?.args).toMatchObject({ timeLimitSeconds: null }));
   });
 
   it("warns when a save fails", async () => {
     failSaves = true;
-    render(<QuestionEditor question={question} round={round} onDeleted={vi.fn()} />);
+    render(<QuestionEditor question={question} round={round} rounds={[round]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
     await userEvent.type(screen.getByLabelText("Fråga som visas på TV:n"), "x");
     expect(await screen.findByRole("alert")).toHaveTextContent("Kunde inte spara");
   });
 
   it("changes type after confirmation", async () => {
-    render(<QuestionEditor question={question} round={round} onDeleted={vi.fn()} />);
+    render(<QuestionEditor question={question} round={round} rounds={[round]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
     await userEvent.selectOptions(screen.getByLabelText("Frågetyp"), "Rita svar");
     await userEvent.click(await screen.findByRole("button", { name: "Byt frågetyp" }));
     expect(calls).toContainEqual({ name: "changeType", args: { questionId: "q1", type: "drawing" } });
@@ -102,11 +103,23 @@ describe("QuestionEditor", () => {
 
   it("deletes the question after confirmation and tells the parent", async () => {
     const onDeleted = vi.fn();
-    render(<QuestionEditor question={question} round={round} onDeleted={onDeleted} />);
+    render(<QuestionEditor question={question} round={round} rounds={[round]} onDeleted={onDeleted} onMoved={vi.fn()} />);
     await userEvent.click(screen.getByRole("button", { name: "Ta bort fråga" }));
     await userEvent.click(await screen.findByRole("button", { name: "Ta bort" }));
     await act(async () => {});
     expect(calls).toContainEqual({ name: "delete", args: { questionId: "q1" } });
     expect(onDeleted).toHaveBeenCalled();
+  });
+
+  it("moves the question to the end of another round and tells the parent", async () => {
+    const onMoved = vi.fn();
+    const julfilmer = { ...round, _id: "r2" as Id<"rounds">, title: "Julfilmer" };
+    render(<QuestionEditor question={question} round={round} rounds={[round, julfilmer]} onDeleted={vi.fn()} onMoved={onMoved} />);
+    await userEvent.selectOptions(screen.getByLabelText("Flytta till rond"), "Julfilmer");
+    await vi.waitFor(() => expect(onMoved).toHaveBeenCalledWith("r2"));
+    expect(calls).toContainEqual({
+      name: "move",
+      args: { questionId: "q1", toRoundId: "r2", toIndex: Number.MAX_SAFE_INTEGER },
+    });
   });
 });
