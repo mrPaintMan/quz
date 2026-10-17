@@ -43,4 +43,13 @@ describe("mapPinRules", () => {
     const initialView = { center: { lat: 100, lng: 0 }, zoom: 4 };
     expect(messagesFor({ ...validContent, initialView })).toEqual(["Välj var kartan ska börja."]);
   });
+
+  it.each([-1, 21, Number.NaN])("flags a starting zoom of %s", (zoom) => {
+    const initialView = { ...validContent.initialView, zoom };
+    expect(messagesFor({ ...validContent, initialView })).toEqual(["Välj en zoomnivå mellan 0 och 20."]);
+  });
+
+  it("flags a radius that is not a number", () => {
+    expect(messagesFor({ ...validContent, radiusMeters: Number.NaN })).toEqual(["Radien måste vara större än 0."]);
+  });
 });

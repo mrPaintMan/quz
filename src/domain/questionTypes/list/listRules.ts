@@ -1,6 +1,6 @@
 import type { ContentOf } from "@convex/questions/questionContent";
-import { problemIf } from "../problemIf";
-import type { QuestionTypeRules } from "../questionTypeRules";
+import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
+import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type ListContent = ContentOf<"list">;
 
@@ -8,5 +8,5 @@ type ListContent = ContentOf<"list">;
 export const listRules: QuestionTypeRules<ListContent> = {
   requiresTimeLimit: true,
   maxPoints: () => null,
-  findProblems: (content) => problemIf(content.pointsPerItem <= 0, "Poängen måste vara större än 0."),
+  findProblems: (content) => problemIfNotPositive(content.pointsPerItem),
 };

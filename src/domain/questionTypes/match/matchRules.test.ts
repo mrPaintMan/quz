@@ -35,4 +35,11 @@ describe("matchRules", () => {
   it("flags zero points per pair", () => {
     expect(messagesFor({ ...validContent, pointsPerPair: 0 })).toEqual(["Poängen måste vara större än 0."]);
   });
+
+  it.each([
+    { name: "left", pairs: [{ left: "Oslo", right: "Norge" }, { left: "oslo", right: "Sverige" }] },
+    { name: "right", pairs: [{ left: "Oslo", right: "Norge" }, { left: "Bergen", right: "Norge" }] },
+  ])("flags the same value twice on the $name side", ({ pairs }) => {
+    expect(messagesFor({ ...validContent, pairs })).toEqual(["Varje sak får bara finnas en gång på varje sida."]);
+  });
 });

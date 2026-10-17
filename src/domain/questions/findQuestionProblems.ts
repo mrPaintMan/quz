@@ -1,8 +1,9 @@
 import type { QuestionContent } from "@convex/questions/questionContent";
-import { isBlank } from "../questionTypes/isBlank";
-import { problemIf } from "../questionTypes/problemIf";
-import type { Problem } from "../questionTypes/questionTypeRules";
-import { rulesFor } from "../questionTypes/registry";
+import { isBlank } from "@/domain/questionTypes/isBlank";
+import { problemIf } from "@/domain/questionTypes/problemIf";
+import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
+import type { Problem } from "@/domain/questionTypes/questionTypeRules";
+import { rulesFor } from "@/domain/questionTypes/registry";
 
 type QuestionDraft = {
   prompt: string;
@@ -14,7 +15,7 @@ function findTimeLimitProblems(question: QuestionDraft): Problem[] {
   if (question.timeLimitSeconds === null) {
     return problemIf(rulesFor(question.content).requiresTimeLimit, "Den här frågetypen behöver en tidsgräns.");
   }
-  return problemIf(question.timeLimitSeconds <= 0, "Tidsgränsen måste vara större än 0.");
+  return problemIfNotPositive(question.timeLimitSeconds, "Tidsgränsen måste vara större än 0.");
 }
 
 // What still has to be filled in before the quiz can start. Empty means ready.

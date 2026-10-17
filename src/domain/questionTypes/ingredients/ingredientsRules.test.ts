@@ -33,4 +33,14 @@ describe("ingredientsRules", () => {
   it("flags zero points per item", () => {
     expect(messagesFor({ ...validContent, pointsPerItem: 0 })).toEqual(["Poängen måste vara större än 0."]);
   });
+
+  it("flags a spelling shared by two ingredients", () => {
+    const items = [{ spellings: ["apelsin"] }, { spellings: ["Apelsin", "apelsinjuice"] }];
+    expect(messagesFor({ ...validContent, items })).toEqual(["Samma stavning finns i flera ingredienser."]);
+  });
+
+  it("accepts the same spelling repeated within one ingredient", () => {
+    const items = [{ spellings: ["glögg", "Glögg"] }, { spellings: ["apelsin"] }];
+    expect(messagesFor({ ...validContent, items })).toEqual([]);
+  });
 });

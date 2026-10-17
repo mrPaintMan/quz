@@ -11,6 +11,11 @@
     "jsx": "react-jsx",
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
+    /* Same aliases as the root tsconfig, so domain code imported from src/ typechecks here too. */
+    "paths": {
+      "@/*": ["../src/*"],
+      "@convex/*": ["./*"]
+    },
 
     /* These compiler options are required by Convex */
     "target": "ESNext",

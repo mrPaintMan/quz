@@ -18,6 +18,7 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 - Briefly explain Convex and non-obvious TypeScript when they come up; the user is new to Convex.
 - Verify your own work: run the checks below, and check UI changes in the browser pane (the TV, phone and admin views).
 - Ask the user about product choices. Decide implementation details yourself and record notable ones in `docs/decisions.md`.
+- Before every push, run the code-review skill on the commits about to be pushed (`origin/main..HEAD`) and handle the findings first.
 - At the end of a work chunk, update `docs/plan.md` (tick items, set "Next up") and add any new decision to `docs/decisions.md`.
 
 ## Stack

@@ -71,3 +71,4 @@ M1: propose the host passphrase gate and the Convex queries and mutations for qu
 - 2026-10-17: Test tooling, import rules, pre-commit hook and CI in place (D13).
 - 2026-10-17: Wireframes reviewed: product doc rewritten, D14–D17 added, "Authoring live" moved to 2026-10-28.
 - 2026-10-17: Schema, content validators for all 11 types and domain rules (max points, problems) with tests; D18–D20.
+- 2026-10-17: Fixes from the first code review: NaN-safe checks, duplicate and tier-order warnings, map zoom check, alias imports in the domain (verified to bundle in Convex).

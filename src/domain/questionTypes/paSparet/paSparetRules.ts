@@ -1,8 +1,9 @@
 import type { ContentOf } from "@convex/questions/questionContent";
-import { hasSpelling } from "../hasSpelling";
-import { isBlank } from "../isBlank";
-import { problemIf } from "../problemIf";
-import type { QuestionTypeRules } from "../questionTypeRules";
+import { hasSpelling } from "@/domain/questionTypes/hasSpelling";
+import { isBlank } from "@/domain/questionTypes/isBlank";
+import { problemIf } from "@/domain/questionTypes/problemIf";
+import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
+import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type PaSparetContent = ContentOf<"paSparet">;
 type Clue = PaSparetContent["clues"][number];
@@ -19,7 +20,7 @@ export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
     ...problemIf(content.clues.length === 0, "Lägg till minst en ledtråd."),
     ...content.clues.flatMap((clue, index) => [
       ...problemIf(isBlank(clue.text), `Ledtråd ${index + 1} saknar text.`),
-      ...problemIf(clue.points <= 0, `Ledtråd ${index + 1}: poängen måste vara större än 0.`),
+      ...problemIfNotPositive(clue.points, `Ledtråd ${index + 1}: poängen måste vara större än 0.`),
     ]),
     ...problemIf(!isDescending(content.clues), "Varje ledtråd ska ge färre poäng än den före."),
   ],

@@ -1,7 +1,8 @@
 import type { ContentOf } from "@convex/questions/questionContent";
-import { hasSpelling } from "../hasSpelling";
-import { problemIf } from "../problemIf";
-import type { QuestionTypeRules } from "../questionTypeRules";
+import { hasSpelling } from "@/domain/questionTypes/hasSpelling";
+import { problemIf } from "@/domain/questionTypes/problemIf";
+import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
+import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type FreeTextContent = ContentOf<"freeText">;
 
@@ -27,6 +28,6 @@ export const freeTextRules: QuestionTypeRules<FreeTextContent> = {
       `Frågan ska ha ${MIN_FIELDS}–${MAX_FIELDS} svarsfält.`,
     ),
     ...findFieldProblems(content),
-    ...problemIf(content.pointsPerField <= 0, "Poängen måste vara större än 0."),
+    ...problemIfNotPositive(content.pointsPerField),
   ],
 };

@@ -45,7 +45,7 @@ const eslintConfig = defineConfig([
   {
     files: ["src/domain/**/*.{ts,tsx}"],
     ignores: ["**/*.test.{ts,tsx}"],
-    rules: restrictImports([convexRuntime, uiAndFramework]),
+    rules: restrictImports([convexRuntime, uiAndFramework, parentFolders]),
   },
   {
     files: ["src/features/**/*.{ts,tsx}"],

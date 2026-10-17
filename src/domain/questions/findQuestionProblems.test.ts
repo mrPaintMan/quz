@@ -36,4 +36,10 @@ describe("findQuestionProblems", () => {
       messagesFor({ prompt: "Pepparkakshus", timeLimitSeconds: null, content: { type: "activity", maxPoints: 0 } }),
     ).toEqual(["Maxpoängen måste vara större än 0."]);
   });
+
+  it("flags a time limit that is not a number", () => {
+    expect(messagesFor({ prompt: "Rita en tomte", timeLimitSeconds: Number.NaN, content: drawing })).toEqual([
+      "Tidsgränsen måste vara större än 0.",
+    ]);
+  });
 });

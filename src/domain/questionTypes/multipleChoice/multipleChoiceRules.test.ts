@@ -52,4 +52,8 @@ describe("multipleChoiceRules", () => {
   it("flags zero points", () => {
     expect(messagesFor({ ...validContent, points: 0 })).toEqual(["Poängen måste vara större än 0."]);
   });
+
+  it("flags points that are not a number", () => {
+    expect(messagesFor({ ...validContent, points: Number.NaN })).toEqual(["Poängen måste vara större än 0."]);
+  });
 });

@@ -1,7 +1,8 @@
 import type { ContentOf } from "@convex/questions/questionContent";
-import { isBlank } from "../isBlank";
-import { problemIf } from "../problemIf";
-import type { QuestionTypeRules } from "../questionTypeRules";
+import { isBlank } from "@/domain/questionTypes/isBlank";
+import { problemIf } from "@/domain/questionTypes/problemIf";
+import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
+import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type MultipleChoiceContent = ContentOf<"multipleChoice">;
 
@@ -31,6 +32,6 @@ export const multipleChoiceRules: QuestionTypeRules<MultipleChoiceContent> = {
     ...problemIf(content.options.length < MIN_OPTIONS, `Lägg till minst ${MIN_OPTIONS} alternativ.`),
     ...findOptionProblems(content),
     ...problemIf(!hasValidCorrectIndex(content), "Välj vilket alternativ som är rätt."),
-    ...problemIf(content.points <= 0, "Poängen måste vara större än 0."),
+    ...problemIfNotPositive(content.points),
   ],
 };

@@ -97,7 +97,7 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 7. **Flat feature folders** until one holds about 8 files; add sub-folders when needed, not up front.
 8. **Rules 1 and 4 are enforced by ESLint** import restrictions in `eslint.config.mjs`, not only by this document.
 9. **Audience names, not device names** (`host`, `player`, `tv`): the split is who uses it and for what, not screen size.
-10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features don't use `../` imports, so the boundary rules can see where an import points. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
+10. **Aliases for anything outside the current folder:** `@/…` for `src/`, `@convex/…` for `convex/`. Features and domain code don't use `../` imports (enforced by ESLint), so the boundary rules can see where an import points. `convex/tsconfig.json` declares the same aliases, so Convex can typecheck and bundle domain code it imports. The frontend reaches Convex through `@convex/_generated/api`, and may import only types from other Convex files.
 11. **Question types extend through registries (D14).** A type's parts live in a `<type>/` folder in each layer. Each layer has one `registry.ts` mapping every type to its part, typed `Record<QuestionType, …>`, so a new type does not compile until every part exists. Shared code never switches on the question type; it asks the registry.
 
 ### Where does it go?

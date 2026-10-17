@@ -39,4 +39,10 @@ describe("sortRules", () => {
   it("flags zero points per item", () => {
     expect(messagesFor({ ...validContent, pointsPerItem: 0 })).toEqual(["Poängen måste vara större än 0."]);
   });
+
+  it("flags two items with the same text", () => {
+    expect(messagesFor({ ...validContent, items: ["Ensam hemma", "ensam hemma "] })).toEqual([
+      "Två saker har samma text, så ordningen blir tvetydig.",
+    ]);
+  });
 });

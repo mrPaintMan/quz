@@ -1,7 +1,9 @@
 import type { ContentOf } from "@convex/questions/questionContent";
-import { isBlank } from "../isBlank";
-import { problemIf } from "../problemIf";
-import type { QuestionTypeRules } from "../questionTypeRules";
+import { hasDuplicates } from "@/domain/questionTypes/hasDuplicates";
+import { isBlank } from "@/domain/questionTypes/isBlank";
+import { problemIf } from "@/domain/questionTypes/problemIf";
+import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
+import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type SortContent = ContentOf<"sort">;
 
@@ -13,7 +15,8 @@ export const sortRules: QuestionTypeRules<SortContent> = {
   findProblems: (content) => [
     ...problemIf(content.items.length < MIN_ITEMS, `Lägg till minst ${MIN_ITEMS} saker att sortera.`),
     ...content.items.flatMap((item, index) => problemIf(isBlank(item), `Sak ${index + 1} saknar text.`)),
+    ...problemIf(hasDuplicates(content.items), "Två saker har samma text, så ordningen blir tvetydig."),
     ...problemIf(isBlank(content.firstLabel) || isBlank(content.lastLabel), "Ange vad början och slutet betyder, till exempel Äldst och Nyast."),
-    ...problemIf(content.pointsPerItem <= 0, "Poängen måste vara större än 0."),
+    ...problemIfNotPositive(content.pointsPerItem),
   ],
 };

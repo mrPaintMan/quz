@@ -70,4 +70,31 @@ describe("numberRules", () => {
       "Poängen för varje placering måste vara större än 0.",
     ]);
   });
+
+  it("accepts tiers written in any order as long as they are consistent", () => {
+    const scoring = { mode: "tiers" as const, tiers: [{ within: 6, points: 1 }, { within: 1, points: 3 }] };
+    expect(messagesFor({ ...tiersContent, scoring })).toEqual([]);
+  });
+
+  it("flags a wider margin that gives more points", () => {
+    const scoring = { mode: "tiers" as const, tiers: [{ within: 1, points: 1 }, { within: 6, points: 3 }] };
+    expect(messagesFor({ ...tiersContent, scoring })).toEqual([
+      "Poängnivåerna krockar: en större marginal ska ge färre poäng, och två nivåer kan inte ha samma marginal.",
+    ]);
+  });
+
+  it("flags two tiers with the same margin", () => {
+    const scoring = { mode: "tiers" as const, tiers: [{ within: 1, points: 3 }, { within: 1, points: 1 }] };
+    expect(messagesFor({ ...tiersContent, scoring })).toEqual([
+      "Poängnivåerna krockar: en större marginal ska ge färre poäng, och två nivåer kan inte ha samma marginal.",
+    ]);
+  });
+
+  it("flags a margin and points that are not numbers", () => {
+    const scoring = { mode: "tiers" as const, tiers: [{ within: Number.NaN, points: Number.NaN }] };
+    expect(messagesFor({ ...tiersContent, scoring })).toEqual([
+      "Poängnivå 1: marginalen kan inte vara negativ.",
+      "Poängnivå 1: poängen måste vara större än 0.",
+    ]);
+  });
 });
