@@ -32,7 +32,7 @@ export function AddRoundForm({ onAdd }: AddRoundFormProps) {
           id={kindId}
           value={kind}
           onChange={(event) => setKind(event.target.value as RoundKind)}
-          className="h-9 rounded-lg border bg-background px-3 text-sm"
+          className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
         >
           <option value="questions">Frågeomgång</option>
           <option value="paSparet">På spåret</option>

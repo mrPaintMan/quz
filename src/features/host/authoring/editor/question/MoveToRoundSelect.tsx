@@ -30,7 +30,7 @@ export function MoveToRoundSelect({ currentRoundId, questionType, rounds, onMove
         id={id}
         value=""
         onChange={(event) => onMove(event.target.value as Id<"rounds">)}
-        className="h-9 max-w-72 rounded-lg border bg-background px-3 text-sm"
+        className="h-9 max-w-72 rounded-lg border bg-background pl-3 pr-9 text-sm"
       >
         <option value="" disabled>
           Välj omgång…

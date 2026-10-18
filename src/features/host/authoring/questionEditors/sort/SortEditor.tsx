@@ -7,6 +7,7 @@ import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
 import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
+import { SortableList } from "@/features/host/authoring/questionEditors/fields/SortableList";
 import { TextField } from "@/features/host/authoring/questionEditors/fields/TextField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
@@ -22,18 +23,23 @@ export function SortEditor({ content, onChange }: QuestionEditorProps<"sort">) {
       </div>
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-medium">Alternativ i rätt ordning · ordningen blandas för deltagarna</legend>
-        {items.map((item, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <span className="w-6 text-right text-muted-foreground">{index + 1}.</span>
-            <Input aria-label={`Alternativ ${index + 1}`} value={item} onChange={(event) => setItems(replaceAt(items, index, event.target.value))} />
-            <RowButtons
-              name={`alternativ ${index + 1}`}
-              onMoveUp={index > 0 ? () => setItems(moveItem(items, index, index - 1)) : undefined}
-              onMoveDown={index < items.length - 1 ? () => setItems(moveItem(items, index, index + 1)) : undefined}
-              onRemove={() => setItems(removeAt(items, index))}
-            />
-          </div>
-        ))}
+        <SortableList
+          items={items}
+          // Items are plain strings that may repeat, so the position is their id, as in the React keys before.
+          getId={(_, index) => String(index)}
+          nameOf={(index) => `alternativ ${index + 1}`}
+          onMove={(_item, fromIndex, toIndex) => setItems(moveItem(items, fromIndex, toIndex))}
+          className="flex flex-col gap-2"
+          itemClassName={() => "flex items-center gap-2 rounded-lg bg-background"}
+          renderItem={(item, { index, dragHandle, position }) => (
+            <>
+              {dragHandle}
+              <span className="w-6 text-right text-muted-foreground">{index + 1}.</span>
+              <Input aria-label={`Alternativ ${index + 1}`} value={item} onChange={(event) => setItems(replaceAt(items, index, event.target.value))} />
+              <RowButtons name={`alternativ ${index + 1}`} position={position} onRemove={() => setItems(removeAt(items, index))} />
+            </>
+          )}
+        />
       </fieldset>
       <Button variant="outline" className="self-start" onClick={() => setItems([...items, ""])}>
         Lägg till alternativ

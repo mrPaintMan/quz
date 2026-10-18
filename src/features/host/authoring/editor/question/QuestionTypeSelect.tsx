@@ -34,7 +34,7 @@ export function QuestionTypeSelect({ value, roundKind, onChange }: QuestionTypeS
         id={id}
         value={value}
         onChange={(event) => setPendingType(event.target.value as QuestionType)}
-        className="h-9 rounded-lg border bg-background px-3 text-sm"
+        className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
       >
         {allowedQuestionTypes(roundKind).map((type) => (
           <option key={type} value={type}>

@@ -35,10 +35,20 @@ describe("QuestionListItem", () => {
     expect(onSelect).toHaveBeenCalled();
   });
 
-  it("offers moving when allowed", async () => {
-    const onMoveDown = vi.fn();
-    render(<QuestionListItem question={question("A", 1)} number={1} selected={false} onSelect={vi.fn()} onMoveDown={onMoveDown} />);
+  it("offers moving when given a position and a drag handle", async () => {
+    const onMove = vi.fn();
+    render(
+      <QuestionListItem
+        question={question("A", 1)}
+        number={1}
+        selected={false}
+        onSelect={vi.fn()}
+        dragHandle={<button type="button">Handtag</button>}
+        position={{ index: 0, count: 2, onMove }}
+      />,
+    );
+    expect(screen.getByRole("button", { name: "Handtag" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Flytta ned fråga 1" }));
-    expect(onMoveDown).toHaveBeenCalled();
+    expect(onMove).toHaveBeenCalledWith(1);
   });
 });
