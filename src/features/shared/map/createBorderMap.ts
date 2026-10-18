@@ -90,13 +90,24 @@ export function createBorderMap(
   };
   setRadius(radiusMeters);
 
-  // Leaflet also fires "moveend" for our own setView and when the page is resized, so
-  // only a view that differs from the last one known counts as the user's move.
+  // Leaflet also fires "moveend" for our own moves and when the page is resized; only a
+  // move that changes the view and isn't ours counts as the user's. Leaflet pans in whole
+  // pixels, so a tiny change from outside may not move the map at all: lastView keeps the
+  // view we asked for, not the one Leaflet rounded to.
   let lastView = readView(map);
+  let movingByCode = false;
+  const showView = (view: MapView) => {
+    lastView = view;
+    movingByCode = true;
+    map.setView([view.center.lat, view.center.lng], view.zoom, { animate: false });
+    movingByCode = false;
+  };
   map.on("move", () => circle?.setLatLng(map.getCenter()));
+  // A resize keeps the centre only to the nearest pixel, kilometres when zoomed out.
+  map.on("resize", () => showView(lastView));
   map.on("moveend", () => {
     const view = readView(map);
-    if (isSameView(view, lastView)) return;
+    if (movingByCode || isSameView(view, lastView)) return;
     lastView = view;
     onUserMove(view);
   });
@@ -104,10 +115,7 @@ export function createBorderMap(
   return {
     setView: (next) => {
       // Half-typed coordinates (NaN) would make Leaflet throw; the map waits for a whole place.
-      if (!isWholeView(next) || isSameView(next, readView(map))) return;
-      lastView = next;
-      map.setView([next.center.lat, next.center.lng], next.zoom, { animate: false });
-      lastView = readView(map);
+      if (isWholeView(next) && !isSameView(next, lastView)) showView(next);
     },
     setRadius,
     destroy: () => map.remove(),

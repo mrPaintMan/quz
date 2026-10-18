@@ -25,6 +25,7 @@ function fakeLeaflet() {
     getCenter: () => ({ ...center, wrap: () => ({ lat: center.lat, lng: ((((center.lng + 180) % 360) + 360) % 360) - 180 }) }),
     getZoom: () => zoom,
     setView: vi.fn(([lat, lng]: [number, number], nextZoom: number) => moveTo(lat, lng, nextZoom)),
+    resize: () => handlers.resize?.(),
     remove: vi.fn(),
   };
   const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn() };
@@ -72,11 +73,27 @@ describe("createBorderMap", () => {
     expect(onUserMove).not.toHaveBeenCalled();
   });
 
+  it("goes back to the last view after the page is resized, instead of drifting", () => {
+    const { map, onUserMove } = setUp();
+    map.resize();
+    expect(map.setView).toHaveBeenCalledWith([59.33, 18.07], 5, { animate: false });
+    expect(onUserMove).not.toHaveBeenCalled();
+  });
+
   it("moves to a new view from outside without reporting it as the user's", () => {
     const { controller, map, onUserMove } = setUp();
     controller.setView({ center: { lat: 67.85, lng: 20.23 }, zoom: 6 });
     expect(map.setView).toHaveBeenCalledWith([67.85, 20.23], 6, { animate: false });
     expect(onUserMove).not.toHaveBeenCalled();
+  });
+
+  it("keeps the asked-for view when Leaflet rounds a tiny move away", () => {
+    const { controller, map, userMovesTo, onUserMove } = setUp();
+    map.setView.mockImplementationOnce(() => userMovesTo(59.33, 18.07, 5));
+    controller.setView({ center: { lat: 59.33, lng: 18.08 }, zoom: 5 });
+    expect(onUserMove).not.toHaveBeenCalled();
+    map.resize();
+    expect(map.setView).toHaveBeenLastCalledWith([59.33, 18.08], 5, { animate: false });
   });
 
   it("stays put for the view it already shows or a half-typed one", () => {
