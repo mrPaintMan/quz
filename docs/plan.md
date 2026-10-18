@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `remove-dead-code` and `review-fixes` PRs, then run `migrateMissingNumbers` on production (`docs/deploy.md`) and delete it in a follow-up PR. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `remove-nan-migration` PR. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -46,7 +46,7 @@ Merge the `remove-dead-code` and `review-fixes` PRs, then run `migrateMissingNum
 - [x] Show a message when creating, copying, deleting or moving fails (`ActionErrorProvider`)
 - [x] Fixes from the codebase review: one hook for half-typed field text, autosave reports its own failures, shared authoring parts in `authoring/shared/`, one type per shape, docs brought up to date
 - [x] Empty number fields saved as `null` instead of `NaN` (D28)
-- [ ] Run `migrateMissingNumbers` on dev and production, then delete it
+- [x] Run `migrateMissingNumbers` on dev and production, then delete it
 - [x] Send the host back to the login screen, instead of a blank page, if the passphrase changes on the server while logged in (`SessionErrorBoundary`)
 
 ### M2 · Live game loop
@@ -92,3 +92,4 @@ Merge the `remove-dead-code` and `review-fixes` PRs, then run `migrateMissingNum
 - 2026-10-18: Map pin authoring on a borders-only map with a fixed pin, the radius drawn to scale, and a phone-sized map for the starting view (D27).
 - 2026-10-18: Codebase review for tech debt, clean-code smells and dead code. Removed unused files (Next.js starter icons, `src/lib/utils.ts`, the unused shadcn card, Convex's starter README), the login form's unused notice, the unused sidebar colour tokens, and two needless type exports.
 - 2026-10-18: Review fixes: `useDraftText` for number, lines and answer-key fields, `useAutosave` with save failure, sortable rows and autosave moved to `authoring/shared/`, single types for rounds with questions, media kind and map views, docs updated; empty numbers are `null` everywhere, with a one-off migration (D28).
+- 2026-10-18: `migrateMissingNumbers` ran on dev and production (no `NaN` found in either) and was deleted.

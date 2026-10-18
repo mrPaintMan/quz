@@ -36,13 +36,9 @@ Not done yet: these steps need your Convex and Vercel logins. Do them once, then
 
 Run after the change that needs them reaches each deployment, then delete the function in a later PR.
 
-- `migrateMissingNumbers` (D28) replaces `NaN` in saved questions with `null`. Run it until it answers `isDone: true`, passing the `continueCursor` from each answer as the next `cursor`:
+Run one with `npx convex run --prod <module>:<function> '<args>'`, or without `--prod` for the dev deployment. A paginated one takes `{"paginationOpts":{"numItems":100,"cursor":null}}` and is run again with each answer's `continueCursor` until it answers `isDone: true`.
 
-  ```bash
-  npx convex run --prod questions/migrateMissingNumbers:migrateMissingNumbers '{"paginationOpts":{"numItems":100,"cursor":null}}'
-  ```
-
-  Without `--prod` it runs on the dev deployment.
+None pending. Done: `migrateMissingNumbers` (D28) on 2026-10-18, on dev and production; it found no `NaN` to fix and was then deleted.
 
 ## 5. Domain
 
