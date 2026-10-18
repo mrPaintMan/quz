@@ -27,9 +27,8 @@ describe("LoginForm", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Fel lösenord");
   });
 
-  it("can't be sent empty and shows a notice when given one", () => {
-    render(<LoginForm onSubmit={vi.fn()} notice="Lösenordet har ändrats." />);
+  it("can't be sent empty", () => {
+    render(<LoginForm onSubmit={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Logga in" })).toBeDisabled();
-    expect(screen.getByText("Lösenordet har ändrats.")).toBeInTheDocument();
   });
 });

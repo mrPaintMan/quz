@@ -9,7 +9,7 @@ import type { RowPosition } from "./RowButtons";
 import { SortableRow } from "./SortableRow";
 import { swedishDragAnnouncements, swedishDragInstructions } from "./swedishDragAnnouncements";
 
-export type SortableItemParts = { index: number; dragHandle: ReactNode; position: RowPosition };
+type SortableItemParts = { index: number; dragHandle: ReactNode; position: RowPosition };
 
 type SortableListProps<T> = {
   items: readonly T[];

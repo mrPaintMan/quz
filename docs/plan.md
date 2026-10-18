@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `map-pin-authoring` PR (map for the map pin question), both hosts try writing in production, then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `remove-dead-code` PR; decide which fixes from the tech-debt review (2026-10-18) to make before M2; both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -87,3 +87,4 @@ Merge the `map-pin-authoring` PR (map for the map pin question), both hosts try 
 - 2026-10-17: Production live at quz.nu (Convex prod in Ireland). Copy pass on the authoring flow: omgång, deltagarna, alternativ (`docs/copy.md`); one branch and PR per topic.
 - 2026-10-18: M1 polish: drag and drop for rounds, questions and Sortera items, disabled arrows at list ends, dropdown chevron inset (D26).
 - 2026-10-18: Map pin authoring on a borders-only map with a fixed pin, the radius drawn to scale, and a phone-sized map for the starting view (D27).
+- 2026-10-18: Codebase review for tech debt, clean-code smells and dead code. Removed unused files (Next.js starter icons, `src/lib/utils.ts`, the unused shadcn card, Convex's starter README), the login form's unused notice, the unused sidebar colour tokens, and two needless type exports.

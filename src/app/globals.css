@@ -10,14 +10,6 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -79,14 +71,6 @@
   --chart-4: #d65a55;
   --chart-5: #c58fd1;
   --radius: 0.625rem;
-  --sidebar: #1d171f;
-  --sidebar-foreground: #f2eae2;
-  --sidebar-primary: #e8b04b;
-  --sidebar-primary-foreground: #3a2606;
-  --sidebar-accent: #322835;
-  --sidebar-accent-foreground: #f2eae2;
-  --sidebar-border: #463a49;
-  --sidebar-ring: #e8b04b;
 }
 
 @layer base {

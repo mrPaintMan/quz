@@ -8,10 +8,9 @@ import { Label } from "@/components/ui/label";
 type LoginFormProps = {
   // Resolves to whether the passphrase was accepted.
   onSubmit: (passphrase: string) => Promise<boolean>;
-  notice?: string;
 };
 
-export function LoginForm({ onSubmit, notice }: LoginFormProps) {
+export function LoginForm({ onSubmit }: LoginFormProps) {
   const [passphrase, setPassphrase] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -31,7 +30,6 @@ export function LoginForm({ onSubmit, notice }: LoginFormProps) {
     <main className="flex min-h-svh items-center justify-center px-4">
       <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4 rounded-xl border bg-card p-6">
         <h1 className="text-2xl font-semibold">Quz för domare</h1>
-        {notice && <p className="text-sm text-muted-foreground">{notice}</p>}
         <div className="flex flex-col gap-2">
           <Label htmlFor="passphrase">Lösenord</Label>
           <Input
