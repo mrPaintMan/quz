@@ -7,7 +7,8 @@ const controller = { setView: vi.fn(), setRadius: vi.fn(), destroy: vi.fn() };
 const createBorderMap = vi.fn<(...args: [unknown, HTMLElement, unknown, BorderMapOptions]) => typeof controller>(() => controller);
 
 vi.mock("leaflet", () => ({ default: { leaflet: true } }));
-vi.mock("@/features/shared/map/loadBorderShapes", () => ({ loadBorderShapes: () => Promise.resolve("shapes") }));
+const loadBorderShapes = vi.fn(() => Promise.resolve("shapes"));
+vi.mock("@/features/shared/map/loadBorderShapes", () => ({ loadBorderShapes: () => loadBorderShapes() }));
 vi.mock("@/features/shared/map/createBorderMap", () => ({
   createBorderMap: (...args: [unknown, HTMLElement, unknown, BorderMapOptions]) => createBorderMap(...args),
 }));
@@ -49,6 +50,13 @@ describe("BorderMap", () => {
     rerender(<BorderMap label="Karta" view={next} radiusMeters={80_000} onViewChange={onViewChange} />);
     expect(controller.setView).toHaveBeenLastCalledWith(next);
     expect(controller.setRadius).toHaveBeenLastCalledWith(80_000);
+  });
+
+  it("says so when the borders can't be loaded", async () => {
+    loadBorderShapes.mockReturnValueOnce(Promise.reject(new Error("offline")));
+    renderMap();
+    expect(await screen.findByRole("alert")).toHaveTextContent("Kartan kunde inte laddas. Ladda om sidan.");
+    expect(createBorderMap).not.toHaveBeenCalled();
   });
 
   it("removes the map when it leaves the page", async () => {

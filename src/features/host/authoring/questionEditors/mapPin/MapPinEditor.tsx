@@ -4,8 +4,13 @@ import { useState } from "react";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 import { BorderMap } from "@/features/shared/map/BorderMap";
+import { isSameView } from "@/features/shared/map/isSameView";
+import type { Coordinates } from "@/features/shared/map/mapView";
 
 const METERS_PER_KM = 1000;
+
+const isPlaced = (target: Coordinates | null): target is Coordinates =>
+  target !== null && Number.isFinite(target.lat) && Number.isFinite(target.lng);
 
 // The hosts set the answer the way the deltagarna give theirs: by moving the map under a fixed pin.
 export function MapPinEditor({ content, onChange }: QuestionEditorProps<"mapPin">) {
@@ -14,6 +19,8 @@ export function MapPinEditor({ content, onChange }: QuestionEditorProps<"mapPin"
   const target = content.target ?? { lat: Number.NaN, lng: Number.NaN };
   const setTarget = (next: { lat: number; lng: number }) =>
     onChange({ ...content, target: Number.isNaN(next.lat) && Number.isNaN(next.lng) ? null : next });
+  const placedTarget = isPlaced(content.target) ? content.target : null;
+  const answerView = { center: placedTarget ?? content.initialView.center, zoom: answerZoom };
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,11 +32,12 @@ export function MapPinEditor({ content, onChange }: QuestionEditorProps<"mapPin"
         </p>
         <BorderMap
           label="Karta för rätt svar"
-          view={{ center: content.target ?? content.initialView.center, zoom: answerZoom }}
-          radiusMeters={content.radiusMeters}
+          view={answerView}
+          radiusMeters={placedTarget ? content.radiusMeters : null}
           onViewChange={(view) => {
             setAnswerZoom(view.zoom);
-            onChange({ ...content, target: view.center });
+            // Zooming alone keeps the pin where it was, so it neither moves nor places the answer.
+            if (!isSameView(view, { ...answerView, zoom: view.zoom })) onChange({ ...content, target: view.center });
           }}
           className="h-96 w-full"
         />

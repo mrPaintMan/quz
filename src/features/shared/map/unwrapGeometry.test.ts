@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { unwrapGeometry, unwrapLine } from "./unwrapLongitudes";
+import { unwrapGeometry } from "./unwrapGeometry";
 
-describe("unwrapLine", () => {
+const unwrapLine = (coordinates: number[][]) => {
+  const geometry = unwrapGeometry({ type: "LineString", coordinates });
+  return geometry.type === "LineString" ? geometry.coordinates : null;
+};
+
+describe("unwrapGeometry on a line", () => {
   it("leaves a line that never crosses the 180° meridian alone", () => {
     expect(unwrapLine([[10, 50], [20, 55]])).toEqual([[10, 50], [20, 55]]);
   });

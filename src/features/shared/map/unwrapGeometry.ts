@@ -7,7 +7,7 @@ const SOUTH_POLE = -90;
 // The world data joins shapes across the 180° meridian, so a coast can jump from 179° to
 // -179°. Leaflet would draw that jump as a line across the whole world; shifting the rest
 // of the line by 360° keeps the shape in one piece (it then reaches past 180°).
-export function unwrapLine(line: Position[]): Position[] {
+function unwrapLine(line: Position[]): Position[] {
   const unwrapped: Position[] = [];
   for (const [lng, lat] of line) {
     const previous = unwrapped.at(-1)?.[0] ?? lng;

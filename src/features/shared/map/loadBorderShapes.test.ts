@@ -1,5 +1,5 @@
 import type { GeometryCollection, Topology } from "topojson-specification";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { loadBorderShapes, toBorderShapes } from "./loadBorderShapes";
 
 // Two squares side by side sharing the middle arc (1), the way TopoJSON stores neighbours.
@@ -36,5 +36,21 @@ describe("loadBorderShapes", () => {
     const first = loadBorderShapes();
     expect(loadBorderShapes()).toBe(first);
     expect((await first).land.features.length).toBeGreaterThan(200);
+  });
+});
+
+describe("loadBorderShapes after a failed load", () => {
+  it("tries again on the next call", async () => {
+    vi.resetModules();
+    vi.doMock("world-atlas/countries-50m.json", () => {
+      throw new Error("offline");
+    });
+    const { loadBorderShapes: load } = await import("./loadBorderShapes");
+    const failed = load();
+    await expect(failed).rejects.toThrow();
+    const retry = load();
+    expect(retry).not.toBe(failed);
+    await retry.catch(() => undefined);
+    vi.doUnmock("world-atlas/countries-50m.json");
   });
 });

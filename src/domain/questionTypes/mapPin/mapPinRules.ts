@@ -8,11 +8,11 @@ type Coordinates = MapPinContent["initialView"]["center"];
 
 const SWEDEN = { lat: 62, lng: 15 };
 
-const MIN_ZOOM = 0;
-const MAX_ZOOM = 20;
+// Past zoom 10 the borders-only map (D27) gets too coarse to be useful.
+export const MAP_ZOOM = { min: 1, max: 10 };
 
 function isValidZoom(zoom: number): boolean {
-  return zoom >= MIN_ZOOM && zoom <= MAX_ZOOM;
+  return zoom >= MAP_ZOOM.min && zoom <= MAP_ZOOM.max;
 }
 
 function isOnEarth({ lat, lng }: Coordinates): boolean {
@@ -34,6 +34,6 @@ export const mapPinRules: QuestionTypeRules<MapPinContent> = {
     ...problemIfNotPositive(content.radiusMeters, "Radien måste vara större än 0."),
     ...problemIfNotPositive(content.points),
     ...problemIf(!isOnEarth(content.initialView.center), "Välj var kartan ska börja."),
-    ...problemIf(!isValidZoom(content.initialView.zoom), `Välj en zoomnivå mellan ${MIN_ZOOM} och ${MAX_ZOOM}.`),
+    ...problemIf(!isValidZoom(content.initialView.zoom), `Välj en zoomnivå mellan ${MAP_ZOOM.min} och ${MAP_ZOOM.max}.`),
   ],
 };

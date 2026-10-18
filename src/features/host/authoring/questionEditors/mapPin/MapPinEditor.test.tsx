@@ -17,6 +17,9 @@ vi.mock("@/features/shared/map/BorderMap", () => ({
       <button type="button" onClick={() => onViewChange(kiruna)}>
         Flytta till Kiruna
       </button>
+      <button type="button" onClick={() => onViewChange({ ...view, zoom: view.zoom + 1 })}>
+        Zooma in
+      </button>
     </div>
   ),
 }));
@@ -35,7 +38,7 @@ const startMap = () => screen.getByRole("group", { name: "Karta för mobilens st
 describe("MapPinEditor", () => {
   it("starts the answer map at the phone's starting view until the answer is placed", () => {
     render(<MapPinEditor content={content} onChange={vi.fn()} />);
-    expect(answerMap()).toHaveTextContent("62/15/4/50000");
+    expect(answerMap()).toHaveTextContent("62/15/4/ingen radie");
     expect(startMap()).toHaveTextContent("62/15/4/ingen radie");
   });
 
@@ -48,6 +51,19 @@ describe("MapPinEditor", () => {
     rerender(<MapPinEditor content={{ ...content, target: kiruna.center }} onChange={onChange} />);
     expect(answerMap()).toHaveTextContent("67.85/20.23/7/50000");
     expect(screen.getByLabelText("Latitud")).toHaveValue("67,85");
+  });
+
+  it("places no answer when the map is only zoomed", async () => {
+    const onChange = vi.fn();
+    render(<MapPinEditor content={content} onChange={onChange} />);
+    await userEvent.click(screen.getAllByRole("button", { name: "Zooma in" })[0]);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(answerMap()).toHaveTextContent("62/15/5/ingen radie");
+  });
+
+  it("keeps the answer map at the starting view while a coordinate is half-typed", () => {
+    render(<MapPinEditor content={{ ...content, target: { lat: 67, lng: Number.NaN } }} onChange={vi.fn()} />);
+    expect(answerMap()).toHaveTextContent("62/15/4/ingen radie");
   });
 
   it("sets the phone's starting view from its own map", async () => {

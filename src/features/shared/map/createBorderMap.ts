@@ -1,4 +1,5 @@
 import type * as Leaflet from "leaflet";
+import { MAP_ZOOM } from "@/domain/questionTypes/mapPin/mapPinRules";
 import type { BorderShapes } from "@/features/shared/map/loadBorderShapes";
 import { isSameView } from "@/features/shared/map/isSameView";
 import type { MapView } from "@/features/shared/map/mapView";
@@ -8,7 +9,7 @@ type LeafletModule = typeof Leaflet;
 export type BorderMapOptions = {
   view: MapView;
   radiusMeters: number | null;
-  // Only moves made by the user: dragging, zooming, the keyboard.
+  // Only moves made by the user (dragging, zooming, the keyboard) that change the view.
   onUserMove: (view: MapView) => void;
 };
 
@@ -27,9 +28,6 @@ const mapColors = {
   radius: "#e8b04b",
 };
 
-// Past this zoom the 1:50m borders look too coarse to be useful.
-const MAX_ZOOM = 10;
-const MIN_ZOOM = 1;
 // Five decimals is about a metre.
 const roundCoordinate = (value: number) => Math.round(value * 1e5) / 1e5;
 
@@ -58,8 +56,8 @@ export function createBorderMap(
   const map = L.map(element, {
     center: [view.center.lat, view.center.lng],
     zoom: view.zoom,
-    minZoom: MIN_ZOOM,
-    maxZoom: MAX_ZOOM,
+    minZoom: MAP_ZOOM.min,
+    maxZoom: MAP_ZOOM.max,
     zoomSnap: 0.25,
     // Zoom around the pin, so zooming never changes what it points at. The scroll wheel
     // stays with the page, which would otherwise get stuck on a big map.
@@ -92,21 +90,24 @@ export function createBorderMap(
   };
   setRadius(radiusMeters);
 
-  // Without animation Leaflet fires its move events inside setView, so the flag
-  // tells our own moves apart from the user's.
-  let movingByCode = false;
+  // Leaflet also fires "moveend" for our own setView and when the page is resized, so
+  // only a view that differs from the last one known counts as the user's move.
+  let lastView = readView(map);
   map.on("move", () => circle?.setLatLng(map.getCenter()));
   map.on("moveend", () => {
-    if (!movingByCode) onUserMove(readView(map));
+    const view = readView(map);
+    if (isSameView(view, lastView)) return;
+    lastView = view;
+    onUserMove(view);
   });
 
   return {
     setView: (next) => {
       // Half-typed coordinates (NaN) would make Leaflet throw; the map waits for a whole place.
       if (!isWholeView(next) || isSameView(next, readView(map))) return;
-      movingByCode = true;
+      lastView = next;
       map.setView([next.center.lat, next.center.lng], next.zoom, { animate: false });
-      movingByCode = false;
+      lastView = readView(map);
     },
     setRadius,
     destroy: () => map.remove(),

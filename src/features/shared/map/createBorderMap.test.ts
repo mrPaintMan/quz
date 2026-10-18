@@ -66,6 +66,12 @@ describe("createBorderMap", () => {
     expect(onUserMove).toHaveBeenCalledWith({ center: { lat: 67.85556, lng: -159.87654 }, zoom: 7 });
   });
 
+  it("ignores a move that leaves the view as it was, such as a resized page", () => {
+    const { userMovesTo, onUserMove } = setUp();
+    userMovesTo(59.33, 18.07, 5);
+    expect(onUserMove).not.toHaveBeenCalled();
+  });
+
   it("moves to a new view from outside without reporting it as the user's", () => {
     const { controller, map, onUserMove } = setUp();
     controller.setView({ center: { lat: 67.85, lng: 20.23 }, zoom: 6 });

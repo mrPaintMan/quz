@@ -1,7 +1,7 @@
 "use client";
 
 import "leaflet/dist/leaflet.css";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CenterPin } from "@/features/shared/map/CenterPin";
 import { createBorderMap, type BorderMapController } from "@/features/shared/map/createBorderMap";
 import { loadBorderShapes } from "@/features/shared/map/loadBorderShapes";
@@ -21,6 +21,7 @@ type BorderMapProps = {
 export function BorderMap({ label, view, onViewChange, radiusMeters = null, className }: BorderMapProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<BorderMapController | null>(null);
+  const [failed, setFailed] = useState(false);
   const latest = useRef({ view, radiusMeters, onViewChange });
   useEffect(() => {
     latest.current = { view, radiusMeters, onViewChange };
@@ -37,6 +38,8 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, clas
         radiusMeters: startRadius,
         onUserMove: (next) => latest.current.onViewChange(next),
       });
+    }).catch(() => {
+      if (!cancelled) setFailed(true);
     });
     return () => {
       cancelled = true;
@@ -57,6 +60,11 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, clas
     <div role="group" aria-label={label} className={`relative overflow-hidden rounded-xl border border-border bg-background ${className ?? ""}`}>
       <div ref={elementRef} data-testid="border-map" className="absolute inset-0" />
       <CenterPin />
+      {failed && (
+        <p role="alert" className="absolute inset-x-0 top-4 z-[600] text-center text-sm text-destructive">
+          Kartan kunde inte laddas. Ladda om sidan.
+        </p>
+      )}
     </div>
   );
 }
