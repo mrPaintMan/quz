@@ -111,3 +111,19 @@
     background-size: 1rem;
   }
 }
+/* Leaflet's zoom buttons, in the dark theme. Outside a layer, like leaflet.css, so these win. */
+.leaflet-container .leaflet-bar {
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+.leaflet-container .leaflet-bar a,
+.leaflet-container .leaflet-bar a:hover {
+  background-color: var(--card);
+  color: var(--foreground);
+  border-bottom-color: var(--border);
+}
+.leaflet-container .leaflet-bar a.leaflet-disabled {
+  background-color: var(--card);
+  color: var(--muted-foreground);
+  opacity: 0.5;
+}
