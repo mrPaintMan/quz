@@ -6,7 +6,7 @@ describe("problemIfNotPositive", () => {
     expect(problemIfNotPositive(2)).toEqual([]);
   });
 
-  it.each([0, Number.NaN])("reports the points message for %s by default", (value) => {
+  it.each([0, null])("reports the points message for %s by default", (value) => {
     expect(problemIfNotPositive(value)).toEqual([{ message: "Poängen måste vara större än 0." }]);
   });
 

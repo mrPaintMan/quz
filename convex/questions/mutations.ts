@@ -7,6 +7,7 @@ import type { QueryCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
+import { numberOrNull } from "./numberOrNull";
 import { questionContent, type QuestionType } from "./questionContent";
 import { MAX_QUESTIONS_PER_ROUND, questionsOfRound } from "./questionsOfRound";
 import { questionType } from "./questionType";
@@ -53,7 +54,7 @@ export const updateQuestion = hostMutation({
   args: {
     questionId: v.id("questions"),
     prompt: v.optional(v.string()),
-    timeLimitSeconds: v.optional(v.union(v.number(), v.null())),
+    timeLimitSeconds: v.optional(numberOrNull),
     hostNotes: v.optional(v.string()),
     content: v.optional(questionContent),
   },

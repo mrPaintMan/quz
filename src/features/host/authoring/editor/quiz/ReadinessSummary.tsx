@@ -1,8 +1,6 @@
-import type { Doc } from "@convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
-
-type RoundWithQuestions = Doc<"rounds"> & { questions: Doc<"questions">[] };
+import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 function summarize(rounds: RoundWithQuestions[]): string {
   const questions = rounds.flatMap((round) => round.questions);

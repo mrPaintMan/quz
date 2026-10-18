@@ -1,9 +1,13 @@
 import { defineTable } from "convex/server";
-import { v } from "convex/values";
+import { v, type Infer } from "convex/values";
+import { numberOrNull } from "./numberOrNull";
 import { questionContent } from "./questionContent";
 
+export const mediaKind = v.union(v.literal("image"), v.literal("audio"), v.literal("video"));
+export type MediaKind = Infer<typeof mediaKind>;
+
 const media = v.object({
-  kind: v.union(v.literal("image"), v.literal("audio"), v.literal("video")),
+  kind: mediaKind,
   storageId: v.id("_storage"),
 });
 
@@ -14,7 +18,7 @@ export const questionsTable = defineTable({
   roundId: v.id("rounds"),
   position: v.number(),
   prompt: v.string(),
-  timeLimitSeconds: v.union(v.number(), v.null()),
+  timeLimitSeconds: numberOrNull,
   media: v.union(media, v.null()),
   hostNotes: v.string(),
   content: questionContent,

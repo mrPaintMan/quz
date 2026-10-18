@@ -9,6 +9,6 @@ describe("formatPoints", () => {
 
   it("shows a dash when there is no fixed maximum", () => {
     expect(formatPoints(null)).toBe("– p");
-    expect(formatPoints(Number.NaN)).toBe("– p");
+    expect(formatPoints(null)).toBe("– p");
   });
 });

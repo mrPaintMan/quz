@@ -1,18 +1,19 @@
 import { v } from "convex/values";
+import { numberOrNull } from "../../numberOrNull";
 
 const tierScoring = v.object({
   mode: v.literal("tiers"),
-  tiers: v.array(v.object({ within: v.number(), points: v.number() })),
+  tiers: v.array(v.object({ within: numberOrNull, points: numberOrNull })),
 });
 
 const closestScoring = v.object({
   mode: v.literal("closest"),
-  pointsByRank: v.array(v.number()),
+  pointsByRank: v.array(numberOrNull),
 });
 
 export const numberContent = v.object({
   type: v.literal("number"),
   // null until the hosts enter the correct answer.
-  answer: v.union(v.number(), v.null()),
+  answer: numberOrNull,
   scoring: v.union(tierScoring, closestScoring),
 });

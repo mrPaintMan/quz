@@ -41,8 +41,8 @@ describe("numberRules", () => {
     expect(messagesFor(closestContent)).toEqual([]);
   });
 
-  it("asks for the correct answer when it is not a finite number", () => {
-    expect(messagesFor({ ...tiersContent, answer: Number.NaN })).toEqual(["Ange det rätta svaret."]);
+  it("asks for the correct answer when it is missing", () => {
+    expect(messagesFor({ ...tiersContent, answer: null })).toEqual(["Ange det rätta svaret."]);
   });
 
   it("asks for at least one tier", () => {
@@ -93,7 +93,7 @@ describe("numberRules", () => {
   it("asks for a missing margin and points without reporting a collision", () => {
     const scoring = {
       mode: "tiers" as const,
-      tiers: [{ within: 1, points: 3 }, { within: Number.NaN, points: Number.NaN }],
+      tiers: [{ within: 1, points: 3 }, { within: null, points: null }],
     };
     expect(messagesFor({ ...tiersContent, scoring })).toEqual([
       "Poängnivå 2: ange en marginal.",

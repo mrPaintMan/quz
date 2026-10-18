@@ -12,11 +12,11 @@ import { NumberField } from "@/features/host/authoring/questionEditors/fields/Nu
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
+import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { MoveToRoundSelect } from "./MoveToRoundSelect";
 import { ProblemList } from "./ProblemList";
 import { QuestionTypeSelect } from "./QuestionTypeSelect";
-import { useAutosave } from "./useAutosave";
 
 // moveQuestion clamps the index, so this places a moved question last in its new round.
 const AT_END_OF_ROUND = Number.MAX_SAFE_INTEGER;
@@ -51,19 +51,13 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
     hostNotes: question.hostNotes,
     content: question.content,
   }));
-  const [saveFailed, setSaveFailed] = useState(false);
   const updateQuestion = useHostMutation(api.questions.mutations.updateQuestion);
   const changeQuestionType = useHostMutation(api.questions.mutations.changeQuestionType);
   const deleteQuestion = useHostMutation(api.questions.mutations.deleteQuestion);
   const moveQuestion = useHostMutation(api.questions.mutations.moveQuestion);
   const run = useRunAction();
 
-  useAutosave(draft, (changes) => {
-    updateQuestion({ questionId: question._id, ...changes }).then(
-      () => setSaveFailed(false),
-      () => setSaveFailed(true),
-    );
-  });
+  const { saveFailed } = useAutosave(draft, (changes) => updateQuestion({ questionId: question._id, ...changes }));
   const edit = (changes: Partial<Draft>) => setDraft((current) => ({ ...current, ...changes }));
 
   return (
@@ -87,7 +81,7 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
       <NumberField
         label="Tidsgräns i sekunder (tomt = ingen)"
         value={draft.timeLimitSeconds}
-        onChange={(seconds) => edit({ timeLimitSeconds: Number.isNaN(seconds) ? null : seconds })}
+        onChange={(timeLimitSeconds) => edit({ timeLimitSeconds })}
         className="max-w-72"
       />
       <QuestionMediaField question={question} />

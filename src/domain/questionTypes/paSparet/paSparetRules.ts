@@ -4,14 +4,19 @@ import { isBlank } from "@/domain/questionTypes/isBlank";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
+import { highestPoints } from "@/domain/questionTypes/highestPoints";
 
 type PaSparetContent = ContentOf<"paSparet">;
 type Clue = PaSparetContent["clues"][number];
 
 const CLUE_POINTS = [10, 8, 6, 4, 2];
 
+// Clues with missing points are reported on their own, not as out of order.
 function isDescending(clues: Clue[]): boolean {
-  return clues.every((clue, index) => index === 0 || clue.points < clues[index - 1].points);
+  return clues.every((clue, index) => {
+    const previous = clues[index - 1]?.points ?? null;
+    return clue.points === null || previous === null || clue.points < previous;
+  });
 }
 
 export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
@@ -22,7 +27,7 @@ export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
     fuzzy: true,
     clues: CLUE_POINTS.map((points) => ({ text: "", points })),
   }),
-  maxPoints: (content) => Math.max(0, ...content.clues.map((clue) => clue.points)),
+  maxPoints: (content) => highestPoints(content.clues.map((clue) => clue.points)),
   findProblems: (content) => [
     ...problemIf(!hasSpelling(content.acceptedAnswers), "Ange resmålet."),
     ...problemIf(content.clues.length === 0, "Lägg till minst en ledtråd."),

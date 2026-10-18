@@ -2,21 +2,20 @@
 
 import { useId, useState } from "react";
 import { api } from "@convex/_generated/api";
-import type { Doc, Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
 import type { QuestionType } from "@convex/questions/questionContent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
-import { useAutosave } from "@/features/host/authoring/editor/question/useAutosave";
-import { SortableList } from "@/features/host/authoring/questionEditors/fields/SortableList";
+import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
+import { SortableList } from "@/features/host/authoring/shared/SortableList";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { QuestionListItem } from "./QuestionListItem";
-
-type RoundWithQuestions = Doc<"rounds"> & { questions: Doc<"questions">[] };
+import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 type RoundPanelProps = {
   round: RoundWithQuestions;
@@ -31,17 +30,11 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
   const [title, setTitle] = useState(round.title);
   const types = allowedQuestionTypes(round.kind);
   const [newType, setNewType] = useState<QuestionType>(types[0]);
-  const [renameFailed, setRenameFailed] = useState(false);
   const renameRound = useHostMutation(api.rounds.mutations.renameRound);
   const deleteRound = useHostMutation(api.rounds.mutations.deleteRound);
   const addQuestion = useHostMutation(api.questions.mutations.addQuestion);
   const moveQuestion = useHostMutation(api.questions.mutations.moveQuestion);
-  useAutosave(title, (value) => {
-    renameRound({ roundId: round._id, title: value }).then(
-      () => setRenameFailed(false),
-      () => setRenameFailed(true),
-    );
-  });
+  const { saveFailed: renameFailed } = useAutosave(title, (value) => renameRound({ roundId: round._id, title: value }));
 
   const run = useRunAction();
   const move = (questionId: Id<"questions">, toIndex: number) =>

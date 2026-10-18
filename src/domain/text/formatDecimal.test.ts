@@ -9,6 +9,6 @@ describe("formatDecimal", () => {
 
   it("shows an empty input for a missing value", () => {
     expect(formatDecimal(null)).toBe("");
-    expect(formatDecimal(Number.NaN)).toBe("");
+    expect(formatDecimal(null)).toBe("");
   });
 });

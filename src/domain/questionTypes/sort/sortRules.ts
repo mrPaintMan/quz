@@ -4,6 +4,7 @@ import { isBlank } from "@/domain/questionTypes/isBlank";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
+import { multiplyPoints } from "@/domain/questionTypes/multiplyPoints";
 
 type SortContent = ContentOf<"sort">;
 
@@ -18,7 +19,7 @@ export const sortRules: QuestionTypeRules<SortContent> = {
     lastLabel: "",
     pointsPerItem: 1,
   }),
-  maxPoints: (content) => content.items.length * content.pointsPerItem,
+  maxPoints: (content) => multiplyPoints(content.items.length, content.pointsPerItem),
   findProblems: (content) => [
     ...problemIf(content.items.length < MIN_ITEMS, `Lägg till minst ${MIN_ITEMS} alternativ att sortera.`),
     ...content.items.flatMap((item, index) => problemIf(isBlank(item), `Alternativ ${index + 1} saknar text.`)),

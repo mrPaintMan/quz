@@ -22,6 +22,7 @@ Live web app for the yearly Christmas quiz (Julquiz): a shared TV screen, one ph
 - Ask the user about product choices. Decide implementation details yourself and record notable ones in `docs/decisions.md`.
 - Each new coding topic gets its own branch and pull request to `main`; never commit straight to `main`, which deploys to production (quz.nu). Merge only when the user says so.
 - Before every push, run the code-review skill once on the commits about to be pushed (`origin/main..HEAD`). Fix real bugs in existing code and cheap fixes; skip findings about future code or pure style (YAGNI) with a reason; ask the user about product decisions. Fixes are verified by the checks, not reviewed again, unless a fix grows bigger than the original change.
+- The review covers the whole diff, test files included: test code is held to the same standard as production code. Never truncate the diff; read a large one in parts, pick an effort level that fits the size of the change, and report what the review covered.
 - At the end of a work chunk, update `docs/plan.md` (tick items, set "Next up") and add any new decision to `docs/decisions.md`.
 
 ## Stack
@@ -39,7 +40,7 @@ Next.js (App Router) + TypeScript, Convex (database, real-time, file storage), T
 ## Conventions
 
 - Convex functions and schema live in `convex/`. Scores are computed from `answers` and `adjustments`, never stored twice.
-- Question shapes are Convex validators in `convex/questions/content.ts`, the single source of truth; `src/domain` imports only their types.
+- Question shapes are Convex validators in `convex/questions/types/<type>/`, combined in `convex/questions/questionContent.ts`, the single source of truth; `src/domain` imports only their types.
 - File structure and dependency rules: see `docs/engineering.md`.
 - Host-only Convex functions check the host passphrase (env var).
 

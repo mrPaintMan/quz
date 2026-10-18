@@ -8,7 +8,7 @@ describe("parseDecimal", () => {
     expect(parseDecimal(" 0,5 ")).toBe(0.5);
   });
 
-  it.each(["", "  ", "tre"])("gives NaN for %j", (text) => {
-    expect(parseDecimal(text)).toBeNaN();
+  it.each(["", "  ", "tre", "Infinity"])("gives null for %j", (text) => {
+    expect(parseDecimal(text)).toBeNull();
   });
 });

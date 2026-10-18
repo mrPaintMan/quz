@@ -32,7 +32,19 @@ Not done yet: these steps need your Convex and Vercel logins. Do them once, then
 2. Create the real quiz (for example "Julquiz 2026"), add a round and a question, reload: it should still be there.
 3. Log in from your fiancé's device too.
 
-## 4. Domain
+## 4. One-off data migrations
+
+Run after the change that needs them reaches each deployment, then delete the function in a later PR.
+
+- `migrateMissingNumbers` (D28) replaces `NaN` in saved questions with `null`. Run it until it answers `isDone: true`, passing the `continueCursor` from each answer as the next `cursor`:
+
+  ```bash
+  npx convex run --prod questions/migrateMissingNumbers:migrateMissingNumbers '{"paginationOpts":{"numItems":100,"cursor":null}}'
+  ```
+
+  Without `--prod` it runs on the dev deployment.
+
+## 5. Domain
 
 `quz.nu` is bought at Loopia, with its nameservers pointing at Cloudflare. In Cloudflare, the records Vercel shows under **Project → Settings → Domains** are set to **DNS only** (grey cloud): proxying through Cloudflare breaks Vercel's certificate. `www.quz.nu` redirects to `quz.nu`, the primary domain.
 

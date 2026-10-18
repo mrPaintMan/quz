@@ -37,8 +37,8 @@ describe("findQuestionProblems", () => {
     ).toEqual(["Maxpoängen måste vara större än 0."]);
   });
 
-  it("flags a time limit that is not a number", () => {
-    expect(messagesFor({ prompt: "Rita en tomte", timeLimitSeconds: Number.NaN, content: drawing })).toEqual([
+  it("flags a time limit below 0", () => {
+    expect(messagesFor({ prompt: "Rita en tomte", timeLimitSeconds: -5, content: drawing })).toEqual([
       "Tidsgränsen måste vara större än 0.",
     ]);
   });

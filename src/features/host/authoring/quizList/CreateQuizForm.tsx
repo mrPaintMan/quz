@@ -16,12 +16,14 @@ export function CreateQuizForm({ defaultYear, onCreate }: CreateQuizFormProps) {
   const [year, setYear] = useState(String(defaultYear));
   const [pending, setPending] = useState(false);
   const parsedYear = parseDecimal(year);
-  const canCreate = title.trim() !== "" && Number.isInteger(parsedYear) && !pending;
+  const validYear = parsedYear !== null && Number.isInteger(parsedYear) ? parsedYear : null;
+  const canCreate = title.trim() !== "" && validYear !== null && !pending;
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault();
+    if (validYear === null) return;
     setPending(true);
-    await onCreate({ title: title.trim(), year: parsedYear }).finally(() => setPending(false));
+    await onCreate({ title: title.trim(), year: validYear }).finally(() => setPending(false));
   }
 
   return (

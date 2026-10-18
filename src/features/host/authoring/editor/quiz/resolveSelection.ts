@@ -1,6 +1,5 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
-
-type RoundWithQuestions = Doc<"rounds"> & { questions: Doc<"questions">[] };
+import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 // The selected round and question, falling back to the first ones when nothing is
 // selected yet or the selection was deleted (possibly by the other host).

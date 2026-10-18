@@ -6,8 +6,8 @@ import { moveItem } from "@/domain/ordering/moveItem";
 import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
-import { SortableList } from "@/features/host/authoring/questionEditors/fields/SortableList";
+import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { SortableList } from "@/features/host/authoring/shared/SortableList";
 import { TextField } from "@/features/host/authoring/questionEditors/fields/TextField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 

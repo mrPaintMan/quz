@@ -3,7 +3,7 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
-import type { MediaKind } from "./mediaKindOf";
+import type { MediaKind } from "@convex/questions/table";
 
 type MediaPreviewProps = { storageId: Id<"_storage">; kind: MediaKind; alt: string };
 

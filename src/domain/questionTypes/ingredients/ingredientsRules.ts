@@ -5,6 +5,7 @@ import { normalizeForComparison } from "@/domain/questionTypes/normalizeForCompa
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
+import { multiplyPoints } from "@/domain/questionTypes/multiplyPoints";
 
 type IngredientsContent = ContentOf<"ingredients">;
 
@@ -22,7 +23,7 @@ export const ingredientsRules: QuestionTypeRules<IngredientsContent> = {
     pointsPerItem: 1,
     fuzzy: true,
   }),
-  maxPoints: (content) => content.items.length * content.pointsPerItem,
+  maxPoints: (content) => multiplyPoints(content.items.length, content.pointsPerItem),
   findProblems: (content) => [
     ...problemIf(content.items.length === 0, "Lägg till minst en ingrediens."),
     ...content.items.flatMap((item, index) =>

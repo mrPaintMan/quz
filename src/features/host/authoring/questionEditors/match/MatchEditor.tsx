@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
+import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 export function MatchEditor({ content, onChange }: QuestionEditorProps<"match">) {

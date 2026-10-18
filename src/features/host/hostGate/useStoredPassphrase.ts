@@ -5,7 +5,7 @@ import {
   clearStoredPassphrase,
   readStoredPassphrase,
   storePassphrase,
-} from "@/features/host/shared/hostPassphraseStorage";
+} from "./hostPassphraseStorage";
 
 const listeners = new Set<() => void>();
 

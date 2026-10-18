@@ -3,6 +3,7 @@ import { hasSpelling } from "@/domain/questionTypes/hasSpelling";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
+import { multiplyPoints } from "@/domain/questionTypes/multiplyPoints";
 
 type FreeTextContent = ContentOf<"freeText">;
 
@@ -27,7 +28,7 @@ export const freeTextRules: QuestionTypeRules<FreeTextContent> = {
     pointsPerField: 1,
     fuzzy: true,
   }),
-  maxPoints: (content) => content.fields.length * content.pointsPerField,
+  maxPoints: (content) => multiplyPoints(content.fields.length, content.pointsPerField),
   findProblems: (content) => [
     ...problemIf(
       content.fields.length < MIN_FIELDS || content.fields.length > MAX_FIELDS,

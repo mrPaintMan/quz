@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { ContentOf } from "@convex/questions/questionContent";
-import type { MapView } from "@/features/shared/map/mapView";
+import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 import { MapPinEditor } from "./MapPinEditor";
 
 type FakeMapProps = { label: string; view: MapView; radiusMeters?: number | null; onViewChange: (view: MapView) => void };
@@ -61,8 +61,12 @@ describe("MapPinEditor", () => {
     expect(answerMap()).toHaveTextContent("62/15/5/ingen radie");
   });
 
-  it("keeps the answer map at the starting view while a coordinate is half-typed", () => {
-    render(<MapPinEditor content={{ ...content, target: { lat: 67, lng: Number.NaN } }} onChange={vi.fn()} />);
+  it("keeps the answer map at the starting view while a coordinate is half-typed", async () => {
+    const onChange = vi.fn();
+    render(<MapPinEditor content={content} onChange={onChange} />);
+    await userEvent.type(screen.getByLabelText("Latitud"), "67");
+    expect(onChange.mock.lastCall?.[0].target).toBeNull();
+    expect(screen.getByLabelText("Latitud")).toHaveValue("67");
     expect(answerMap()).toHaveTextContent("62/15/4/ingen radie");
   });
 
@@ -77,16 +81,16 @@ describe("MapPinEditor", () => {
     const onChange = vi.fn();
     render(<MapPinEditor content={content} onChange={onChange} />);
     await userEvent.type(screen.getByLabelText("Latitud"), "67");
-    expect(onChange.mock.lastCall?.[0].target.lat).toBe(67);
     await userEvent.type(screen.getByLabelText("Longitud"), "20");
-    expect(onChange.mock.lastCall?.[0].target.lng).toBe(20);
+    expect(onChange.mock.lastCall?.[0].target).toEqual({ lat: 67, lng: 20 });
   });
 
-  it("clears the answer when both coordinates are emptied", async () => {
+  it("clears the answer when a coordinate is emptied, keeping the other", async () => {
     const onChange = vi.fn();
-    render(<MapPinEditor content={{ ...content, target: { lat: 1, lng: Number.NaN } }} onChange={onChange} />);
+    render(<MapPinEditor content={{ ...content, target: { lat: 1, lng: 2 } }} onChange={onChange} />);
     await userEvent.clear(screen.getByLabelText("Latitud"));
     expect(onChange.mock.lastCall?.[0].target).toBeNull();
+    expect(screen.getByLabelText("Longitud")).toHaveValue("2");
   });
 
   it("edits the radius in kilometres and the points", async () => {

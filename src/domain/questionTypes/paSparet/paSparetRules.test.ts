@@ -2,7 +2,7 @@ import type { ContentOf } from "@convex/questions/questionContent";
 import { describe, expect, it } from "vitest";
 import { paSparetRules } from "./paSparetRules";
 
-const clue = (points: number, text = `Ledtråd värd ${points}`) => ({ text, points });
+const clue = (points: number | null, text = `Ledtråd värd ${points}`) => ({ text, points });
 
 const validContent: ContentOf<"paSparet"> = {
   type: "paSparet",
@@ -40,6 +40,12 @@ describe("paSparetRules", () => {
       "Ledtråd 1 saknar text.",
       "Ledtråd 2: poängen måste vara större än 0.",
     ]);
+  });
+
+  it("reports a clue without points on its own, not as out of order", () => {
+    const content = { ...validContent, clues: [clue(10), clue(null, "Ledtråd utan poäng"), clue(6)] };
+    expect(messagesFor(content)).toEqual(["Ledtråd 2: poängen måste vara större än 0."]);
+    expect(paSparetRules.maxPoints(content)).toBeNull();
   });
 
   it("flags clues that do not get cheaper", () => {

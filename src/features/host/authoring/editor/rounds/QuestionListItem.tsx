@@ -5,7 +5,7 @@ import type { Doc } from "@convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
 import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
 import { maxQuestionPoints } from "@/domain/questions/maxQuestionPoints";
-import { RowButtons, type RowPosition } from "@/features/host/authoring/questionEditors/fields/RowButtons";
+import { RowButtons, type RowPosition } from "@/features/host/authoring/shared/RowButtons";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { formatPoints } from "./formatPoints";
 

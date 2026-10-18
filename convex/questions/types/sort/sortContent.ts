@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { numberOrNull } from "../../numberOrNull";
 
 export const sortContent = v.object({
   type: v.literal("sort"),
@@ -6,5 +7,5 @@ export const sortContent = v.object({
   items: v.array(v.string()),
   firstLabel: v.string(),
   lastLabel: v.string(),
-  pointsPerItem: v.number(),
+  pointsPerItem: numberOrNull,
 });

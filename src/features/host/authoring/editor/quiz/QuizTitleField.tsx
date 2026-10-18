@@ -4,19 +4,13 @@ import { useState } from "react";
 import { api } from "@convex/_generated/api";
 import type { Doc } from "@convex/_generated/dataModel";
 import { Input } from "@/components/ui/input";
-import { useAutosave } from "@/features/host/authoring/editor/question/useAutosave";
+import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 
 export function QuizTitleField({ quiz }: { quiz: Doc<"quizzes"> }) {
   const [title, setTitle] = useState(quiz.title);
-  const [saveFailed, setSaveFailed] = useState(false);
   const updateQuiz = useHostMutation(api.quizzes.mutations.updateQuiz);
-  useAutosave(title, (value) => {
-    updateQuiz({ quizId: quiz._id, title: value }).then(
-      () => setSaveFailed(false),
-      () => setSaveFailed(true),
-    );
-  });
+  const { saveFailed } = useAutosave(title, (value) => updateQuiz({ quizId: quiz._id, title: value }));
   return (
     <>
       <Input
