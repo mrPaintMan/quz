@@ -6,7 +6,7 @@ import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { LinesField } from "@/features/host/authoring/questionEditors/fields/LinesField";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
+import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
 import { SwitchField } from "@/features/host/authoring/questionEditors/fields/SwitchField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
@@ -41,7 +41,7 @@ export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSpa
           </div>
         ))}
       </fieldset>
-      <Button variant="outline" className="self-start" onClick={() => onChange({ ...content, clues: [...clues, { text: "", points: Number.NaN }] })}>
+      <Button variant="outline" className="self-start" onClick={() => onChange({ ...content, clues: [...clues, { text: "", points: null }] })}>
         Lägg till ledtråd
       </Button>
       <SwitchField

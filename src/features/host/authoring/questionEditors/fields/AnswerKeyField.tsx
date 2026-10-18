@@ -1,10 +1,11 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatAnswerKey } from "@/domain/text/formatAnswerKey";
 import { parseAnswerKey, type AnswerKeyItem } from "@/domain/text/parseAnswerKey";
+import { useDraftText } from "./useDraftText";
 
 type AnswerKeyFieldProps = {
   label: string;
@@ -15,13 +16,7 @@ type AnswerKeyFieldProps = {
 // A bulk-pasteable answer key: one item per line, spellings separated by "/" (D19).
 export function AnswerKeyField({ label, value, onChange }: AnswerKeyFieldProps) {
   const id = useId();
-  const [text, setText] = useState(() => formatAnswerKey(value));
-  const [shownValue, setShownValue] = useState(formatAnswerKey(value));
-  // Typed text is kept while it means the same as the value; a change from outside replaces it.
-  if (formatAnswerKey(value) !== shownValue) {
-    setShownValue(formatAnswerKey(value));
-    if (formatAnswerKey(parseAnswerKey(text)) !== formatAnswerKey(value)) setText(formatAnswerKey(value));
-  }
+  const [text, setText] = useDraftText(value, formatAnswerKey, parseAnswerKey);
   return (
     <div className="flex flex-col gap-1.5">
       <Label htmlFor={id}>{label}</Label>

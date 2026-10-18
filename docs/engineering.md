@@ -40,6 +40,7 @@ Exceptions to the test rules are made on purpose and listed here with a reason. 
 | `**/*.setup.ts` | Shared test setup, only runs inside tests |
 | `src/app/**/page.tsx` | Thin routes: read params, render one feature component |
 | `convex/schema.ts`, `convex/**/table.ts` | Declarations only; exercised by every Convex function test |
+| `convex/questions/**/*Content.ts`, `convex/questions/acceptedItem.ts`, `convex/questions/numberOrNull.ts` | Question shape validators, declarations only; exercised by every question function test |
 
 ## File structure
 
@@ -78,9 +79,10 @@ src/
       hostGate/                  # login screen and passphrase check
       authoring/
         quizList/                # /admin: list, create, copy, delete
-        editor/quiz|rounds|question/  # /admin/quizzes/[quizId]: the three editor columns and autosave
+        editor/quiz|rounds|question/  # /admin/quizzes/[quizId]: the three editor columns
         questionEditors/<type>/  # editor for one type, plus registry.ts (label + editor per type)
         questionEditors/fields/  # form fields shared by the type editors
+        shared/                  # used by several authoring features: autosave, sortable lists, row buttons
         media/                   # uploads and previews
       liveControl/  scoreHistory/
     player/                      # teams on their phones
@@ -112,12 +114,12 @@ Every code file has its `*.test.ts(x)` next to it (left out of the tree above).
 
 ### Where does it go?
 
-- A rule about how many points an answer gets → `src/domain/grading/`.
-- A new field on questions → `convex/questions/table.ts` (or `content.ts` for type-specific content).
+- A rule about how many points an answer gets → that type's folder in `src/domain/questionTypes/<type>/`, next to its rules.
+- A new field on questions → `convex/questions/table.ts` (or `convex/questions/types/<type>/<type>Content.ts` for type-specific content).
 - A form the hosts use to write questions → `src/features/host/authoring/`.
 - Something both the TV and the phones display → `src/features/shared/`.
 - A new URL → `src/app/…/page.tsx` that renders a feature component.
 - A host-only Convex function → `hostQuery` / `hostMutation` from `convex/auth/hostFunctions.ts`, never plain `query` / `mutation`.
 - A host action triggered by a click (create, move, delete …) → wrap it in `useRunAction()` so a failure is shown to the host. Autosaves show their own failure next to the field.
-- A field that can be "not filled in yet" → `null` in the validator (for example `correctIndex`), never a fake default that hides the editor's warning.
+- A field that can be "not filled in yet" → `null` in the validator (for example `correctIndex`), never a fake default that hides the editor's warning. Every number the hosts type uses `numberOrNull`; an empty field is `null`, never `NaN` (D28).
 - A new question type → a `<type>/` folder and a registry entry in each layer: validators in `convex/questions/types/`, grader in `src/domain/questionTypes/`, editor, answer input, TV display. The compiler lists what is missing.

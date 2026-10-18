@@ -50,7 +50,7 @@ describe("mapPinRules", () => {
   });
 
   it("flags a radius that is not a number", () => {
-    expect(messagesFor({ ...validContent, radiusMeters: Number.NaN })).toEqual(["Radien måste vara större än 0."]);
+    expect(messagesFor({ ...validContent, radiusMeters: null })).toEqual(["Radien måste vara större än 0."]);
   });
 
   it("asks for the target until it is placed", () => {

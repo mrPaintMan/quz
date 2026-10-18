@@ -96,10 +96,9 @@ describe("createBorderMap", () => {
     expect(map.setView).toHaveBeenLastCalledWith([59.33, 18.08], 5, { animate: false });
   });
 
-  it("stays put for the view it already shows or a half-typed one", () => {
+  it("stays put for the view it already shows", () => {
     const { controller, map } = setUp();
     controller.setView(stockholm);
-    controller.setView({ center: { lat: 67, lng: Number.NaN }, zoom: 5 });
     expect(map.setView).not.toHaveBeenCalled();
   });
 
@@ -115,7 +114,7 @@ describe("createBorderMap", () => {
     controller.setRadius(80_000);
     expect(circle.remove).toHaveBeenCalledTimes(1);
     expect(fake.circle).toHaveBeenLastCalledWith(expect.anything(), expect.objectContaining({ radius: 80_000 }));
-    controller.setRadius(Number.NaN);
+    controller.setRadius(0);
     controller.setRadius(null);
     expect(fake.circle).toHaveBeenCalledTimes(2);
   });

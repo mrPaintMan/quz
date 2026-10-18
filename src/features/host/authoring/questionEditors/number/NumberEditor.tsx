@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
+import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 const DEFAULT_RANK_POINTS = [3, 2, 1];
@@ -17,7 +17,7 @@ export function NumberEditor({ content, onChange }: QuestionEditorProps<"number"
       <NumberField
         label="Rätt svar"
         value={content.answer}
-        onChange={(answer) => onChange({ ...content, answer: Number.isNaN(answer) ? null : answer })}
+        onChange={(answer) => onChange({ ...content, answer })}
         className="max-w-60"
       />
       <fieldset className="flex flex-wrap gap-2" aria-label="Poängsättning">
@@ -62,7 +62,7 @@ export function NumberEditor({ content, onChange }: QuestionEditorProps<"number"
           <Button
             variant="outline"
             className="self-start"
-            onClick={() => onChange({ ...content, scoring: { ...scoring, tiers: [...scoring.tiers, { within: Number.NaN, points: Number.NaN }] } })}
+            onClick={() => onChange({ ...content, scoring: { ...scoring, tiers: [...scoring.tiers, { within: null, points: null }] } })}
           >
             Lägg till nivå
           </Button>
@@ -89,7 +89,7 @@ export function NumberEditor({ content, onChange }: QuestionEditorProps<"number"
           <Button
             variant="outline"
             className="self-start"
-            onClick={() => onChange({ ...content, scoring: { ...scoring, pointsByRank: [...scoring.pointsByRank, Number.NaN] } })}
+            onClick={() => onChange({ ...content, scoring: { ...scoring, pointsByRank: [...scoring.pointsByRank, null] } })}
           >
             Lägg till placering
           </Button>

@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { hostMutation } from "../auth/hostFunctions";
+import { mediaKind } from "../questions/table";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
 
@@ -11,7 +12,7 @@ export const generateUploadUrl = hostMutation({
 export const setQuestionMedia = hostMutation({
   args: {
     questionId: v.id("questions"),
-    kind: v.union(v.literal("image"), v.literal("audio"), v.literal("video")),
+    kind: mediaKind,
     storageId: v.id("_storage"),
   },
   handler: async (ctx, { questionId, kind, storageId }) => {

@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { CenterPin } from "@/features/shared/map/CenterPin";
 import { createBorderMap, type BorderMapController } from "@/features/shared/map/createBorderMap";
 import { loadBorderShapes } from "@/features/shared/map/loadBorderShapes";
-import type { MapView } from "@/features/shared/map/mapView";
+import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 
 type BorderMapProps = {
   label: string;

@@ -39,7 +39,7 @@ Next.js (App Router) + TypeScript, Convex (database, real-time, file storage), T
 ## Conventions
 
 - Convex functions and schema live in `convex/`. Scores are computed from `answers` and `adjustments`, never stored twice.
-- Question shapes are Convex validators in `convex/questions/content.ts`, the single source of truth; `src/domain` imports only their types.
+- Question shapes are Convex validators in `convex/questions/types/<type>/`, combined in `convex/questions/questionContent.ts`, the single source of truth; `src/domain` imports only their types.
 - File structure and dependency rules: see `docs/engineering.md`.
 - Host-only Convex functions check the host passphrase (env var).
 

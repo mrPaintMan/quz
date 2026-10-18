@@ -1,14 +1,13 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import type { Doc, Id } from "@convex/_generated/dataModel";
-import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
-import { SortableList } from "@/features/host/authoring/questionEditors/fields/SortableList";
+import type { Id } from "@convex/_generated/dataModel";
+import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { SortableList } from "@/features/host/authoring/shared/SortableList";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { AddRoundForm } from "./AddRoundForm";
-
-type RoundWithQuestions = Doc<"rounds"> & { questions: Doc<"questions">[] };
+import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 type RoundListProps = {
   quizId: Id<"quizzes">;

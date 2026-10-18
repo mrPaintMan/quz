@@ -14,11 +14,11 @@ describe("NumberField", () => {
     expect(onChange).toHaveBeenLastCalledWith(1.5);
   });
 
-  it("reports an emptied field as NaN", async () => {
+  it("reports an emptied field as null", async () => {
     const onChange = vi.fn();
     render(<NumberField label="Poäng" value={2} onChange={onChange} />);
     await userEvent.clear(screen.getByLabelText("Poäng"));
-    expect(onChange).toHaveBeenLastCalledWith(Number.NaN);
+    expect(onChange).toHaveBeenLastCalledWith(null);
   });
 
   it("starts empty for a missing value", () => {

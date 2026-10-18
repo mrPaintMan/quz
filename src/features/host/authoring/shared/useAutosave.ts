@@ -1,16 +1,21 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Saves value delayMs after it stops changing, and saves any pending change on unmount,
-// so switching question or page never loses typing.
-export function useAutosave<T>(value: T, save: (value: T) => void, delayMs = 600): void {
+// so switching question or page never loses typing. saveFailed stays true until a save works.
+export function useAutosave<T>(value: T, save: (value: T) => Promise<unknown>, delayMs = 600): { saveFailed: boolean } {
+  const [saveFailed, setSaveFailed] = useState(false);
   const saveRef = useRef(save);
   const pending = useRef<{ value: T } | null>(null);
   const isFirstValue = useRef(true);
 
   useEffect(() => {
-    saveRef.current = save;
+    saveRef.current = (next) =>
+      save(next).then(
+        () => setSaveFailed(false),
+        () => setSaveFailed(true),
+      );
   });
 
   useEffect(() => {
@@ -21,7 +26,7 @@ export function useAutosave<T>(value: T, save: (value: T) => void, delayMs = 600
     pending.current = { value };
     const timer = setTimeout(() => {
       pending.current = null;
-      saveRef.current(value);
+      void saveRef.current(value);
     }, delayMs);
     return () => clearTimeout(timer);
   }, [value, delayMs]);
@@ -29,9 +34,11 @@ export function useAutosave<T>(value: T, save: (value: T) => void, delayMs = 600
   useEffect(
     () => () => {
       if (pending.current) {
-        saveRef.current(pending.current.value);
+        void saveRef.current(pending.current.value);
       }
     },
     [],
   );
+
+  return { saveFailed };
 }

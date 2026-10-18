@@ -7,14 +7,14 @@ describe("useAutosave", () => {
   afterEach(() => vi.useRealTimers());
 
   it("does not save the initial value", () => {
-    const save = vi.fn();
+    const save = vi.fn().mockResolvedValue(undefined);
     renderHook(() => useAutosave("a", save, 500));
     act(() => vi.advanceTimersByTime(1000));
     expect(save).not.toHaveBeenCalled();
   });
 
   it("saves once, after the value has stopped changing", () => {
-    const save = vi.fn();
+    const save = vi.fn().mockResolvedValue(undefined);
     const { rerender } = renderHook(({ value }) => useAutosave(value, save, 500), { initialProps: { value: "a" } });
     rerender({ value: "ab" });
     act(() => vi.advanceTimersByTime(300));
@@ -26,7 +26,7 @@ describe("useAutosave", () => {
   });
 
   it("saves a pending change when unmounted", () => {
-    const save = vi.fn();
+    const save = vi.fn().mockResolvedValue(undefined);
     const { rerender, unmount } = renderHook(({ value }) => useAutosave(value, save, 500), { initialProps: { value: "a" } });
     rerender({ value: "ab" });
     unmount();
@@ -34,11 +34,22 @@ describe("useAutosave", () => {
   });
 
   it("does not save again on unmount when nothing is pending", () => {
-    const save = vi.fn();
+    const save = vi.fn().mockResolvedValue(undefined);
     const { rerender, unmount } = renderHook(({ value }) => useAutosave(value, save, 500), { initialProps: { value: "a" } });
     rerender({ value: "ab" });
     act(() => vi.advanceTimersByTime(500));
     unmount();
     expect(save).toHaveBeenCalledOnce();
+  });
+
+  it("reports a failed save until a later save works", async () => {
+    const save = vi.fn().mockRejectedValueOnce(new Error("offline")).mockResolvedValue(undefined);
+    const { result, rerender } = renderHook(({ value }) => useAutosave(value, save, 500), { initialProps: { value: "a" } });
+    rerender({ value: "ab" });
+    await act(() => vi.advanceTimersByTimeAsync(500));
+    expect(result.current.saveFailed).toBe(true);
+    rerender({ value: "abc" });
+    await act(() => vi.advanceTimersByTimeAsync(500));
+    expect(result.current.saveFailed).toBe(false);
   });
 });

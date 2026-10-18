@@ -1,4 +1,4 @@
-import type { MapView } from "@/features/shared/map/mapView";
+import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 
 // About a metre: closer than this counts as the same place, so rounding never moves the map.
 const COORDINATE_TOLERANCE = 1e-5;

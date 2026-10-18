@@ -2,7 +2,7 @@ import type * as Leaflet from "leaflet";
 import { MAP_ZOOM } from "@/domain/questionTypes/mapPin/mapPinRules";
 import type { BorderShapes } from "@/features/shared/map/loadBorderShapes";
 import { isSameView } from "@/features/shared/map/isSameView";
-import type { MapView } from "@/features/shared/map/mapView";
+import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 
 type LeafletModule = typeof Leaflet;
 
@@ -30,10 +30,6 @@ const mapColors = {
 
 // Five decimals is about a metre.
 const roundCoordinate = (value: number) => Math.round(value * 1e5) / 1e5;
-
-function isWholeView({ center, zoom }: MapView): boolean {
-  return [center.lat, center.lng, zoom].every(Number.isFinite);
-}
 
 function readView(map: Leaflet.Map): MapView {
   // The world repeats sideways; wrap() keeps longitudes within ±180.
@@ -114,8 +110,7 @@ export function createBorderMap(
 
   return {
     setView: (next) => {
-      // Half-typed coordinates (NaN) would make Leaflet throw; the map waits for a whole place.
-      if (isWholeView(next) && !isSameView(next, lastView)) showView(next);
+      if (!isSameView(next, lastView)) showView(next);
     },
     setRadius,
     destroy: () => map.remove(),

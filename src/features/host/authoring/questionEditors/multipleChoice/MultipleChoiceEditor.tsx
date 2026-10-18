@@ -9,7 +9,7 @@ import { FileButton } from "@/features/host/authoring/media/FileButton";
 import { MediaPreview } from "@/features/host/authoring/media/MediaPreview";
 import { useUploadFile } from "@/features/host/authoring/media/useUploadFile";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/questionEditors/fields/RowButtons";
+import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 const MAX_OPTIONS = 6;

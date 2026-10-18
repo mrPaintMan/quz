@@ -6,7 +6,7 @@ describe("isPositive", () => {
     expect(isPositive(0.5)).toBe(true);
   });
 
-  it.each([0, -1, Number.NaN])("is false for %s", (value) => {
+  it.each([0, -1, null, Number.NaN])("is false for %s", (value) => {
     expect(isPositive(value)).toBe(false);
   });
 });

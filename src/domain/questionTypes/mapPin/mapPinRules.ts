@@ -1,10 +1,10 @@
 import type { ContentOf } from "@convex/questions/questionContent";
+import type { Coordinates } from "@convex/questions/types/mapPin/mapPinContent";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
 
 type MapPinContent = ContentOf<"mapPin">;
-type Coordinates = MapPinContent["initialView"]["center"];
 
 const SWEDEN = { lat: 62, lng: 15 };
 

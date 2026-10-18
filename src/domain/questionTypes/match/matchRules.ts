@@ -4,6 +4,7 @@ import { isBlank } from "@/domain/questionTypes/isBlank";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
+import { multiplyPoints } from "@/domain/questionTypes/multiplyPoints";
 
 type MatchContent = ContentOf<"match">;
 
@@ -19,7 +20,7 @@ export const matchRules: QuestionTypeRules<MatchContent> = {
     ],
     pointsPerPair: 1,
   }),
-  maxPoints: (content) => content.pairs.length * content.pointsPerPair,
+  maxPoints: (content) => multiplyPoints(content.pairs.length, content.pointsPerPair),
   findProblems: (content) => [
     ...problemIf(content.pairs.length < MIN_PAIRS, `Lägg till minst ${MIN_PAIRS} par.`),
     ...content.pairs.flatMap((pair, index) =>

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { numberOrNull } from "../../numberOrNull";
 
 export const freeTextContent = v.object({
   type: v.literal("freeText"),
@@ -8,6 +9,6 @@ export const freeTextContent = v.object({
       acceptedAnswers: v.array(v.string()),
     }),
   ),
-  pointsPerField: v.number(),
+  pointsPerField: numberOrNull,
   fuzzy: v.boolean(),
 });
