@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `copy-authoring` PR, both hosts try writing in production, then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `m1-ui-polish` PR (drag and drop, dropdown arrows), both hosts try writing in production, then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -40,7 +40,7 @@ Merge the `copy-authoring` PR, both hosts try writing in production, then M2 (th
 - [ ] Both hosts can log in and save from their own devices (to confirm)
 
 ### Follow-ups from M1
-- [ ] Drag and drop for reordering (up/down buttons for now, D25)
+- [x] Drag and drop for reordering, beside the arrows (D26)
 - [ ] Clickable map for placing the map pin target (typed coordinates for now)
 - [x] Moving a question to another round from the editor
 - [x] Show a message when creating, copying, deleting or moving fails (`ActionErrorProvider`)
@@ -85,3 +85,4 @@ Merge the `copy-authoring` PR, both hosts try writing in production, then M2 (th
 - 2026-10-17: Admin UI on branch `m1`: login, quiz list, three-column editor with all 11 question type editors, autosave and media upload (D23–D25). Production deploy steps written in `docs/deploy.md`.
 - 2026-10-17: Error messages for failed host actions, a session error boundary, and moving a question to another round (M1 follow-ups).
 - 2026-10-17: Production live at quz.nu (Convex prod in Ireland). Copy pass on the authoring flow: omgång, deltagarna, alternativ (`docs/copy.md`); one branch and PR per topic.
+- 2026-10-18: M1 polish: drag and drop for rounds, questions and Sortera items, disabled arrows at list ends, dropdown chevron inset (D26).

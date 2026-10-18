@@ -18,7 +18,8 @@ describe("SortEditor", () => {
     render(<SortEditor content={content} onChange={onChange} />);
     await userEvent.type(screen.getByLabelText("Alternativ 2"), "!");
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Kalle Anka", "Ensam hemma!"]);
-    expect(screen.queryByRole("button", { name: "Flytta upp alternativ 1" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Flytta upp alternativ 1" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Dra för att flytta alternativ 1" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Flytta ned alternativ 1" }));
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Ensam hemma", "Kalle Anka"]);
     await userEvent.click(screen.getByRole("button", { name: "Flytta upp alternativ 2" }));

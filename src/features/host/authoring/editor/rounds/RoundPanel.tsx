@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
 import { useAutosave } from "@/features/host/authoring/editor/question/useAutosave";
+import { SortableList } from "@/features/host/authoring/questionEditors/fields/SortableList";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
@@ -58,19 +59,26 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           </p>
         )}
       </div>
-      <ol className="flex flex-col gap-2">
-        {round.questions.map((question, index) => (
+      <SortableList
+        items={round.questions}
+        getId={(question) => question._id}
+        nameOf={(index) => `fråga ${index + 1}`}
+        onMove={(fromIndex, toIndex) => move(round.questions[fromIndex]._id, toIndex)}
+        className="flex flex-col gap-2"
+        itemClassName={(question) =>
+          `flex items-start gap-1 rounded-xl border p-1 ${question._id === selectedQuestionId ? "border-primary bg-secondary" : "bg-card"}`
+        }
+        renderItem={(question, { index, dragHandle, position }) => (
           <QuestionListItem
-            key={question._id}
             question={question}
             number={index + 1}
             selected={question._id === selectedQuestionId}
             onSelect={() => onSelectQuestion(question._id)}
-            onMoveUp={index > 0 ? () => move(question._id, index - 1) : undefined}
-            onMoveDown={index < round.questions.length - 1 ? () => move(question._id, index + 1) : undefined}
+            dragHandle={dragHandle}
+            position={position}
           />
-        ))}
-      </ol>
+        )}
+      />
       {round.questions.length === 0 && (
         <p className="text-sm text-muted-foreground">{isPaSparet ? "Inga resor ännu." : "Inga frågor ännu."}</p>
       )}
@@ -82,7 +90,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
               id={typeId}
               value={newType}
               onChange={(event) => setNewType(event.target.value as QuestionType)}
-              className="h-9 rounded-lg border bg-background px-3 text-sm"
+              className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
             >
               {types.map((type) => (
                 <option key={type} value={type}>

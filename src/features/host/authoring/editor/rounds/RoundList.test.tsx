@@ -50,7 +50,8 @@ describe("RoundList", () => {
 
   it("moves rounds up and down", async () => {
     render(<RoundList quizId={"quiz" as Id<"quizzes">} rounds={rounds} selectedRoundId={null} onSelectRound={vi.fn()} />);
-    expect(screen.queryByRole("button", { name: "Flytta upp omgång 1" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Flytta upp omgång 1" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Dra för att flytta omgång 1" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Flytta upp omgång 3" }));
     await userEvent.click(screen.getByRole("button", { name: "Flytta ned omgång 1" }));
     expect(calls).toEqual([

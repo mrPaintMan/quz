@@ -13,12 +13,19 @@ describe("RowButtons", () => {
   });
 
   it("moves the row up and down", async () => {
-    const onMoveUp = vi.fn();
-    const onMoveDown = vi.fn();
-    render(<RowButtons name="sak 1" onMoveUp={onMoveUp} onMoveDown={onMoveDown} />);
-    await userEvent.click(screen.getByRole("button", { name: "Flytta upp sak 1" }));
-    await userEvent.click(screen.getByRole("button", { name: "Flytta ned sak 1" }));
-    expect(onMoveUp).toHaveBeenCalledOnce();
-    expect(onMoveDown).toHaveBeenCalledOnce();
+    const onMove = vi.fn();
+    render(<RowButtons name="sak 2" position={{ index: 1, count: 3, onMove }} />);
+    await userEvent.click(screen.getByRole("button", { name: "Flytta upp sak 2" }));
+    await userEvent.click(screen.getByRole("button", { name: "Flytta ned sak 2" }));
+    expect(onMove.mock.calls).toEqual([[0], [2]]);
+  });
+
+  it("disables the arrow that would move the first or last row out of the list", () => {
+    const { rerender } = render(<RowButtons name="sak 1" position={{ index: 0, count: 2, onMove: vi.fn() }} />);
+    expect(screen.getByRole("button", { name: "Flytta upp sak 1" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Flytta ned sak 1" })).toBeEnabled();
+    rerender(<RowButtons name="sak 2" position={{ index: 1, count: 2, onMove: vi.fn() }} />);
+    expect(screen.getByRole("button", { name: "Flytta upp sak 2" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Flytta ned sak 2" })).toBeDisabled();
   });
 });

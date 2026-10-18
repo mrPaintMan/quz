@@ -78,6 +78,9 @@ shadcn/ui (Base UI preset) with the wireframes' palette as tokens in `globals.cs
 **D25 · Editor interaction choices for M1** (2026-10-17)
 Reordering rounds, questions, items and pairs uses up/down buttons rather than drag and drop: accessible by keyboard, works on phones, and needs no extra library; drag can come later. Map pin targets are typed as coordinates with a link to check them in OpenStreetMap; a clickable map comes with the map question's phone view (M4). Question editors keep a local draft and autosave 600 ms after typing stops (and on leaving the question); the whole draft is saved, so two hosts on the same question get last-save-wins. Type pickers use native `<select>` for simplicity and testability.
 
+**D26 · Drag and drop beside the arrows** (2026-10-18)
+Reopens D25's "buttons rather than drag": rounds, a round's questions and Sortera items can now also be dragged by a grip handle, within their own list only (another round stays the "Flytta till omgång" picker). Library: `@dnd-kit` (core, sortable, utilities), which handles mouse, touch and keyboard dragging and lets us give screen readers Swedish texts. Only the handle starts a drag, so buttons and inputs in a row keep working. The arrows stay; at the ends they are disabled instead of hidden, so rows don't shift. `SortableList` shows the new order until the move settles, because a Convex mutation resolves only after the client has the updated query, so rows don't jump back; on failure they return to the server's order. Sortera items keep their position as id, since they are plain strings that may repeat. Dropdowns draw their own chevron, inset like the text.
+
 ## Open questions
 
 - [ ] Convex document store fine, or Postgres (Supabase) with a keep-alive? (Leaning Convex, see D2.)
