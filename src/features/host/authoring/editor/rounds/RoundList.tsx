@@ -36,7 +36,7 @@ export function RoundList({ quizId, rounds, selectedRoundId, onSelectRound }: Ro
         items={rounds}
         getId={(round) => round._id}
         nameOf={(index) => `omgång ${index + 1}`}
-        onMove={(fromIndex, toIndex) => move(rounds[fromIndex]._id, toIndex)}
+        onMove={(round, _fromIndex, toIndex) => move(round._id, toIndex)}
         className="flex flex-col gap-1"
         itemClassName={(round) =>
           `flex items-center gap-1 rounded-lg border pl-1 ${round._id === selectedRoundId ? "border-primary bg-secondary" : "border-transparent bg-background"}`

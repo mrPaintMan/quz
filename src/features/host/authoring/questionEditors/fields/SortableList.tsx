@@ -16,8 +16,9 @@ type SortableListProps<T> = {
   getId: (item: T, index: number) => string;
   // What row `index` is called in labels, such as "omgång 2".
   nameOf: (index: number) => string;
+  // Gets the item itself, since indices into the caller's list go stale while an earlier move is pending.
   // May return a promise (a server move); the new order shows until it settles.
-  onMove: (fromIndex: number, toIndex: number) => unknown;
+  onMove: (item: T, fromIndex: number, toIndex: number) => unknown;
   className?: string;
   itemClassName?: (item: T, index: number) => string;
   renderItem: (item: T, parts: SortableItemParts) => ReactNode;
@@ -36,7 +37,7 @@ export function SortableList<T>({ items, getId, nameOf, onMove, className, itemC
     setPendingOrder(moveItem(shown, fromIndex, toIndex));
     movesInFlight.current += 1;
     try {
-      await onMove(fromIndex, toIndex);
+      await onMove(shown[fromIndex], fromIndex, toIndex);
     } finally {
       movesInFlight.current -= 1;
       if (movesInFlight.current === 0) setPendingOrder(null);

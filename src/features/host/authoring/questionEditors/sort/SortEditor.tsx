@@ -28,7 +28,7 @@ export function SortEditor({ content, onChange }: QuestionEditorProps<"sort">) {
           // Items are plain strings that may repeat, so the position is their id, as in the React keys before.
           getId={(_, index) => String(index)}
           nameOf={(index) => `alternativ ${index + 1}`}
-          onMove={(fromIndex, toIndex) => setItems(moveItem(items, fromIndex, toIndex))}
+          onMove={(_item, fromIndex, toIndex) => setItems(moveItem(items, fromIndex, toIndex))}
           className="flex flex-col gap-2"
           itemClassName={() => "flex items-center gap-2 rounded-lg bg-background"}
           renderItem={(item, { index, dragHandle, position }) => (

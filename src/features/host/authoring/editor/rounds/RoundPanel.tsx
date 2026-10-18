@@ -63,7 +63,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
         items={round.questions}
         getId={(question) => question._id}
         nameOf={(index) => `fråga ${index + 1}`}
-        onMove={(fromIndex, toIndex) => move(round.questions[fromIndex]._id, toIndex)}
+        onMove={(question, _fromIndex, toIndex) => move(question._id, toIndex)}
         className="flex flex-col gap-2"
         itemClassName={(question) =>
           `flex items-start gap-1 rounded-xl border p-1 ${question._id === selectedQuestionId ? "border-primary bg-secondary" : "bg-card"}`

@@ -4,7 +4,7 @@ import { describe, expect, it, vi } from "vitest";
 import { RowButtons } from "./RowButtons";
 import { SortableList } from "./SortableList";
 
-function renderList(items: string[], onMove: (fromIndex: number, toIndex: number) => unknown) {
+function renderList(items: string[], onMove: (item: string, fromIndex: number, toIndex: number) => unknown) {
   return render(
     <SortableList
       items={items}
@@ -37,7 +37,7 @@ describe("SortableList", () => {
     const onMove = vi.fn();
     renderList(["A", "B", "C"], onMove);
     await userEvent.click(screen.getByRole("button", { name: "Flytta ned sak 1" }));
-    expect(onMove).toHaveBeenCalledWith(0, 1);
+    expect(onMove).toHaveBeenCalledWith("A", 0, 1);
   });
 
   it("shows the new order until a slow move settles, then follows the items again", async () => {
@@ -49,5 +49,17 @@ describe("SortableList", () => {
     await act(async () => settle());
     // The items prop never changed here, as when the server refuses the move.
     expect(shownOrder()).toEqual(["A", "B"]);
+  });
+
+  it("hands over the moved item itself, also for a second move while the first is pending", async () => {
+    const onMove = vi.fn(() => new Promise<void>(() => {}));
+    renderList(["A", "B", "C"], onMove);
+    await userEvent.click(screen.getByRole("button", { name: "Flytta ned sak 1" }));
+    // Shown order is now B, A, C; row 1 is B even though the items prop still starts with A.
+    await userEvent.click(screen.getByRole("button", { name: "Flytta ned sak 1" }));
+    expect(onMove.mock.calls).toEqual([
+      ["A", 0, 1],
+      ["B", 0, 1],
+    ]);
   });
 });
