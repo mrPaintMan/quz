@@ -156,20 +156,26 @@ describe("createBorderMap", () => {
 
   it("drops borders that arrive after the map zoomed back out", async () => {
     let finish = () => {};
-    const { fake, userMovesTo } = setUp(null, vi.fn(() => new Promise<typeof shapes>((resolve) => (finish = () => resolve(shapes)))));
+    const { fake, loadShapes, userMovesTo } = setUp(null, vi.fn(() => new Promise<typeof shapes>((resolve) => (finish = () => resolve(shapes)))));
     userMovesTo(59.33, 18.07, 7);
+    expect(loadShapes).toHaveBeenCalledWith("10m");
     userMovesTo(59.33, 18.07, 5);
     finish();
     await settle();
     expect(fake.geoJSON).toHaveBeenCalledTimes(2);
   });
 
-  it("keeps the old borders when the finer ones can't be loaded", async () => {
-    const { fake, layers, userMovesTo } = setUp(null, vi.fn(() => Promise.reject(new Error("offline"))));
+  it("keeps the old borders when the finer ones can't be loaded, and tries again on the next zoom", async () => {
+    const loadShapes = vi.fn<(detail: BorderDetail) => Promise<typeof shapes>>().mockRejectedValueOnce(new Error("offline")).mockResolvedValue(shapes);
+    const { fake, layers, userMovesTo } = setUp(null, loadShapes);
     userMovesTo(59.33, 18.07, 10);
     await settle();
     expect(fake.geoJSON).toHaveBeenCalledTimes(2);
     expect(layers[0].remove).not.toHaveBeenCalled();
+    userMovesTo(59.33, 18.07, 11);
+    await settle();
+    expect(loadShapes).toHaveBeenCalledTimes(2);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
   });
 
   it("draws nothing that arrives after the map was removed", async () => {
