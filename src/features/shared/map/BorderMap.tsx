@@ -31,10 +31,12 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, clas
   useEffect(() => {
     let cancelled = false;
     // Leaflet needs the browser's window, so it is loaded only once the page runs there.
-    const { view: startView, radiusMeters: startRadius } = latest.current;
-    Promise.all([import("leaflet"), loadBorderShapes(borderDetailForZoom(startView.zoom))]).then(([leaflet, shapes]) => {
+    const detail = borderDetailForZoom(latest.current.view.zoom);
+    Promise.all([import("leaflet"), loadBorderShapes(detail)]).then(([leaflet, shapes]) => {
       if (cancelled || !elementRef.current) return;
-      controllerRef.current = createBorderMap(leaflet.default ?? leaflet, elementRef.current, shapes, {
+      // The view may have changed while loading; the map swaps borders if its band did.
+      const { view: startView, radiusMeters: startRadius } = latest.current;
+      controllerRef.current = createBorderMap(leaflet.default ?? leaflet, elementRef.current, { detail, shapes }, {
         view: startView,
         radiusMeters: startRadius,
         onUserMove: (next) => latest.current.onViewChange(next),

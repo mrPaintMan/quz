@@ -56,7 +56,7 @@ function setUp(radiusMeters: number | null = null, loadShapes = vi.fn<(detail: B
   const leaflet = fakeLeaflet();
   const onUserMove = vi.fn();
   const element = document.createElement("div");
-  const controller = createBorderMap(leaflet.L, element, shapes, { view: stockholm, radiusMeters, onUserMove, loadShapes });
+  const controller = createBorderMap(leaflet.L, element, { detail: "50m", shapes }, { view: stockholm, radiusMeters, onUserMove, loadShapes });
   return { ...leaflet, element, controller, onUserMove, loadShapes };
 }
 
@@ -139,6 +139,13 @@ describe("createBorderMap", () => {
     expect(layers[0].remove).toHaveBeenCalled();
     expect(layers[1].remove).toHaveBeenCalled();
     expect(circle.bringToFront).toHaveBeenCalled();
+  });
+
+  it("loads the right borders straight away when the ones given don't suit the starting zoom", () => {
+    const leaflet = fakeLeaflet();
+    const loadShapes = vi.fn(() => Promise.resolve(shapes));
+    createBorderMap(leaflet.L, document.createElement("div"), { detail: "110m", shapes }, { view: stockholm, radiusMeters: null, onUserMove: vi.fn(), loadShapes });
+    expect(loadShapes).toHaveBeenCalledWith("50m");
   });
 
   it("keeps the borders it has while zooming within a band", () => {

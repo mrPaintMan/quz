@@ -30,11 +30,22 @@ describe("BorderMap", () => {
     expect(leaflet).toEqual({ leaflet: true });
     expect(element).toBe(screen.getByTestId("border-map"));
     expect(loadBorderShapes).toHaveBeenCalledWith("50m");
-    expect(shapes).toBe("shapes");
+    expect(shapes).toEqual({ detail: "50m", shapes: "shapes" });
     expect(options).toMatchObject({ view, radiusMeters: 50_000 });
     await options.loadShapes("10m");
     expect(loadBorderShapes).toHaveBeenLastCalledWith("10m");
     expect(screen.getByRole("group", { name: "Karta" })).toBeInTheDocument();
+  });
+
+  it("opens at the view it has once the borders have loaded, not the one it started with", async () => {
+    let finish = () => {};
+    loadBorderShapes.mockReturnValueOnce(new Promise((resolve) => (finish = () => resolve("shapes"))));
+    const { rerender, onViewChange } = renderMap();
+    const pasted = { center: { lat: 67.85, lng: 20.23 }, zoom: 9 };
+    rerender(<BorderMap label="Karta" view={pasted} radiusMeters={50_000} onViewChange={onViewChange} />);
+    finish();
+    await waitFor(() => expect(createBorderMap).toHaveBeenCalled());
+    expect(createBorderMap.mock.calls[0][3]).toMatchObject({ view: pasted });
   });
 
   it("passes the user's moves to the latest onViewChange", async () => {

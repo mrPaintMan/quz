@@ -16,6 +16,9 @@ export type BorderMapOptions = {
   loadShapes: (detail: BorderDetail) => Promise<BorderShapes>;
 };
 
+// Borders already loaded, with the detail they were loaded at.
+export type InitialBorders = { detail: BorderDetail; shapes: BorderShapes };
+
 export type BorderMapController = {
   setView: (view: MapView) => void;
   setRadius: (radiusMeters: number | null) => void;
@@ -51,8 +54,8 @@ function addBorders(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes): L
 export function createBorderMap(
   L: LeafletModule,
   element: HTMLElement,
-  // The borders for the starting zoom, so the map opens fully drawn.
-  shapes: BorderShapes,
+  // Drawn straight away, so the map never opens blank; swapped if they don't suit the zoom.
+  initialBorders: InitialBorders,
   { view, radiusMeters, onUserMove, loadShapes }: BorderMapOptions,
 ): BorderMapController {
   const map = L.map(element, {
@@ -74,8 +77,8 @@ export function createBorderMap(
   });
   element.style.background = mapColors.sea;
   L.control.zoom({ position: "topright", zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }).addTo(map);
-  let borderLayers = addBorders(L, map, shapes);
-  let shownDetail = borderDetailForZoom(view.zoom);
+  let borderLayers = addBorders(L, map, initialBorders.shapes);
+  let shownDetail = initialBorders.detail;
 
   let circle: Leaflet.Circle | null = null;
   const setRadius = (meters: number | null) => {
@@ -97,7 +100,7 @@ export function createBorderMap(
   // that fails keeps them, and the next zoom tries again. By the time a load finishes the map
   // may have zoomed into yet another band, or been removed, and then the result is dropped.
   let removed = false;
-  map.on("zoomend", () => {
+  const showDetailForZoom = () => {
     const wanted = borderDetailForZoom(map.getZoom());
     if (wanted === shownDetail) return;
     loadShapes(wanted).then((next) => {
@@ -108,7 +111,9 @@ export function createBorderMap(
       // The canvas paints in the order layers were added; keep the radius above the land.
       circle?.bringToFront();
     }, () => undefined);
-  });
+  };
+  map.on("zoomend", showDetailForZoom);
+  showDetailForZoom();
 
   // Leaflet also fires "moveend" for our own moves and when the page is resized; only a
   // move that changes the view and isn't ours counts as the user's. Leaflet pans in whole
