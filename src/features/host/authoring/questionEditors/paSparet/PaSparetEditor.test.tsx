@@ -30,4 +30,11 @@ describe("PaSparetEditor", () => {
     await userEvent.click(screen.getByRole("switch"));
     expect(onChange.mock.lastCall?.[0].fuzzy).toBe(false);
   });
+
+  it("saves five clues even when the trip has fewer", async () => {
+    const onChange = vi.fn();
+    render(<PaSparetEditor content={{ ...content, clues: ["Gruva"] }} onChange={onChange} />);
+    await userEvent.type(screen.getByLabelText("Ledtråd 4"), "N");
+    expect(onChange.mock.lastCall?.[0].clues).toEqual(["Gruva", "", "", "N", ""]);
+  });
 });

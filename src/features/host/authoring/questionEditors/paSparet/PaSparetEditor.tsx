@@ -1,14 +1,15 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { replaceAt } from "@/domain/ordering/replaceAt";
 import { PA_SPARET_CLUE_POINTS } from "@/domain/questionTypes/paSparet/paSparetRules";
 import { LinesField } from "@/features/host/authoring/questionEditors/fields/LinesField";
 import { SwitchField } from "@/features/host/authoring/questionEditors/fields/SwitchField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSparet">) {
-  const setClue = (index: number, text: string) => onChange({ ...content, clues: replaceAt(content.clues, index, text) });
+  // Always saves five clues, so a trip that somehow has fewer can still be completed here.
+  const setClue = (index: number, text: string) =>
+    onChange({ ...content, clues: PA_SPARET_CLUE_POINTS.map((_, position) => (position === index ? text : (content.clues[position] ?? ""))) });
 
   return (
     <div className="flex flex-col gap-4">
