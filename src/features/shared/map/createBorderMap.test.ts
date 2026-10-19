@@ -1,5 +1,6 @@
 import type * as Leaflet from "leaflet";
 import { describe, expect, it, vi } from "vitest";
+import type { BorderDetail } from "./borderDetailForZoom";
 import { createBorderMap } from "./createBorderMap";
 
 const shapes = {
@@ -8,16 +9,18 @@ const shapes = {
 };
 const stockholm = { center: { lat: 59.33, lng: 18.07 }, zoom: 5 };
 
-// Just enough of Leaflet to drive the map: moving it fires "move" and "moveend",
-// synchronously as Leaflet does without animation.
+// Just enough of Leaflet to drive the map: moving it fires "move" and "moveend", and
+// "zoomend" when the zoom changed, synchronously as Leaflet does without animation.
 function fakeLeaflet() {
   const handlers: Record<string, () => void> = {};
   let center = { lat: 0, lng: 0 };
   let zoom = 0;
   const moveTo = (lat: number, lng: number, nextZoom: number) => {
+    const zoomed = nextZoom !== zoom;
     center = { lat, lng };
     zoom = nextZoom;
     handlers.move?.();
+    if (zoomed) handlers.zoomend?.();
     handlers.moveend?.();
   };
   const map = {
@@ -28,7 +31,8 @@ function fakeLeaflet() {
     resize: () => handlers.resize?.(),
     remove: vi.fn(),
   };
-  const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn() };
+  const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn(), bringToFront: vi.fn() };
+  const layers: { remove: ReturnType<typeof vi.fn> }[] = [];
   const zoomControl = { addTo: vi.fn() };
   const L = {
     map: vi.fn((_element: HTMLElement, options: { center: [number, number]; zoom: number }) => {
@@ -38,19 +42,26 @@ function fakeLeaflet() {
     }),
     canvas: vi.fn(),
     control: { zoom: vi.fn(() => zoomControl) },
-    geoJSON: vi.fn(() => ({ addTo: vi.fn() })),
+    geoJSON: vi.fn(() => {
+      const layer = { addTo: () => layer, remove: vi.fn() };
+      layers.push(layer);
+      return layer;
+    }),
     circle: vi.fn(() => circle),
   };
-  return { L: L as unknown as typeof Leaflet, fake: L, map, circle, userMovesTo: moveTo };
+  return { L: L as unknown as typeof Leaflet, fake: L, map, circle, layers, userMovesTo: moveTo };
 }
 
-function setUp(radiusMeters: number | null = null) {
+function setUp(radiusMeters: number | null = null, loadShapes = vi.fn<(detail: BorderDetail) => Promise<typeof shapes>>(() => Promise.resolve(shapes))) {
   const leaflet = fakeLeaflet();
   const onUserMove = vi.fn();
   const element = document.createElement("div");
-  const controller = createBorderMap(leaflet.L, element, shapes, { view: stockholm, radiusMeters, onUserMove });
-  return { ...leaflet, element, controller, onUserMove };
+  const controller = createBorderMap(leaflet.L, element, { detail: "50m", shapes }, { view: stockholm, radiusMeters, onUserMove, loadShapes });
+  return { ...leaflet, element, controller, onUserMove, loadShapes };
 }
+
+// Lets the promise callbacks of a finished load run.
+const settle = () => new Promise((resolve) => setTimeout(resolve));
 
 describe("createBorderMap", () => {
   it("opens at the given view with land, borders and Swedish zoom buttons", () => {
@@ -117,6 +128,62 @@ describe("createBorderMap", () => {
     controller.setRadius(0);
     controller.setRadius(null);
     expect(fake.circle).toHaveBeenCalledTimes(2);
+  });
+
+  it("swaps in finer borders when zoomed in past 6, keeping the radius on top", async () => {
+    const { fake, layers, circle, loadShapes, userMovesTo } = setUp(50_000);
+    userMovesTo(59.33, 18.07, 6);
+    expect(loadShapes).toHaveBeenCalledWith("10m");
+    await settle();
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
+    expect(layers[0].remove).toHaveBeenCalled();
+    expect(layers[1].remove).toHaveBeenCalled();
+    expect(circle.bringToFront).toHaveBeenCalled();
+  });
+
+  it("loads the right borders straight away when the ones given don't suit the starting zoom", () => {
+    const leaflet = fakeLeaflet();
+    const loadShapes = vi.fn(() => Promise.resolve(shapes));
+    createBorderMap(leaflet.L, document.createElement("div"), { detail: "10m", shapes }, { view: stockholm, radiusMeters: null, onUserMove: vi.fn(), loadShapes });
+    expect(loadShapes).toHaveBeenCalledWith("50m");
+  });
+
+  it("keeps the borders it has while zooming within their range", () => {
+    const { loadShapes, userMovesTo } = setUp();
+    userMovesTo(59.33, 18.07, 1);
+    expect(loadShapes).not.toHaveBeenCalled();
+  });
+
+  it("drops borders that arrive after the map zoomed back out", async () => {
+    let finish = () => {};
+    const { fake, loadShapes, userMovesTo } = setUp(null, vi.fn(() => new Promise<typeof shapes>((resolve) => (finish = () => resolve(shapes)))));
+    userMovesTo(59.33, 18.07, 7);
+    expect(loadShapes).toHaveBeenCalledWith("10m");
+    userMovesTo(59.33, 18.07, 5);
+    finish();
+    await settle();
+    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the old borders when the finer ones can't be loaded, and tries again on the next zoom", async () => {
+    const loadShapes = vi.fn<(detail: BorderDetail) => Promise<typeof shapes>>().mockRejectedValueOnce(new Error("offline")).mockResolvedValue(shapes);
+    const { fake, layers, userMovesTo } = setUp(null, loadShapes);
+    userMovesTo(59.33, 18.07, 10);
+    await settle();
+    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
+    expect(layers[0].remove).not.toHaveBeenCalled();
+    userMovesTo(59.33, 18.07, 11);
+    await settle();
+    expect(loadShapes).toHaveBeenCalledTimes(2);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
+  });
+
+  it("draws nothing that arrives after the map was removed", async () => {
+    const { controller, fake, userMovesTo } = setUp();
+    userMovesTo(59.33, 18.07, 8);
+    controller.destroy();
+    await settle();
+    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
   });
 
   it("removes the map when destroyed", () => {

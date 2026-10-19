@@ -8,8 +8,8 @@ type MapPinContent = ContentOf<"mapPin">;
 
 const SWEDEN = { lat: 62, lng: 15 };
 
-// Past zoom 10 the borders-only map (D27) gets too coarse to be useful.
-export const MAP_ZOOM = { min: 1, max: 10 };
+// Past zoom 12 even the finest borders-only map (D27, D29) gets too coarse to be useful.
+export const MAP_ZOOM = { min: 1, max: 12 };
 
 function isValidZoom(zoom: number): boolean {
   return zoom >= MAP_ZOOM.min && zoom <= MAP_ZOOM.max;

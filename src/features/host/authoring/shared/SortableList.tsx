@@ -5,11 +5,10 @@ import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrate
 import { useRef, useState, type ReactNode } from "react";
 import { findDragMove } from "@/domain/ordering/findDragMove";
 import { moveItem } from "@/domain/ordering/moveItem";
-import type { RowPosition } from "./RowButtons";
 import { SortableRow } from "./SortableRow";
 import { swedishDragAnnouncements, swedishDragInstructions } from "./swedishDragAnnouncements";
 
-type SortableItemParts = { index: number; dragHandle: ReactNode; position: RowPosition };
+type SortableItemParts = { index: number; dragHandle: ReactNode };
 
 type SortableListProps<T> = {
   items: readonly T[];
@@ -24,7 +23,7 @@ type SortableListProps<T> = {
   renderItem: (item: T, parts: SortableItemParts) => ReactNode;
 };
 
-// An ordered list whose rows move by dragging their grip handle or by the arrows in RowButtons.
+// An ordered list whose rows move by dragging their grip handle, with the mouse, touch or keyboard.
 export function SortableList<T>({ items, getId, nameOf, onMove, className, itemClassName, renderItem }: SortableListProps<T>) {
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }));
   // Without this the row would jump back until the server's new order arrives.
@@ -66,13 +65,7 @@ export function SortableList<T>({ items, getId, nameOf, onMove, className, itemC
         <ol className={className}>
           {shown.map((item, index) => (
             <SortableRow key={ids[index]} id={ids[index]} name={nameOf(index)} className={itemClassName?.(item, index)}>
-              {(dragHandle) =>
-                renderItem(item, {
-                  index,
-                  dragHandle,
-                  position: { index, count: shown.length, onMove: (toIndex) => void move(index, toIndex) },
-                })
-              }
+              {(dragHandle) => renderItem(item, { index, dragHandle })}
             </SortableRow>
           ))}
         </ol>

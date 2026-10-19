@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `remove-nan-migration` PR. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `authoring-tweaks` PR and try the finer map on a real phone. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -48,6 +48,7 @@ Merge the `remove-nan-migration` PR. Both hosts try writing in production; then 
 - [x] Empty number fields saved as `null` instead of `NaN` (D28)
 - [x] Run `migrateMissingNumbers` on dev and production, then delete it
 - [x] Send the host back to the login screen, instead of a blank page, if the passphrase changes on the server while logged in (`SessionErrorBoundary`)
+- [x] Reordering by drag only, round count under the title, two map detail levels with zoom up to 12 (D29)
 
 ### M2 · Live game loop
 - [ ] Convex schema: games, teams, answers (drafts and locks), adjustments

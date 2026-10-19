@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { ContentOf } from "@convex/questions/questionContent";
+import { dragByKeyboard } from "@/features/host/authoring/shared/dragByKeyboard.setup";
 import { SortEditor } from "./SortEditor";
 
 const content: ContentOf<"sort"> = {
@@ -18,11 +19,7 @@ describe("SortEditor", () => {
     render(<SortEditor content={content} onChange={onChange} />);
     await userEvent.type(screen.getByLabelText("Alternativ 2"), "!");
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Kalle Anka", "Ensam hemma!"]);
-    expect(screen.getByRole("button", { name: "Flytta upp alternativ 1" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Dra för att flytta alternativ 1" })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Flytta ned alternativ 1" }));
-    expect(onChange.mock.lastCall?.[0].items).toEqual(["Ensam hemma", "Kalle Anka"]);
-    await userEvent.click(screen.getByRole("button", { name: "Flytta upp alternativ 2" }));
+    await dragByKeyboard("Dra för att flytta alternativ 1", "down");
     expect(onChange.mock.lastCall?.[0].items).toEqual(["Ensam hemma", "Kalle Anka"]);
     await userEvent.click(screen.getByRole("button", { name: "Lägg till alternativ" }));
     expect(onChange.mock.lastCall?.[0].items).toHaveLength(3);

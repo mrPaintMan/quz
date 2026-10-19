@@ -61,14 +61,13 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
         itemClassName={(question) =>
           `flex items-start gap-1 rounded-xl border p-1 ${question._id === selectedQuestionId ? "border-primary bg-secondary" : "bg-card"}`
         }
-        renderItem={(question, { index, dragHandle, position }) => (
+        renderItem={(question, { index, dragHandle }) => (
           <QuestionListItem
             question={question}
             number={index + 1}
             selected={question._id === selectedQuestionId}
             onSelect={() => onSelectQuestion(question._id)}
             dragHandle={dragHandle}
-            position={position}
           />
         )}
       />

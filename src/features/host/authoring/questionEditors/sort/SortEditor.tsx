@@ -6,7 +6,7 @@ import { moveItem } from "@/domain/ordering/moveItem";
 import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
 import { SortableList } from "@/features/host/authoring/shared/SortableList";
 import { TextField } from "@/features/host/authoring/questionEditors/fields/TextField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
@@ -31,12 +31,12 @@ export function SortEditor({ content, onChange }: QuestionEditorProps<"sort">) {
           onMove={(_item, fromIndex, toIndex) => setItems(moveItem(items, fromIndex, toIndex))}
           className="flex flex-col gap-2"
           itemClassName={() => "flex items-center gap-2 rounded-lg bg-background"}
-          renderItem={(item, { index, dragHandle, position }) => (
+          renderItem={(item, { index, dragHandle }) => (
             <>
               {dragHandle}
               <span className="w-6 text-right text-muted-foreground">{index + 1}.</span>
               <Input aria-label={`Alternativ ${index + 1}`} value={item} onChange={(event) => setItems(replaceAt(items, index, event.target.value))} />
-              <RowButtons name={`alternativ ${index + 1}`} position={position} onRemove={() => setItems(removeAt(items, index))} />
+              <RemoveRowButton name={`alternativ ${index + 1}`} onRemove={() => setItems(removeAt(items, index))} />
             </>
           )}
         />

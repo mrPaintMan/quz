@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 import { CenterPin } from "@/features/shared/map/CenterPin";
 import { createBorderMap, type BorderMapController } from "@/features/shared/map/createBorderMap";
+import { borderDetailForZoom } from "@/features/shared/map/borderDetailForZoom";
 import { loadBorderShapes } from "@/features/shared/map/loadBorderShapes";
 import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 
@@ -30,13 +31,16 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, clas
   useEffect(() => {
     let cancelled = false;
     // Leaflet needs the browser's window, so it is loaded only once the page runs there.
-    Promise.all([import("leaflet"), loadBorderShapes()]).then(([leaflet, shapes]) => {
+    const detail = borderDetailForZoom(latest.current.view.zoom);
+    Promise.all([import("leaflet"), loadBorderShapes(detail)]).then(([leaflet, shapes]) => {
       if (cancelled || !elementRef.current) return;
+      // The view may have changed while loading; the map swaps borders if the zoom now needs others.
       const { view: startView, radiusMeters: startRadius } = latest.current;
-      controllerRef.current = createBorderMap(leaflet.default ?? leaflet, elementRef.current, shapes, {
+      controllerRef.current = createBorderMap(leaflet.default ?? leaflet, elementRef.current, { detail, shapes }, {
         view: startView,
         radiusMeters: startRadius,
         onUserMove: (next) => latest.current.onViewChange(next),
+        loadShapes: loadBorderShapes,
       });
     }).catch(() => {
       if (!cancelled) setFailed(true);

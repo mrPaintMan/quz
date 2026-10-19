@@ -32,25 +32,31 @@ describe("toBorderShapes", () => {
 });
 
 describe("loadBorderShapes", () => {
-  it("loads the world's countries once and reuses them", async () => {
-    const first = loadBorderShapes();
-    expect(loadBorderShapes()).toBe(first);
+  it("loads the world's countries once per detail and reuses them", async () => {
+    const first = loadBorderShapes("50m");
+    expect(loadBorderShapes("50m")).toBe(first);
     expect((await first).land.features.length).toBeGreaterThan(200);
+  });
+
+  it("loads a finer detail as a separate set of shapes", async () => {
+    const [coarse, fine] = await Promise.all([loadBorderShapes("50m"), loadBorderShapes("10m")]);
+    expect(fine).not.toBe(coarse);
+    expect(fine.land.features.length).toBeGreaterThan(coarse.land.features.length);
   });
 });
 
 describe("loadBorderShapes after a failed load", () => {
   it("tries again on the next call", async () => {
     vi.resetModules();
-    vi.doMock("world-atlas/countries-50m.json", () => {
+    vi.doMock("world-atlas/countries-10m.json", () => {
       throw new Error("offline");
     });
     const { loadBorderShapes: load } = await import("./loadBorderShapes");
-    const failed = load();
+    const failed = load("10m");
     await expect(failed).rejects.toThrow();
-    const retry = load();
+    const retry = load("10m");
     expect(retry).not.toBe(failed);
     await retry.catch(() => undefined);
-    vi.doUnmock("world-atlas/countries-50m.json");
+    vi.doUnmock("world-atlas/countries-10m.json");
   });
 });

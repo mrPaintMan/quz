@@ -82,7 +82,7 @@ src/
         editor/quiz|rounds|question/  # /admin/quizzes/[quizId]: the three editor columns
         questionEditors/<type>/  # editor for one type, plus registry.ts (label + editor per type)
         questionEditors/fields/  # form fields shared by the type editors
-        shared/                  # used by several authoring features: autosave, sortable lists, row buttons
+        shared/                  # used by several authoring features: autosave, sortable lists, remove buttons, the keyboard drag test helper
         media/                   # uploads and previews
       liveControl/  scoreHistory/
     player/                      # teams on their phones
