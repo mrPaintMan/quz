@@ -34,7 +34,7 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, clas
     const detail = borderDetailForZoom(latest.current.view.zoom);
     Promise.all([import("leaflet"), loadBorderShapes(detail)]).then(([leaflet, shapes]) => {
       if (cancelled || !elementRef.current) return;
-      // The view may have changed while loading; the map swaps borders if its band did.
+      // The view may have changed while loading; the map swaps borders if the zoom now needs others.
       const { view: startView, radiusMeters: startRadius } = latest.current;
       controllerRef.current = createBorderMap(leaflet.default ?? leaflet, elementRef.current, { detail, shapes }, {
         view: startView,

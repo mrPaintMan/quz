@@ -33,13 +33,13 @@ describe("toBorderShapes", () => {
 
 describe("loadBorderShapes", () => {
   it("loads the world's countries once per detail and reuses them", async () => {
-    const first = loadBorderShapes("110m");
-    expect(loadBorderShapes("110m")).toBe(first);
-    expect((await first).land.features.length).toBeGreaterThan(170);
+    const first = loadBorderShapes("50m");
+    expect(loadBorderShapes("50m")).toBe(first);
+    expect((await first).land.features.length).toBeGreaterThan(200);
   });
 
   it("loads a finer detail as a separate set of shapes", async () => {
-    const [coarse, fine] = await Promise.all([loadBorderShapes("110m"), loadBorderShapes("50m")]);
+    const [coarse, fine] = await Promise.all([loadBorderShapes("50m"), loadBorderShapes("10m")]);
     expect(fine).not.toBe(coarse);
     expect(fine.land.features.length).toBeGreaterThan(coarse.land.features.length);
   });

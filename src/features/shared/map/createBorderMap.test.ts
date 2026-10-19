@@ -130,9 +130,9 @@ describe("createBorderMap", () => {
     expect(fake.circle).toHaveBeenCalledTimes(2);
   });
 
-  it("swaps in finer borders when zoomed into the next band, keeping the radius on top", async () => {
+  it("swaps in finer borders when zoomed in past 6, keeping the radius on top", async () => {
     const { fake, layers, circle, loadShapes, userMovesTo } = setUp(50_000);
-    userMovesTo(59.33, 18.07, 9);
+    userMovesTo(59.33, 18.07, 6);
     expect(loadShapes).toHaveBeenCalledWith("10m");
     await settle();
     expect(fake.geoJSON).toHaveBeenCalledTimes(4);
@@ -144,20 +144,20 @@ describe("createBorderMap", () => {
   it("loads the right borders straight away when the ones given don't suit the starting zoom", () => {
     const leaflet = fakeLeaflet();
     const loadShapes = vi.fn(() => Promise.resolve(shapes));
-    createBorderMap(leaflet.L, document.createElement("div"), { detail: "110m", shapes }, { view: stockholm, radiusMeters: null, onUserMove: vi.fn(), loadShapes });
+    createBorderMap(leaflet.L, document.createElement("div"), { detail: "10m", shapes }, { view: stockholm, radiusMeters: null, onUserMove: vi.fn(), loadShapes });
     expect(loadShapes).toHaveBeenCalledWith("50m");
   });
 
-  it("keeps the borders it has while zooming within a band", () => {
+  it("keeps the borders it has while zooming within their range", () => {
     const { loadShapes, userMovesTo } = setUp();
-    userMovesTo(59.33, 18.07, 8.75);
+    userMovesTo(59.33, 18.07, 1);
     expect(loadShapes).not.toHaveBeenCalled();
   });
 
-  it("drops borders that arrive after the map zoomed back to its band", async () => {
+  it("drops borders that arrive after the map zoomed back out", async () => {
     let finish = () => {};
     const { fake, userMovesTo } = setUp(null, vi.fn(() => new Promise<typeof shapes>((resolve) => (finish = () => resolve(shapes)))));
-    userMovesTo(59.33, 18.07, 3);
+    userMovesTo(59.33, 18.07, 7);
     userMovesTo(59.33, 18.07, 5);
     finish();
     await settle();
@@ -174,7 +174,7 @@ describe("createBorderMap", () => {
 
   it("draws nothing that arrives after the map was removed", async () => {
     const { controller, fake, userMovesTo } = setUp();
-    userMovesTo(59.33, 18.07, 2);
+    userMovesTo(59.33, 18.07, 8);
     controller.destroy();
     await settle();
     expect(fake.geoJSON).toHaveBeenCalledTimes(2);

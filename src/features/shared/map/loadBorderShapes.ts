@@ -11,9 +11,8 @@ export type BorderShapes = {
 
 type CountriesTopology = Topology<{ countries: GeometryCollection }>;
 
-// Each scale is its own chunk, fetched the first time a map zooms into its band.
+// Each scale is its own chunk, fetched the first time a map zooms into its range.
 const topologies: Record<BorderDetail, () => Promise<{ default: unknown }>> = {
-  "110m": () => import("world-atlas/countries-110m.json"),
   "50m": () => import("world-atlas/countries-50m.json"),
   "10m": () => import("world-atlas/countries-10m.json"),
 };
@@ -33,9 +32,8 @@ export function toBorderShapes(topology: CountriesTopology): BorderShapes {
   };
 }
 
-// Natural Earth (public domain): about 110 kB at 1:110m, 750 kB at 1:50m and 3.7 MB at
-// 1:10m before compression, so each is loaded only when a map needs it and then kept for
-// every later map.
+// Natural Earth (public domain): about 750 kB at 1:50m and 3.7 MB at 1:10m before
+// compression, so each is loaded only when a map needs it and then kept for every later map.
 export function loadBorderShapes(detail: BorderDetail): Promise<BorderShapes> {
   const cached = loaded.get(detail);
   if (cached) return cached;

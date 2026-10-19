@@ -12,7 +12,7 @@ export type BorderMapOptions = {
   radiusMeters: number | null;
   // Only moves made by the user (dragging, zooming, the keyboard) that change the view.
   onUserMove: (view: MapView) => void;
-  // Fetches the borders for another zoom band when the map is zoomed into it.
+  // Fetches the borders for another detail when the map is zoomed into its range.
   loadShapes: (detail: BorderDetail) => Promise<BorderShapes>;
 };
 
@@ -98,7 +98,7 @@ export function createBorderMap(
 
   // The old borders stay until the new ones have loaded, so the map is never blank; a load
   // that fails keeps them, and the next zoom tries again. By the time a load finishes the map
-  // may have zoomed into yet another band, or been removed, and then the result is dropped.
+  // may have zoomed back out of that range, or been removed, and then the result is dropped.
   let removed = false;
   const showDetailForZoom = () => {
     const wanted = borderDetailForZoom(map.getZoom());
