@@ -22,6 +22,7 @@ function findFieldProblems(content: FreeTextContent) {
 
 export const freeTextRules: QuestionTypeRules<FreeTextContent> = {
   requiresTimeLimit: false,
+  requiresVideo: false,
   createEmptyContent: () => ({
     type: "freeText",
     fields: [{ label: "", acceptedAnswers: [] }],

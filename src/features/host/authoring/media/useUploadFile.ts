@@ -6,10 +6,10 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 
 // Uploads a file to Convex storage and returns its id (the three-step upload Convex uses).
-export function useUploadFile(): (file: File) => Promise<Id<"_storage">> {
+export function useUploadFile(): (file: Blob) => Promise<Id<"_storage">> {
   const generateUploadUrl = useHostMutation(api.media.mutations.generateUploadUrl);
   return useCallback(
-    async (file: File) => {
+    async (file: Blob) => {
       const uploadUrl = await generateUploadUrl({});
       const response = await fetch(uploadUrl, {
         method: "POST",

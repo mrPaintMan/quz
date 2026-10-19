@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `authoring-tweaks` PR and try the finer map on a real phone. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `pa-sparet-one-trip` PR, run `migratePaSparetClues` on production, then narrow the clue schema in a follow-up PR. Try the finer map on a real phone. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -49,6 +49,8 @@ Merge the `authoring-tweaks` PR and try the finer map on a real phone. Both host
 - [x] Run `migrateMissingNumbers` on dev and production, then delete it
 - [x] Send the host back to the login screen, instead of a blank page, if the passphrase changes on the server while logged in (`SessionErrorBoundary`)
 - [x] Reordering by drag only, round count under the title, two map detail levels with zoom up to 12 (D29)
+- [x] På spåret as one trip with five fixed clues and an uploaded film, shown by a still (D30)
+- [ ] Run `migratePaSparetClues` on production, then narrow the clue schema and delete the migration (D30)
 
 ### M2 · Live game loop
 - [ ] Convex schema: games, teams, answers (drafts and locks), adjustments
@@ -56,6 +58,7 @@ Merge the `authoring-tweaks` PR and try the finer map on a real phone. Both host
 - [ ] TV: lobby with QR code and join word, rules screen, question and answer screens
 - [ ] Phone: join with a team name and colour, rejoin after refresh, follow the game
 - [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz
+- [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
 - [ ] Draft saving and locking, including on timer end (D16)
 
 ### M3 · Answering and grading, all types

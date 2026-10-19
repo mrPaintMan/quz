@@ -7,6 +7,7 @@ type ListContent = ContentOf<"list">;
 // The answer key may be empty: open lists are graded through review (and the AI judge).
 export const listRules: QuestionTypeRules<ListContent> = {
   requiresTimeLimit: true,
+  requiresVideo: false,
   createEmptyContent: () => ({
     type: "list",
     acceptedItems: [],

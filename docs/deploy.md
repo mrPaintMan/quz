@@ -38,7 +38,9 @@ Run after the change that needs them reaches each deployment, then delete the fu
 
 Run one with `npx convex run --prod <module>:<function> '<args>'`, or without `--prod` for the dev deployment. A paginated one takes `{"paginationOpts":{"numItems":100,"cursor":null}}` and is run again with each answer's `continueCursor` until it answers `isDone: true`.
 
-None pending. Done: `migrateMissingNumbers` (D28) on 2026-10-18, on dev and production; it found no `NaN` to fix and was then deleted.
+Pending: `questions/migratePaSparetClues:migratePaSparetClues` (D30), which turns På spåret clues into five plain texts. Done on dev on 2026-10-19 (1 trip); run on production once this change is deployed, then narrow the clue schema and delete the migration in a later PR.
+
+Done: `migrateMissingNumbers` (D28) on 2026-10-18, on dev and production; it found no `NaN` to fix and was then deleted.
 
 ## 5. Domain
 

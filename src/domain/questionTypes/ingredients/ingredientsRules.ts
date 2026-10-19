@@ -17,6 +17,7 @@ function spellingsShareAnItem(content: IngredientsContent): boolean {
 
 export const ingredientsRules: QuestionTypeRules<IngredientsContent> = {
   requiresTimeLimit: false,
+  requiresVideo: false,
   createEmptyContent: () => ({
     type: "ingredients",
     items: [],

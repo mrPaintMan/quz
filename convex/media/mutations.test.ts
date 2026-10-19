@@ -7,6 +7,7 @@ async function setupQuestionWithFile() {
   const quizId = await t.mutation(api.quizzes.mutations.createQuiz, { ...host, title: "Julquiz", year: 2026 });
   const roundId = await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "questions", title: "Julmusik" });
   const questionId = await t.mutation(api.questions.mutations.addQuestion, { ...host, roundId, type: "freeText" });
+  await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "paSparet", title: "På spåret" });
   const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["bild"])));
   const mediaOf = async () => (await t.run((ctx) => ctx.db.get("questions", questionId)))?.media;
   return { t, questionId, storageId, mediaOf };
@@ -22,15 +23,30 @@ describe("generateUploadUrl", () => {
 describe("setQuestionMedia", () => {
   it("attaches an uploaded file to the question", async () => {
     const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
-    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, kind: "image", storageId });
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media: { kind: "image", storageId } });
     expect(await mediaOf()).toEqual({ kind: "image", storageId });
+  });
+
+  it("saves a film with its still and length", async () => {
+    const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
+    const media = { kind: "video" as const, storageId, posterId: null, durationSeconds: 120 };
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media });
+    expect(await mediaOf()).toEqual(media);
+  });
+
+  it("refuses anything but a film for a question that needs one", async () => {
+    const { t, storageId } = await setupQuestionWithFile();
+    const tripId = await t.run(async (ctx) => (await ctx.db.query("questions").take(10)).find((q) => q.content.type === "paSparet")?._id);
+    await expect(
+      t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId: tripId!, media: { kind: "image", storageId } }),
+    ).rejects.toThrow("behöver en film");
   });
 });
 
 describe("removeQuestionMedia", () => {
   it("detaches the file from the question but keeps it in storage", async () => {
     const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
-    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, kind: "audio", storageId });
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media: { kind: "audio", storageId } });
     await t.mutation(api.media.mutations.removeQuestionMedia, { ...host, questionId });
     expect(await mediaOf()).toBeNull();
     expect(await t.run((ctx) => ctx.storage.getUrl(storageId))).not.toBeNull();

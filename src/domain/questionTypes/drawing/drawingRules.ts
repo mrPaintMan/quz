@@ -6,6 +6,7 @@ type DrawingContent = ContentOf<"drawing">;
 
 export const drawingRules: QuestionTypeRules<DrawingContent> = {
   requiresTimeLimit: true,
+  requiresVideo: false,
   createEmptyContent: () => ({ type: "drawing", maxPoints: 1 }),
   maxPoints: (content) => content.maxPoints,
   findProblems: (content) => problemIfNotPositive(content.maxPoints, "Maxpoängen måste vara större än 0."),

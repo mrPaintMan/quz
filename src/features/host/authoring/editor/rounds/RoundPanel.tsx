@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
+import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
 import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
 import { SortableList } from "@/features/host/authoring/shared/SortableList";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
@@ -71,38 +72,42 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           />
         )}
       />
-      {round.questions.length === 0 && (
-        <p className="text-sm text-muted-foreground">{isPaSparet ? "Inga resor ännu." : "Inga frågor ännu."}</p>
-      )}
-      <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dashed p-3">
-        {!isPaSparet && (
-          <div className="flex min-w-40 flex-1 flex-col gap-1.5">
-            <Label htmlFor={typeId}>Ny fråga av typen</Label>
-            <select
-              id={typeId}
-              value={newType}
-              onChange={(event) => setNewType(event.target.value as QuestionType)}
-              className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
+      {!holdsOneQuestion(round.kind) && (
+        <>
+          {round.questions.length === 0 && <p className="text-sm text-muted-foreground">Inga frågor ännu.</p>}
+          <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dashed p-3">
+            <div className="flex min-w-40 flex-1 flex-col gap-1.5">
+              <Label htmlFor={typeId}>Ny fråga av typen</Label>
+              <select
+                id={typeId}
+                value={newType}
+                onChange={(event) => setNewType(event.target.value as QuestionType)}
+                className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
+              >
+                {types.map((type) => (
+                  <option key={type} value={type}>
+                    {questionEditors[type].label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <Button
+              variant="outline"
+              onClick={() => run(async () => onSelectQuestion(await addQuestion({ roundId: round._id, type: newType })))}
             >
-              {types.map((type) => (
-                <option key={type} value={type}>
-                  {questionEditors[type].label}
-                </option>
-              ))}
-            </select>
+              Lägg till fråga
+            </Button>
           </div>
-        )}
-        <Button
-          variant="outline"
-          onClick={() => run(async () => onSelectQuestion(await addQuestion({ roundId: round._id, type: newType })))}
-        >
-          {isPaSparet ? "Lägg till resa" : "Lägg till fråga"}
-        </Button>
-      </div>
+        </>
+      )}
       <div className="pt-2">
         <ConfirmButton
           title={`Ta bort ${round.title || "omgången"}?`}
-          description={`Omgången och dess ${round.questions.length} frågor tas bort. Det går inte att ångra.`}
+          description={
+            isPaSparet
+              ? "Omgången och dess resa tas bort. Det går inte att ångra."
+              : `Omgången och dess ${round.questions.length} frågor tas bort. Det går inte att ångra.`
+          }
           confirmLabel="Ta bort"
           size="sm"
           onConfirm={() =>

@@ -7,12 +7,12 @@ describe("createEmptyContent", () => {
     expect(createEmptyContent("paSparet").type).toBe("paSparet");
   });
 
-  it("starts På spåret with clues worth 10, 8, 6, 4 and 2", () => {
-    expect(createEmptyContent("paSparet").clues.map((clue) => clue.points)).toEqual([10, 8, 6, 4, 2]);
+  it("starts a På spåret trip with five empty clues", () => {
+    expect(createEmptyContent("paSparet").clues).toEqual(["", "", "", "", ""]);
   });
 
   it("starts as a draft that still needs filling in", () => {
-    const question = { prompt: "", timeLimitSeconds: null, content: createEmptyContent("multipleChoice") };
+    const question = { prompt: "", timeLimitSeconds: null, media: null, content: createEmptyContent("multipleChoice") };
     expect(findQuestionProblems(question).length).toBeGreaterThan(0);
   });
 });

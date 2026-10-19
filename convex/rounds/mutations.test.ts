@@ -21,6 +21,16 @@ describe("addRound", () => {
     expect(await roundTitles()).toEqual(["Julmusik", "Julmat"]);
   });
 
+  it("gives a new På spåret round its one trip straight away", async () => {
+    const { t, quizId } = await setupQuizWithRounds([]);
+    const roundId = await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "paSparet", title: "På spåret" });
+    const tree = await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId });
+    const round = tree?.rounds.find((candidate) => candidate._id === roundId);
+    expect(round?.questions.map((question) => question.content)).toEqual([
+      { type: "paSparet", acceptedAnswers: [], fuzzy: true, clues: ["", "", "", "", ""] },
+    ]);
+  });
+
   it("refuses more than 50 rounds", async () => {
     const { t, quizId } = await setupQuizWithRounds([]);
     await t.run(async (ctx) => {
