@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `narrow-pa-sparet-clues` PR. Try the finer map and a real På spåret film on a phone. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Merge the `logo` PR. Try the finer map and a real På spåret film on a phone. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -51,6 +51,7 @@ Merge the `narrow-pa-sparet-clues` PR. Try the finer map and a real På spåret 
 - [x] Reordering by drag only, round count under the title, two map detail levels with zoom up to 12 (D29)
 - [x] På spåret as one trip with five fixed clues and an uploaded film, shown by a still (D30)
 - [x] Run `migratePaSparetClues` on dev and production, then narrow the clue schema and delete the migration (D30)
+- [x] Logo: favicon, iPhone icon, logo top left linking to a simple home page (D31)
 
 ### M2 · Live game loop
 - [ ] Convex schema: games, teams, answers (drafts and locks), adjustments

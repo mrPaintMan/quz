@@ -18,12 +18,12 @@ describe("HostHeader", () => {
     expect(logOut).toHaveBeenCalledOnce();
   });
 
-  it("shows the Quz name, linking to the quiz list", () => {
+  it("shows the Quz logo, linking to the home page", () => {
     render(
       <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
         <HostHeader>Innehåll</HostHeader>
       </HostSessionProvider>,
     );
-    expect(screen.getByRole("link", { name: "Quz" })).toHaveAttribute("href", "/admin");
+    expect(screen.getByRole("link", { name: "Quz" })).toHaveAttribute("href", "/");
   });
 });

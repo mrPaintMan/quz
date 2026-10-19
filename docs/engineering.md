@@ -91,7 +91,8 @@ src/
     tv/                          # the shared screen
       screens/                   # lobby, rules, question, answer, leaderboard …
       questionDisplays/<type>/   # TV display for one type, plus registry.ts
-    shared/                      # used by more than one audience
+    home/                        # the start page at /
+    shared/                      # used by more than one audience: logo (brand/), map …
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
 ```
