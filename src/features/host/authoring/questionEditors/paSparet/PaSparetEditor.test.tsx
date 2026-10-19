@@ -31,11 +31,10 @@ describe("PaSparetEditor", () => {
     expect(onChange.mock.lastCall?.[0].fuzzy).toBe(false);
   });
 
-  it("brings a trip saved before D30 to five plain-text clues when a clue is edited", async () => {
+  it("saves five clues even when the trip has fewer", async () => {
     const onChange = vi.fn();
-    render(<PaSparetEditor content={{ ...content, clues: [{ text: "Gruva", points: 10 }] }} onChange={onChange} />);
-    expect(screen.getByLabelText("Ledtråd 1")).toHaveValue("Gruva");
-    await userEvent.type(screen.getByLabelText("Ledtråd 3"), "N");
-    expect(onChange.mock.lastCall?.[0].clues).toEqual(["Gruva", "", "N", "", ""]);
+    render(<PaSparetEditor content={{ ...content, clues: ["Gruva"] }} onChange={onChange} />);
+    await userEvent.type(screen.getByLabelText("Ledtråd 4"), "N");
+    expect(onChange.mock.lastCall?.[0].clues).toEqual(["Gruva", "", "", "N", ""]);
   });
 });

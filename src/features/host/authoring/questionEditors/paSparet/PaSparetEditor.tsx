@@ -1,18 +1,15 @@
 "use client";
 
 import { Textarea } from "@/components/ui/textarea";
-import { replaceAt } from "@/domain/ordering/replaceAt";
-import { clueText } from "@/domain/questionTypes/paSparet/clueText";
 import { PA_SPARET_CLUE_POINTS } from "@/domain/questionTypes/paSparet/paSparetRules";
-import { toFiveClueTexts } from "@/domain/questionTypes/paSparet/toFiveClueTexts";
 import { LinesField } from "@/features/host/authoring/questionEditors/fields/LinesField";
 import { SwitchField } from "@/features/host/authoring/questionEditors/fields/SwitchField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSparet">) {
-  // Saving any clue also brings a trip saved before D30 to five plain-text clues.
+  // Always saves five clues, so a trip that somehow has fewer can still be completed here.
   const setClue = (index: number, text: string) =>
-    onChange({ ...content, clues: replaceAt(toFiveClueTexts(content.clues), index, text) });
+    onChange({ ...content, clues: PA_SPARET_CLUE_POINTS.map((_, position) => (position === index ? text : (content.clues[position] ?? ""))) });
 
   return (
     <div className="flex flex-col gap-4">
@@ -33,7 +30,7 @@ export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSpa
             <Textarea
               aria-label={`Ledtråd ${index + 1}`}
               rows={2}
-              value={content.clues[index] === undefined ? "" : clueText(content.clues[index])}
+              value={content.clues[index] ?? ""}
               onChange={(event) => setClue(index, event.target.value)}
             />
           </label>

@@ -16,7 +16,6 @@ import type * as media_mutations from "../media/mutations.js";
 import type * as media_queries from "../media/queries.js";
 import type * as questions_acceptedItem from "../questions/acceptedItem.js";
 import type * as questions_insertQuestion from "../questions/insertQuestion.js";
-import type * as questions_migratePaSparetClues from "../questions/migratePaSparetClues.js";
 import type * as questions_mutations from "../questions/mutations.js";
 import type * as questions_numberOrNull from "../questions/numberOrNull.js";
 import type * as questions_questionContent from "../questions/questionContent.js";
@@ -60,7 +59,6 @@ declare const fullApi: ApiFromModules<{
   "media/queries": typeof media_queries;
   "questions/acceptedItem": typeof questions_acceptedItem;
   "questions/insertQuestion": typeof questions_insertQuestion;
-  "questions/migratePaSparetClues": typeof questions_migratePaSparetClues;
   "questions/mutations": typeof questions_mutations;
   "questions/numberOrNull": typeof questions_numberOrNull;
   "questions/questionContent": typeof questions_questionContent;
