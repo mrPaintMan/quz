@@ -1,6 +1,7 @@
 import type { FeatureCollection, MultiLineString } from "geojson";
 import { feature, mesh } from "topojson-client";
 import type { GeometryCollection, Topology } from "topojson-specification";
+import type { BorderDetail } from "@/features/shared/map/borderDetailForZoom";
 import { unwrapGeometry } from "@/features/shared/map/unwrapGeometry";
 
 export type BorderShapes = {
@@ -10,7 +11,14 @@ export type BorderShapes = {
 
 type CountriesTopology = Topology<{ countries: GeometryCollection }>;
 
-let shapes: Promise<BorderShapes> | null = null;
+// Each scale is its own chunk, fetched the first time a map zooms into its band.
+const topologies: Record<BorderDetail, () => Promise<{ default: unknown }>> = {
+  "110m": () => import("world-atlas/countries-110m.json"),
+  "50m": () => import("world-atlas/countries-50m.json"),
+  "10m": () => import("world-atlas/countries-10m.json"),
+};
+
+const loaded = new Map<BorderDetail, Promise<BorderShapes>>();
 
 export function toBorderShapes(topology: CountriesTopology): BorderShapes {
   const countries = topology.objects.countries;
@@ -25,15 +33,19 @@ export function toBorderShapes(topology: CountriesTopology): BorderShapes {
   };
 }
 
-// Natural Earth 1:50m (public domain), about 750 kB, so it is loaded only when a map is
-// shown and then kept for every later map.
-export function loadBorderShapes(): Promise<BorderShapes> {
-  shapes ??= import("world-atlas/countries-50m.json")
-    .then((module) => toBorderShapes(module.default as unknown as CountriesTopology))
+// Natural Earth (public domain): about 110 kB at 1:110m, 750 kB at 1:50m and 3.7 MB at
+// 1:10m before compression, so each is loaded only when a map needs it and then kept for
+// every later map.
+export function loadBorderShapes(detail: BorderDetail): Promise<BorderShapes> {
+  const cached = loaded.get(detail);
+  if (cached) return cached;
+  const loading = topologies[detail]()
+    .then((module) => toBorderShapes(module.default as CountriesTopology))
     .catch((error: unknown) => {
       // Forget the failure, so the next map tries again.
-      shapes = null;
+      loaded.delete(detail);
       throw error;
     });
-  return shapes;
+  loaded.set(detail, loading);
+  return loading;
 }

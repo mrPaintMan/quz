@@ -9,7 +9,7 @@ import { FileButton } from "@/features/host/authoring/media/FileButton";
 import { MediaPreview } from "@/features/host/authoring/media/MediaPreview";
 import { useUploadFile } from "@/features/host/authoring/media/useUploadFile";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 const MAX_OPTIONS = 6;
@@ -48,7 +48,7 @@ export function MultipleChoiceEditor({ content, onChange }: QuestionEditorProps<
                 value={option.text}
                 onChange={(event) => updateOption(index, { ...option, text: event.target.value })}
               />
-              <RowButtons name={`alternativ ${LETTERS[index]}`} onRemove={() => removeOption(index)} />
+              <RemoveRowButton name={`alternativ ${LETTERS[index]}`} onRemove={() => removeOption(index)} />
             </div>
             <div className="flex flex-wrap items-center gap-2 pl-12">
               {option.imageId && <MediaPreview storageId={option.imageId} kind="image" alt={`Bild för alternativ ${LETTERS[index]}`} />}

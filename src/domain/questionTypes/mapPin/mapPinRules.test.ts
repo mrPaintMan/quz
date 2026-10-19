@@ -44,9 +44,9 @@ describe("mapPinRules", () => {
     expect(messagesFor({ ...validContent, initialView })).toEqual(["Välj var kartan ska börja."]);
   });
 
-  it.each([0, 11, Number.NaN])("flags a starting zoom of %s", (zoom) => {
+  it.each([0, 13, Number.NaN])("flags a starting zoom of %s", (zoom) => {
     const initialView = { ...validContent.initialView, zoom };
-    expect(messagesFor({ ...validContent, initialView })).toEqual(["Välj en zoomnivå mellan 1 och 10."]);
+    expect(messagesFor({ ...validContent, initialView })).toEqual(["Välj en zoomnivå mellan 1 och 12."]);
   });
 
   it("flags a radius that is not a number", () => {

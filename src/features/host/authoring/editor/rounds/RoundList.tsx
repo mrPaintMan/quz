@@ -2,7 +2,6 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
 import { SortableList } from "@/features/host/authoring/shared/SortableList";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
@@ -40,21 +39,20 @@ export function RoundList({ quizId, rounds, selectedRoundId, onSelectRound }: Ro
         itemClassName={(round) =>
           `flex items-center gap-1 rounded-lg border pl-1 ${round._id === selectedRoundId ? "border-primary bg-secondary" : "border-transparent bg-background"}`
         }
-        renderItem={(round, { index, dragHandle, position }) => (
+        renderItem={(round, { index, dragHandle }) => (
           <>
             {dragHandle}
             <button
               type="button"
               aria-current={round._id === selectedRoundId}
               onClick={() => onSelectRound(round._id)}
-              className="flex min-w-0 flex-1 items-center justify-between gap-2 rounded-lg py-2 pr-3 pl-1 text-left"
+              className="flex min-w-0 flex-1 flex-col gap-0.5 rounded-lg py-2 pr-3 pl-1 text-left"
             >
-              <span className="truncate">
+              <span className="break-words">
                 {index + 1}. {round.title}
               </span>
-              <span className="shrink-0 text-xs text-muted-foreground">{countLabel(round)}</span>
+              <span className="text-xs text-muted-foreground">{countLabel(round)}</span>
             </button>
-            <RowButtons name={`omgång ${index + 1}`} position={position} />
           </>
         )}
       />

@@ -2,6 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Doc, Id } from "@convex/_generated/dataModel";
+import { dragByKeyboard } from "@/features/host/authoring/shared/dragByKeyboard.setup";
 import { RoundPanel } from "./RoundPanel";
 
 const calls: { name: string; args: unknown }[] = [];
@@ -63,14 +64,10 @@ describe("RoundPanel", () => {
     expect(onSelectQuestion).toHaveBeenCalledWith("b");
   });
 
-  it("moves questions within the round", async () => {
+  it("moves a question within the round when dragged by its handle", async () => {
     render(<RoundPanel round={round("questions", [question("a", "A"), question("b", "B")])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
-    await userEvent.click(screen.getByRole("button", { name: "Flytta ned fråga 1" }));
-    await userEvent.click(screen.getByRole("button", { name: "Flytta upp fråga 2" }));
-    expect(calls).toEqual([
-      { name: "questions/mutations:moveQuestion", args: { questionId: "a", toRoundId: "r1", toIndex: 1 } },
-      { name: "questions/mutations:moveQuestion", args: { questionId: "b", toRoundId: "r1", toIndex: 0 } },
-    ]);
+    await dragByKeyboard("Dra för att flytta fråga 1", "down");
+    expect(calls).toEqual([{ name: "questions/mutations:moveQuestion", args: { questionId: "a", toRoundId: "r1", toIndex: 1 } }]);
   });
 
   it("adds a question of the chosen type and selects it", async () => {

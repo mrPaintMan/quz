@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Doc, Id } from "@convex/_generated/dataModel";
+import { dragByKeyboard } from "@/features/host/authoring/shared/dragByKeyboard.setup";
 import { RoundList } from "./RoundList";
 
 const calls: { name: string; args: unknown }[] = [];
@@ -48,16 +49,10 @@ describe("RoundList", () => {
     expect(onSelectRound).toHaveBeenCalledWith("b");
   });
 
-  it("moves rounds up and down", async () => {
+  it("moves a round dragged by its handle", async () => {
     render(<RoundList quizId={"quiz" as Id<"quizzes">} rounds={rounds} selectedRoundId={null} onSelectRound={vi.fn()} />);
-    expect(screen.getByRole("button", { name: "Flytta upp omgång 1" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Dra för att flytta omgång 1" })).toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Flytta upp omgång 3" }));
-    await userEvent.click(screen.getByRole("button", { name: "Flytta ned omgång 1" }));
-    expect(calls).toEqual([
-      { name: "rounds/mutations:moveRound", args: { roundId: "c", toIndex: 1 } },
-      { name: "rounds/mutations:moveRound", args: { roundId: "a", toIndex: 1 } },
-    ]);
+    await dragByKeyboard("Dra för att flytta omgång 3", "up");
+    expect(calls).toEqual([{ name: "rounds/mutations:moveRound", args: { roundId: "c", toIndex: 1 } }]);
   });
 
   it("adds a round and selects it", async () => {

@@ -7,8 +7,8 @@ const controller = { setView: vi.fn(), setRadius: vi.fn(), destroy: vi.fn() };
 const createBorderMap = vi.fn<(...args: [unknown, HTMLElement, unknown, BorderMapOptions]) => typeof controller>(() => controller);
 
 vi.mock("leaflet", () => ({ default: { leaflet: true } }));
-const loadBorderShapes = vi.fn(() => Promise.resolve("shapes"));
-vi.mock("@/features/shared/map/loadBorderShapes", () => ({ loadBorderShapes: () => loadBorderShapes() }));
+const loadBorderShapes = vi.fn<(detail: string) => Promise<string>>(() => Promise.resolve("shapes"));
+vi.mock("@/features/shared/map/loadBorderShapes", () => ({ loadBorderShapes: (detail: string) => loadBorderShapes(detail) }));
 vi.mock("@/features/shared/map/createBorderMap", () => ({
   createBorderMap: (...args: [unknown, HTMLElement, unknown, BorderMapOptions]) => createBorderMap(...args),
 }));
@@ -29,8 +29,11 @@ describe("BorderMap", () => {
     const [leaflet, element, shapes, options] = createBorderMap.mock.calls[0];
     expect(leaflet).toEqual({ leaflet: true });
     expect(element).toBe(screen.getByTestId("border-map"));
+    expect(loadBorderShapes).toHaveBeenCalledWith("50m");
     expect(shapes).toBe("shapes");
     expect(options).toMatchObject({ view, radiusMeters: 50_000 });
+    await options.loadShapes("10m");
+    expect(loadBorderShapes).toHaveBeenLastCalledWith("10m");
     expect(screen.getByRole("group", { name: "Karta" })).toBeInTheDocument();
   });
 

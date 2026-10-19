@@ -1,5 +1,6 @@
 import type * as Leaflet from "leaflet";
 import { MAP_ZOOM } from "@/domain/questionTypes/mapPin/mapPinRules";
+import { borderDetailForZoom, type BorderDetail } from "@/features/shared/map/borderDetailForZoom";
 import type { BorderShapes } from "@/features/shared/map/loadBorderShapes";
 import { isSameView } from "@/features/shared/map/isSameView";
 import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
@@ -11,6 +12,8 @@ export type BorderMapOptions = {
   radiusMeters: number | null;
   // Only moves made by the user (dragging, zooming, the keyboard) that change the view.
   onUserMove: (view: MapView) => void;
+  // Fetches the borders for another zoom band when the map is zoomed into it.
+  loadShapes: (detail: BorderDetail) => Promise<BorderShapes>;
 };
 
 export type BorderMapController = {
@@ -37,17 +40,20 @@ function readView(map: Leaflet.Map): MapView {
   return { center: { lat: roundCoordinate(center.lat), lng: roundCoordinate(center.lng) }, zoom: map.getZoom() };
 }
 
-function addBorders(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes) {
+function addBorders(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes): Leaflet.Layer[] {
   const lines = { color: mapColors.line, weight: 0.8, opacity: 1 };
-  L.geoJSON(shapes.land, { interactive: false, style: { ...lines, fillColor: mapColors.land, fillOpacity: 1 } }).addTo(map);
-  L.geoJSON(shapes.borders, { interactive: false, style: lines }).addTo(map);
+  return [
+    L.geoJSON(shapes.land, { interactive: false, style: { ...lines, fillColor: mapColors.land, fillOpacity: 1 } }).addTo(map),
+    L.geoJSON(shapes.borders, { interactive: false, style: lines }).addTo(map),
+  ];
 }
 
 export function createBorderMap(
   L: LeafletModule,
   element: HTMLElement,
+  // The borders for the starting zoom, so the map opens fully drawn.
   shapes: BorderShapes,
-  { view, radiusMeters, onUserMove }: BorderMapOptions,
+  { view, radiusMeters, onUserMove, loadShapes }: BorderMapOptions,
 ): BorderMapController {
   const map = L.map(element, {
     center: [view.center.lat, view.center.lng],
@@ -68,7 +74,8 @@ export function createBorderMap(
   });
   element.style.background = mapColors.sea;
   L.control.zoom({ position: "topright", zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }).addTo(map);
-  addBorders(L, map, shapes);
+  let borderLayers = addBorders(L, map, shapes);
+  let shownDetail = borderDetailForZoom(view.zoom);
 
   let circle: Leaflet.Circle | null = null;
   const setRadius = (meters: number | null) => {
@@ -85,6 +92,23 @@ export function createBorderMap(
     }).addTo(map);
   };
   setRadius(radiusMeters);
+
+  // The old borders stay until the new ones have loaded, so the map is never blank; a load
+  // that fails keeps them, and the next zoom tries again. By the time a load finishes the map
+  // may have zoomed into yet another band, or been removed, and then the result is dropped.
+  let removed = false;
+  map.on("zoomend", () => {
+    const wanted = borderDetailForZoom(map.getZoom());
+    if (wanted === shownDetail) return;
+    loadShapes(wanted).then((next) => {
+      if (removed || wanted !== borderDetailForZoom(map.getZoom()) || wanted === shownDetail) return;
+      borderLayers.forEach((layer) => layer.remove());
+      borderLayers = addBorders(L, map, next);
+      shownDetail = wanted;
+      // The canvas paints in the order layers were added; keep the radius above the land.
+      circle?.bringToFront();
+    }, () => undefined);
+  });
 
   // Leaflet also fires "moveend" for our own moves and when the page is resized; only a
   // move that changes the view and isn't ours counts as the user's. Leaflet pans in whole
@@ -113,6 +137,9 @@ export function createBorderMap(
       if (!isSameView(next, lastView)) showView(next);
     },
     setRadius,
-    destroy: () => map.remove(),
+    destroy: () => {
+      removed = true;
+      map.remove();
+    },
   };
 }

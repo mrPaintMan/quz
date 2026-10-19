@@ -5,7 +5,7 @@ import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { LinesField } from "@/features/host/authoring/questionEditors/fields/LinesField";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
 import { SwitchField } from "@/features/host/authoring/questionEditors/fields/SwitchField";
 import { TextField } from "@/features/host/authoring/questionEditors/fields/TextField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
@@ -26,7 +26,7 @@ export function FreeTextEditor({ content, onChange }: QuestionEditorProps<"freeT
           {withSubQuestions && (
             <div className="flex items-center justify-between">
               <h3 className="font-medium">Delfråga {LETTERS[index]})</h3>
-              <RowButtons
+              <RemoveRowButton
                 name={`delfråga ${LETTERS[index]}`}
                 onRemove={() => onChange({ ...content, fields: removeAt(fields, index) })}
               />

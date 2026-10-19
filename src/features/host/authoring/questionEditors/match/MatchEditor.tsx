@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 export function MatchEditor({ content, onChange }: QuestionEditorProps<"match">) {
@@ -24,7 +24,7 @@ export function MatchEditor({ content, onChange }: QuestionEditorProps<"match">)
             <Input aria-label={`Par ${index + 1}, vänster`} value={pair.left} onChange={(event) => updatePair(index, { ...pair, left: event.target.value })} />
             <span aria-hidden="true" className="text-muted-foreground">↔</span>
             <Input aria-label={`Par ${index + 1}, höger`} value={pair.right} onChange={(event) => updatePair(index, { ...pair, right: event.target.value })} />
-            <RowButtons name={`par ${index + 1}`} onRemove={() => onChange({ ...content, pairs: removeAt(pairs, index) })} />
+            <RemoveRowButton name={`par ${index + 1}`} onRemove={() => onChange({ ...content, pairs: removeAt(pairs, index) })} />
           </div>
         ))}
       </fieldset>

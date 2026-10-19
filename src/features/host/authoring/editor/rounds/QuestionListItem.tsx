@@ -5,7 +5,6 @@ import type { Doc } from "@convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
 import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
 import { maxQuestionPoints } from "@/domain/questions/maxQuestionPoints";
-import { RowButtons, type RowPosition } from "@/features/host/authoring/shared/RowButtons";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { formatPoints } from "./formatPoints";
 
@@ -15,11 +14,10 @@ type QuestionListItemProps = {
   selected: boolean;
   onSelect: () => void;
   dragHandle?: ReactNode;
-  position?: RowPosition;
 };
 
 // The inside of one row in the round's question list; the list supplies the <li>.
-export function QuestionListItem({ question, number, selected, onSelect, dragHandle, position }: QuestionListItemProps) {
+export function QuestionListItem({ question, number, selected, onSelect, dragHandle }: QuestionListItemProps) {
   const ready = findQuestionProblems(question).length === 0;
   return (
     <>
@@ -36,7 +34,6 @@ export function QuestionListItem({ question, number, selected, onSelect, dragHan
         </span>
         {!ready && <Badge variant="outline" className="border-primary/60 text-primary">Ej klar</Badge>}
       </button>
-      <RowButtons name={`fråga ${number}`} position={position} />
     </>
   );
 }

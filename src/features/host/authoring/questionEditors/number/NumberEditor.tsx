@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RowButtons } from "@/features/host/authoring/shared/RowButtons";
+import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 const DEFAULT_RANK_POINTS = [3, 2, 1];
@@ -53,7 +53,7 @@ export function NumberEditor({ content, onChange }: QuestionEditorProps<"number"
                 onChange={(points) => onChange({ ...content, scoring: { ...scoring, tiers: replaceAt(scoring.tiers, index, { ...tier, points }) } })}
                 className="w-32"
               />
-              <RowButtons
+              <RemoveRowButton
                 name={`nivå ${index + 1}`}
                 onRemove={() => onChange({ ...content, scoring: { ...scoring, tiers: removeAt(scoring.tiers, index) } })}
               />
@@ -80,7 +80,7 @@ export function NumberEditor({ content, onChange }: QuestionEditorProps<"number"
                 onChange={(value) => onChange({ ...content, scoring: { ...scoring, pointsByRank: replaceAt(scoring.pointsByRank, index, value) } })}
                 className="w-40"
               />
-              <RowButtons
+              <RemoveRowButton
                 name={`plats ${index + 1}`}
                 onRemove={() => onChange({ ...content, scoring: { ...scoring, pointsByRank: removeAt(scoring.pointsByRank, index) } })}
               />
