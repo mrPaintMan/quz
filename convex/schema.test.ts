@@ -21,7 +21,7 @@ const oneOfEachType: QuestionContent[] = [
     points: 3,
     initialView: { center: { lat: 62, lng: 15 }, zoom: 4 },
   },
-  { type: "paSparet", acceptedAnswers: ["Kiruna"], fuzzy: true, clues: [{ text: "Gruva", points: 10 }] },
+  { type: "paSparet", acceptedAnswers: ["Kiruna"], fuzzy: true, clues: ["Gruva", "Ishotell", "Norrsken", "Malmbanan", "Kyrka"] },
   { type: "activity", maxPoints: 5 },
 ];
 
@@ -52,6 +52,12 @@ describe("schema", () => {
 
   it("rejects content of an unknown question type", async () => {
     await expect(insertQuestion({ type: "karaoke", points: 1 })).rejects.toThrow();
+  });
+
+  it("rejects På spåret clues that carry their own points, the shape before D30", async () => {
+    await expect(
+      insertQuestion({ type: "paSparet", acceptedAnswers: ["Kiruna"], fuzzy: true, clues: [{ text: "Gruva", points: 10 }] }),
+    ).rejects.toThrow();
   });
 
   it("rejects content missing a field its type requires", async () => {

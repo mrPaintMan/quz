@@ -43,9 +43,4 @@ describe("paSparetRules", () => {
   it("flags a trip that doesn't have exactly five clues", () => {
     expect(messagesFor({ ...validContent, clues: ["Gruva"] })).toEqual(["En resa har fem ledtrådar."]);
   });
-
-  it("reads clues saved with their own points before D30", () => {
-    const clues = validContent.clues.map((text, index) => (index === 0 ? { text: "", points: 10 } : text));
-    expect(messagesFor({ ...validContent, clues })).toEqual(["Ledtråd 1 saknar text."]);
-  });
 });

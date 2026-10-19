@@ -3,7 +3,6 @@ import { hasSpelling } from "@/domain/questionTypes/hasSpelling";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
-import { clueText } from "./clueText";
 
 type PaSparetContent = ContentOf<"paSparet">;
 
@@ -23,6 +22,6 @@ export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
   findProblems: (content) => [
     ...problemIf(!hasSpelling(content.acceptedAnswers), "Ange resmålet."),
     ...problemIf(content.clues.length !== PA_SPARET_CLUE_POINTS.length, "En resa har fem ledtrådar."),
-    ...content.clues.flatMap((clue, index) => problemIf(isBlank(clueText(clue)), `Ledtråd ${index + 1} saknar text.`)),
+    ...content.clues.flatMap((clue, index) => problemIf(isBlank(clue), `Ledtråd ${index + 1} saknar text.`)),
   ],
 };
