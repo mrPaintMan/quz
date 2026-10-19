@@ -7,10 +7,9 @@ async function setupQuestionWithFile() {
   const quizId = await t.mutation(api.quizzes.mutations.createQuiz, { ...host, title: "Julquiz", year: 2026 });
   const roundId = await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "questions", title: "Julmusik" });
   const questionId = await t.mutation(api.questions.mutations.addQuestion, { ...host, roundId, type: "freeText" });
-  await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "paSparet", title: "På spåret" });
   const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["bild"])));
   const mediaOf = async () => (await t.run((ctx) => ctx.db.get("questions", questionId)))?.media;
-  return { t, questionId, storageId, mediaOf };
+  return { t, quizId, questionId, storageId, mediaOf };
 }
 
 describe("generateUploadUrl", () => {
@@ -35,10 +34,12 @@ describe("setQuestionMedia", () => {
   });
 
   it("refuses anything but a film for a question that needs one", async () => {
-    const { t, storageId } = await setupQuestionWithFile();
-    const tripId = await t.run(async (ctx) => (await ctx.db.query("questions").take(10)).find((q) => q.content.type === "paSparet")?._id);
+    const { t, quizId, storageId } = await setupQuestionWithFile();
+    const roundId = await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "paSparet", title: "På spåret" });
+    const tree = await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId });
+    const [trip] = tree?.rounds.find((round) => round._id === roundId)?.questions ?? [];
     await expect(
-      t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId: tripId!, media: { kind: "image", storageId } }),
+      t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId: trip._id, media: { kind: "image", storageId } }),
     ).rejects.toThrow("behöver en film");
   });
 });

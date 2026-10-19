@@ -17,6 +17,10 @@ describe("activeClueIndex", () => {
     expect(activeClueIndex(130, 120)).toBe(4);
   });
 
+  it("stays on the first clue while the film's length is unknown", () => {
+    expect(activeClueIndex(0, 0)).toBe(0);
+  });
+
   it("stays on the first clue before the film has started", () => {
     expect(activeClueIndex(-1, 120)).toBe(0);
   });

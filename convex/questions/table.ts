@@ -3,7 +3,6 @@ import { v, type Infer } from "convex/values";
 import { numberOrNull } from "./numberOrNull";
 import { questionContent } from "./questionContent";
 
-
 const imageOrAudio = v.object({
   kind: v.union(v.literal("image"), v.literal("audio")),
   storageId: v.id("_storage"),

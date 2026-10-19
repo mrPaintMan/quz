@@ -55,7 +55,9 @@ export async function readVideoFacts(file: Blob): Promise<VideoFacts> {
   } catch {
     return { durationSeconds: null, still: null };
   } finally {
+    // Detaching the source and reloading lets the browser free the decoded film at once.
     video.removeAttribute("src");
+    video.load();
     URL.revokeObjectURL(url);
   }
 }

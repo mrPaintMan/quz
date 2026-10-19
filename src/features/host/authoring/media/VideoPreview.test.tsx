@@ -5,7 +5,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { VideoPreview } from "./VideoPreview";
 
 // The fake query answers with a URL per storage id, and records which ones were asked for.
-const urls: Record<string, string | null> = { film: "https://film.example", still: "https://still.example" };
+const urls: Record<string, string | null> = { film: "https://film.example", still: "https://still.example", gone: null };
 const askedFor: string[] = [];
 vi.mock("@/features/host/shared/useHostQuery", () => ({
   useHostQuery: (_query: unknown, args: { storageId: string } | "skip") => {
@@ -45,6 +45,11 @@ describe("VideoPreview", () => {
     render(<VideoPreview media={media(null, null)} alt="Filmen" />);
     expect(screen.getByText("Ingen stillbild. Ladda upp filmen igen för att få en.")).toBeInTheDocument();
     expect(screen.queryByText(/Längd/)).not.toBeInTheDocument();
+  });
+
+  it("says so when the still is gone", () => {
+    render(<VideoPreview media={media("gone")} alt="Filmen" />);
+    expect(screen.getByText("Ingen stillbild. Ladda upp filmen igen för att få en.")).toBeInTheDocument();
   });
 
   it("says so when the film is gone", async () => {

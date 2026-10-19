@@ -72,6 +72,21 @@ describe("QuestionMediaField", () => {
     expect(uploadFile).toHaveBeenCalledTimes(1);
   });
 
+  it("saves the film without a still when only the still fails to upload", async () => {
+    uploadFile.mockImplementation(async (file: Blob) => {
+      if (file === still) throw new Error("offline");
+      return "file1";
+    });
+    const { container } = render(<QuestionMediaField question={question(null)} />);
+    chooseFile(container, new File(["x"], "tag.mp4", { type: "video/mp4" }));
+    await vi.waitFor(() =>
+      expect(mutation).toHaveBeenCalledWith({
+        questionId: "q1",
+        media: { kind: "video", storageId: "file1", posterId: null, durationSeconds: 120 },
+      }),
+    );
+  });
+
   it("takes only a film for a På spåret trip, with export advice", async () => {
     const { container } = render(<QuestionMediaField question={question(null, trip)} />);
     expect(screen.getByRole("heading", { name: "Filmen" })).toBeInTheDocument();

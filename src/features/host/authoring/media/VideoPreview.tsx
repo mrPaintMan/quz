@@ -32,7 +32,8 @@ export function VideoPreview({ media, alt }: VideoPreviewProps) {
         // eslint-disable-next-line @next/next/no-img-element -- Convex storage URLs are signed and change; next/image would need a remote pattern per deployment.
         <img src={stillUrl} alt={`Stillbild ur ${alt.toLowerCase()}`} className="max-h-64 rounded-lg object-contain" />
       ) : (
-        media.posterId === null && <p className="text-sm text-muted-foreground">Ingen stillbild. Ladda upp filmen igen för att få en.</p>
+        // No still was made, or it is gone; while its URL is on its way (undefined) show nothing.
+        (media.posterId === null || stillUrl === null) && <p className="text-sm text-muted-foreground">Ingen stillbild. Ladda upp filmen igen för att få en.</p>
       )}
       <div className="flex flex-wrap items-center gap-3">
         {media.durationSeconds !== null && <span className="text-sm text-muted-foreground">Längd {formatClock(media.durationSeconds)}</span>}

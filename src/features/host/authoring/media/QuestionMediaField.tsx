@@ -32,7 +32,9 @@ export function QuestionMediaField({ question }: { question: Doc<"questions"> })
       return { kind, storageId: await uploadFile(file) };
     }
     const { still, durationSeconds } = await readVideoFacts(file);
-    const [storageId, posterId] = await Promise.all([uploadFile(file), still ? uploadFile(still) : null]);
+    // A still that fails to upload is left out rather than failing the film's upload with it.
+    const stillUpload = still ? uploadFile(still).catch(() => null) : null;
+    const [storageId, posterId] = await Promise.all([uploadFile(file), stillUpload]);
     return { kind, storageId, posterId, durationSeconds };
   }
 

@@ -7,7 +7,7 @@ type FakeVideo = EventTarget & { duration: number; videoWidth: number; videoHeig
 
 function fakeVideo({ duration, fails }: { duration: number; fails?: "load" | "seek" }): FakeVideo {
   const video = new EventTarget() as FakeVideo & { src: string; muted: boolean; preload: string; removeAttribute: () => void };
-  Object.assign(video, { duration, videoWidth: 1920, videoHeight: 1080, muted: false, preload: "", removeAttribute: vi.fn() });
+  Object.assign(video, { duration, videoWidth: 1920, videoHeight: 1080, muted: false, preload: "", removeAttribute: vi.fn(), load: vi.fn() });
   let time = 0;
   Object.defineProperty(video, "src", {
     set: () => queueMicrotask(() => video.dispatchEvent(new Event(fails === "load" ? "error" : "loadedmetadata"))),
