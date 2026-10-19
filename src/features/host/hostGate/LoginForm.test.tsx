@@ -31,4 +31,9 @@ describe("LoginForm", () => {
     render(<LoginForm onSubmit={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Logga in" })).toBeDisabled();
   });
+
+  it("shows the logo linking home", () => {
+    render(<LoginForm onSubmit={vi.fn()} />);
+    expect(screen.getByRole("link", { name: "Quz" })).toHaveAttribute("href", "/");
+  });
 });
