@@ -80,12 +80,13 @@ describe("RoundPanel", () => {
     expect(onSelectQuestion).toHaveBeenCalledWith("new-question");
   });
 
-  it("adds trips without a type choice in a På spåret round", async () => {
-    render(<RoundPanel round={round("paSparet", [])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
-    expect(screen.getByText("Inga resor ännu.")).toBeInTheDocument();
+  it("shows a På spåret round's one trip, with no way to add another", async () => {
+    render(<RoundPanel round={round("paSparet", [question("t", "Vart är vi på väg?")])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
+    expect(screen.getByText("Vart är vi på väg?")).toBeInTheDocument();
     expect(screen.queryByLabelText("Ny fråga av typen")).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole("button", { name: "Lägg till resa" }));
-    expect(calls).toContainEqual({ name: "questions/mutations:addQuestion", args: { roundId: "r1", type: "paSparet" } });
+    expect(screen.queryByRole("button", { name: /Lägg till/ })).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole("button", { name: "Ta bort omgång" }));
+    expect(await screen.findByText("Omgången och dess resa tas bort. Det går inte att ångra.")).toBeInTheDocument();
   });
 
   it("autosaves the round's name", async () => {

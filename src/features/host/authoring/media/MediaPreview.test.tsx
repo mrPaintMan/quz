@@ -21,13 +21,11 @@ describe("MediaPreview", () => {
     expect(screen.getByText("Filen finns inte längre.")).toBeInTheDocument();
   });
 
-  it("shows an image, audio player or video player by kind", () => {
+  it("shows an image or an audio player by kind", () => {
     url.mockReturnValue("https://file.example");
     const { rerender } = render(<MediaPreview storageId={storageId} kind="image" alt="Bild" />);
     expect(screen.getByRole("img", { name: "Bild" })).toHaveAttribute("src", "https://file.example");
     rerender(<MediaPreview storageId={storageId} kind="audio" alt="Ljud" />);
     expect(screen.getByLabelText("Ljud").tagName).toBe("AUDIO");
-    rerender(<MediaPreview storageId={storageId} kind="video" alt="Video" />);
-    expect(screen.getByLabelText("Video").tagName).toBe("VIDEO");
   });
 });

@@ -1,6 +1,9 @@
 import { ConvexError, v } from "convex/values";
 import { moveItem } from "@/domain/ordering/moveItem";
+import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
+import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
 import { hostMutation } from "../auth/hostFunctions";
+import { insertQuestion } from "../questions/insertQuestion";
 import { questionsOfRound } from "../questions/questionsOfRound";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
@@ -17,6 +20,9 @@ export const addRound = hostMutation({
       throw new ConvexError(`Ett quiz kan ha högst ${MAX_ROUNDS_PER_QUIZ} omgångar.`);
     }
     const roundId = await ctx.db.insert("rounds", { quizId, kind, title, position: rounds.length });
+    if (holdsOneQuestion(kind)) {
+      await insertQuestion(ctx, await getOrThrow(ctx, "rounds", roundId), 0, allowedQuestionTypes(kind)[0]);
+    }
     await touchQuiz(ctx, quizId);
     return roundId;
   },

@@ -36,6 +36,13 @@ describe("addQuestion", () => {
     });
   });
 
+  it("refuses a second trip in a På spåret round", async () => {
+    const { t, paSparet } = await setupQuiz();
+    await expect(
+      t.mutation(api.questions.mutations.addQuestion, { ...host, roundId: paSparet, type: "paSparet" }),
+    ).rejects.toThrow("exakt en resa");
+  });
+
   it("refuses a type that doesn't belong in the round", async () => {
     const { t, paSparet } = await setupQuiz();
     await expect(
@@ -159,5 +166,14 @@ describe("deleteQuestion", () => {
     await t.mutation(api.questions.mutations.deleteQuestion, { ...host, questionId: a });
     expect(await promptsIn(julmat)).toEqual(["B"]);
     expect((await getQuestion(b))?.position).toBe(0);
+  });
+
+  it("keeps a På spåret round's trip", async () => {
+    const { t, quizId, paSparet } = await setupQuiz();
+    const tree = await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId });
+    const [trip] = tree?.rounds.find((round) => round._id === paSparet)?.questions ?? [];
+    await expect(t.mutation(api.questions.mutations.deleteQuestion, { ...host, questionId: trip._id })).rejects.toThrow(
+      "Ta bort omgången i stället",
+    );
   });
 });

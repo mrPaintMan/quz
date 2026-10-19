@@ -16,8 +16,8 @@ type RoundListProps = {
 };
 
 function countLabel(round: RoundWithQuestions): string {
+  if (round.kind === "paSparet") return "På spåret";
   const count = round.questions.length;
-  if (round.kind === "paSparet") return count === 1 ? "1 resa" : `${count} resor`;
   return count === 1 ? "1 fråga" : `${count} frågor`;
 }
 

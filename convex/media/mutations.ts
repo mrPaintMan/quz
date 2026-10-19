@@ -1,6 +1,7 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { hostMutation } from "../auth/hostFunctions";
-import { mediaKind } from "../questions/table";
+import { rulesFor } from "@/domain/questionTypes/registry";
+import { questionMedia } from "../questions/table";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
 
@@ -12,12 +13,14 @@ export const generateUploadUrl = hostMutation({
 export const setQuestionMedia = hostMutation({
   args: {
     questionId: v.id("questions"),
-    kind: mediaKind,
-    storageId: v.id("_storage"),
+    media: questionMedia,
   },
-  handler: async (ctx, { questionId, kind, storageId }) => {
+  handler: async (ctx, { questionId, media }) => {
     const question = await getOrThrow(ctx, "questions", questionId);
-    await ctx.db.patch("questions", questionId, { media: { kind, storageId } });
+    if (rulesFor(question.content).requiresVideo && media.kind !== "video") {
+      throw new ConvexError("Den här frågan behöver en film.");
+    }
+    await ctx.db.patch("questions", questionId, { media });
     await touchQuiz(ctx, question.quizId);
   },
 });

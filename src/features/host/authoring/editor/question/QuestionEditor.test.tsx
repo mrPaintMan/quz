@@ -122,4 +122,13 @@ describe("QuestionEditor", () => {
       args: { questionId: "q1", toRoundId: "r2", toIndex: Number.MAX_SAFE_INTEGER },
     });
   });
+
+  it("keeps a På spåret trip in its round and asks for the film", () => {
+    const paSparet = { ...round, kind: "paSparet" as const };
+    const trip = { ...question, content: { type: "paSparet" as const, acceptedAnswers: [], fuzzy: true, clues: ["", "", "", "", ""] } };
+    render(<QuestionEditor question={trip} round={paSparet} rounds={[paSparet]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
+    expect(screen.queryByRole("button", { name: "Ta bort fråga" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Flytta till omgång")).not.toBeInTheDocument();
+    expect(screen.getByText("Lägg till filmen.")).toBeInTheDocument();
+  });
 });

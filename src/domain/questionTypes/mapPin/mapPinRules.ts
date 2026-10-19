@@ -21,6 +21,7 @@ function isOnEarth({ lat, lng }: Coordinates): boolean {
 
 export const mapPinRules: QuestionTypeRules<MapPinContent> = {
   requiresTimeLimit: false,
+  requiresVideo: false,
   createEmptyContent: () => ({
     type: "mapPin",
     target: null,

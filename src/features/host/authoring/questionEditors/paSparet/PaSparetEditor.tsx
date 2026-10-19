@@ -1,19 +1,18 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
+import { clueText } from "@/domain/questionTypes/paSparet/clueText";
+import { PA_SPARET_CLUE_POINTS } from "@/domain/questionTypes/paSparet/paSparetRules";
+import { toFiveClueTexts } from "@/domain/questionTypes/paSparet/toFiveClueTexts";
 import { LinesField } from "@/features/host/authoring/questionEditors/fields/LinesField";
-import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
-import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
 import { SwitchField } from "@/features/host/authoring/questionEditors/fields/SwitchField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSparet">) {
-  const { clues } = content;
-  type Clue = (typeof clues)[number];
-  const updateClue = (index: number, clue: Clue) => onChange({ ...content, clues: replaceAt(clues, index, clue) });
+  // Saving any clue also brings a trip saved before D30 to five plain-text clues.
+  const setClue = (index: number, text: string) =>
+    onChange({ ...content, clues: replaceAt(toFiveClueTexts(content.clues), index, text) });
 
   return (
     <div className="flex flex-col gap-4">
@@ -24,26 +23,22 @@ export function PaSparetEditor({ content, onChange }: QuestionEditorProps<"paSpa
         onChange={(acceptedAnswers) => onChange({ ...content, acceptedAnswers })}
       />
       <fieldset className="flex flex-col gap-3">
-        <legend className="mb-2 text-sm font-medium">Ledtrådar, från svårast till lättast</legend>
-        {clues.map((clue, index) => (
-          <div key={index} className="flex flex-col gap-2 rounded-lg border bg-card p-3">
-            <div className="flex flex-wrap items-end gap-3">
-              <NumberField label={`Ledtråd ${index + 1}: poäng`} value={clue.points} onChange={(points) => updateClue(index, { ...clue, points })} className="w-40" />
-              <div className="flex-1" />
-              <RemoveRowButton name={`ledtråd ${index + 1}`} onRemove={() => onChange({ ...content, clues: removeAt(clues, index) })} />
-            </div>
+        <legend className="mb-1 text-sm font-medium">Ledtrådar, från svårast till lättast</legend>
+        <p className="text-sm text-muted-foreground">Ledtrådarna visas i jämn takt medan filmen spelas.</p>
+        {PA_SPARET_CLUE_POINTS.map((points, index) => (
+          <label key={points} className="flex flex-col gap-1.5">
+            <span className="text-sm">
+              Ledtråd {index + 1} · {points} p
+            </span>
             <Textarea
               aria-label={`Ledtråd ${index + 1}`}
               rows={2}
-              value={clue.text}
-              onChange={(event) => updateClue(index, { ...clue, text: event.target.value })}
+              value={content.clues[index] === undefined ? "" : clueText(content.clues[index])}
+              onChange={(event) => setClue(index, event.target.value)}
             />
-          </div>
+          </label>
         ))}
       </fieldset>
-      <Button variant="outline" className="self-start" onClick={() => onChange({ ...content, clues: [...clues, { text: "", points: null }] })}>
-        Lägg till ledtråd
-      </Button>
       <SwitchField
         label="Rätta med ungefärlig matchning"
         description="Nästan rättstavat räknas; osäkra svar hamnar hos er för granskning."

@@ -26,7 +26,7 @@ The wireframes in the claude.ai design canvas "Quz wireframes" (https://claude.a
 | Round kind | Contents |
 |---|---|
 | Question round | A title (the theme) and its questions. An activity is a question too, usually the last one in a round |
-| På spåret | One or more trips, each a På spåret question |
+| På spåret | Exactly one trip: a film, the destination and five clues worth 10, 8, 6, 4 and 2 points |
 
 ## Question types
 
@@ -60,7 +60,7 @@ The TV and the phones follow one screen sequence, derived from the quiz:
    - **Reveal:** the TV shows the answer key; then the updated leaderboard.
 4. **Between rounds:** leaderboard and, when the hosts choose, the score graph.
 
-På spåret: the hosts reveal the clues one at a time; each team's guess stores the clue level at which it pulled the brake.
+På spåret: the film plays on the TV and the five clues follow at an even pace through it, one per fifth of the film; the admin view shows which clue is active. Each team's guess stores the clue level at which it pulled the brake.
 
 ## Grading
 

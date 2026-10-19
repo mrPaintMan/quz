@@ -24,6 +24,7 @@ function hasValidCorrectIndex({ correctIndex, options }: MultipleChoiceContent) 
 
 export const multipleChoiceRules: QuestionTypeRules<MultipleChoiceContent> = {
   requiresTimeLimit: false,
+  requiresVideo: false,
   createEmptyContent: () => ({
     type: "multipleChoice",
     options: Array.from({ length: 4 }, () => ({ text: "", imageId: null })),

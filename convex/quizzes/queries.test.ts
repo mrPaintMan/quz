@@ -32,7 +32,7 @@ describe("getQuizTree", () => {
     expect(tree?.quiz.title).toBe("Julquiz");
     expect(tree?.rounds.map((round) => round.title)).toEqual(["Julmat", "På spåret"]);
     expect(tree?.rounds[0].questions.map((question) => question.content.type)).toEqual(["freeText", "activity"]);
-    expect(tree?.rounds[1].questions).toEqual([]);
+    expect(tree?.rounds[1].questions.map((question) => question.content.type)).toEqual(["paSparet"]);
   });
 
   it("returns null for a quiz that no longer exists", async () => {

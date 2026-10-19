@@ -1,12 +1,14 @@
 import { ConvexError, v } from "convex/values";
 import { moveItem } from "@/domain/ordering/moveItem";
 import { createEmptyContent } from "@/domain/questions/createEmptyContent";
+import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
 import { isTypeAllowedInRound } from "@/domain/rounds/isTypeAllowedInRound";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
+import { insertQuestion } from "./insertQuestion";
 import { numberOrNull } from "./numberOrNull";
 import { questionContent, type QuestionType } from "./questionContent";
 import { MAX_QUESTIONS_PER_ROUND, questionsOfRound } from "./questionsOfRound";
@@ -19,8 +21,13 @@ function requireTypeAllowed(round: Doc<"rounds">, type: QuestionType): void {
   }
 }
 
-async function requireRoomIn(ctx: QueryCtx, roundId: Id<"rounds">): Promise<Doc<"questions">[]> {
-  const questions = await questionsOfRound(ctx, roundId);
+const ONE_TRIP = "En På spåret-omgång har exakt en resa.";
+
+async function requireRoomIn(ctx: QueryCtx, round: Doc<"rounds">): Promise<Doc<"questions">[]> {
+  const questions = await questionsOfRound(ctx, round._id);
+  if (holdsOneQuestion(round.kind) && questions.length > 0) {
+    throw new ConvexError(ONE_TRIP);
+  }
   if (questions.length >= MAX_QUESTIONS_PER_ROUND) {
     throw new ConvexError(`En omgång kan ha högst ${MAX_QUESTIONS_PER_ROUND} frågor.`);
   }
@@ -32,17 +39,8 @@ export const addQuestion = hostMutation({
   handler: async (ctx, { roundId, type }) => {
     const round = await getOrThrow(ctx, "rounds", roundId);
     requireTypeAllowed(round, type);
-    const questions = await requireRoomIn(ctx, roundId);
-    const questionId = await ctx.db.insert("questions", {
-      quizId: round.quizId,
-      roundId,
-      position: questions.length,
-      prompt: "",
-      timeLimitSeconds: null,
-      media: null,
-      hostNotes: "",
-      content: createEmptyContent(type),
-    });
+    const questions = await requireRoomIn(ctx, round);
+    const questionId = await insertQuestion(ctx, round, questions.length, type);
     await touchQuiz(ctx, round.quizId);
     return questionId;
   },
@@ -94,7 +92,7 @@ export const moveQuestion = hostMutation({
       const fromIndex = questions.findIndex((candidate) => candidate._id === questionId);
       await saveQuestionOrder(ctx, toRoundId, moveItem(questions, fromIndex, toIndex));
     } else {
-      const target = await requireRoomIn(ctx, toRoundId);
+      const target = await requireRoomIn(ctx, toRound);
       const source = (await questionsOfRound(ctx, question.roundId)).filter((q) => q._id !== questionId);
       await saveQuestionOrder(ctx, question.roundId, source);
       await saveQuestionOrder(ctx, toRoundId, moveItem([...target, question], target.length, toIndex));
@@ -107,6 +105,9 @@ export const deleteQuestion = hostMutation({
   args: { questionId: v.id("questions") },
   handler: async (ctx, { questionId }) => {
     const question = await getOrThrow(ctx, "questions", questionId);
+    if (holdsOneQuestion((await getOrThrow(ctx, "rounds", question.roundId)).kind)) {
+      throw new ConvexError(`${ONE_TRIP} Ta bort omgången i stället.`);
+    }
     await ctx.db.delete("questions", questionId);
     await saveQuestionOrder(ctx, question.roundId, await questionsOfRound(ctx, question.roundId));
     await touchQuiz(ctx, question.quizId);

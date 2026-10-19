@@ -7,6 +7,7 @@ import type { ContentOf, QuestionType } from "@convex/questions/questionContent"
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
+import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
 import { QuestionMediaField } from "@/features/host/authoring/media/QuestionMediaField";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
@@ -94,38 +95,41 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
           onChange={(event) => edit({ hostNotes: event.target.value })}
         />
       </div>
-      <ProblemList problems={findQuestionProblems(draft)} />
+      <ProblemList problems={findQuestionProblems({ ...draft, media: question.media })} />
       {saveFailed && (
         <p role="alert" className="text-sm text-destructive">
           Kunde inte spara. Kontrollera anslutningen; ändringen sparas igen vid nästa ändring.
         </p>
       )}
-      <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
-        <MoveToRoundSelect
-          currentRoundId={round._id}
-          questionType={draft.content.type}
-          rounds={rounds}
-          onMove={(toRoundId) =>
-            run(async () => {
-              await moveQuestion({ questionId: question._id, toRoundId, toIndex: AT_END_OF_ROUND });
-              onMoved(toRoundId);
-            })
-          }
-        />
-        <ConfirmButton
-          title="Ta bort frågan?"
-          description="Frågan tas bort från omgången. Det går inte att ångra."
-          confirmLabel="Ta bort"
-          onConfirm={() =>
-            run(async () => {
-              await deleteQuestion({ questionId: question._id });
-              onDeleted();
-            })
-          }
-        >
-          Ta bort fråga
-        </ConfirmButton>
-      </div>
+      {/* A På spåret trip belongs to its round for good: it goes when the round does (D30). */}
+      {!holdsOneQuestion(round.kind) && (
+        <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
+          <MoveToRoundSelect
+            currentRoundId={round._id}
+            questionType={draft.content.type}
+            rounds={rounds}
+            onMove={(toRoundId) =>
+              run(async () => {
+                await moveQuestion({ questionId: question._id, toRoundId, toIndex: AT_END_OF_ROUND });
+                onMoved(toRoundId);
+              })
+            }
+          />
+          <ConfirmButton
+            title="Ta bort frågan?"
+            description="Frågan tas bort från omgången. Det går inte att ångra."
+            confirmLabel="Ta bort"
+            onConfirm={() =>
+              run(async () => {
+                await deleteQuestion({ questionId: question._id });
+                onDeleted();
+              })
+            }
+          >
+            Ta bort fråga
+          </ConfirmButton>
+        </div>
+      )}
     </div>
   );
 }

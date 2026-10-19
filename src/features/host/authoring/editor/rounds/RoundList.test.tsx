@@ -27,19 +27,18 @@ const round = (id: string, title: string, kind: "questions" | "paSparet", count:
   questions: questions(count),
 });
 
-const rounds = [round("a", "Julmusik", "questions", 1), round("b", "Julmat", "questions", 3), round("c", "På spåret", "paSparet", 2)];
+const rounds = [round("a", "Julmusik", "questions", 1), round("b", "Julmat", "questions", 3), round("c", "Tåget", "paSparet", 1)];
 
 describe("RoundList", () => {
   beforeEach(() => {
     calls.length = 0;
   });
 
-  it("lists rounds with their question or trip counts", () => {
-    render(<RoundList quizId={"quiz" as Id<"quizzes">} rounds={[...rounds, round("d", "Resa", "paSparet", 1)]} selectedRoundId={null} onSelectRound={vi.fn()} />);
+  it("lists question rounds with their question count and a På spåret round as such", () => {
+    render(<RoundList quizId={"quiz" as Id<"quizzes">} rounds={rounds} selectedRoundId={null} onSelectRound={vi.fn()} />);
     expect(screen.getByText("1 fråga")).toBeInTheDocument();
     expect(screen.getByText("3 frågor")).toBeInTheDocument();
-    expect(screen.getByText("2 resor")).toBeInTheDocument();
-    expect(screen.getByText("1 resa")).toBeInTheDocument();
+    expect(screen.getByText("På spåret", { selector: "span.text-xs" })).toBeInTheDocument();
   });
 
   it("selects a round", async () => {
