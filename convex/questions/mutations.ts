@@ -1,7 +1,8 @@
 import { ConvexError, v } from "convex/values";
 import { moveItem } from "@/domain/ordering/moveItem";
 import { createEmptyContent } from "@/domain/questions/createEmptyContent";
-import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
+import { isFilmQuestionType } from "@/domain/rounds/filmQuestionTypes";
+import { hasFixedQuestionList } from "@/domain/rounds/hasFixedQuestionList";
 import { isTypeAllowedInRound } from "@/domain/rounds/isTypeAllowedInRound";
 import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
@@ -21,17 +22,37 @@ function requireTypeAllowed(round: Doc<"rounds">, type: QuestionType): void {
   }
 }
 
-const ONE_TRIP = "En På spåret-omgång har exakt en resa.";
+export function requireFilmQuestionType(type: QuestionType): void {
+  if (!isFilmQuestionType(type)) {
+    throw new ConvexError("Den här frågetypen kan inte ställas efter en film.");
+  }
+}
+
+// A På spåret round gets its trip when created and its other questions through its films (D32).
+const FIXED_LIST = "En På spåret-omgång har sin resa och frågor till sina filmer; lägg till frågor via en film.";
 
 async function requireRoomIn(ctx: QueryCtx, round: Doc<"rounds">): Promise<Doc<"questions">[]> {
-  const questions = await questionsOfRound(ctx, round._id);
-  if (holdsOneQuestion(round.kind) && questions.length > 0) {
-    throw new ConvexError(ONE_TRIP);
+  if (hasFixedQuestionList(round.kind)) {
+    throw new ConvexError(FIXED_LIST);
   }
+  const questions = await questionsOfRound(ctx, round._id);
   if (questions.length >= MAX_QUESTIONS_PER_ROUND) {
     throw new ConvexError(`En omgång kan ha högst ${MAX_QUESTIONS_PER_ROUND} frågor.`);
   }
   return questions;
+}
+
+// A trip goes only with its round, and a film keeps at least one question (D30, D32).
+async function requireDeletable(ctx: QueryCtx, question: Doc<"questions">): Promise<void> {
+  const round = await getOrThrow(ctx, "rounds", question.roundId);
+  if (!hasFixedQuestionList(round.kind)) return;
+  if (question.filmId === undefined) {
+    throw new ConvexError("Resan hör till omgången. Ta bort omgången i stället.");
+  }
+  const sameFilm = (await questionsOfRound(ctx, round._id)).filter((other) => other.filmId === question.filmId);
+  if (sameFilm.length === 1) {
+    throw new ConvexError("En film behöver minst en fråga. Ta bort filmen i stället.");
+  }
 }
 
 export const addQuestion = hostMutation({
@@ -71,7 +92,11 @@ export const changeQuestionType = hostMutation({
   args: { questionId: v.id("questions"), type: questionType },
   handler: async (ctx, { questionId, type }) => {
     const question = await getOrThrow(ctx, "questions", questionId);
-    requireTypeAllowed(await getOrThrow(ctx, "rounds", question.roundId), type);
+    if (question.filmId === undefined) {
+      requireTypeAllowed(await getOrThrow(ctx, "rounds", question.roundId), type);
+    } else {
+      requireFilmQuestionType(type);
+    }
     await ctx.db.patch("questions", questionId, { content: createEmptyContent(type) });
     await touchQuiz(ctx, question.quizId);
   },
@@ -85,7 +110,9 @@ export const moveQuestion = hostMutation({
     if (toRound.quizId !== question.quizId) {
       throw new ConvexError("En fråga kan bara flyttas inom samma quiz.");
     }
-    requireTypeAllowed(toRound, question.content.type);
+    if (hasFixedQuestionList((await getOrThrow(ctx, "rounds", question.roundId)).kind) || hasFixedQuestionList(toRound.kind)) {
+      throw new ConvexError("Frågorna i en På spåret-omgång har en fast ordning och flyttas inte.");
+    }
 
     if (toRoundId === question.roundId) {
       const questions = await questionsOfRound(ctx, toRoundId);
@@ -105,9 +132,7 @@ export const deleteQuestion = hostMutation({
   args: { questionId: v.id("questions") },
   handler: async (ctx, { questionId }) => {
     const question = await getOrThrow(ctx, "questions", questionId);
-    if (holdsOneQuestion((await getOrThrow(ctx, "rounds", question.roundId)).kind)) {
-      throw new ConvexError(`${ONE_TRIP} Ta bort omgången i stället.`);
-    }
+    await requireDeletable(ctx, question);
     await ctx.db.delete("questions", questionId);
     await saveQuestionOrder(ctx, question.roundId, await questionsOfRound(ctx, question.roundId));
     await touchQuiz(ctx, question.quizId);

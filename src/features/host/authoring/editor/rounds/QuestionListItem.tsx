@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import type { Doc } from "@convex/_generated/dataModel";
+import type { VideoMedia } from "@convex/questions/table";
 import { Badge } from "@/components/ui/badge";
 import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
 import { maxQuestionPoints } from "@/domain/questions/maxQuestionPoints";
@@ -14,11 +15,13 @@ type QuestionListItemProps = {
   selected: boolean;
   onSelect: () => void;
   dragHandle?: ReactNode;
+  // For a question asked after a På spåret film: that film's video, so a missing film shows as not ready.
+  film?: VideoMedia | null;
 };
 
 // The inside of one row in the round's question list; the list supplies the <li>.
-export function QuestionListItem({ question, number, selected, onSelect, dragHandle }: QuestionListItemProps) {
-  const ready = findQuestionProblems(question).length === 0;
+export function QuestionListItem({ question, number, selected, onSelect, dragHandle, film }: QuestionListItemProps) {
+  const ready = findQuestionProblems({ ...question, film }).length === 0;
   return (
     <>
       {dragHandle && <div className="self-center">{dragHandle}</div>}

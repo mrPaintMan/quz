@@ -3,19 +3,19 @@
 import { useId, useState } from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import type { QuestionType } from "@convex/questions/questionContent";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
-import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
+import { hasFixedQuestionList } from "@/domain/rounds/hasFixedQuestionList";
 import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
 import { SortableList } from "@/features/host/authoring/shared/SortableList";
-import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
+import { AddQuestionForm } from "./AddQuestionForm";
+import { PaSparetQuestions } from "./PaSparetQuestions";
 import { QuestionListItem } from "./QuestionListItem";
+import { questionRowClassName } from "./questionRowClassName";
 import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 type RoundPanelProps = {
@@ -27,10 +27,7 @@ type RoundPanelProps = {
 
 export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDeleted }: RoundPanelProps) {
   const titleId = useId();
-  const typeId = useId();
   const [title, setTitle] = useState(round.title);
-  const types = allowedQuestionTypes(round.kind);
-  const [newType, setNewType] = useState<QuestionType>(types[0]);
   const renameRound = useHostMutation(api.rounds.mutations.renameRound);
   const deleteRound = useHostMutation(api.rounds.mutations.deleteRound);
   const addQuestion = useHostMutation(api.questions.mutations.addQuestion);
@@ -53,51 +50,34 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           </p>
         )}
       </div>
-      <SortableList
-        items={round.questions}
-        getId={(question) => question._id}
-        nameOf={(index) => `fråga ${index + 1}`}
-        onMove={(question, _fromIndex, toIndex) => move(question._id, toIndex)}
-        className="flex flex-col gap-2"
-        itemClassName={(question) =>
-          `flex items-start gap-1 rounded-xl border p-1 ${question._id === selectedQuestionId ? "border-primary bg-secondary" : "bg-card"}`
-        }
-        renderItem={(question, { index, dragHandle }) => (
-          <QuestionListItem
-            question={question}
-            number={index + 1}
-            selected={question._id === selectedQuestionId}
-            onSelect={() => onSelectQuestion(question._id)}
-            dragHandle={dragHandle}
-          />
-        )}
-      />
-      {!holdsOneQuestion(round.kind) && (
+      {hasFixedQuestionList(round.kind) ? (
+        <PaSparetQuestions round={round} selectedQuestionId={selectedQuestionId} onSelectQuestion={onSelectQuestion} />
+      ) : (
         <>
+          <SortableList
+            items={round.questions}
+            getId={(question) => question._id}
+            nameOf={(index) => `fråga ${index + 1}`}
+            onMove={(question, _fromIndex, toIndex) => move(question._id, toIndex)}
+            className="flex flex-col gap-2"
+            itemClassName={(question) => questionRowClassName(question._id === selectedQuestionId)}
+            renderItem={(question, { index, dragHandle }) => (
+              <QuestionListItem
+                question={question}
+                number={index + 1}
+                selected={question._id === selectedQuestionId}
+                onSelect={() => onSelectQuestion(question._id)}
+                dragHandle={dragHandle}
+              />
+            )}
+          />
           {round.questions.length === 0 && <p className="text-sm text-muted-foreground">Inga frågor ännu.</p>}
-          <div className="flex flex-wrap items-end gap-2 rounded-xl border border-dashed p-3">
-            <div className="flex min-w-40 flex-1 flex-col gap-1.5">
-              <Label htmlFor={typeId}>Ny fråga av typen</Label>
-              <select
-                id={typeId}
-                value={newType}
-                onChange={(event) => setNewType(event.target.value as QuestionType)}
-                className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
-              >
-                {types.map((type) => (
-                  <option key={type} value={type}>
-                    {questionEditors[type].label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => run(async () => onSelectQuestion(await addQuestion({ roundId: round._id, type: newType })))}
-            >
-              Lägg till fråga
-            </Button>
-          </div>
+          <AddQuestionForm
+            label="Ny fråga av typen"
+            buttonLabel="Lägg till fråga"
+            types={allowedQuestionTypes(round.kind)}
+            onAdd={(type) => run(async () => onSelectQuestion(await addQuestion({ roundId: round._id, type })))}
+          />
         </>
       )}
       <div className="pt-2">
@@ -105,7 +85,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           title={`Ta bort ${round.title || "omgången"}?`}
           description={
             isPaSparet
-              ? "Omgången och dess resa tas bort. Det går inte att ångra."
+              ? "Omgången med resan, filmerna och deras frågor tas bort. Det går inte att ångra."
               : `Omgången och dess ${round.questions.length} frågor tas bort. Det går inte att ångra.`
           }
           confirmLabel="Ta bort"

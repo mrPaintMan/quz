@@ -39,6 +39,7 @@ import type * as quizzes_mutations from "../quizzes/mutations.js";
 import type * as quizzes_queries from "../quizzes/queries.js";
 import type * as quizzes_table from "../quizzes/table.js";
 import type * as quizzes_touchQuiz from "../quizzes/touchQuiz.js";
+import type * as rounds_filmMutations from "../rounds/filmMutations.js";
 import type * as rounds_mutations from "../rounds/mutations.js";
 import type * as rounds_roundsOfQuiz from "../rounds/roundsOfQuiz.js";
 import type * as rounds_saveRoundOrder from "../rounds/saveRoundOrder.js";
@@ -83,6 +84,7 @@ declare const fullApi: ApiFromModules<{
   "quizzes/queries": typeof quizzes_queries;
   "quizzes/table": typeof quizzes_table;
   "quizzes/touchQuiz": typeof quizzes_touchQuiz;
+  "rounds/filmMutations": typeof rounds_filmMutations;
   "rounds/mutations": typeof rounds_mutations;
   "rounds/roundsOfQuiz": typeof rounds_roundsOfQuiz;
   "rounds/saveRoundOrder": typeof rounds_saveRoundOrder;

@@ -26,7 +26,7 @@ The wireframes in the claude.ai design canvas "Quz wireframes" (https://claude.a
 | Round kind | Contents |
 |---|---|
 | Question round | A title (the theme) and its questions. An activity is a question too, usually the last one in a round |
-| På spåret | Exactly one trip: a film, the destination and five clues worth 10, 8, 6, 4 and 2 points |
+| På spåret | Exactly one trip first (a film, the destination and five clues worth 10, 8, 6, 4 and 2 points), then up to three questions of any answerable type asked after films about the destination: one film with several questions, or a film per question |
 
 ## Question types
 

@@ -1,5 +1,5 @@
 import type { QuestionContent } from "@convex/questions/questionContent";
-import type { QuestionMedia } from "@convex/questions/table";
+import type { QuestionMedia, VideoMedia } from "@convex/questions/table";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
@@ -11,6 +11,8 @@ type QuestionDraft = {
   timeLimitSeconds: number | null;
   content: QuestionContent;
   media: QuestionMedia | null;
+  // For a question asked after a På spåret film (D32): that film's video, null until uploaded.
+  film?: VideoMedia | null;
 };
 
 function findTimeLimitProblems(question: QuestionDraft): Problem[] {
@@ -20,10 +22,14 @@ function findTimeLimitProblems(question: QuestionDraft): Problem[] {
   return problemIfNotPositive(question.timeLimitSeconds, "Tidsgränsen måste vara större än 0.");
 }
 
-function findMediaProblems({ content, media }: QuestionDraft): Problem[] {
-  if (!rulesFor(content).requiresVideo) return [];
-  if (media?.kind !== "video") return [{ message: "Lägg till filmen." }];
-  return problemIf(media.durationSeconds === null, "Filmens längd kunde inte läsas. Ladda upp den igen.");
+function findVideoProblems(video: QuestionMedia | null): Problem[] {
+  if (video?.kind !== "video") return [{ message: "Lägg till filmen." }];
+  return problemIf(video.durationSeconds === null, "Filmens längd kunde inte läsas. Ladda upp den igen.");
+}
+
+function findMediaProblems({ content, media, film }: QuestionDraft): Problem[] {
+  if (film !== undefined) return findVideoProblems(film);
+  return rulesFor(content).requiresVideo ? findVideoProblems(media) : [];
 }
 
 // What still has to be filled in before the quiz can start. Empty means ready.
