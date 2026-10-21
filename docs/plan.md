@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Set up the production R2 bucket (`docs/deploy.md` section 6), then merge the R2 PR and the film-questions PR. Try the finer map and a real På spåret film on a phone. Then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+M2 continues: the screen sequence derived from the quiz (D15), including På spåret films followed by their questions (D33); then the TV lobby and phone join, then the admin's live control.
 
 ## Milestones
 
@@ -37,7 +37,7 @@ Set up the production R2 bucket (`docs/deploy.md` section 6), then merge the R2 
 - [x] Editor per question type (all 11)
 - [x] Media: upload images, audio and video clips to Convex storage
 - [x] Production Convex deployment (Ireland) and Vercel project, live at quz.nu
-- [ ] Both hosts can log in and save from their own devices (to confirm)
+- [x] Both hosts can log in and save from their own devices
 
 ### Follow-ups from M1
 - [x] Drag and drop for reordering, beside the arrows (D26)
@@ -51,14 +51,14 @@ Set up the production R2 bucket (`docs/deploy.md` section 6), then merge the R2 
 - [x] Reordering by drag only, round count under the title, two map detail levels with zoom up to 12 (D29)
 - [x] På spåret as one trip with five fixed clues and an uploaded film, shown by a still (D30)
 - [x] Run `migratePaSparetClues` on dev and production, then narrow the clue schema and delete the migration (D30)
-- [x] Films stored in Cloudflare R2, dev bucket set up (D32); production bucket to set up before merging
+- [x] Films stored in Cloudflare R2, dev and production buckets set up (D32)
 - [x] På spåret films with up to three questions asked after them (D33)
 - [x] Logo: favicon, iPhone icon, logo top left linking to a simple home page (D31)
 
 ### M2 · Live game loop
-- [ ] Convex schema: games, teams, answers (drafts and locks), adjustments
+- [x] Convex schema: games, teams, answers (drafts and locks), adjustments; start and end a game, join a team, rejoin by saved id (D34)
 - [ ] Screen sequence derived from the quiz (D15)
-- [ ] TV: lobby with QR code and join word, rules screen, question and answer screens
+- [ ] TV: lobby with QR code and quz.nu, rules screen, question and answer screens
 - [ ] Phone: join with a team name and colour, rejoin after refresh, follow the game
 - [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz
 - [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
@@ -101,3 +101,4 @@ Set up the production R2 bucket (`docs/deploy.md` section 6), then merge the R2 
 - 2026-10-18: Codebase review for tech debt, clean-code smells and dead code. Removed unused files (Next.js starter icons, `src/lib/utils.ts`, the unused shadcn card, Convex's starter README), the login form's unused notice, the unused sidebar colour tokens, and two needless type exports.
 - 2026-10-18: Review fixes: `useDraftText` for number, lines and answer-key fields, `useAutosave` with save failure, sortable rows and autosave moved to `authoring/shared/`, single types for rounds with questions, media kind and map views, docs updated; empty numbers are `null` everywhere, with a one-off migration (D28).
 - 2026-10-18: `migrateMissingNumbers` ran on dev and production (no `NaN` found in either) and was deleted.
+- 2026-10-22: M1 closed. M2 started: games, teams, answers and adjustments tables, one game at a time joined at quz.nu, 12 team colours (D34). Decisions renumbered: R2 is D32, film questions D33.

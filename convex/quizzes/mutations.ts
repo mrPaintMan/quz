@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
+import { deleteGame } from "../games/deleteGame";
+import { gamesOfQuiz } from "../games/gamesOfQuiz";
 import { questionsOfRound } from "../questions/questionsOfRound";
 import { roundsOfQuiz } from "../rounds/roundsOfQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
@@ -49,6 +51,9 @@ export const deleteQuiz = hostMutation({
   args: { quizId: v.id("quizzes") },
   handler: async (ctx, { quizId }) => {
     await getOrThrow(ctx, "quizzes", quizId);
+    for (const game of await gamesOfQuiz(ctx, quizId)) {
+      await deleteGame(ctx, game._id);
+    }
     for (const round of await roundsOfQuiz(ctx, quizId)) {
       const questions = await questionsOfRound(ctx, round._id);
       await Promise.all(questions.map((question) => ctx.db.delete("questions", question._id)));

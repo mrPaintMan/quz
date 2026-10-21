@@ -6,7 +6,7 @@ import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositiv
 import type { Problem } from "@/domain/questionTypes/questionTypeRules";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
-type QuestionDraft = {
+export type QuestionDraft = {
   prompt: string;
   timeLimitSeconds: number | null;
   content: QuestionContent;
