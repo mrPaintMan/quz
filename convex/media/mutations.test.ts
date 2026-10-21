@@ -19,6 +19,24 @@ describe("generateUploadUrl", () => {
   });
 });
 
+describe("generateFilmUploadUrl", () => {
+  it("gives a signed R2 upload link and the key the film will have", async () => {
+    const t = setupConvexTest();
+    const { key, url } = await t.mutation(api.media.mutations.generateFilmUploadUrl, host);
+    expect(url).toContain("quz-films-test");
+    expect(url).toContain(key);
+  });
+});
+
+describe("getFilmUrl", () => {
+  it("gives a signed link to a film that lasts four hours", async () => {
+    const t = setupConvexTest();
+    const url = await t.mutation(api.media.mutations.getFilmUrl, { ...host, r2Key: "film-key" });
+    expect(url).toContain("film-key");
+    expect(new URL(url).searchParams.get("X-Amz-Expires")).toBe("14400");
+  });
+});
+
 describe("setQuestionMedia", () => {
   it("attaches an uploaded file to the question", async () => {
     const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
@@ -28,7 +46,7 @@ describe("setQuestionMedia", () => {
 
   it("saves a film with its still and length", async () => {
     const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
-    const media = { kind: "video" as const, storageId, posterId: null, durationSeconds: 120 };
+    const media = { kind: "video" as const, r2Key: "film-key", posterId: storageId, durationSeconds: 120 };
     await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media });
     expect(await mediaOf()).toEqual(media);
   });

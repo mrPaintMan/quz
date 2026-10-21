@@ -41,7 +41,7 @@ describe("findQuestionProblems", () => {
   describe("for a type that needs a film", () => {
     const trip: QuestionContent = { type: "paSparet", acceptedAnswers: ["Kiruna"], fuzzy: true, clues: ["A", "B", "C", "D", "E"] };
     const storageId = "film" as Id<"_storage">;
-    const video = (durationSeconds: number | null) => ({ kind: "video" as const, storageId, posterId: null, durationSeconds });
+    const video = (durationSeconds: number | null) => ({ kind: "video" as const, r2Key: "film-key", posterId: null, durationSeconds });
     const draft = (media: Parameters<typeof findQuestionProblems>[0]["media"]) => ({ prompt: "Vart är vi på väg?", timeLimitSeconds: null, media, content: trip });
 
     it("asks for the film", () => {
