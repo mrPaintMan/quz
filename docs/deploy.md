@@ -53,7 +53,7 @@ Don't use the Vercel Marketplace's Convex integration: it creates a separate Con
 Films (videos) are stored in Cloudflare R2, where downloads are free, through the `@convex-dev/r2` component (D31). Images, audio and the films' stills stay in Convex storage. Dev and production each get their own bucket and token.
 
 1. In the Cloudflare dashboard (the same account as the `quz.nu` DNS), open **R2 Object Storage** and switch it on. Cloudflare may ask for a card even on the free plan (10 GB storage, free downloads).
-2. **Create bucket** twice: `quz-films-dev` and `quz-films-prod`, location *Automatic* (or Western Europe), Standard storage.
+2. **Create bucket** twice: `quz-films-dev` and `quz-films-prod`, Standard storage, with **EU jurisdiction** so the films stay in the EU (the dev bucket was made this way).
 3. In each bucket: **Settings → CORS policy → Add**, and paste (the dev bucket only needs the localhost line, the production bucket only the quz.nu lines):
    ```json
    [
@@ -64,11 +64,11 @@ Films (videos) are stored in Cloudflare R2, where downloads are free, through th
      }
    ]
    ```
-4. On the R2 overview page: **Manage R2 API Tokens → Create API Token**, permission **Object Read & Write**, limited to one bucket. Make one token for each bucket. Cloudflare shows four values once: Token value, Access Key ID, Secret Access Key and the endpoint (`https://<account id>.r2.cloudflarestorage.com`).
+4. On the R2 overview page: **Manage R2 API Tokens → Create API Token**, permission **Object Read & Write**, limited to one bucket. Make one token for each bucket. Cloudflare shows four values once: Token value, Access Key ID, Secret Access Key and an endpoint. For an EU-jurisdiction bucket the endpoint must contain `.eu.` (`https://<account id>.eu.r2.cloudflarestorage.com`); the address without it answers "CORS not configured for this bucket" and every upload fails.
 5. Give each Convex deployment its bucket's values; run these yourself so the keys never pass through anyone else. Without `--prod` they go to dev:
    ```sh
    npx convex env set R2_BUCKET quz-films-dev
-   npx convex env set R2_ENDPOINT https://<account id>.r2.cloudflarestorage.com
+   npx convex env set R2_ENDPOINT https://<account id>.eu.r2.cloudflarestorage.com
    npx convex env set R2_ACCESS_KEY_ID <access key id>
    npx convex env set R2_SECRET_ACCESS_KEY <secret access key>
    npx convex env set R2_TOKEN <token value>
