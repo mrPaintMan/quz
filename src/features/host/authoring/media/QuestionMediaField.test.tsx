@@ -9,6 +9,8 @@ const uploadFile = vi.fn();
 vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () => mutation }));
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => "https://file.example" }));
 vi.mock("./useUploadFile", () => ({ useUploadFile: () => uploadFile }));
+const uploadFilm = vi.fn();
+vi.mock("./useUploadFilm", () => ({ useUploadFilm: () => uploadFilm }));
 const readVideoFacts = vi.fn();
 vi.mock("./readVideoFacts", () => ({ readVideoFacts: (file: Blob) => readVideoFacts(file) }));
 const still = new Blob(["jpeg"], { type: "image/jpeg" });
@@ -36,6 +38,7 @@ describe("QuestionMediaField", () => {
   beforeEach(() => {
     mutation.mockReset().mockResolvedValue(undefined);
     uploadFile.mockReset().mockImplementation(async (file: Blob) => (file === still ? "still1" : "file1"));
+    uploadFilm.mockReset().mockResolvedValue("film-key");
     readVideoFacts.mockReset().mockResolvedValue({ still, durationSeconds: 120 });
   });
 
@@ -54,7 +57,7 @@ describe("QuestionMediaField", () => {
     await vi.waitFor(() =>
       expect(mutation).toHaveBeenCalledWith({
         questionId: "q1",
-        media: { kind: "video", storageId: "file1", posterId: "still1", durationSeconds: 120 },
+        media: { kind: "video", r2Key: "film-key", posterId: "still1", durationSeconds: 120 },
       }),
     );
   });
@@ -66,23 +69,23 @@ describe("QuestionMediaField", () => {
     await vi.waitFor(() =>
       expect(mutation).toHaveBeenCalledWith({
         questionId: "q1",
-        media: { kind: "video", storageId: "file1", posterId: null, durationSeconds: null },
+        media: { kind: "video", r2Key: "film-key", posterId: null, durationSeconds: null },
       }),
     );
-    expect(uploadFile).toHaveBeenCalledTimes(1);
+    expect(uploadFile).not.toHaveBeenCalled();
   });
 
   it("saves the film without a still when only the still fails to upload", async () => {
     uploadFile.mockImplementation(async (file: Blob) => {
       if (file === still) throw new Error("offline");
-      return "file1";
+      return "other";
     });
     const { container } = render(<QuestionMediaField question={question(null)} />);
     chooseFile(container, new File(["x"], "tag.mp4", { type: "video/mp4" }));
     await vi.waitFor(() =>
       expect(mutation).toHaveBeenCalledWith({
         questionId: "q1",
-        media: { kind: "video", storageId: "file1", posterId: null, durationSeconds: 120 },
+        media: { kind: "video", r2Key: "film-key", posterId: null, durationSeconds: 120 },
       }),
     );
   });
@@ -98,7 +101,7 @@ describe("QuestionMediaField", () => {
   });
 
   it("shows an attached film by its still", () => {
-    const media = { kind: "video" as const, storageId: "file1" as Id<"_storage">, posterId: "still1" as Id<"_storage">, durationSeconds: 120 };
+    const media = { kind: "video" as const, r2Key: "film-key", posterId: "still1" as Id<"_storage">, durationSeconds: 120 };
     render(<QuestionMediaField question={question(media, trip)} />);
     expect(screen.getByRole("img", { name: "Stillbild ur filmen" })).toBeInTheDocument();
     expect(screen.getByText("Längd 2:00")).toBeInTheDocument();

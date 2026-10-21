@@ -47,3 +47,33 @@ Done: `migratePaSparetClues` (D30) on 2026-10-19, on dev and production; it turn
 `quz.nu` is bought at Loopia, with its nameservers pointing at Cloudflare. In Cloudflare, the records Vercel shows under **Project → Settings → Domains** are set to **DNS only** (grey cloud): proxying through Cloudflare breaks Vercel's certificate. `www.quz.nu` redirects to `quz.nu`, the primary domain.
 
 Don't use the Vercel Marketplace's Convex integration: it creates a separate Convex team instead of using this project.
+
+## 6. Film storage in Cloudflare R2
+
+Films (videos) are stored in Cloudflare R2, where downloads are free, through the `@convex-dev/r2` component (D31). Images, audio and the films' stills stay in Convex storage. Dev and production each get their own bucket and token.
+
+1. In the Cloudflare dashboard (the same account as the `quz.nu` DNS), open **R2 Object Storage** and switch it on. Cloudflare may ask for a card even on the free plan (10 GB storage, free downloads).
+2. **Create bucket** twice: `quz-films-dev` and `quz-films-prod`, location *Automatic* (or Western Europe), Standard storage.
+3. In each bucket: **Settings → CORS policy → Add**, and paste (the dev bucket only needs the localhost line, the production bucket only the quz.nu lines):
+   ```json
+   [
+     {
+       "AllowedOrigins": ["http://localhost:3000", "https://quz.nu", "https://www.quz.nu"],
+       "AllowedMethods": ["GET", "PUT"],
+       "AllowedHeaders": ["Content-Type"]
+     }
+   ]
+   ```
+4. On the R2 overview page: **Manage R2 API Tokens → Create API Token**, permission **Object Read & Write**, limited to one bucket. Make one token for each bucket. Cloudflare shows four values once: Token value, Access Key ID, Secret Access Key and the endpoint (`https://<account id>.r2.cloudflarestorage.com`).
+5. Give each Convex deployment its bucket's values; run these yourself so the keys never pass through anyone else. Without `--prod` they go to dev:
+   ```sh
+   npx convex env set R2_BUCKET quz-films-dev
+   npx convex env set R2_ENDPOINT https://<account id>.r2.cloudflarestorage.com
+   npx convex env set R2_ACCESS_KEY_ID <access key id>
+   npx convex env set R2_SECRET_ACCESS_KEY <secret access key>
+   npx convex env set R2_TOKEN <token value>
+   ```
+   and the same with `--prod` and `quz-films-prod`.
+6. Check: upload a film in the editor, then press "Spela upp". The file shows up in the bucket's **Objects** list.
+
+The buckets stay private: the app plays films through signed links that expire after a few hours.

@@ -8,11 +8,12 @@ const imageOrAudio = v.object({
   storageId: v.id("_storage"),
 });
 
-// The still and the length are read in the host's browser while uploading (D30), so the
-// editor can show the film without downloading it. Either is null if the browser couldn't.
+// The film itself is in Cloudflare R2 (D31); its still stays in Convex storage. The still and
+// the length are read in the host's browser while uploading (D30), so the editor can show the
+// film without downloading it. Either is null if the browser couldn't.
 const video = v.object({
   kind: v.literal("video"),
-  storageId: v.id("_storage"),
+  r2Key: v.string(),
   posterId: v.union(v.id("_storage"), v.null()),
   durationSeconds: numberOrNull,
 });

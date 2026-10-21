@@ -12,12 +12,14 @@ import { mediaKindOf } from "./mediaKindOf";
 import { MediaPreview } from "./MediaPreview";
 import { readVideoFacts } from "./readVideoFacts";
 import { useUploadFile } from "./useUploadFile";
+import { useUploadFilm } from "./useUploadFilm";
 import { VideoPreview } from "./VideoPreview";
 
 // Image, audio or a video shown with the question. A question that needs a film, the
 // På spåret trip, takes only video (D30).
 export function QuestionMediaField({ question }: { question: Doc<"questions"> }) {
   const uploadFile = useUploadFile();
+  const uploadFilm = useUploadFilm();
   const setMedia = useHostMutation(api.media.mutations.setQuestionMedia);
   const removeMedia = useHostMutation(api.media.mutations.removeQuestionMedia);
   const run = useRunAction();
@@ -34,8 +36,8 @@ export function QuestionMediaField({ question }: { question: Doc<"questions"> })
     const { still, durationSeconds } = await readVideoFacts(file);
     // A still that fails to upload is left out rather than failing the film's upload with it.
     const stillUpload = still ? uploadFile(still).catch(() => null) : null;
-    const [storageId, posterId] = await Promise.all([uploadFile(file), stillUpload]);
-    return { kind, storageId, posterId, durationSeconds };
+    const [r2Key, posterId] = await Promise.all([uploadFilm(file), stillUpload]);
+    return { kind, r2Key, posterId, durationSeconds };
   }
 
   async function upload(file: File) {
@@ -48,8 +50,8 @@ export function QuestionMediaField({ question }: { question: Doc<"questions"> })
       <h3 className="text-sm font-medium">{needsFilm ? "Filmen" : "Bild, ljud eller video"}</h3>
       {needsFilm && (
         <p className="text-sm text-muted-foreground">
-          Exportera som MP4 i 1080p, 30 bilder per sekund, runt 5 Mbit/s (cirka 75 MB för 2 minuter). Varje uppspelning
-          räknas mot Convex gratisgräns på 1 GB nedladdning i månaden.
+          Exportera som MP4 i 1080p, 30 bilder per sekund, runt 5 Mbit/s (cirka 75 MB för 2 minuter), så att den laddas
+          snabbt på TV:n.
         </p>
       )}
       {media?.kind === "video" && <VideoPreview media={media} alt={needsFilm ? "Filmen" : "Frågans video"} />}

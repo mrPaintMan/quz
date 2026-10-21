@@ -12,6 +12,7 @@ import type * as auth_hostFunctions from "../auth/hostFunctions.js";
 import type * as auth_isHostPassphrase from "../auth/isHostPassphrase.js";
 import type * as auth_queries from "../auth/queries.js";
 import type * as auth_requireHost from "../auth/requireHost.js";
+import type * as media_filmStorage from "../media/filmStorage.js";
 import type * as media_mutations from "../media/mutations.js";
 import type * as media_queries from "../media/queries.js";
 import type * as questions_acceptedItem from "../questions/acceptedItem.js";
@@ -55,6 +56,7 @@ declare const fullApi: ApiFromModules<{
   "auth/isHostPassphrase": typeof auth_isHostPassphrase;
   "auth/queries": typeof auth_queries;
   "auth/requireHost": typeof auth_requireHost;
+  "media/filmStorage": typeof media_filmStorage;
   "media/mutations": typeof media_mutations;
   "media/queries": typeof media_queries;
   "questions/acceptedItem": typeof questions_acceptedItem;
@@ -114,4 +116,6 @@ export declare const internal: FilterApi<
   FunctionReference<any, "internal">
 >;
 
-export declare const components: {};
+export declare const components: {
+  r2: import("@convex-dev/r2/_generated/component.js").ComponentApi<"r2">;
+};
