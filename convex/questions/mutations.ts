@@ -1,7 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { moveItem } from "@/domain/ordering/moveItem";
 import { createEmptyContent } from "@/domain/questions/createEmptyContent";
-import { isFilmQuestionType } from "@/domain/rounds/filmQuestionTypes";
 import { hasFixedQuestionList } from "@/domain/rounds/hasFixedQuestionList";
 import { isTypeAllowedInRound } from "@/domain/rounds/isTypeAllowedInRound";
 import type { Doc } from "../_generated/dataModel";
@@ -14,17 +13,12 @@ import { numberOrNull } from "./numberOrNull";
 import { questionContent, type QuestionType } from "./questionContent";
 import { MAX_QUESTIONS_PER_ROUND, questionsOfRound } from "./questionsOfRound";
 import { questionType } from "./questionType";
+import { requireFilmQuestionType } from "./requireFilmQuestionType";
 import { saveQuestionOrder } from "./saveQuestionOrder";
 
 function requireTypeAllowed(round: Doc<"rounds">, type: QuestionType): void {
   if (!isTypeAllowedInRound(round.kind, type)) {
     throw new ConvexError("Den här frågetypen passar inte i den här omgången.");
-  }
-}
-
-export function requireFilmQuestionType(type: QuestionType): void {
-  if (!isFilmQuestionType(type)) {
-    throw new ConvexError("Den här frågetypen kan inte ställas efter en film.");
   }
 }
 

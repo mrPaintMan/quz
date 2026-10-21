@@ -71,7 +71,7 @@ describe("FilmCard", () => {
 
   it("deletes the film after confirmation", async () => {
     renderCard();
-    await userEvent.click(screen.getByRole("button", { name: "Ta bort film" }));
+    await userEvent.click(screen.getByRole("button", { name: "Ta bort film 2 med frågor" }));
     expect(await screen.findByText("Filmen och dess fråga tas bort. Det går inte att ångra.")).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Ta bort" }));
     await act(async () => {});

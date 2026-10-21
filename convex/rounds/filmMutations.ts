@@ -7,9 +7,10 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { insertQuestion } from "../questions/insertQuestion";
-import { requireFilmQuestionType } from "../questions/mutations";
+import type { QuestionType } from "../questions/questionContent";
 import { questionsOfRound } from "../questions/questionsOfRound";
 import { questionType } from "../questions/questionType";
+import { requireFilmQuestionType } from "../questions/requireFilmQuestionType";
 import { saveQuestionOrder } from "../questions/saveQuestionOrder";
 import { videoMedia } from "../questions/table";
 import { touchQuiz } from "../quizzes/touchQuiz";
@@ -38,7 +39,7 @@ async function saveFilms(ctx: MutationCtx, round: Doc<"rounds">, films: Film[]):
 }
 
 // Adds a question after a film, keeping the round's order and the cap of three film questions.
-async function addQuestionAfter(ctx: MutationCtx, round: Doc<"rounds">, films: Film[], filmId: string, type: Doc<"questions">["content"]["type"]) {
+async function addQuestionAfter(ctx: MutationCtx, round: Doc<"rounds">, films: Film[], filmId: string, type: QuestionType) {
   requireFilmQuestionType(type);
   const questions = await questionsOfRound(ctx, round._id);
   if (questions.filter((question) => question.filmId !== undefined).length >= MAX_FILM_QUESTIONS) {

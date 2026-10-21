@@ -63,7 +63,7 @@ export function FilmCard({ roundId, film, filmNumber, questions, canAddQuestion,
           size="sm"
           onConfirm={() => run(() => deleteFilm({ roundId, filmId: film.id }))}
         >
-          Ta bort film
+          Ta bort film {filmNumber} med frågor
         </ConfirmButton>
       </div>
     </section>

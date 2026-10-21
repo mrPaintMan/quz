@@ -22,6 +22,7 @@ import type * as questions_numberOrNull from "../questions/numberOrNull.js";
 import type * as questions_questionContent from "../questions/questionContent.js";
 import type * as questions_questionType from "../questions/questionType.js";
 import type * as questions_questionsOfRound from "../questions/questionsOfRound.js";
+import type * as questions_requireFilmQuestionType from "../questions/requireFilmQuestionType.js";
 import type * as questions_saveQuestionOrder from "../questions/saveQuestionOrder.js";
 import type * as questions_table from "../questions/table.js";
 import type * as questions_types_activity_activityContent from "../questions/types/activity/activityContent.js";
@@ -67,6 +68,7 @@ declare const fullApi: ApiFromModules<{
   "questions/questionContent": typeof questions_questionContent;
   "questions/questionType": typeof questions_questionType;
   "questions/questionsOfRound": typeof questions_questionsOfRound;
+  "questions/requireFilmQuestionType": typeof questions_requireFilmQuestionType;
   "questions/saveQuestionOrder": typeof questions_saveQuestionOrder;
   "questions/table": typeof questions_table;
   "questions/types/activity/activityContent": typeof questions_types_activity_activityContent;

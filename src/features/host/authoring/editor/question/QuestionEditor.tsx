@@ -115,8 +115,8 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
         </p>
       )}
       {canDelete && (
-        <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
-          {canMove ? (
+        <div className={`flex flex-wrap items-end gap-4 border-t pt-4 ${canMove ? "justify-between" : "justify-end"}`}>
+          {canMove && (
             <MoveToRoundSelect
               currentRoundId={round._id}
               questionType={draft.content.type}
@@ -128,8 +128,6 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
                 })
               }
             />
-          ) : (
-            <span />
           )}
           <ConfirmButton
             title="Ta bort frågan?"
