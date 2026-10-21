@@ -4,7 +4,7 @@ import { filmOf } from "@/domain/rounds/filmOf";
 import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 function summarize(rounds: RoundWithQuestions[]): string {
-  // A question asked after a film is ready only once its film is (D32).
+  // A question asked after a film is ready only once its film is (D33).
   const questions = rounds.flatMap((round) => round.questions.map((question) => ({ ...question, film: filmOf(round, question)?.video })));
   if (questions.length === 0) return "Inga frågor ännu";
   const unfinished = questions.filter((question) => findQuestionProblems(question).length > 0).length;

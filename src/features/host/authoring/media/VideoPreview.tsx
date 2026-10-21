@@ -12,7 +12,7 @@ import { useHostQuery } from "@/features/host/shared/useHostQuery";
 type VideoPreviewProps = { media: VideoMedia; alt: string };
 
 // Shows the film's still and length, and asks for a link to the film itself only when the
-// host presses play, so opening a question never downloads it (D30, D31).
+// host presses play, so opening a question never downloads it (D30, D32).
 export function VideoPreview({ media, alt }: VideoPreviewProps) {
   const [filmUrl, setFilmUrl] = useState<string | null>(null);
   const [unplayable, setUnplayable] = useState(false);

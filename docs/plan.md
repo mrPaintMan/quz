@@ -51,8 +51,8 @@ Set up the production R2 bucket (`docs/deploy.md` section 6), then merge the R2 
 - [x] Reordering by drag only, round count under the title, two map detail levels with zoom up to 12 (D29)
 - [x] På spåret as one trip with five fixed clues and an uploaded film, shown by a still (D30)
 - [x] Run `migratePaSparetClues` on dev and production, then narrow the clue schema and delete the migration (D30)
-- [x] Films stored in Cloudflare R2, dev bucket set up (D31); production bucket to set up before merging
-- [x] På spåret films with up to three questions asked after them (D32)
+- [x] Films stored in Cloudflare R2, dev bucket set up (D32); production bucket to set up before merging
+- [x] På spåret films with up to three questions asked after them (D33)
 - [x] Logo: favicon, iPhone icon, logo top left linking to a simple home page (D31)
 
 ### M2 · Live game loop

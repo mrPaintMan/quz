@@ -13,7 +13,7 @@ type FilmFieldProps = {
   onChange: (video: VideoMedia | null) => Promise<unknown>;
 };
 
-// A required film, such as the trip's or one the round's questions are asked after (D30, D32).
+// A required film, such as the trip's or one the round's questions are asked after (D30, D33).
 export function FilmField({ title, video, onChange }: FilmFieldProps) {
   const uploadVideo = useUploadVideo();
   const run = useRunAction();

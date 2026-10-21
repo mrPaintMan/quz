@@ -23,7 +23,7 @@ type FilmCardProps = {
   onSelectQuestion: (questionId: Id<"questions">) => void;
 };
 
-// One film of a På spåret round and the questions answered after it (D32).
+// One film of a På spåret round and the questions answered after it (D33).
 export function FilmCard({ roundId, film, filmNumber, questions, canAddQuestion, selectedQuestionId, onSelectQuestion }: FilmCardProps) {
   const setFilmVideo = useHostMutation(api.rounds.filmMutations.setFilmVideo);
   const addFilmQuestion = useHostMutation(api.rounds.filmMutations.addFilmQuestion);

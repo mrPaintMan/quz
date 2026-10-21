@@ -13,7 +13,7 @@ type AddQuestionFormProps = {
   onAdd: (type: QuestionType) => Promise<unknown>;
 };
 
-// Picks the type of a new question and adds it: to a round, or after a film (D32).
+// Picks the type of a new question and adds it: to a round, or after a film (D33).
 export function AddQuestionForm({ label, buttonLabel, types, onAdd }: AddQuestionFormProps) {
   const id = useId();
   const [type, setType] = useState<QuestionType>(types[0]);

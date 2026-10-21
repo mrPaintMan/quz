@@ -11,7 +11,7 @@ type QuestionDraft = {
   timeLimitSeconds: number | null;
   content: QuestionContent;
   media: QuestionMedia | null;
-  // For a question asked after a På spåret film (D32): that film's video, null until uploaded.
+  // For a question asked after a På spåret film (D33): that film's video, null until uploaded.
   film?: VideoMedia | null;
 };
 

@@ -2,7 +2,7 @@ import type { Film } from "@convex/rounds/table";
 
 type RoundWithFilms = { films?: Film[] };
 
-// A round's films; a round made before D32 has none.
+// A round's films; a round made before D33 has none.
 export function filmsOf(round: RoundWithFilms): Film[] {
   return round.films ?? [];
 }
