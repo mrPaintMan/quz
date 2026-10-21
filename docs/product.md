@@ -16,7 +16,7 @@ The wireframes in the claude.ai design canvas "Quz wireframes" (https://claude.a
 ## Views
 
 - **TV (shared screen):** shows a sequence of screens that the hosts step through: lobby, rules, questions, answers, leaderboard and score graph. Replaces the PowerPoint.
-- **Team phone:** join by scanning the QR code on the TV (or typing the join word) and picking a team name, with no account. The phone follows the game by itself; teams never tap "next". It shows the input for the open question and the team's own score.
+- **Team phone:** join by scanning the QR code on the TV (or typing quz.nu) and picking a team name and colour, with no account. The phone follows the game by itself; teams never tap "next". It shows the input for the open question and the team's own score.
 - **Host admin, authoring:** a list of quizzes; inside a quiz, rounds on the left (drag to reorder), the round's questions in the middle, the selected question's editor on the right. Changes save automatically. Buttons to preview on the TV and to start the quiz.
 - **Host admin, running the night:** a live copy of what the TV shows now and a preview of what comes next; next/previous (also by keyboard); timer pause and +15 s; play media; show answer; pause the whole quiz; a review queue; a leaderboard showing which teams have answered.
 - **Host admin, score history:** total score per team question by question, points per round (round winner highlighted), biggest jump and number of lead changes. Can be shown on the TV.
@@ -50,7 +50,7 @@ Every question has: a prompt shown on the TV, points, an optional time limit, op
 
 The TV and the phones follow one screen sequence, derived from the quiz:
 
-1. **Lobby:** QR code, join word (for example quz.nu/GLÖGG) and the teams that have joined, each with its own colour.
+1. **Lobby:** QR code, the address quz.nu and the teams that have joined, each with its own colour. Only one game runs at a time, so quz.nu always joins it.
 2. **Rules:** how the evening works and an overview (number of rounds, questions, activities, playing time).
 3. **For each question:**
    - **Show:** the TV shows the question and media, the phones show the answer input, the timer starts if there is one.

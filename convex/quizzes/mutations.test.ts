@@ -64,4 +64,13 @@ describe("deleteQuiz", () => {
     }));
     expect(remaining).toEqual({ round: null, question: null });
   });
+
+  it("deletes the quiz's games with their teams", async () => {
+    const { t, quizId } = await setupQuizWithQuestion();
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    const teamId = await t.mutation(api.teams.mutations.joinGame, { gameId, name: "Tomtarna", colour: "red" });
+    await t.mutation(api.quizzes.mutations.deleteQuiz, { ...host, quizId });
+    const remaining = await t.run(async (ctx) => ({ game: await ctx.db.get("games", gameId), team: await ctx.db.get("teams", teamId) }));
+    expect(remaining).toEqual({ game: null, team: null });
+  });
 });

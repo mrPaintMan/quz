@@ -1,7 +1,7 @@
 import { v, type Infer } from "convex/values";
 import { numberOrNull } from "../../numberOrNull";
 
-const coordinates = v.object({ lat: v.number(), lng: v.number() });
+export const coordinates = v.object({ lat: v.number(), lng: v.number() });
 const mapView = v.object({ center: coordinates, zoom: v.number() });
 
 export type Coordinates = Infer<typeof coordinates>;

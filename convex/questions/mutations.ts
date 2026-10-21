@@ -22,7 +22,7 @@ function requireTypeAllowed(round: Doc<"rounds">, type: QuestionType): void {
   }
 }
 
-// A På spåret round gets its trip when created and its other questions through its films (D32).
+// A På spåret round gets its trip when created and its other questions through its films (D33).
 const FIXED_LIST = "En På spåret-omgång har sin resa och frågor till sina filmer; lägg till frågor via en film.";
 
 async function requireRoomIn(ctx: QueryCtx, round: Doc<"rounds">): Promise<Doc<"questions">[]> {
@@ -36,7 +36,7 @@ async function requireRoomIn(ctx: QueryCtx, round: Doc<"rounds">): Promise<Doc<"
   return questions;
 }
 
-// A trip goes only with its round, and a film keeps at least one question (D30, D32).
+// A trip goes only with its round, and a film keeps at least one question (D30, D33).
 async function requireDeletable(ctx: QueryCtx, question: Doc<"questions">): Promise<void> {
   const round = await getOrThrow(ctx, "rounds", question.roundId);
   if (!hasFixedQuestionList(round.kind)) return;

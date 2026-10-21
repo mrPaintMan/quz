@@ -61,7 +61,7 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
   const moveQuestion = useHostMutation(api.questions.mutations.moveQuestion);
   const run = useRunAction();
   const film = filmOf(round, question);
-  // A På spåret round's questions keep their order; a trip goes only with its round (D30, D32).
+  // A På spåret round's questions keep their order; a trip goes only with its round (D30, D33).
   const canMove = !hasFixedQuestionList(round.kind);
   const canDelete = canMove || film !== undefined;
 

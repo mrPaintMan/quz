@@ -6,12 +6,12 @@ import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositiv
 import type { Problem } from "@/domain/questionTypes/questionTypeRules";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
-type QuestionDraft = {
+export type QuestionDraft = {
   prompt: string;
   timeLimitSeconds: number | null;
   content: QuestionContent;
   media: QuestionMedia | null;
-  // For a question asked after a På spåret film (D32): that film's video, null until uploaded.
+  // For a question asked after a På spåret film (D33): that film's video, null until uploaded.
   film?: VideoMedia | null;
 };
 

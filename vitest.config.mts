@@ -13,6 +13,8 @@ const coverageExceptions = [
   "convex/schema.ts",
   "convex/**/table.ts",
   "convex/questions/**/*Content.ts",
+  "convex/questions/**/*Answer.ts",
+  "convex/answers/answerContent.ts",
   "convex/questions/acceptedItem.ts",
   "convex/questions/numberOrNull.ts",
   "src/components/ui/**",

@@ -18,7 +18,7 @@ type PaSparetQuestionsProps = {
   onSelectQuestion: (questionId: Id<"questions">) => void;
 };
 
-// A På spåret round in its fixed order: the trip, then each film with its questions (D30, D32).
+// A På spåret round in its fixed order: the trip, then each film with its questions (D30, D33).
 export function PaSparetQuestions({ round, selectedQuestionId, onSelectQuestion }: PaSparetQuestionsProps) {
   const addFilm = useHostMutation(api.rounds.filmMutations.addFilm);
   const run = useRunAction();

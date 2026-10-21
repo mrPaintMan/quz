@@ -6,7 +6,7 @@ import { readVideoFacts } from "./readVideoFacts";
 import { useUploadFile } from "./useUploadFile";
 import { useUploadFilm } from "./useUploadFilm";
 
-// Uploads a film to R2 and its still to Convex, with the length read from the file (D30, D31).
+// Uploads a film to R2 and its still to Convex, with the length read from the file (D30, D32).
 export function useUploadVideo(): (file: File) => Promise<VideoMedia> {
   const uploadFile = useUploadFile();
   const uploadFilm = useUploadFilm();
