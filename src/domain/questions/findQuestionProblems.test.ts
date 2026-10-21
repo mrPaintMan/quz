@@ -58,6 +58,18 @@ describe("findQuestionProblems", () => {
     });
   });
 
+  describe("for a question asked after a På spåret film", () => {
+    const afterFilm = (film: Parameters<typeof findQuestionProblems>[0]["film"]) => ({ prompt: "Vad heter bron?", timeLimitSeconds: null, media: null, content: activity, film });
+
+    it("asks for the film until it is uploaded", () => {
+      expect(messagesFor(afterFilm(null))).toEqual(["Lägg till filmen."]);
+    });
+
+    it("is satisfied once the film has a known length", () => {
+      expect(messagesFor(afterFilm({ kind: "video", r2Key: "film-key", posterId: null, durationSeconds: 60 }))).toEqual([]);
+    });
+  });
+
   it("flags a time limit below 0", () => {
     expect(messagesFor({ prompt: "Rita en tomte", timeLimitSeconds: -5, media: null, content: drawing })).toEqual([
       "Tidsgränsen måste vara större än 0.",

@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-Merge the `logo` PR. Try the finer map and a real På spåret film on a phone. Both hosts try writing in production; then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
+Set up the production R2 bucket (`docs/deploy.md` section 6), then merge the R2 PR and the film-questions PR. Try the finer map and a real På spåret film on a phone. Then M2 (the live game loop) starts with a proposal for the games, teams and answers schema.
 
 ## Milestones
 
@@ -51,6 +51,8 @@ Merge the `logo` PR. Try the finer map and a real På spåret film on a phone. B
 - [x] Reordering by drag only, round count under the title, two map detail levels with zoom up to 12 (D29)
 - [x] På spåret as one trip with five fixed clues and an uploaded film, shown by a still (D30)
 - [x] Run `migratePaSparetClues` on dev and production, then narrow the clue schema and delete the migration (D30)
+- [x] Films stored in Cloudflare R2, dev bucket set up (D31); production bucket to set up before merging
+- [x] På spåret films with up to three questions asked after them (D32)
 - [x] Logo: favicon, iPhone icon, logo top left linking to a simple home page (D31)
 
 ### M2 · Live game loop
@@ -60,6 +62,7 @@ Merge the `logo` PR. Try the finer map and a real På spåret film on a phone. B
 - [ ] Phone: join with a team name and colour, rejoin after refresh, follow the game
 - [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz
 - [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
+- [ ] På spåret films: TV plays each film, then its questions; phones answer after the film (D32)
 - [ ] Draft saving and locking, including on timer end (D16)
 
 ### M3 · Answering and grading, all types

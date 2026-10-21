@@ -36,11 +36,11 @@ describe("addQuestion", () => {
     });
   });
 
-  it("refuses a second trip in a På spåret round", async () => {
+  it("refuses adding to a På spåret round outside its trip and films", async () => {
     const { t, paSparet } = await setupQuiz();
     await expect(
       t.mutation(api.questions.mutations.addQuestion, { ...host, roundId: paSparet, type: "paSparet" }),
-    ).rejects.toThrow("exakt en resa");
+    ).rejects.toThrow("lägg till frågor via en film");
   });
 
   it("refuses a type that doesn't belong in the round", async () => {
@@ -139,14 +139,6 @@ describe("moveQuestion", () => {
     expect(await promptsIn(julfilmer)).toEqual(["A", "X"]);
   });
 
-  it("refuses moving into a round where the type doesn't belong", async () => {
-    const { t, julmat, paSparet, addActivity } = await setupQuiz();
-    const a = await addActivity(julmat, "A");
-    await expect(
-      t.mutation(api.questions.mutations.moveQuestion, { ...host, questionId: a, toRoundId: paSparet, toIndex: 0 }),
-    ).rejects.toThrow("passar inte i den här omgången");
-  });
-
   it("refuses moving into another quiz", async () => {
     const { t, julmat, addActivity } = await setupQuiz();
     const a = await addActivity(julmat, "A");
@@ -175,5 +167,52 @@ describe("deleteQuestion", () => {
     await expect(t.mutation(api.questions.mutations.deleteQuestion, { ...host, questionId: trip._id })).rejects.toThrow(
       "Ta bort omgången i stället",
     );
+  });
+
+  it("deletes one of a film's questions but keeps its last one", async () => {
+    const { t, paSparet, getQuestion } = await setupQuiz();
+    const { filmId, questionId: first } = await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId: paSparet, type: "freeText" });
+    const second = await t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId: paSparet, filmId, type: "number" });
+    await t.mutation(api.questions.mutations.deleteQuestion, { ...host, questionId: first });
+    expect(await getQuestion(first)).toBeNull();
+    await expect(t.mutation(api.questions.mutations.deleteQuestion, { ...host, questionId: second })).rejects.toThrow(
+      "Ta bort filmen i stället",
+    );
+  });
+});
+
+describe("questions after a film", () => {
+  it("change only to a type that can follow a film", async () => {
+    const { t, paSparet, getQuestion } = await setupQuiz();
+    const { questionId } = await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId: paSparet, type: "freeText" });
+    await t.mutation(api.questions.mutations.changeQuestionType, { ...host, questionId, type: "number" });
+    expect((await getQuestion(questionId))?.content.type).toBe("number");
+    await expect(t.mutation(api.questions.mutations.changeQuestionType, { ...host, questionId, type: "activity" })).rejects.toThrow(
+      "kan inte ställas efter en film",
+    );
+  });
+
+  it("can't be moved, nor anything moved into a På spåret round", async () => {
+    const { t, julmat, paSparet, addActivity } = await setupQuiz();
+    const { questionId } = await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId: paSparet, type: "freeText" });
+    await expect(
+      t.mutation(api.questions.mutations.moveQuestion, { ...host, questionId, toRoundId: julmat, toIndex: 0 }),
+    ).rejects.toThrow("fast ordning");
+    await expect(
+      t.mutation(api.questions.mutations.moveQuestion, { ...host, questionId, toRoundId: paSparet, toIndex: 0 }),
+    ).rejects.toThrow("fast ordning");
+    const activity = await addActivity(julmat, "Pepparkakshus");
+    await expect(
+      t.mutation(api.questions.mutations.moveQuestion, { ...host, questionId: activity, toRoundId: paSparet, toIndex: 0 }),
+    ).rejects.toThrow("fast ordning");
+  });
+
+  it("have no media of their own", async () => {
+    const { t, paSparet } = await setupQuiz();
+    const { questionId } = await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId: paSparet, type: "freeText" });
+    const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["bild"])));
+    await expect(
+      t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media: { kind: "image", storageId } }),
+    ).rejects.toThrow("ställs efter sin film");
   });
 });

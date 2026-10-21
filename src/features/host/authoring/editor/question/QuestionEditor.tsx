@@ -7,7 +7,10 @@ import type { ContentOf, QuestionType } from "@convex/questions/questionContent"
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
-import { holdsOneQuestion } from "@/domain/rounds/holdsOneQuestion";
+import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
+import { filmOf, filmsOf } from "@/domain/rounds/filmOf";
+import { filmQuestionTypes } from "@/domain/rounds/filmQuestionTypes";
+import { hasFixedQuestionList } from "@/domain/rounds/hasFixedQuestionList";
 import { QuestionMediaField } from "@/features/host/authoring/media/QuestionMediaField";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
@@ -57,6 +60,10 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
   const deleteQuestion = useHostMutation(api.questions.mutations.deleteQuestion);
   const moveQuestion = useHostMutation(api.questions.mutations.moveQuestion);
   const run = useRunAction();
+  const film = filmOf(round, question);
+  // A På spåret round's questions keep their order; a trip goes only with its round (D30, D32).
+  const canMove = !hasFixedQuestionList(round.kind);
+  const canDelete = canMove || film !== undefined;
 
   const { saveFailed } = useAutosave(draft, (changes) => updateQuestion({ questionId: question._id, ...changes }));
   const edit = (changes: Partial<Draft>) => setDraft((current) => ({ ...current, ...changes }));
@@ -65,7 +72,7 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
     <div className="flex flex-col gap-5">
       <QuestionTypeSelect
         value={draft.content.type}
-        roundKind={round.kind}
+        types={film ? filmQuestionTypes() : allowedQuestionTypes(round.kind)}
         onChange={(type) => run(() => changeQuestionType({ questionId: question._id, type }))}
       />
       <div className="flex flex-col gap-1.5">
@@ -85,7 +92,13 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
         onChange={(timeLimitSeconds) => edit({ timeLimitSeconds })}
         className="max-w-72"
       />
-      <QuestionMediaField question={question} />
+      {film ? (
+        <p className="text-sm text-muted-foreground">
+          Frågan besvaras efter film {filmsOf(round).indexOf(film) + 1}, som läggs till under omgången.
+        </p>
+      ) : (
+        <QuestionMediaField question={question} />
+      )}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="question-notes">Anteckningar för domarna (visas inte på TV:n)</Label>
         <Textarea
@@ -95,26 +108,27 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
           onChange={(event) => edit({ hostNotes: event.target.value })}
         />
       </div>
-      <ProblemList problems={findQuestionProblems({ ...draft, media: question.media })} />
+      <ProblemList problems={findQuestionProblems({ ...draft, media: question.media, film: film?.video })} />
       {saveFailed && (
         <p role="alert" className="text-sm text-destructive">
           Kunde inte spara. Kontrollera anslutningen; ändringen sparas igen vid nästa ändring.
         </p>
       )}
-      {/* A På spåret trip belongs to its round for good: it goes when the round does (D30). */}
-      {!holdsOneQuestion(round.kind) && (
-        <div className="flex flex-wrap items-end justify-between gap-4 border-t pt-4">
-          <MoveToRoundSelect
-            currentRoundId={round._id}
-            questionType={draft.content.type}
-            rounds={rounds}
-            onMove={(toRoundId) =>
-              run(async () => {
-                await moveQuestion({ questionId: question._id, toRoundId, toIndex: AT_END_OF_ROUND });
-                onMoved(toRoundId);
-              })
-            }
-          />
+      {canDelete && (
+        <div className={`flex flex-wrap items-end gap-4 border-t pt-4 ${canMove ? "justify-between" : "justify-end"}`}>
+          {canMove && (
+            <MoveToRoundSelect
+              currentRoundId={round._id}
+              questionType={draft.content.type}
+              rounds={rounds}
+              onMove={(toRoundId) =>
+                run(async () => {
+                  await moveQuestion({ questionId: question._id, toRoundId, toIndex: AT_END_OF_ROUND });
+                  onMoved(toRoundId);
+                })
+              }
+            />
+          )}
           <ConfirmButton
             title="Ta bort frågan?"
             description="Frågan tas bort från omgången. Det går inte att ångra."

@@ -34,6 +34,9 @@ export const setQuestionMedia = hostMutation({
   },
   handler: async (ctx, { questionId, media }) => {
     const question = await getOrThrow(ctx, "questions", questionId);
+    if (question.filmId !== undefined) {
+      throw new ConvexError("Frågan ställs efter sin film och har ingen egen bild, ljud eller video.");
+    }
     if (rulesFor(question.content).requiresVideo && media.kind !== "video") {
       throw new ConvexError("Den här frågan behöver en film.");
     }

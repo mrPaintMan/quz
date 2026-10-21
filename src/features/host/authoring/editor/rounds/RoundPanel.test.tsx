@@ -80,13 +80,13 @@ describe("RoundPanel", () => {
     expect(onSelectQuestion).toHaveBeenCalledWith("new-question");
   });
 
-  it("shows a På spåret round's one trip, with no way to add another", async () => {
+  it("shows a På spåret round as its trip and films, without the free question list", async () => {
     render(<RoundPanel round={round("paSparet", [question("t", "Vart är vi på väg?")])} selectedQuestionId={null} onSelectQuestion={vi.fn()} onDeleted={vi.fn()} />);
     expect(screen.getByText("Vart är vi på väg?")).toBeInTheDocument();
     expect(screen.queryByLabelText("Ny fråga av typen")).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /Lägg till/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lägg till film" })).toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Ta bort omgång" }));
-    expect(await screen.findByText("Omgången och dess resa tas bort. Det går inte att ångra.")).toBeInTheDocument();
+    expect(await screen.findByText("Omgången med resan, filmerna och deras frågor tas bort. Det går inte att ångra.")).toBeInTheDocument();
   });
 
   it("autosaves the round's name", async () => {

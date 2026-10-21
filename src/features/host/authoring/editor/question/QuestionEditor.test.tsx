@@ -123,6 +123,18 @@ describe("QuestionEditor", () => {
     });
   });
 
+  it("asks a question after its film: no own media, no moving, film types only, but deletable", () => {
+    const paSparet = { ...round, kind: "paSparet" as const, films: [{ id: "f1", video: null }, { id: "f2", video: null }] };
+    const afterFilm = { ...question, filmId: "f2", content: { type: "freeText" as const, fields: [{ label: "", acceptedAnswers: [] }], pointsPerField: 1, fuzzy: true } };
+    render(<QuestionEditor question={afterFilm} round={paSparet} rounds={[paSparet]} onDeleted={vi.fn()} onMoved={vi.fn()} />);
+    expect(screen.getByText("Frågan besvaras efter film 2, som läggs till under omgången.")).toBeInTheDocument();
+    expect(screen.queryByText("Bild, ljud eller video")).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Flytta till omgång")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Ta bort fråga" })).toBeInTheDocument();
+    expect(screen.queryByRole("option", { name: "Aktivitet" })).not.toBeInTheDocument();
+    expect(screen.getByText("Lägg till filmen.")).toBeInTheDocument();
+  });
+
   it("keeps a På spåret trip in its round and asks for the film", () => {
     const paSparet = { ...round, kind: "paSparet" as const };
     const trip = { ...question, content: { type: "paSparet" as const, acceptedAnswers: [], fuzzy: true, clues: ["", "", "", "", ""] } };

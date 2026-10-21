@@ -2,7 +2,6 @@
 
 import { useId, useState } from "react";
 import type { QuestionType } from "@convex/questions/questionContent";
-import type { RoundKind } from "@convex/rounds/table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,17 +13,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
-import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
 import { questionEditors } from "@/features/host/authoring/questionEditors/registry";
 
 type QuestionTypeSelectProps = {
   value: QuestionType;
-  roundKind: RoundKind;
+  types: QuestionType[];
   onChange: (type: QuestionType) => void;
 };
 
 // Changing type throws away what was written, so the hosts confirm first (D22).
-export function QuestionTypeSelect({ value, roundKind, onChange }: QuestionTypeSelectProps) {
+export function QuestionTypeSelect({ value, types, onChange }: QuestionTypeSelectProps) {
   const id = useId();
   const [pendingType, setPendingType] = useState<QuestionType | null>(null);
   return (
@@ -36,7 +34,7 @@ export function QuestionTypeSelect({ value, roundKind, onChange }: QuestionTypeS
         onChange={(event) => setPendingType(event.target.value as QuestionType)}
         className="h-9 rounded-lg border bg-background pl-3 pr-9 text-sm"
       >
-        {allowedQuestionTypes(roundKind).map((type) => (
+        {types.map((type) => (
           <option key={type} value={type}>
             {questionEditors[type].label}
           </option>

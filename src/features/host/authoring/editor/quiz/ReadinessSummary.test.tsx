@@ -19,4 +19,11 @@ describe("ReadinessSummary", () => {
     expect(screen.getByRole("status")).toHaveTextContent(text);
     expect(screen.getByRole("button", { name: "Starta quiz" })).toBeDisabled();
   });
+
+  it("counts a question after a film as unfinished until the film is uploaded", () => {
+    const afterFilm = { ...question("Vilken bro?"), media: null, filmId: "f1" } as Doc<"questions">;
+    const paSparet = [{ films: [{ id: "f1", video: null }], questions: [afterFilm] }] as (Doc<"rounds"> & { questions: Doc<"questions">[] })[];
+    render(<ReadinessSummary rounds={paSparet} />);
+    expect(screen.getByRole("status")).toHaveTextContent("1 fråga behöver fyllas i");
+  });
 });
