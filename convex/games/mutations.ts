@@ -3,20 +3,16 @@ import { findUnfinishedQuestions } from "@/domain/questions/findUnfinishedQuesti
 import type { Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
-import { questionsOfRound } from "../questions/questionsOfRound";
-import { roundsOfQuiz } from "../rounds/roundsOfQuiz";
+import { roundsWithQuestionsOfQuiz } from "../rounds/roundsWithQuestionsOfQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
 import { findRunningGame } from "./findRunningGame";
 
 async function requireReadyQuiz(ctx: QueryCtx, quizId: Id<"quizzes">) {
-  const rounds = await roundsOfQuiz(ctx, quizId);
-  const roundsWithQuestions = await Promise.all(
-    rounds.map(async (round) => ({ ...round, questions: await questionsOfRound(ctx, round._id) })),
-  );
-  if (roundsWithQuestions.every((round) => round.questions.length === 0)) {
+  const rounds = await roundsWithQuestionsOfQuiz(ctx, quizId);
+  if (rounds.every((round) => round.questions.length === 0)) {
     throw new ConvexError("Lägg till minst en fråga innan quizet startar.");
   }
-  const unfinished = findUnfinishedQuestions(roundsWithQuestions).length;
+  const unfinished = findUnfinishedQuestions(rounds).length;
   if (unfinished > 0) {
     throw new ConvexError(`${unfinished === 1 ? "1 fråga behöver" : `${unfinished} frågor behöver`} fyllas i innan quizet startar.`);
   }

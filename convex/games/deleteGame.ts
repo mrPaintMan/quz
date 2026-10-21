@@ -1,9 +1,10 @@
+import { ConvexError } from "convex/values";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { teamsOfGame } from "../teams/teamsOfGame";
 
 // A night has some 50 questions and up to 12 teams, about 600 answers; this leaves room to spare.
-const MAX_ANSWERS_PER_GAME = 4000;
+export const MAX_ANSWERS_PER_GAME = 4000;
 const MAX_ADJUSTMENTS_PER_GAME = 1000;
 
 // Deletes a game with everything the teams did in it.
@@ -16,6 +17,10 @@ export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {
     .query("adjustments")
     .withIndex("by_gameId", (q) => q.eq("gameId", gameId))
     .take(MAX_ADJUSTMENTS_PER_GAME);
+  // Deleting only part of a game would leave answers pointing at a game that is gone.
+  if (answers.length === MAX_ANSWERS_PER_GAME || adjustments.length === MAX_ADJUSTMENTS_PER_GAME) {
+    throw new ConvexError("Spelet har för många svar för att tas bort på en gång.");
+  }
   const teams = await teamsOfGame(ctx, gameId);
   await Promise.all([
     ...answers.map((answer) => ctx.db.delete("answers", answer._id)),
