@@ -38,11 +38,13 @@ describe("VideoPreview", () => {
     expect(await screen.findByLabelText("Filmen")).toHaveAttribute("src", "https://r2.example/film-key");
   });
 
-  it("says so when the film can't be played", async () => {
+  it("says so when the film can't be played, and lets the host try again with a fresh link", async () => {
     render(<VideoPreview media={media("still")} alt="Filmen" />);
     await userEvent.click(screen.getByRole("button", { name: "Spela upp" }));
     fireEvent.error(await screen.findByLabelText("Filmen"));
-    expect(screen.getByText("Filmen kunde inte spelas. Ladda upp den igen.")).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("Filmen kunde inte spelas. Försök igen; hjälper det inte, ladda upp den igen.");
+    await userEvent.click(screen.getByRole("button", { name: "Spela upp" }));
+    expect(getFilmUrl).toHaveBeenCalledTimes(2);
   });
 
   it("says so when there is no still and no known length", () => {

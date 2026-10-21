@@ -20,16 +20,21 @@ export function VideoPreview({ media, alt }: VideoPreviewProps) {
   const run = useRunAction();
   const stillUrl = useHostQuery(api.media.queries.getMediaUrl, media.posterId ? { storageId: media.posterId } : "skip");
 
-  if (unplayable) {
-    return <p className="text-sm text-destructive">Filmen kunde inte spelas. Ladda upp den igen.</p>;
-  }
+  // A link lasts four hours, so a failed film goes back to the play button, which asks for a fresh one.
+  const showError = () => {
+    setFilmUrl(null);
+    setUnplayable(true);
+  };
   if (filmUrl) {
-    return (
-      <video controls autoPlay src={filmUrl} onError={() => setUnplayable(true)} className="max-h-64 w-full rounded-lg" aria-label={alt} />
-    );
+    return <video controls autoPlay src={filmUrl} onError={showError} className="max-h-64 w-full rounded-lg" aria-label={alt} />;
   }
   return (
     <div className="flex flex-col gap-2">
+      {unplayable && (
+        <p role="alert" className="text-sm text-destructive">
+          Filmen kunde inte spelas. Försök igen; hjälper det inte, ladda upp den igen.
+        </p>
+      )}
       {stillUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- Convex storage URLs are signed and change; next/image would need a remote pattern per deployment.
         <img src={stillUrl} alt={`Stillbild ur ${alt.toLowerCase()}`} className="max-h-64 rounded-lg object-contain" />
