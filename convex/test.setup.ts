@@ -8,6 +8,8 @@ const modules = import.meta.glob("./**/*.ts");
 
 export const TEST_PASSPHRASE = "pepparkaka";
 export const host = { hostPassphrase: TEST_PASSPHRASE };
+// The screen fields of a game that hasn't left the lobby, for tests inserting games directly.
+export const atLobby = { screen: { kind: "lobby" as const }, screenIndex: 0 };
 
 // A made-up bucket: signing links works offline, so tests never reach Cloudflare.
 const TEST_R2 = {

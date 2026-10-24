@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AnswerContent } from "./answers/answerContent";
 import type { QuestionContent } from "./questions/questionContent";
-import { setupConvexTest } from "./test.setup";
+import { atLobby, setupConvexTest } from "./test.setup";
 
 const oneOfEachType: QuestionContent[] = [
   { type: "multipleChoice", options: [{ text: "Sverige", imageId: null }], correctIndex: 0, points: 2 },
@@ -54,7 +54,7 @@ async function insertAnswer(content: unknown) {
       hostNotes: "",
       content: { type: "activity", maxPoints: 1 },
     });
-    const gameId = await ctx.db.insert("games", { quizId, endedAt: null });
+    const gameId = await ctx.db.insert("games", { quizId, endedAt: null, ...atLobby });
     const teamId = await ctx.db.insert("teams", { gameId, name: "Tomtarna", colour: "red" });
     const answerId = await ctx.db.insert("answers", { gameId, teamId, questionId, content: content as AnswerContent, lockedAt: null });
     return ctx.db.get("answers", answerId);

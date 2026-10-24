@@ -8,6 +8,7 @@ type ListContent = ContentOf<"list">;
 export const listRules: QuestionTypeRules<ListContent> = {
   requiresTimeLimit: true,
   requiresVideo: false,
+  hasAnswerScreen: true,
   createEmptyContent: () => ({
     type: "list",
     acceptedItems: [],

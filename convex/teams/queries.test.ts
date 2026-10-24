@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { api } from "../_generated/api";
-import { setupConvexTest } from "../test.setup";
+import { atLobby, setupConvexTest } from "../test.setup";
 
 async function setupTeam(endedAt: number | null) {
   const t = setupConvexTest();
   const { gameId, teamId } = await t.run(async (ctx) => {
     const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
-    const gameId = await ctx.db.insert("games", { quizId, endedAt });
+    const gameId = await ctx.db.insert("games", { quizId, endedAt, ...atLobby });
     return { gameId, teamId: await ctx.db.insert("teams", { gameId, name: "Tomtarna", colour: "red" }) };
   });
   return { t, gameId, teamId };

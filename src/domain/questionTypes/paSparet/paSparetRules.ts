@@ -12,6 +12,7 @@ export const PA_SPARET_CLUE_POINTS = [10, 8, 6, 4, 2] as const;
 export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
   requiresTimeLimit: false,
   requiresVideo: true,
+  hasAnswerScreen: true,
   createEmptyContent: () => ({
     type: "paSparet",
     acceptedAnswers: [],

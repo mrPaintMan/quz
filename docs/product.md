@@ -52,15 +52,16 @@ The TV and the phones follow one screen sequence, derived from the quiz:
 
 1. **Lobby:** QR code, the address quz.nu and the teams that have joined, each with its own colour. Only one game runs at a time, so quz.nu always joins it.
 2. **Rules:** how the evening works and an overview (number of rounds, questions, activities, playing time).
-3. **For each question:**
+3. **For each round:** an intro screen with the round's title, then its questions.
+4. **For each question:**
    - **Show:** the TV shows the question and media, the phones show the answer input, the timer starts if there is one.
    - **Answer:** teams submit. The admin sees who has answered; the TV shows only how many.
    - **Lock:** an answer is final once submitted. When the time runs out, unsent answers are locked as they are (drafts are kept on the server, so a sleeping phone loses nothing).
    - **Grade:** auto-grading runs; uncertain answers go to the hosts' review queue (right / wrong).
-   - **Reveal:** the TV shows the answer key; then the updated leaderboard.
-4. **Between rounds:** leaderboard and, when the hosts choose, the score graph.
+   - **Reveal:** the TV shows the answer key on the question's own answer screen, right after the question. An activity has no answer screen; its points show on the next leaderboard.
+5. **Between rounds:** the leaderboard and, when the hosts choose, the score graph. After the last round, the final leaderboard instead.
 
-På spåret: the film plays on the TV and the five clues follow at an even pace through it, one per fifth of the film; the admin view shows which clue is active. Each team's guess stores the clue level at which it pulled the brake.
+På spåret: the trip comes first, as a question with its answer screen; then each film plays on its own screen, followed by its questions, which the phones open only after the film. During the trip, the film plays on the TV and the five clues follow at an even pace through it, one per fifth of the film; the admin view shows which clue is active. Each team's guess stores the clue level at which it pulled the brake.
 
 ## Grading
 

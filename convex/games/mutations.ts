@@ -6,6 +6,8 @@ import { hostMutation } from "../auth/hostFunctions";
 import { roundsWithQuestionsOfQuiz } from "../rounds/roundsWithQuestionsOfQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
 import { findRunningGame } from "./findRunningGame";
+import { moveScreen } from "./moveScreen";
+import { screen } from "./screen";
 
 async function requireReadyQuiz(ctx: QueryCtx, quizId: Id<"quizzes">) {
   const rounds = await roundsWithQuestionsOfQuiz(ctx, quizId);
@@ -28,7 +30,7 @@ export const startGame = hostMutation({
     if (running !== null) {
       await ctx.db.patch("games", running._id, { endedAt: Date.now() });
     }
-    return ctx.db.insert("games", { quizId, endedAt: null });
+    return ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "lobby" }, screenIndex: 0 });
   },
 });
 
@@ -40,4 +42,14 @@ export const endGame = hostMutation({
       await ctx.db.patch("games", gameId, { endedAt: Date.now() });
     }
   },
+});
+
+export const goToNextScreen = hostMutation({
+  args: { gameId: v.id("games"), from: screen },
+  handler: async (ctx, { gameId, from }) => moveScreen(ctx, gameId, from, 1),
+});
+
+export const goToPreviousScreen = hostMutation({
+  args: { gameId: v.id("games"), from: screen },
+  handler: async (ctx, { gameId, from }) => moveScreen(ctx, gameId, from, -1),
 });

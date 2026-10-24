@@ -13,6 +13,7 @@ const MIN_ITEMS = 2;
 export const sortRules: QuestionTypeRules<SortContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
+  hasAnswerScreen: true,
   createEmptyContent: () => ({
     type: "sort",
     items: ["", ""],
