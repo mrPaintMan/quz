@@ -1,14 +1,12 @@
 import { Button } from "@/components/ui/button";
-import { findQuestionProblems } from "@/domain/questions/findQuestionProblems";
-import { filmOf } from "@/domain/rounds/filmOf";
+import { findUnfinishedQuestions } from "@/domain/questions/findUnfinishedQuestions";
 import type { RoundWithQuestions } from "@/features/host/authoring/editor/RoundWithQuestions";
 
 function summarize(rounds: RoundWithQuestions[]): string {
-  // A question asked after a film is ready only once its film is (D32).
-  const questions = rounds.flatMap((round) => round.questions.map((question) => ({ ...question, film: filmOf(round, question)?.video })));
-  if (questions.length === 0) return "Inga frågor ännu";
-  const unfinished = questions.filter((question) => findQuestionProblems(question).length > 0).length;
-  if (unfinished === 0) return `Alla ${questions.length} frågor är klara`;
+  const questionCount = rounds.reduce((count, round) => count + round.questions.length, 0);
+  if (questionCount === 0) return "Inga frågor ännu";
+  const unfinished = findUnfinishedQuestions(rounds).length;
+  if (unfinished === 0) return `Alla ${questionCount} frågor är klara`;
   return unfinished === 1 ? "1 fråga behöver fyllas i" : `${unfinished} frågor behöver fyllas i`;
 }
 

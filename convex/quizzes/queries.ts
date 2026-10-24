@@ -1,7 +1,6 @@
 import { v } from "convex/values";
 import { hostQuery } from "../auth/hostFunctions";
-import { questionsOfRound } from "../questions/questionsOfRound";
-import { roundsOfQuiz } from "../rounds/roundsOfQuiz";
+import { roundsWithQuestionsOfQuiz } from "../rounds/roundsWithQuestionsOfQuiz";
 
 const MAX_QUIZZES = 50;
 
@@ -18,10 +17,6 @@ export const getQuizTree = hostQuery({
     if (quiz === null) {
       return null;
     }
-    const rounds = await roundsOfQuiz(ctx, quizId);
-    const roundsWithQuestions = await Promise.all(
-      rounds.map(async (round) => ({ ...round, questions: await questionsOfRound(ctx, round._id) })),
-    );
-    return { quiz, rounds: roundsWithQuestions };
+    return { quiz, rounds: await roundsWithQuestionsOfQuiz(ctx, quizId) };
   },
 });

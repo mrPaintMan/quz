@@ -41,6 +41,7 @@ Exceptions to the test rules are made on purpose and listed here with a reason. 
 | `src/app/**/page.tsx` | Thin routes: read params, render one feature component |
 | `convex/schema.ts`, `convex/**/table.ts` | Declarations only; exercised by every Convex function test |
 | `convex/questions/**/*Content.ts`, `convex/questions/acceptedItem.ts`, `convex/questions/numberOrNull.ts` | Question shape validators, declarations only; exercised by every question function test |
+| `convex/questions/**/*Answer.ts`, `convex/answers/answerContent.ts` | Answer shape validators, declarations only; exercised by the schema test |
 
 ## File structure
 
@@ -56,10 +57,12 @@ Agreed in D11. Three layers, with dependencies pointing inward toward the domain
 convex/
   schema.ts                      # combines the tables from each folder
   quizzes/  rounds/  questions/  # one folder per table:
+  games/  teams/  answers/  adjustments/
     table.ts                     #   table definition + its validators
     queries.ts                   #   reads
     mutations.ts                 #   writes
-  questions/types/<type>/        # one folder per question type: <type>Content.ts (later its answer validator)
+  questions/types/<type>/        # one folder per question type: <type>Content.ts and <type>Answer.ts
+  answers/answerContent.ts       # union of the answer validators, for every type answered in the app
   questions/questionContent.ts   # union of all content validators, and the QuestionContent / QuestionType types
   auth/                          # passphrase check and hostQuery / hostMutation wrappers (D21)
   media/                         # upload URLs, attaching media, media URLs
@@ -70,7 +73,7 @@ src/
     questionTypes/<type>/        # rules for one type: <type>Rules.ts (max points, problems), later its grader
     questionTypes/registry.ts    # type → rules, typed as a complete map over QuestionType
     questions/                   # cross-type functions using the registry: findQuestionProblems, maxQuestionPoints, createEmptyContent
-    rounds/  ordering/  text/  time/ # which types fit a round, list moves, number and answer-key text, "Sparat för …"
+    rounds/  teams/  ordering/  text/  time/ # which types fit a round, list moves, number and answer-key text, "Sparat för …"
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/  matching/          # leaderboard, fuzzy text matching …
   features/

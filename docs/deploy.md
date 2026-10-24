@@ -50,7 +50,7 @@ Don't use the Vercel Marketplace's Convex integration: it creates a separate Con
 
 ## 6. Film storage in Cloudflare R2
 
-Films (videos) are stored in Cloudflare R2, where downloads are free, through the `@convex-dev/r2` component (D31). Images, audio and the films' stills stay in Convex storage. Dev and production each get their own bucket and token.
+Films (videos) are stored in Cloudflare R2, where downloads are free, through the `@convex-dev/r2` component (D32). Images, audio and the films' stills stay in Convex storage. Dev and production each get their own bucket and token.
 
 1. In the Cloudflare dashboard (the same account as the `quz.nu` DNS), open **R2 Object Storage** and switch it on. Cloudflare may ask for a card even on the free plan (10 GB storage, free downloads).
 2. **Create bucket** twice: `quz-films-dev` and `quz-films-prod`, Standard storage, with **EU jurisdiction** so the films stay in the EU (the dev bucket was made this way).

@@ -8,7 +8,7 @@ const imageOrAudio = v.object({
   storageId: v.id("_storage"),
 });
 
-// The film itself is in Cloudflare R2 (D31); its still stays in Convex storage. The still and
+// The film itself is in Cloudflare R2 (D32); its still stays in Convex storage. The still and
 // the length are read in the host's browser while uploading (D30), so the editor can show the
 // film without downloading it. Either is null if the browser couldn't.
 export const videoMedia = v.object({
@@ -34,7 +34,7 @@ export const questionsTable = defineTable({
   media: v.union(questionMedia, v.null()),
   hostNotes: v.string(),
   content: questionContent,
-  // Set for a question asked after one of a På spåret round's films (D32): the film's id on the
+  // Set for a question asked after one of a På spåret round's films (D33): the film's id on the
   // round. Left out for every other question.
   filmId: v.optional(v.string()),
 })
