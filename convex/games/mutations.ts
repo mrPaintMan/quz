@@ -7,6 +7,7 @@ import { roundsWithQuestionsOfQuiz } from "../rounds/roundsWithQuestionsOfQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
 import { findRunningGame } from "./findRunningGame";
 import { moveScreen } from "./moveScreen";
+import { screen } from "./screen";
 
 async function requireReadyQuiz(ctx: QueryCtx, quizId: Id<"quizzes">) {
   const rounds = await roundsWithQuestionsOfQuiz(ctx, quizId);
@@ -44,11 +45,11 @@ export const endGame = hostMutation({
 });
 
 export const goToNextScreen = hostMutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, { gameId }) => moveScreen(ctx, gameId, 1),
+  args: { gameId: v.id("games"), from: screen },
+  handler: async (ctx, { gameId, from }) => moveScreen(ctx, gameId, from, 1),
 });
 
 export const goToPreviousScreen = hostMutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, { gameId }) => moveScreen(ctx, gameId, -1),
+  args: { gameId: v.id("games"), from: screen },
+  handler: async (ctx, { gameId, from }) => moveScreen(ctx, gameId, from, -1),
 });
