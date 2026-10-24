@@ -5,6 +5,10 @@ import { activityRules } from "./activityRules";
 const validContent: ContentOf<"activity"> = { type: "activity", maxPoints: 5 };
 
 describe("activityRules", () => {
+  it("has no answer screen, since there is nothing to reveal", () => {
+    expect(activityRules.hasAnswerScreen).toBe(false);
+  });
+
   it("gives the set max points", () => {
     expect(activityRules.maxPoints(validContent)).toBe(5);
   });

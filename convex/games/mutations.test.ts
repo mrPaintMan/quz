@@ -8,14 +8,18 @@ async function setupQuiz(prompt = "Pepparkakshus") {
   const roundId = await t.mutation(api.rounds.mutations.addRound, { ...host, quizId, kind: "questions", title: "Julmat" });
   const questionId = await t.mutation(api.questions.mutations.addQuestion, { ...host, roundId, type: "activity" });
   await t.mutation(api.questions.mutations.updateQuestion, { ...host, questionId, prompt });
-  return { t, quizId, roundId };
+  return { t, quizId, roundId, questionId };
 }
 
 describe("startGame", () => {
   it("starts a game of a ready quiz", async () => {
     const { t, quizId } = await setupQuiz();
     const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
-    await expect(t.query(api.games.queries.getRunningGame, {})).resolves.toEqual({ _id: gameId, quizTitle: "Julquiz 2026" });
+    await expect(t.query(api.games.queries.getRunningGame, {})).resolves.toEqual({
+      _id: gameId,
+      quizTitle: "Julquiz 2026",
+      screen: { kind: "lobby" },
+    });
   });
 
   it("ends the running game, so only one game runs at a time", async () => {
@@ -63,5 +67,52 @@ describe("endGame", () => {
 
     await expect(t.query(api.games.queries.getRunningGame, {})).resolves.toBeNull();
     expect((await t.run((ctx) => ctx.db.get("games", gameId)))?.endedAt).toBe(endedAt);
+  });
+});
+
+describe("goToNextScreen and goToPreviousScreen", () => {
+  const screenNow = async (t: Awaited<ReturnType<typeof setupQuiz>>["t"]) => (await t.query(api.games.queries.getRunningGame, {}))?.screen;
+
+  it("step through the screens and stay put at the ends", async () => {
+    const { t, quizId, roundId, questionId } = await setupQuiz();
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+
+    await t.mutation(api.games.mutations.goToPreviousScreen, { ...host, gameId });
+    expect(await screenNow(t)).toEqual({ kind: "lobby" });
+    for (const expected of [{ kind: "rules" }, { kind: "roundIntro", roundId }, { kind: "question", questionId }]) {
+      await t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId });
+      expect(await screenNow(t)).toEqual(expected);
+    }
+    await t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId });
+    await t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId });
+    expect(await screenNow(t)).toEqual({ kind: "finalLeaderboard" });
+    await t.mutation(api.games.mutations.goToPreviousScreen, { ...host, gameId });
+    expect(await screenNow(t)).toEqual({ kind: "question", questionId });
+  });
+
+  it("move on from the screen that took the place of a question deleted during the game", async () => {
+    const { t, quizId, roundId, questionId } = await setupQuiz();
+    const second = await t.mutation(api.questions.mutations.addQuestion, { ...host, roundId, type: "activity" });
+    await t.mutation(api.questions.mutations.updateQuestion, { ...host, questionId: second, prompt: "Julsång" });
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    for (let i = 0; i < 3; i++) await t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId });
+
+    await t.mutation(api.questions.mutations.deleteQuestion, { ...host, questionId });
+    expect(await screenNow(t)).toEqual({ kind: "question", questionId: second });
+    await t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId });
+    expect(await screenNow(t)).toEqual({ kind: "finalLeaderboard" });
+  });
+
+  it("refuse a game that has ended", async () => {
+    const { t, quizId } = await setupQuiz();
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    await t.mutation(api.games.mutations.endGame, { ...host, gameId });
+    await expect(t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId })).rejects.toThrow("Quizet är slut.");
+  });
+
+  it("refuse a wrong passphrase", async () => {
+    const { t, quizId } = await setupQuiz();
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    await expect(t.mutation(api.games.mutations.goToPreviousScreen, { hostPassphrase: "fel", gameId })).rejects.toThrow("Fel lösenord.");
   });
 });

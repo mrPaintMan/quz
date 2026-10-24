@@ -13,6 +13,7 @@ const MIN_PAIRS = 2;
 export const matchRules: QuestionTypeRules<MatchContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
+  hasAnswerScreen: true,
   createEmptyContent: () => ({
     type: "match",
     pairs: [

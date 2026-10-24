@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { setupConvexTest } from "../test.setup";
+import { atLobby, setupConvexTest } from "../test.setup";
 import { deleteGame, MAX_ANSWERS_PER_GAME } from "./deleteGame";
 
 describe("deleteGame", () => {
@@ -19,7 +19,7 @@ describe("deleteGame", () => {
         content: { type: "number", answer: 3, scoring: { mode: "closest", pointsByRank: [1] } },
       });
       const addPlayedGame = async () => {
-        const gameId = await ctx.db.insert("games", { quizId, endedAt: 1 });
+        const gameId = await ctx.db.insert("games", { quizId, endedAt: 1, ...atLobby });
         const teamId = await ctx.db.insert("teams", { gameId, name: "Tomtarna", colour: "red" });
         await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "number", value: 4 }, lockedAt: 1 });
         await ctx.db.insert("adjustments", { gameId, teamId, questionId: null, points: 2, note: "Bonus" });
@@ -58,7 +58,7 @@ describe("deleteGame", () => {
           hostNotes: "",
           content: { type: "number", answer: 3, scoring: { mode: "closest", pointsByRank: [1] } },
         });
-        const gameId = await ctx.db.insert("games", { quizId, endedAt: 1 });
+        const gameId = await ctx.db.insert("games", { quizId, endedAt: 1, ...atLobby });
         const teamId = await ctx.db.insert("teams", { gameId, name: "Tomtarna", colour: "red" });
         for (let i = 0; i < MAX_ANSWERS_PER_GAME; i++) {
           await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "number", value: i }, lockedAt: 1 });

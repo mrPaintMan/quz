@@ -7,6 +7,7 @@ type ActivityContent = ContentOf<"activity">;
 export const activityRules: QuestionTypeRules<ActivityContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
+  hasAnswerScreen: false,
   createEmptyContent: () => ({ type: "activity", maxPoints: 1 }),
   maxPoints: (content) => content.maxPoints,
   findProblems: (content) => problemIfNotPositive(content.maxPoints, "Maxpoängen måste vara större än 0."),

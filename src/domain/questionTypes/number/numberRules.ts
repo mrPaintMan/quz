@@ -63,6 +63,7 @@ function scoringPoints(scoring: Scoring): (number | null)[] {
 export const numberRules: QuestionTypeRules<NumberContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
+  hasAnswerScreen: true,
   createEmptyContent: () => ({
     type: "number",
     answer: null,

@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M2 continues: the screen sequence derived from the quiz (D15), including På spåret films followed by their questions (D33); then the TV lobby and phone join, then the admin's live control.
+M2 continues: the TV lobby and phone join, with the TV and phones following the game's screen; then the admin's live control.
 
 ## Milestones
 
@@ -57,7 +57,7 @@ M2 continues: the screen sequence derived from the quiz (D15), including På sp�
 
 ### M2 · Live game loop
 - [x] Convex schema: games, teams, answers (drafts and locks), adjustments; start and end a game, join a team, rejoin by saved id (D34)
-- [ ] Screen sequence derived from the quiz (D15)
+- [x] Screen sequence derived from the quiz, with next and previous on the server (D15, D35)
 - [ ] TV: lobby with QR code and quz.nu, rules screen, question and answer screens
 - [ ] Phone: join with a team name and colour, rejoin after refresh, follow the game
 - [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz
@@ -102,3 +102,4 @@ M2 continues: the screen sequence derived from the quiz (D15), including På sp�
 - 2026-10-18: Review fixes: `useDraftText` for number, lines and answer-key fields, `useAutosave` with save failure, sortable rows and autosave moved to `authoring/shared/`, single types for rounds with questions, media kind and map views, docs updated; empty numbers are `null` everywhere, with a one-off migration (D28).
 - 2026-10-18: `migrateMissingNumbers` ran on dev and production (no `NaN` found in either) and was deleted.
 - 2026-10-22: M1 closed. M2 started: games, teams, answers and adjustments tables, one game at a time joined at quz.nu, 12 team colours (D34). Decisions renumbered: R2 is D32, film questions D33.
+- 2026-10-25: Screen sequence: round intro, each question then its answer, leaderboards between rounds and a final one, films before their questions in På spåret; next and previous on the server (D35).
