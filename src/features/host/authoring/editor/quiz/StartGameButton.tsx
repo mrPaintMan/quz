@@ -1,16 +1,18 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 
 // Starts the night and opens its live control. Only one game runs at a time, so starting
-// while another runs asks first, since that ends it (D34).
+// while another runs asks first, since that ends it (D34). While this quiz runs, it leads back
+// to the game instead, so a host can't restart it by mistake.
 export function StartGameButton({ quizId, disabled }: { quizId: Id<"quizzes">; disabled: boolean }) {
   const router = useRouter();
   const runningGame = useQuery(api.games.queries.getRunningGame);
@@ -18,6 +20,13 @@ export function StartGameButton({ quizId, disabled }: { quizId: Id<"quizzes">; d
   const run = useRunAction();
   const start = () => run(async () => router.push(`/admin/games/${await startGame({ quizId })}`));
 
+  if (runningGame?.quizId === quizId) {
+    return (
+      <Link href={`/admin/games/${runningGame._id}`} className={buttonVariants()}>
+        Till spelet
+      </Link>
+    );
+  }
   if (disabled || !runningGame) {
     return (
       <Button disabled={disabled} onClick={start}>

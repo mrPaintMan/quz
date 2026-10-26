@@ -28,7 +28,7 @@ describe("StartGameButton", () => {
   });
 
   it("asks before ending another game that is running", async () => {
-    runningGame.mockReturnValue({ _id: "game0", quizTitle: "Julquiz 2025" });
+    runningGame.mockReturnValue({ _id: "game0", quizId: "quiz0", quizTitle: "Julquiz 2025" });
     render(<StartGameButton quizId={quizId} disabled={false} />);
     await userEvent.click(screen.getByRole("button", { name: "Starta quiz" }));
     expect(await screen.findByText("”Julquiz 2025” pågår just nu. Startar du det här quizet avslutas det.")).toBeInTheDocument();
@@ -38,8 +38,15 @@ describe("StartGameButton", () => {
   });
 
   it("stays disabled while the quiz isn't ready", () => {
-    runningGame.mockReturnValue({ _id: "game0", quizTitle: "Julquiz 2025" });
+    runningGame.mockReturnValue({ _id: "game0", quizId: "quiz0", quizTitle: "Julquiz 2025" });
     render(<StartGameButton quizId={quizId} disabled />);
     expect(screen.getByRole("button", { name: "Starta quiz" })).toBeDisabled();
+  });
+
+  it("leads back to the game while this quiz runs, instead of restarting it", () => {
+    runningGame.mockReturnValue({ _id: "game1", quizId, quizTitle: "Julquiz 2026" });
+    render(<StartGameButton quizId={quizId} disabled={false} />);
+    expect(screen.getByRole("link", { name: "Till spelet" })).toHaveAttribute("href", "/admin/games/game1");
+    expect(screen.queryByRole("button", { name: "Starta quiz" })).not.toBeInTheDocument();
   });
 });

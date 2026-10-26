@@ -12,14 +12,15 @@ describe("getRunningGame", () => {
     await expect(t.query(api.games.queries.getRunningGame, {})).resolves.toBeNull();
   });
 
-  it("shows the running game's quiz title and screen, and nothing else of the quiz", async () => {
+  it("shows the running game's quiz and screen, and nothing else of the quiz", async () => {
     const t = setupConvexTest();
-    const gameId = await t.run(async (ctx) => {
+    const { gameId, quizId } = await t.run(async (ctx) => {
       const quizId = await ctx.db.insert("quizzes", { title: "Julquiz 2026", year: 2026, updatedAt: 0 });
-      return ctx.db.insert("games", { quizId, endedAt: null, ...atLobby });
+      return { quizId, gameId: await ctx.db.insert("games", { quizId, endedAt: null, ...atLobby }) };
     });
     await expect(t.query(api.games.queries.getRunningGame, {})).resolves.toEqual({
       _id: gameId,
+      quizId,
       quizTitle: "Julquiz 2026",
       screen: { kind: "lobby" },
       view: { kind: "lobby" },

@@ -26,9 +26,14 @@ function save(teamId: string | null) {
   listeners.forEach((listener) => listener());
 }
 
+// Also follows other tabs on the same phone, which change storage through the storage event.
 function subscribe(listener: () => void) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  window.addEventListener("storage", listener);
+  return () => {
+    listeners.delete(listener);
+    window.removeEventListener("storage", listener);
+  };
 }
 
 // The team this phone joined as, kept so it can rejoin after a refresh (D3). undefined while

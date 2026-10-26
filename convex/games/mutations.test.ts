@@ -18,6 +18,7 @@ describe("startGame", () => {
     const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
     await expect(t.query(api.games.queries.getRunningGame, {})).resolves.toEqual({
       _id: gameId,
+      quizId,
       quizTitle: "Julquiz 2026",
       screen: { kind: "lobby" },
       view: { kind: "lobby" },

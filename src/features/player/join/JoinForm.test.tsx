@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -53,5 +53,17 @@ describe("JoinForm", () => {
     teams.mockReturnValue(undefined);
     render(<JoinForm gameId={gameId} quizTitle="Julquiz" onJoined={vi.fn()} />);
     expect(screen.getByRole("radio", { name: "Röd" })).toBeEnabled();
+  });
+
+  it("joins once while the first press is on its way", async () => {
+    let finish: (teamId: string) => void = () => {};
+    joinGame.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    render(<JoinForm gameId={gameId} quizTitle="Julquiz" onJoined={vi.fn()} />);
+    await userEvent.type(screen.getByLabelText("Lagets namn"), "Nissarna");
+    await userEvent.click(screen.getByRole("radio", { name: "Grön" }));
+    await userEvent.click(screen.getByRole("button", { name: "Gå med" }));
+    expect(screen.getByRole("button", { name: "Gå med" })).toBeDisabled();
+    await act(async () => finish("team2"));
+    expect(joinGame).toHaveBeenCalledOnce();
   });
 });

@@ -24,6 +24,15 @@ describe("useSavedTeamId", () => {
     expect(window.localStorage.getItem("quz.teamId")).toBeNull();
   });
 
+  it("follows a team saved in another tab", () => {
+    const { result } = renderHook(() => useSavedTeamId());
+    act(() => {
+      window.localStorage.setItem("quz.teamId", "team4");
+      window.dispatchEvent(new StorageEvent("storage", { key: "quz.teamId" }));
+    });
+    expect(result.current[0]).toBe("team4");
+  });
+
   it("still works for this visit when the browser refuses storage", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(() => {
       throw new Error("blocked");

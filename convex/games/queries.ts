@@ -17,6 +17,6 @@ export const getRunningGame = query({
     const rounds = await roundsWithQuestionsOfQuiz(ctx, game.quizId);
     const sequence = buildScreenSequence(rounds);
     const screen = sequence[findScreenIndex(sequence, game.screen, game.screenIndex)];
-    return { _id: game._id, quizTitle: quiz.title, screen, view: describeScreen(screen, rounds) };
+    return { _id: game._id, quizId: game.quizId, quizTitle: quiz.title, screen, view: describeScreen(screen, rounds) };
   },
 });

@@ -7,7 +7,6 @@ import type { Id } from "@convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MAX_TEAM_NAME_LENGTH } from "@/domain/teams/findTeamProblems";
 import { TEAM_COLOURS, type TeamColour } from "@/domain/teams/teamColours";
 import { describeActionError } from "@/features/shared/errors/describeActionError";
 import { TEAM_COLOUR_HEX, TEAM_COLOUR_NAMES } from "@/features/shared/teams/teamColourStyles";
@@ -20,15 +19,19 @@ export function JoinForm({ gameId, quizTitle, onJoined }: JoinFormProps) {
   const [name, setName] = useState("");
   const [colour, setColour] = useState<TeamColour | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [joining, setJoining] = useState(false);
   const taken = new Set(teams.map((team) => team.colour));
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (colour === null) return;
+    if (colour === null || joining) return;
+    setJoining(true);
     try {
       onJoined(await joinGame({ gameId, name, colour }));
     } catch (failure) {
       setError(describeActionError(failure));
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -40,7 +43,7 @@ export function JoinForm({ gameId, quizTitle, onJoined }: JoinFormProps) {
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="team-name">Lagets namn</Label>
-        <Input id="team-name" value={name} maxLength={MAX_TEAM_NAME_LENGTH} onChange={(event) => setName(event.target.value)} />
+        <Input id="team-name" value={name} onChange={(event) => setName(event.target.value)} />
       </div>
       <fieldset className="flex flex-col gap-2">
         <legend className="mb-2 text-sm font-medium">Lagets färg</legend>
@@ -71,7 +74,7 @@ export function JoinForm({ gameId, quizTitle, onJoined }: JoinFormProps) {
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={name.trim() === "" || colour === null || taken.has(colour)}>
+      <Button type="submit" size="lg" disabled={joining || name.trim() === "" || colour === null || taken.has(colour)}>
         Gå med
       </Button>
     </form>
