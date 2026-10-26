@@ -87,15 +87,17 @@ src/
         questionEditors/fields/  # form fields shared by the type editors
         shared/                  # used by several authoring features: autosave, sortable lists, remove buttons, the keyboard drag test helper
         media/                   # uploads and previews
-      liveControl/  scoreHistory/
+      liveControl/               # /admin/games/[gameId]: stepping through the night
+      scoreHistory/
     player/                      # teams on their phones
-      join/
+      game/                      # / (quz.nu): the page, no-game page, following the TV
+      join/                      # join form, the team saved on the phone
       answering/<type>/          # answer input for one type, plus registry.ts
     tv/                          # the shared screen
+      game/                      # /tv: the page and the join address
       screens/                   # lobby, rules, question, answer, leaderboard …
       questionDisplays/<type>/   # TV display for one type, plus registry.ts
-    home/                        # the start page at /
-    shared/                      # used by more than one audience: logo (brand/), map …
+    shared/                      # used by more than one audience: logo (brand/), map, team colours (teams/), error texts (errors/)
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
 ```

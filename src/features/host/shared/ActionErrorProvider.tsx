@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
-import { describeActionError } from "@/features/host/shared/describeActionError";
+import { describeActionError } from "@/features/shared/errors/describeActionError";
 
 type RunAction = <T>(action: () => Promise<T>) => Promise<T | undefined>;
 

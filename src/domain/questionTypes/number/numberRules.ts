@@ -64,6 +64,7 @@ export const numberRules: QuestionTypeRules<NumberContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "number",
     answer: null,

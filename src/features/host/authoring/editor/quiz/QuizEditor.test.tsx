@@ -6,6 +6,7 @@ import { HostSessionProvider } from "@/features/host/shared/HostSessionProvider"
 import { QuizEditor } from "./QuizEditor";
 
 const tree = vi.fn();
+vi.mock("./StartGameButton", () => ({ StartGameButton: () => <button>Starta quiz</button> }));
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => tree() }));
 vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () => vi.fn().mockResolvedValue(undefined) }));
 

@@ -19,6 +19,7 @@ export const ingredientsRules: QuestionTypeRules<IngredientsContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "ingredients",
     items: [],
