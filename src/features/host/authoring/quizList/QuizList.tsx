@@ -8,6 +8,7 @@ import { HostHeader } from "@/features/host/shared/HostHeader";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { useNow } from "@/features/host/shared/useNow";
+import { RunningGameLink } from "@/features/host/liveControl/RunningGameLink";
 import { CreateQuizForm } from "./CreateQuizForm";
 import { QuizListItem } from "./QuizListItem";
 
@@ -29,7 +30,7 @@ export function QuizList() {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <HostHeader>
+      <HostHeader actions={<RunningGameLink />}>
         <h1 className="text-lg font-semibold">Dina quiz</h1>
       </HostHeader>
       <main className="mx-auto flex w-full max-w-3xl flex-col gap-6 px-4 py-6">

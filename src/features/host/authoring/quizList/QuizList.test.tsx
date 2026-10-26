@@ -11,6 +11,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push }) }));
 
 const quizzes = vi.fn();
 const mutation = vi.fn();
+vi.mock("@/features/host/liveControl/RunningGameLink", () => ({ RunningGameLink: () => null }));
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => quizzes() }));
 vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () => mutation }));
 

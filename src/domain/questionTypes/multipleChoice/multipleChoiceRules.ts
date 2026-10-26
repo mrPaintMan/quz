@@ -26,6 +26,7 @@ export const multipleChoiceRules: QuestionTypeRules<MultipleChoiceContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "multipleChoice",
     options: Array.from({ length: 4 }, () => ({ text: "", imageId: null })),

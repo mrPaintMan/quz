@@ -14,6 +14,7 @@ export const sortRules: QuestionTypeRules<SortContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "sort",
     items: ["", ""],

@@ -5,8 +5,9 @@ import { activityRules } from "./activityRules";
 const validContent: ContentOf<"activity"> = { type: "activity", maxPoints: 5 };
 
 describe("activityRules", () => {
-  it("has no answer screen, since there is nothing to reveal", () => {
+  it("has no answer screen and no answer in the app, since it happens in the room", () => {
     expect(activityRules.hasAnswerScreen).toBe(false);
+    expect(activityRules.answeredInApp).toBe(false);
   });
 
   it("gives the set max points", () => {

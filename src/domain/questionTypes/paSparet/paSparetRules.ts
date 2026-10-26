@@ -13,6 +13,7 @@ export const paSparetRules: QuestionTypeRules<PaSparetContent> = {
   requiresTimeLimit: false,
   requiresVideo: true,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "paSparet",
     acceptedAnswers: [],

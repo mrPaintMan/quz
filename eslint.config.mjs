@@ -52,7 +52,7 @@ const eslintConfig = defineConfig([
     ignores: ["**/*.test.{ts,tsx}"],
     rules: restrictImports([convexRuntime, uiAndFramework, parentFolders]),
   },
-  ...["host", "player", "tv", "home", "shared"].map((audience) => ({
+  ...["host", "player", "tv", "shared"].map((audience) => ({
     files: [`src/features/${audience}/**/*.{ts,tsx}`],
     rules: restrictImports([otherAudiences(audience), parentFolders, convexInternals]),
   })),

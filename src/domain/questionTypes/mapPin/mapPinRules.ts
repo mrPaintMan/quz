@@ -23,6 +23,7 @@ export const mapPinRules: QuestionTypeRules<MapPinContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "mapPin",
     target: null,

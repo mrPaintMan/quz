@@ -24,6 +24,7 @@ export const freeTextRules: QuestionTypeRules<FreeTextContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "freeText",
     fields: [{ label: "", acceptedAnswers: [] }],

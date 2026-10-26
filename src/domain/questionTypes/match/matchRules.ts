@@ -14,6 +14,7 @@ export const matchRules: QuestionTypeRules<MatchContent> = {
   requiresTimeLimit: false,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "match",
     pairs: [

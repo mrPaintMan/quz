@@ -20,6 +20,7 @@ describe("startGame", () => {
       _id: gameId,
       quizTitle: "Julquiz 2026",
       screen: { kind: "lobby" },
+      view: { kind: "lobby" },
     });
   });
 

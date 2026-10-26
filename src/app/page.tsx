@@ -1,5 +1,5 @@
-import { HomePage } from "@/features/home/HomePage";
+import { PlayerPage } from "@/features/player/game/PlayerPage";
 
 export default function Home() {
-  return <HomePage />;
+  return <PlayerPage />;
 }

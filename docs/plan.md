@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M2 continues: the TV lobby and phone join, with the TV and phones following the game's screen; then the admin's live control.
+M2 continues: the admin's full live control (now / next preview, keyboard, timer, media, pause), then På spåret playback and draft saving and locking.
 
 ## Milestones
 
@@ -58,9 +58,9 @@ M2 continues: the TV lobby and phone join, with the TV and phones following the 
 ### M2 · Live game loop
 - [x] Convex schema: games, teams, answers (drafts and locks), adjustments; start and end a game, join a team, rejoin by saved id (D34)
 - [x] Screen sequence derived from the quiz, with next and previous on the server (D15, D35)
-- [ ] TV: lobby with QR code and quz.nu, rules screen, question and answer screens
-- [ ] Phone: join with a team name and colour, rejoin after refresh, follow the game
-- [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz
+- [x] TV: lobby with QR code and quz.nu, rules screen, round intro; question, answer, film and leaderboard as text placeholders (D36)
+- [x] Phone: join with a team name and colour, rejoin after refresh, follow the game (D36)
+- [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz. Started: "Starta quiz", a bare game page with Nästa, Föregående and Avsluta quiz (D36)
 - [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
 - [ ] På spåret films: TV plays each film, then its questions; phones answer after the film (D32)
 - [ ] Draft saving and locking, including on timer end (D16)
@@ -103,3 +103,4 @@ M2 continues: the TV lobby and phone join, with the TV and phones following the 
 - 2026-10-18: `migrateMissingNumbers` ran on dev and production (no `NaN` found in either) and was deleted.
 - 2026-10-22: M1 closed. M2 started: games, teams, answers and adjustments tables, one game at a time joined at quz.nu, 12 team colours (D34). Decisions renumbered: R2 is D32, film questions D33.
 - 2026-10-25: Screen sequence: round intro, each question then its answer, leaderboards between rounds and a final one, films before their questions in På spåret; next and previous on the server (D35).
+- 2026-10-26: TV at /tv (lobby with QR code, rules, round intro, text placeholders), phones join and follow at /, "Starta quiz" and a bare live control (D36). Tried end to end on dev in the browser pane.

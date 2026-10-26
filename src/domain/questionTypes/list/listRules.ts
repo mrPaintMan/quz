@@ -9,6 +9,7 @@ export const listRules: QuestionTypeRules<ListContent> = {
   requiresTimeLimit: true,
   requiresVideo: false,
   hasAnswerScreen: true,
+  answeredInApp: true,
   createEmptyContent: () => ({
     type: "list",
     acceptedItems: [],

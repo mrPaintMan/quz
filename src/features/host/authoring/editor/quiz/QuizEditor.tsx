@@ -53,7 +53,7 @@ export function QuizEditor({ quizId }: { quizId: Id<"quizzes"> }) {
 
   return (
     <div className="flex min-h-svh flex-col">
-      <HostHeader actions={<ReadinessSummary rounds={tree.rounds} />}>
+      <HostHeader actions={<ReadinessSummary quizId={tree.quiz._id} rounds={tree.rounds} />}>
         <Link href="/admin" className="text-sm text-muted-foreground hover:text-foreground">
           ← Dina quiz
         </Link>
