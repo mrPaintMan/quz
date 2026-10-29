@@ -24,7 +24,7 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
   }, [isStale, saveTeamId]);
 
   if (teamId !== null && team === undefined) return <Waiting />;
-  if (team) return <FollowGame team={team} view={game.view} />;
+  if (team) return <FollowGame team={team} view={game.view} timer={game.timer} />;
   return (
     <main className="flex min-h-svh items-center justify-center p-5">
       <JoinForm gameId={game._id} quizTitle={game.quizTitle} onJoined={saveTeamId} />

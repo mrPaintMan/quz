@@ -1,17 +1,20 @@
+import type { Timer } from "@convex/games/timer";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { LeaderboardScreen } from "./LeaderboardScreen";
 import { LobbyScreen } from "./LobbyScreen";
 import { RulesScreen } from "./RulesScreen";
 import type { TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
+import { TvTimer } from "./TvTimer";
 
-type TvScreenProps = { view: ScreenView; quizTitle: string; joinUrl: URL; teams: TvTeam[] };
+type TvScreenProps = { view: ScreenView; quizTitle: string; joinUrl: URL; teams: TvTeam[]; timer: Timer | null };
 
 const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
 // The screen the game is on. Questions, answers and films show their text only for now; each
-// question type's display comes in M3 and film playback with the live control.
-export function TvScreen({ view, quizTitle, joinUrl, teams }: TvScreenProps) {
+// question type's display comes in M3 and film playback with the live control. Drawn on the TV
+// and, smaller, in the hosts' live control.
+export function TvScreen({ view, quizTitle, joinUrl, teams, timer }: TvScreenProps) {
   switch (view.kind) {
     case "lobby":
       return <LobbyScreen quizTitle={quizTitle} joinUrl={joinUrl} teams={teams} />;
@@ -20,7 +23,13 @@ export function TvScreen({ view, quizTitle, joinUrl, teams }: TvScreenProps) {
     case "roundIntro":
       return <TvFrame eyebrow={roundLabel(view.roundNumber)} title={view.title} />;
     case "question":
-      return <TvFrame eyebrow={`${roundLabel(view.roundNumber)} · Fråga ${view.questionNumber}`} title={view.prompt} />;
+      return (
+        <TvFrame
+          eyebrow={`${roundLabel(view.roundNumber)} · Fråga ${view.questionNumber}`}
+          title={view.prompt}
+          corner={<TvTimer timer={timer} />}
+        />
+      );
     case "answer":
       return <TvFrame eyebrow={`${roundLabel(view.roundNumber)} · Svar på fråga ${view.questionNumber}`} title={view.prompt} />;
     case "film":

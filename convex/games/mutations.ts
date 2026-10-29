@@ -1,10 +1,14 @@
 import { ConvexError, v } from "convex/values";
 import { findUnfinishedQuestions } from "@/domain/questions/findUnfinishedQuestions";
+import { extendTimer } from "@/domain/timer/extendTimer";
+import { pauseTimer } from "@/domain/timer/pauseTimer";
+import { resumeTimer } from "@/domain/timer/resumeTimer";
 import type { Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { roundsWithQuestionsOfQuiz } from "../rounds/roundsWithQuestionsOfQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
+import { changeTimer } from "./changeTimer";
 import { findRunningGame } from "./findRunningGame";
 import { moveScreen } from "./moveScreen";
 import { screen } from "./screen";
@@ -52,4 +56,19 @@ export const goToNextScreen = hostMutation({
 export const goToPreviousScreen = hostMutation({
   args: { gameId: v.id("games"), from: screen },
   handler: async (ctx, { gameId, from }) => moveScreen(ctx, gameId, from, -1),
+});
+
+export const pauseGameTimer = hostMutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, { gameId }) => changeTimer(ctx, gameId, pauseTimer),
+});
+
+export const resumeGameTimer = hostMutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, { gameId }) => changeTimer(ctx, gameId, resumeTimer),
+});
+
+export const extendGameTimer = hostMutation({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, { gameId }) => changeTimer(ctx, gameId, extendTimer),
 });

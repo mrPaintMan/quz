@@ -13,4 +13,9 @@ describe("TvFrame", () => {
     expect(screen.getByText("Omgång 1")).toBeInTheDocument();
     expect(screen.getByText("Innehåll")).toBeInTheDocument();
   });
+
+  it("shows the corner beside the title", () => {
+    render(<TvFrame title="Julmat" corner={<p>0:42</p>} />);
+    expect(screen.getByText("0:42")).toBeInTheDocument();
+  });
 });

@@ -1,10 +1,11 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import type { Timer } from "@convex/games/timer";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { TvScreen } from "./TvScreen";
 
-const renderView = (view: ScreenView) =>
-  render(<TvScreen view={view} quizTitle="Julquiz 2026" joinUrl={new URL("https://quz.nu/")} teams={[]} />);
+const renderView = (view: ScreenView, timer: Timer | null = null) =>
+  render(<TvScreen view={view} quizTitle="Julquiz 2026" joinUrl={new URL("https://quz.nu/")} teams={[]} timer={timer} />);
 
 describe("TvScreen", () => {
   it.each<[ScreenView, string, string | null]>([
@@ -20,5 +21,10 @@ describe("TvScreen", () => {
     renderView(view);
     expect(screen.getByRole("heading", { level: 1, name: title })).toBeInTheDocument();
     if (eyebrow) expect(screen.getByText(eyebrow)).toBeInTheDocument();
+  });
+
+  it("shows the question's timer", () => {
+    renderView({ kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vilken krydda?", answeredInApp: true }, { kind: "paused", remainingMs: 42_000 });
+    expect(screen.getByRole("timer")).toHaveTextContent("0:42");
   });
 });

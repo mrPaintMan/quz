@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M2 continues: the admin's full live control (now / next preview, keyboard, timer, media, pause), then På spåret playback and draft saving and locking.
+M2 continues: media playback from the admin (question images on the TV, audio and video played on the TV and started from the admin), then På spåret playback and draft saving and locking.
 
 ## Milestones
 
@@ -62,7 +62,8 @@ M2 continues: the admin's full live control (now / next preview, keyboard, timer
 - [x] Phone: join with a team name and colour, rejoin after refresh, follow the game (D36)
 - [x] TV fits any browser window: a 16:9 stage scaled to the window (D37)
 - [x] Lobby fits all 12 teams: names flow and wrap, smaller when long (D37)
-- [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz. Started: "Starta quiz", a bare game page with Nästa, Föregående and Avsluta quiz (D36)
+- [x] Admin: live control with the TV now and next drawn small, Nästa and Föregående; question timer with pause and +15 s on the TV, phones and admin (D38)
+- [ ] Admin: media playback (question images on the TV; audio and video played on the TV, started from the admin)
 - [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
 - [ ] På spåret films: TV plays each film, then its questions; phones answer after the film (D32)
 - [ ] Draft saving and locking, including on timer end (D16)
@@ -106,3 +107,4 @@ M2 continues: the admin's full live control (now / next preview, keyboard, timer
 - 2026-10-22: M1 closed. M2 started: games, teams, answers and adjustments tables, one game at a time joined at quz.nu, 12 team colours (D34). Decisions renumbered: R2 is D32, film questions D33.
 - 2026-10-25: Screen sequence: round intro, each question then its answer, leaderboards between rounds and a final one, films before their questions in På spåret; next and previous on the server (D35).
 - 2026-10-26: TV at /tv (lobby with QR code, rules, round intro, text placeholders), phones join and follow at /, "Starta quiz" and a bare live control (D36). Tried end to end on dev in the browser pane.
+- 2026-10-29: Live control shows the TV now and next; question timer with pause and +15 s on the TV, phones and admin. Keyboard shortcuts and pausing the whole quiz dropped (D38). Not yet tried in a browser: the cloud session's network blocks Convex.

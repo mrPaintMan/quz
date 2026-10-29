@@ -74,6 +74,7 @@ src/
     questionTypes/registry.ts    # type → rules, typed as a complete map over QuestionType
     questions/                   # cross-type functions using the registry: findQuestionProblems, maxQuestionPoints, createEmptyContent
     rounds/  teams/  ordering/  text/  time/ # which types fit a round, list moves, number and answer-key text, "Sparat för …"
+    timer/                       # the question timer: start, pause, resume, +15 s, seconds left
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/  matching/          # leaderboard, fuzzy text matching …
   features/
@@ -94,10 +95,10 @@ src/
       join/                      # join form, the team saved on the phone
       answering/<type>/          # answer input for one type, plus registry.ts
     tv/                          # the shared screen
-      game/                      # /tv: the page and the join address
-      screens/                   # lobby, rules, question, answer, leaderboard …
-      questionDisplays/<type>/   # TV display for one type, plus registry.ts
-    shared/                      # used by more than one audience: logo (brand/), map, team colours (teams/), error texts (errors/)
+      game/                      # /tv: the page and the 16:9 stage
+    shared/                      # used by more than one audience: logo (brand/), map, team colours (teams/), error texts (errors/), the countdown (timer/)
+      tvScreens/                 # lobby, rules, question, answer, leaderboard …, drawn on the TV and in the hosts' live control (D38)
+      questionDisplays/<type>/   # TV display for one type, plus registry.ts; shared since the TV screens are
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
 ```
