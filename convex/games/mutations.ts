@@ -12,6 +12,7 @@ import { changeTimer } from "./changeTimer";
 import { findRunningGame } from "./findRunningGame";
 import { moveScreen } from "./moveScreen";
 import { screen } from "./screen";
+import { timer } from "./timer";
 
 async function requireReadyQuiz(ctx: QueryCtx, quizId: Id<"quizzes">) {
   const rounds = await roundsWithQuestionsOfQuiz(ctx, quizId);
@@ -59,16 +60,16 @@ export const goToPreviousScreen = hostMutation({
 });
 
 export const pauseGameTimer = hostMutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, { gameId }) => changeTimer(ctx, gameId, pauseTimer),
+  args: { gameId: v.id("games"), from: timer },
+  handler: async (ctx, { gameId, from }) => changeTimer(ctx, gameId, from, pauseTimer),
 });
 
 export const resumeGameTimer = hostMutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, { gameId }) => changeTimer(ctx, gameId, resumeTimer),
+  args: { gameId: v.id("games"), from: timer },
+  handler: async (ctx, { gameId, from }) => changeTimer(ctx, gameId, from, resumeTimer),
 });
 
 export const extendGameTimer = hostMutation({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, { gameId }) => changeTimer(ctx, gameId, extendTimer),
+  args: { gameId: v.id("games"), from: timer },
+  handler: async (ctx, { gameId, from }) => changeTimer(ctx, gameId, from, extendTimer),
 });

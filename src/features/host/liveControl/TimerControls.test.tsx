@@ -29,24 +29,32 @@ describe("TimerControls", () => {
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
-  it("pauses a running timer", async () => {
-    renderControls({ kind: "running", endsAt: Date.now() + 42_000 });
+  it("pauses the running timer it shows", async () => {
+    const timer = { kind: "running" as const, endsAt: Date.now() + 42_000 };
+    renderControls(timer);
     expect(screen.getByRole("timer")).toHaveTextContent("0:42");
     await userEvent.click(screen.getByRole("button", { name: "Pausa" }));
-    expect(mutations.pauseGameTimer).toHaveBeenCalledWith({ gameId });
+    expect(mutations.pauseGameTimer).toHaveBeenCalledWith({ gameId, from: timer });
   });
 
-  it("resumes a paused timer", async () => {
-    renderControls({ kind: "paused", remainingMs: 20_000 });
+  it("resumes the paused timer it shows", async () => {
+    const timer = { kind: "paused" as const, remainingMs: 20_000 };
+    renderControls(timer);
     expect(screen.getByRole("timer")).toHaveTextContent("0:20");
     await userEvent.click(screen.getByRole("button", { name: "Fortsätt" }));
-    expect(mutations.resumeGameTimer).toHaveBeenCalledWith({ gameId });
+    expect(mutations.resumeGameTimer).toHaveBeenCalledWith({ gameId, from: timer });
   });
 
   it("gives 15 seconds more", async () => {
-    renderControls({ kind: "paused", remainingMs: 0 });
+    const timer = { kind: "paused" as const, remainingMs: 0 };
+    renderControls(timer);
     expect(screen.getByRole("timer")).toHaveTextContent("Tiden är ute!");
     await userEvent.click(screen.getByRole("button", { name: "+15 s" }));
-    expect(mutations.extendGameTimer).toHaveBeenCalledWith({ gameId });
+    expect(mutations.extendGameTimer).toHaveBeenCalledWith({ gameId, from: timer });
+  });
+
+  it("can't pause once the time is out", () => {
+    renderControls({ kind: "running", endsAt: Date.now() - 1_000 });
+    expect(screen.getByRole("button", { name: "Pausa" })).toBeDisabled();
   });
 });

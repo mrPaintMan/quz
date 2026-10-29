@@ -24,10 +24,15 @@ export function TimerControls({ gameId, timer }: { gameId: Id<"games">; timer: T
       <p role="timer" className="min-w-14 text-2xl font-bold text-primary tabular-nums">
         {secondsLeft !== null && timeLeftText(secondsLeft)}
       </p>
-      <Button variant="outline" onClick={() => run(() => (isRunning ? pause : resume)({ gameId }))}>
+      {/* Pausing at zero would only hide that the time is out; +15 s is what's left to do. */}
+      <Button
+        variant="outline"
+        disabled={isRunning && secondsLeft === 0}
+        onClick={() => run(() => (isRunning ? pause : resume)({ gameId, from: timer }))}
+      >
         {isRunning ? "Pausa" : "Fortsätt"}
       </Button>
-      <Button variant="outline" onClick={() => run(() => extend({ gameId }))}>
+      <Button variant="outline" onClick={() => run(() => extend({ gameId, from: timer }))}>
         +{TIMER_EXTENSION_SECONDS} s
       </Button>
     </div>

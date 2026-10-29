@@ -26,7 +26,6 @@ import type * as games_queries from "../games/queries.js";
 import type * as games_screen from "../games/screen.js";
 import type * as games_table from "../games/table.js";
 import type * as games_timer from "../games/timer.js";
-import type * as games_timerForScreen from "../games/timerForScreen.js";
 import type * as media_filmStorage from "../media/filmStorage.js";
 import type * as media_mutations from "../media/mutations.js";
 import type * as media_queries from "../media/queries.js";
@@ -102,7 +101,6 @@ declare const fullApi: ApiFromModules<{
   "games/screen": typeof games_screen;
   "games/table": typeof games_table;
   "games/timer": typeof games_timer;
-  "games/timerForScreen": typeof games_timerForScreen;
   "media/filmStorage": typeof media_filmStorage;
   "media/mutations": typeof media_mutations;
   "media/queries": typeof media_queries;
