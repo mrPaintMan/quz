@@ -16,19 +16,19 @@ export function RulesScreen({ roundCount, questionCount, activityCount }: RulesS
   ];
   return (
     <TvFrame title="Så funkar kvällen">
-      <div className="flex flex-1 gap-[4vw]">
-        <ul className="flex flex-1 flex-col gap-[1.4vw]">
+      <div className="flex flex-1 gap-[4cqw]">
+        <ul className="flex flex-1 flex-col gap-[1.4cqw]">
           {RULES.map((rule) => (
-            <li key={rule.title} className="rounded-[1.4vw] border-2 bg-card px-[2.2vw] py-[1.8vw]">
-              <p className="text-[2.4vw] font-semibold">{rule.title}</p>
-              <p className="mt-[0.4vw] text-[1.6vw] text-muted-foreground">{rule.text}</p>
+            <li key={rule.title} className="rounded-[1.4cqw] border-2 bg-card px-[2.2cqw] py-[1.8cqw]">
+              <p className="text-[2.4cqw] font-semibold">{rule.title}</p>
+              <p className="mt-[0.4cqw] text-[1.6cqw] text-muted-foreground">{rule.text}</p>
             </li>
           ))}
         </ul>
-        <section aria-label="Kvällens upplägg" className="grid w-[30vw] shrink-0 content-start gap-[1.2vw]">
+        <section aria-label="Kvällens upplägg" className="grid w-[30cqw] shrink-0 content-start gap-[1.2cqw]">
           {overview.map(({ count, label }) => (
-            <p key={label} className="rounded-[1.4vw] bg-card p-[1.8vw] text-[1.8vw]">
-              <span className="block text-[5vw] leading-none font-bold text-primary">{count}</span>
+            <p key={label} className="rounded-[1.4cqw] bg-card p-[1.8cqw] text-[1.8cqw]">
+              <span className="block text-[5cqw] leading-none font-bold text-primary">{count}</span>
               {label}
             </p>
           ))}
