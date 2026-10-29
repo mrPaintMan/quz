@@ -61,6 +61,7 @@ M2 continues: the admin's full live control (now / next preview, keyboard, timer
 - [x] TV: lobby with QR code and quz.nu, rules screen, round intro; question, answer, film and leaderboard as text placeholders (D36)
 - [x] Phone: join with a team name and colour, rejoin after refresh, follow the game (D36)
 - [x] TV fits any browser window: a 16:9 stage scaled to the window (D37)
+- [x] Lobby fits all 12 teams: names flow and wrap, smaller when long (D37)
 - [ ] Admin: live control (now / next on the TV, next and previous, keyboard), timer with pause and +15 s, media playback, pause quiz. Started: "Starta quiz", a bare game page with Nästa, Föregående and Avsluta quiz (D36)
 - [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
 - [ ] På spåret films: TV plays each film, then its questions; phones answer after the film (D32)
