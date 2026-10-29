@@ -14,10 +14,11 @@ const nameSize = (teams: TvTeam[]) =>
 // from its dot.
 export function TeamList({ teams, emptyText }: { teams: TvTeam[]; emptyText: string }) {
   if (teams.length === 0) return <p className="text-[2cqw] text-muted-foreground">{emptyText}</p>;
+  const size = nameSize(teams);
   return (
     <ul className="flex flex-wrap gap-x-[3cqw] gap-y-[1.4cqw]">
       {teams.map((team) => (
-        <li key={team._id} className={`flex max-w-full items-center gap-[1cqw] font-semibold whitespace-nowrap ${nameSize(teams)}`}>
+        <li key={team._id} className={`flex max-w-full items-center gap-[1cqw] font-semibold whitespace-nowrap ${size}`}>
           <TeamDot colour={team.colour} className="size-[1.4cqw]" />
           <span className="truncate">{team.name}</span>
         </li>
