@@ -24,7 +24,9 @@ describe("getRunningGame", () => {
       quizTitle: "Julquiz 2026",
       screen: { kind: "lobby" },
       view: { kind: "lobby" },
+      media: null,
       timer: null,
+      playback: null,
     });
   });
 
@@ -51,8 +53,9 @@ describe("getRunningGame", () => {
   });
 });
 
-async function insertQuizWithQuestion(t: ReturnType<typeof setupConvexTest>) {
+async function insertQuizWithQuestion(t: ReturnType<typeof setupConvexTest>, withImage = false) {
   return t.run(async (ctx) => {
+    const storageId = await ctx.storage.store(new Blob(["bild"]));
     const quizId = await ctx.db.insert("quizzes", { title: "Julquiz 2026", year: 2026, updatedAt: 0 });
     const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Julmat", kind: "questions" });
     const questionId = await ctx.db.insert("questions", {
@@ -61,7 +64,7 @@ async function insertQuizWithQuestion(t: ReturnType<typeof setupConvexTest>) {
       position: 0,
       prompt: "Pepparkakshus",
       timeLimitSeconds: 30,
-      media: null,
+      media: withImage ? { kind: "image", storageId } : null,
       hostNotes: "",
       content: { type: "activity", maxPoints: 5 },
     });
@@ -69,16 +72,20 @@ async function insertQuizWithQuestion(t: ReturnType<typeof setupConvexTest>) {
   });
 }
 
-describe("getRunningGame's timer", () => {
-  it("shows the timer of the screen showing now", async () => {
+describe("getRunningGame's media, timer and clip", () => {
+  it("shows the media, timer and clip of the screen showing now", async () => {
     const t = setupConvexTest();
-    const { quizId, questionId } = await insertQuizWithQuestion(t);
+    const { quizId, questionId } = await insertQuizWithQuestion(t, true);
     const timer = { kind: "running" as const, endsAt: 130_000 };
-    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3, timer }));
-    expect((await t.query(api.games.queries.getRunningGame, {}))?.timer).toEqual(timer);
+    const playback = { kind: "paused" as const, positionMs: 2_000 };
+    await t.run((ctx) =>
+      ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3, timer, playback }),
+    );
+    const game = await t.query(api.games.queries.getRunningGame, {});
+    expect(game).toMatchObject({ media: { kind: "image", url: expect.any(String) }, timer, playback });
   });
 
-  it("leaves out the timer of a question deleted during the game", async () => {
+  it("leaves out the timer and clip of a question deleted during the game", async () => {
     const t = setupConvexTest();
     const { quizId, questionId } = await insertQuizWithQuestion(t);
     await t.run(async (ctx) => {
@@ -88,12 +95,14 @@ describe("getRunningGame's timer", () => {
         screen: { kind: "question", questionId },
         screenIndex: 3,
         timer: { kind: "running", endsAt: 130_000 },
+        playback: { kind: "playing", startedAt: 100_000 },
       });
       await ctx.db.delete("questions", questionId);
     });
     const game = await t.query(api.games.queries.getRunningGame, {});
     expect(game?.screen).toEqual({ kind: "finalLeaderboard" });
     expect(game?.timer).toBeNull();
+    expect(game?.playback).toBeNull();
   });
 });
 
@@ -103,10 +112,17 @@ describe("getNextScreen", () => {
     const { quizId } = await insertQuizWithQuestion(t);
     const gameId = await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "rules" }, screenIndex: 1 }));
     await expect(t.query(api.games.queries.getNextScreen, { ...host, gameId })).resolves.toEqual({
-      kind: "roundIntro",
-      roundNumber: 1,
-      title: "Julmat",
+      view: { kind: "roundIntro", roundNumber: 1, title: "Julmat" },
+      media: null,
     });
+  });
+
+  it("shows the next screen's media", async () => {
+    const t = setupConvexTest();
+    const { quizId, roundId } = await insertQuizWithQuestion(t, true);
+    const gameId = await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "roundIntro", roundId }, screenIndex: 2 }));
+    const next = await t.query(api.games.queries.getNextScreen, { ...host, gameId });
+    expect(next?.media).toEqual({ kind: "image", url: expect.any(String) });
   });
 
   it("is null after the last screen", async () => {

@@ -1,5 +1,6 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
+import { playback } from "./playback";
 import { screen } from "./screen";
 import { timer } from "./timer";
 
@@ -15,6 +16,8 @@ export const gamesTable = defineTable({
   // The timer of the question showing now; left out on any other screen and for a question
   // without a time limit. Optional rather than nullable so games started before it still match.
   timer: v.optional(timer),
+  // The clip of the question showing now, kept like the timer.
+  playback: v.optional(playback),
 })
   .index("by_endedAt", ["endedAt"])
   .index("by_quizId", ["quizId"]);

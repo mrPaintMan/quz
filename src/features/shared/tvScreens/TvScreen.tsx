@@ -1,20 +1,38 @@
+import type { Playback } from "@convex/games/playback";
 import type { Timer } from "@convex/games/timer";
+import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { LeaderboardScreen } from "./LeaderboardScreen";
 import { LobbyScreen } from "./LobbyScreen";
 import { RulesScreen } from "./RulesScreen";
 import type { TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
+import { TvMedia } from "./TvMedia";
 import { TvTimer } from "./TvTimer";
 
-type TvScreenProps = { view: ScreenView; quizTitle: string; joinUrl: URL; teams: TvTeam[]; timer: Timer | null };
+type TvScreenProps = {
+  view: ScreenView;
+  quizTitle: string;
+  joinUrl: URL;
+  teams: TvTeam[];
+  media: ShownMedia | null;
+  timer: Timer | null;
+  playback: Playback | null;
+  // Draws the screen without playing its clip, for the hosts' small copies of the TV.
+  silent?: boolean;
+};
 
 const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
-// The screen the game is on. Questions, answers and films show their text only for now; each
-// question type's display comes in M3 and film playback with the live control. Drawn on the TV
-// and, smaller, in the hosts' live control.
-export function TvScreen({ view, quizTitle, joinUrl, teams, timer }: TvScreenProps) {
+// The screen the game is on. Questions and answers show their text and media for now; each
+// question type's display comes in M3 and På spåret's films after this. Drawn on the TV and,
+// smaller, in the hosts' live control.
+export function TvScreen({ view, quizTitle, joinUrl, teams, media, timer, playback, silent = false }: TvScreenProps) {
+  const mediaArea = media && (
+    <div className="flex min-h-0 flex-1 items-center justify-center">
+      <TvMedia media={media} playback={playback} silent={silent} />
+    </div>
+  );
   switch (view.kind) {
     case "lobby":
       return <LobbyScreen quizTitle={quizTitle} joinUrl={joinUrl} teams={teams} />;
@@ -28,10 +46,16 @@ export function TvScreen({ view, quizTitle, joinUrl, teams, timer }: TvScreenPro
           eyebrow={`${roundLabel(view.roundNumber)} · Fråga ${view.questionNumber}`}
           title={view.prompt}
           corner={<TvTimer timer={timer} />}
-        />
+        >
+          {mediaArea}
+        </TvFrame>
       );
     case "answer":
-      return <TvFrame eyebrow={`${roundLabel(view.roundNumber)} · Svar på fråga ${view.questionNumber}`} title={view.prompt} />;
+      return (
+        <TvFrame eyebrow={`${roundLabel(view.roundNumber)} · Svar på fråga ${view.questionNumber}`} title={view.prompt}>
+          {mediaArea}
+        </TvFrame>
+      );
     case "film":
       return <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film" />;
     case "leaderboard":

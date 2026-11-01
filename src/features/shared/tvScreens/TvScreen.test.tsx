@@ -1,11 +1,20 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import type { Timer } from "@convex/games/timer";
+import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { TvScreen } from "./TvScreen";
 
-const renderView = (view: ScreenView, timer: Timer | null = null) =>
-  render(<TvScreen view={view} quizTitle="Julquiz 2026" joinUrl={new URL("https://quz.nu/")} teams={[]} timer={timer} />);
+type Extras = { media?: ShownMedia | null; timer?: Timer | null };
+
+const renderView = (view: ScreenView, { media = null, timer = null }: Extras = {}) =>
+  render(
+    <TvScreen view={view} quizTitle="Julquiz 2026" joinUrl={new URL("https://quz.nu/")} teams={[]} media={media} timer={timer} playback={null} />,
+  );
+
+const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: true };
+const answer: ScreenView = { kind: "answer", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?" };
+const image: ShownMedia = { kind: "image", url: "https://example.com/tomte.jpg" };
 
 describe("TvScreen", () => {
   it.each<[ScreenView, string, string | null]>([
@@ -24,7 +33,17 @@ describe("TvScreen", () => {
   });
 
   it("shows the question's timer", () => {
-    renderView({ kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vilken krydda?", answeredInApp: true }, { kind: "paused", remainingMs: 42_000 });
+    renderView(question, { timer: { kind: "paused", remainingMs: 42_000 } });
     expect(screen.getByRole("timer")).toHaveTextContent("0:42");
+  });
+
+  it.each([question, answer])("shows the picture on the %o screen", (view) => {
+    renderView(view, { media: image });
+    expect(screen.getByRole("presentation")).toHaveAttribute("src", image.url);
+  });
+
+  it("shows no media area without media", () => {
+    renderView(question);
+    expect(screen.queryByRole("presentation")).not.toBeInTheDocument();
   });
 });

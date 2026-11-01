@@ -77,3 +77,16 @@ Films (videos) are stored in Cloudflare R2, where downloads are free, through th
 6. Check: upload a film in the editor, then press "Spela upp". The file shows up in the bucket's **Objects** list.
 
 The buckets stay private: the app plays films through signed links that expire after a few hours.
+
+## 7. The TV on the night
+
+The TV runs quz.nu/tv in a browser. Browsers play no sound on a page nobody has clicked, so a clip the hosts start would stay silent. The TV then shows **Klicka för att slå på ljudet**; one click on it is enough until the page is reloaded. To avoid the click altogether (D39):
+
+- **The TV's own browser** (first choice): before the dry run, open quz.nu/tv, start a quiz with a sound clip and a video, and press Spela in the admin. If the button shows, click it once with the remote's pointer. If the browser has no pointer, won't play the clips, or the picture doesn't fit, use the MacBook.
+- **MacBook with Chrome over HDMI** (fallback): quit Chrome fully (Cmd+Q), then start it from Terminal with sound allowed without a click:
+  ```
+  open -a "Google Chrome" --args --autoplay-policy=no-user-gesture-required
+  ```
+  Without that, click once anywhere on the TV page, for example in the lobby, and again after any reload. Safari is an alternative that remembers the choice: Safari → Settings for quz.nu → Auto-Play: Allow All Auto-Play.
+- Make the window fullscreen; the TV screens fit any window shape (D37).
+- Upload videos as MP4 (H.264 with AAC sound), which every TV and browser plays.

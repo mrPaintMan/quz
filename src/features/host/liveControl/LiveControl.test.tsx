@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
+import type { Playback } from "@convex/games/playback";
 import type { Timer } from "@convex/games/timer";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { ActionErrorProvider } from "@/features/host/shared/ActionErrorProvider";
@@ -23,8 +24,11 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 const gameId = "game1" as Id<"games">;
 const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true };
 
-function renderControl({ view = { kind: "lobby" }, timer = null }: { view?: ScreenView; timer?: Timer | null } = {}) {
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: { kind: "lobby" as const }, view, timer };
+type GameState = { view?: ScreenView; timer?: Timer | null; playback?: Playback | null };
+
+function renderControl({ view = { kind: "lobby" }, timer = null, playback = null }: GameState = {}) {
+  const screenNow = { kind: "lobby" as const };
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media: null, timer, playback };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>
@@ -36,7 +40,7 @@ function renderControl({ view = { kind: "lobby" }, timer = null }: { view?: Scre
 
 describe("LiveControl", () => {
   beforeEach(() => {
-    nextScreen.mockReturnValue({ kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 });
+    nextScreen.mockReturnValue({ view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null });
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
@@ -75,6 +79,16 @@ describe("LiveControl", () => {
   it("has no timer controls without a timer", () => {
     renderControl({ view: question });
     expect(screen.queryByRole("button", { name: "Pausa" })).not.toBeInTheDocument();
+  });
+
+  it("shows the clip controls only while the question has a clip", () => {
+    renderControl({ view: question, playback: { kind: "paused", positionMs: 0 } });
+    expect(screen.getByRole("button", { name: "Spela" })).toBeInTheDocument();
+  });
+
+  it("has no clip controls without a clip", () => {
+    renderControl({ view: question });
+    expect(screen.queryByRole("button", { name: "Spela" })).not.toBeInTheDocument();
   });
 
   it("links to the TV view", () => {

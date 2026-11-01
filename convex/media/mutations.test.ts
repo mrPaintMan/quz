@@ -37,6 +37,38 @@ describe("getFilmUrl", () => {
   });
 });
 
+describe("getShowingFilmUrl", () => {
+  const video = { kind: "video" as const, r2Key: "film-key", posterId: null, durationSeconds: 10 };
+
+  async function gameShowing(screenKind: "question" | "answer") {
+    const { t, quizId, questionId } = await setupQuestionWithFile();
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media: video });
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: screenKind, questionId }, screenIndex: 3 }));
+    return { t, questionId };
+  }
+
+  it("gives the TV a link to the film of the question showing now", async () => {
+    const { t, questionId } = await gameShowing("question");
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toContain("film-key");
+  });
+
+  it("gives nothing once the question no longer shows", async () => {
+    const { t, questionId } = await gameShowing("answer");
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toBeNull();
+  });
+
+  it("gives nothing for a question without a film", async () => {
+    const { t, quizId, questionId } = await setupQuestionWithFile();
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 }));
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toBeNull();
+  });
+
+  it("gives nothing when no game is running", async () => {
+    const { t, questionId } = await setupQuestionWithFile();
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toBeNull();
+  });
+});
+
 describe("setQuestionMedia", () => {
   it("attaches an uploaded file to the question", async () => {
     const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();
