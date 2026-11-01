@@ -3,9 +3,9 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { QuzWordmark } from "@/features/shared/brand/QuzWordmark";
-import { TvScreen } from "@/features/tv/screens/TvScreen";
+import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { TvStage } from "./TvStage";
-import { useJoinUrl } from "./useJoinUrl";
+import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
 
 function Idle({ text }: { text: string }) {
   return (
@@ -33,5 +33,5 @@ function CurrentScreen() {
 
   if (game === undefined || joinUrl === null) return <Idle text="Hämtar quizet…" />;
   if (game === null) return <Idle text="Inget quiz pågår just nu." />;
-  return <TvScreen view={game.view} quizTitle={game.quizTitle} joinUrl={joinUrl} teams={teams} />;
+  return <TvScreen view={game.view} quizTitle={game.quizTitle} joinUrl={joinUrl} teams={teams} timer={game.timer} />;
 }

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { api } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { host, setupConvexTest } from "../test.setup";
@@ -22,6 +22,7 @@ describe("startGame", () => {
       quizTitle: "Julquiz 2026",
       screen: { kind: "lobby" },
       view: { kind: "lobby" },
+      timer: null,
     });
   });
 
@@ -135,5 +136,107 @@ describe("goToNextScreen and goToPreviousScreen", () => {
     await expect(
       t.mutation(api.games.mutations.goToPreviousScreen, { hostPassphrase: "fel", gameId, from: { kind: "lobby" } }),
     ).rejects.toThrow("Fel lösenord.");
+  });
+});
+
+describe("the question timer", () => {
+  const running = { kind: "running" as const, endsAt: 130_000 };
+  type TestConvex = Awaited<ReturnType<typeof setupQuiz>>["t"];
+  const runningGame = async (t: TestConvex) => (await t.query(api.games.queries.getRunningGame, {}))!;
+  // The timer showing now, which the admin view sends with each press.
+  const timerNow = async (t: TestConvex) => (await runningGame(t)).timer!;
+  const step = async (t: TestConvex, gameId: Id<"games">, direction: "next" | "previous") => {
+    const mutation = direction === "next" ? api.games.mutations.goToNextScreen : api.games.mutations.goToPreviousScreen;
+    await t.mutation(mutation, { ...host, gameId, from: (await runningGame(t)).screen });
+  };
+
+  // A game showing a question with a 30 second limit, started at 100 seconds.
+  async function atTimedQuestion() {
+    const { t, quizId, questionId } = await setupQuiz();
+    await t.mutation(api.questions.mutations.updateQuestion, { ...host, questionId, timeLimitSeconds: 30 });
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    await step(t, gameId, "next");
+    await step(t, gameId, "next");
+    vi.setSystemTime(100_000);
+    await step(t, gameId, "next");
+    return { t, gameId };
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("starts when a question with a time limit shows", async () => {
+    const { t } = await atTimedQuestion();
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 130_000 });
+  });
+
+  it("is gone on the next screen and starts over when stepping back to the question", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    await step(t, gameId, "next");
+    expect((await runningGame(t)).timer).toBeNull();
+    vi.setSystemTime(200_000);
+    await step(t, gameId, "previous");
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 230_000 });
+  });
+
+  it("doesn't start for a question without a time limit", async () => {
+    const { t, quizId } = await setupQuiz();
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    for (let i = 0; i < 3; i++) await step(t, gameId, "next");
+    expect((await runningGame(t)).view.kind).toBe("question");
+    expect((await runningGame(t)).timer).toBeNull();
+  });
+
+  it("pauses, resumes with the time that was left, and gets 15 seconds more", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    vi.setSystemTime(110_000);
+    await t.mutation(api.games.mutations.pauseGameTimer, { ...host, gameId, from: await timerNow(t) });
+    expect((await runningGame(t)).timer).toEqual({ kind: "paused", remainingMs: 20_000 });
+    vi.setSystemTime(500_000);
+    await t.mutation(api.games.mutations.resumeGameTimer, { ...host, gameId, from: await timerNow(t) });
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 520_000 });
+    await t.mutation(api.games.mutations.extendGameTimer, { ...host, gameId, from: await timerNow(t) });
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 535_000 });
+  });
+
+  it("counts two presses from the same timer once", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    const from = await timerNow(t);
+    await t.mutation(api.games.mutations.extendGameTimer, { ...host, gameId, from });
+    await t.mutation(api.games.mutations.extendGameTimer, { ...host, gameId, from });
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 145_000 });
+  });
+
+  it("leaves the question's new timer alone when a press comes after a step", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    const from = await timerNow(t);
+    await step(t, gameId, "next");
+    vi.setSystemTime(200_000);
+    await step(t, gameId, "previous");
+    await t.mutation(api.games.mutations.pauseGameTimer, { ...host, gameId, from });
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 230_000 });
+  });
+
+  it("does nothing on a screen without a timer", async () => {
+    const { t, quizId } = await setupQuiz();
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    await t.mutation(api.games.mutations.extendGameTimer, { ...host, gameId, from: running });
+    expect((await runningGame(t)).timer).toBeNull();
+  });
+
+  it("refuses a game that has ended", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    await t.mutation(api.games.mutations.endGame, { ...host, gameId });
+    await expect(t.mutation(api.games.mutations.pauseGameTimer, { ...host, gameId, from: running })).rejects.toThrow("Quizet är slut.");
+  });
+
+  it("refuses a wrong passphrase", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    await expect(t.mutation(api.games.mutations.resumeGameTimer, { hostPassphrase: "fel", gameId, from: running })).rejects.toThrow("Fel lösenord.");
   });
 });

@@ -18,7 +18,7 @@ The wireframes in the claude.ai design canvas "Quz wireframes" (https://claude.a
 - **TV (shared screen):** shows a sequence of screens that the hosts step through: lobby, rules, questions, answers, leaderboard and score graph. Replaces the PowerPoint.
 - **Team phone:** join by scanning the QR code on the TV (or typing quz.nu) and picking a team name and colour, with no account. The phone follows the game by itself; teams never tap "next". It shows the input for the open question and the team's own score.
 - **Host admin, authoring:** a list of quizzes; inside a quiz, rounds on the left (drag to reorder), the round's questions in the middle, the selected question's editor on the right. Changes save automatically. Buttons to preview on the TV and to start the quiz.
-- **Host admin, running the night:** a live copy of what the TV shows now and a preview of what comes next; next/previous (also by keyboard); timer pause and +15 s; play media; show answer; pause the whole quiz; a review queue; a leaderboard showing which teams have answered.
+- **Host admin, running the night:** a live copy of what the TV shows now and a preview of what comes next; next/previous; timer pause and +15 s; play media; a review queue; a leaderboard showing which teams have answered. The answer shows by stepping to its screen. No keyboard shortcuts and no pausing the whole quiz (D38).
 - **Host admin, score history:** total score per team question by question, points per round (round winner highlighted), biggest jump and number of lead changes. Can be shown on the TV.
 
 ## Rounds

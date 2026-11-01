@@ -28,7 +28,7 @@ describe("TvPage", () => {
   });
 
   it("shows the running game's screen with its teams", () => {
-    runningGame.mockReturnValue({ _id: "game1", quizTitle: "Julquiz 2026", screen: { kind: "lobby" }, view: { kind: "lobby" } });
+    runningGame.mockReturnValue({ _id: "game1", quizTitle: "Julquiz 2026", screen: { kind: "lobby" }, view: { kind: "lobby" }, timer: null });
     render(<TvPage />);
     expect(screen.getByRole("heading", { level: 1, name: "Julquiz 2026" })).toBeInTheDocument();
     expect(screen.getByText("Tomtarna")).toBeInTheDocument();
