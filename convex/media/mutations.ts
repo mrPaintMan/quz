@@ -1,11 +1,12 @@
 import { ConvexError, v } from "convex/values";
+import { videoPlayedOn } from "@/domain/media/videoPlayedOn";
 import { rulesFor } from "@/domain/questionTypes/registry";
-import { findQuestionInRounds } from "@/domain/rounds/findQuestionInRounds";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
 import { mutation } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { findRunningGame } from "../games/findRunningGame";
 import { placeOfGame } from "../games/placeOfGame";
+import { screen as screenValidator } from "../games/screen";
 import { questionMedia } from "../questions/table";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
@@ -32,18 +33,17 @@ export const getFilmUrl = hostMutation({
   handler: async (_ctx, { r2Key }) => filmStorage.getUrl(r2Key, { expiresIn: FILM_LINK_SECONDS }),
 });
 
-// Public, for the TV: the film of the question it shows, and only while that question shows, so
-// no one can watch a clip before its question. null otherwise, or if the question has no film.
+// Public, for the TV: the film of the screen it shows (a question's video or a På spåret film),
+// and only while that screen shows, so no one can watch a clip early. null otherwise.
 export const getShowingFilmUrl = mutation({
-  args: { questionId: v.id("questions") },
-  handler: async (ctx, { questionId }) => {
+  args: { screen: screenValidator },
+  handler: async (ctx, { screen }) => {
     const game = await findRunningGame(ctx);
     if (game === null) return null;
     const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
-    if (!isSameScreen(sequence[screenIndex], { kind: "question", questionId })) return null;
-    const media = findQuestionInRounds(rounds, questionId)?.media;
-    if (media?.kind !== "video") return null;
-    return filmStorage.getUrl(media.r2Key, { expiresIn: FILM_LINK_SECONDS });
+    if (!isSameScreen(sequence[screenIndex], screen)) return null;
+    const video = videoPlayedOn(screen, rounds);
+    return video && filmStorage.getUrl(video.r2Key, { expiresIn: FILM_LINK_SECONDS });
   },
 });
 

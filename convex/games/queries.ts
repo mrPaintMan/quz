@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
@@ -42,5 +43,17 @@ export const getNextScreen = hostQuery({
     const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
     const next = sequence[screenIndex + 1];
     return next === undefined ? null : showScreen(ctx, next, rounds);
+  },
+});
+
+// For the hosts' line on the trip's active clue; host-only, as the clues give the destination
+// away. null on any other screen and for an ended game.
+export const getShowingTrip = hostQuery({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, { gameId }) => {
+    const game = await getOrThrow(ctx, "games", gameId);
+    if (game.endedAt !== null) return null;
+    const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
+    return tripOnScreen(sequence[screenIndex], rounds);
   },
 });

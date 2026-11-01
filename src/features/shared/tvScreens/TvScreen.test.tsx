@@ -1,9 +1,11 @@
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { act, render, screen } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { TvScreen } from "./TvScreen";
+
+vi.mock("convex/react", () => ({ useMutation: () => vi.fn().mockResolvedValue(null) }));
 
 type Extras = { media?: ShownMedia | null; timer?: Timer | null };
 
@@ -45,5 +47,12 @@ describe("TvScreen", () => {
   it("shows no media area without media", () => {
     renderView(question);
     expect(screen.queryByRole("presentation")).not.toBeInTheDocument();
+  });
+
+  it("plays a På spåret film on its film screen", async () => {
+    const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: false };
+    const { container } = renderView({ kind: "film", roundNumber: 4 }, { media: film });
+    expect(container.querySelector("video")).toBeInTheDocument();
+    await act(async () => {});
   });
 });

@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
 import type { Playback } from "@convex/games/playback";
 import type { Timer } from "@convex/games/timer";
+import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { ActionErrorProvider } from "@/features/host/shared/ActionErrorProvider";
 import { HostSessionProvider } from "@/features/host/shared/HostSessionProvider";
@@ -15,6 +16,7 @@ const mutations = { goToNextScreen: vi.fn(), goToPreviousScreen: vi.fn() };
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna", colour: "red" }] }));
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => nextScreen() }));
+vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
 vi.mock("@/features/host/shared/useHostMutation", () => ({
   // The generated api hands out a new reference on each access, so pick by name.
   useHostMutation: (mutation: FunctionReference<"mutation">) =>
@@ -24,11 +26,11 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 const gameId = "game1" as Id<"games">;
 const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true };
 
-type GameState = { view?: ScreenView; timer?: Timer | null; playback?: Playback | null };
+type GameState = { view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
 
-function renderControl({ view = { kind: "lobby" }, timer = null, playback = null }: GameState = {}) {
+function renderControl({ view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
   const screenNow = { kind: "lobby" as const };
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media: null, timer, playback };
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, timer, playback };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>
@@ -89,6 +91,18 @@ describe("LiveControl", () => {
   it("has no clip controls without a clip", () => {
     renderControl({ view: question });
     expect(screen.queryByRole("button", { name: "Spela" })).not.toBeInTheDocument();
+  });
+
+  it("follows the trip's clues while its film shows", () => {
+    const tripFilm: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: true };
+    renderControl({ view: question, media: tripFilm, playback: { kind: "paused", positionMs: 0 } });
+    expect(screen.getByText("Ledtrådsrad")).toBeInTheDocument();
+  });
+
+  it("follows no clues over other films", () => {
+    const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: false };
+    renderControl({ view: question, media: film, playback: { kind: "paused", positionMs: 0 } });
+    expect(screen.queryByText("Ledtrådsrad")).not.toBeInTheDocument();
   });
 
   it("links to the TV view", () => {

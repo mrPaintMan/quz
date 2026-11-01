@@ -6,9 +6,9 @@ import { TvMedia } from "./TvMedia";
 
 vi.mock("convex/react", () => ({ useMutation: () => vi.fn().mockResolvedValue("https://films.example.com/tomte.mp4") }));
 
-const questionId = "q1" as Id<"questions">;
+const screenNow = { kind: "question" as const, questionId: "q1" as Id<"questions"> };
 const audio: ShownMedia = { kind: "audio", url: "https://example.com/jingle.mp3" };
-const video: ShownMedia = { kind: "video", questionId, posterUrl: "https://example.com/still.jpg" };
+const video = { kind: "video" as const, screen: screenNow, posterUrl: "https://example.com/still.jpg", showsCluePoints: false };
 const paused = { kind: "paused" as const, positionMs: 0 };
 
 describe("TvMedia", () => {
@@ -38,7 +38,7 @@ describe("TvMedia", () => {
   it("starts a fresh video for the next question", async () => {
     const { container, rerender } = await act(async () => render(<TvMedia media={video} playback={paused} silent={false} />));
     const first = container.querySelector("video");
-    await act(async () => rerender(<TvMedia media={{ ...video, questionId: "q2" as Id<"questions"> }} playback={paused} silent={false} />));
+    await act(async () => rerender(<TvMedia media={{ ...video, screen: { ...screenNow, questionId: "q2" as Id<"questions"> } }} playback={paused} silent={false} />));
     expect(container.querySelector("video")).not.toBe(first);
   });
 

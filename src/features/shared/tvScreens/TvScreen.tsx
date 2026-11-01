@@ -24,9 +24,9 @@ type TvScreenProps = {
 
 const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
-// The screen the game is on. Questions and answers show their text and media for now; each
-// question type's display comes in M3 and På spåret's films after this. Drawn on the TV and,
-// smaller, in the hosts' live control.
+// The screen the game is on. Questions, answers and films show their text and media for now;
+// each question type's display comes in M3. Drawn on the TV and, smaller, in the hosts' live
+// control.
 export function TvScreen({ view, quizTitle, joinUrl, teams, media, timer, playback, silent = false }: TvScreenProps) {
   const mediaArea = media && (
     <div className="flex min-h-0 flex-1 items-center justify-center">
@@ -57,7 +57,11 @@ export function TvScreen({ view, quizTitle, joinUrl, teams, media, timer, playba
         </TvFrame>
       );
     case "film":
-      return <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film" />;
+      return (
+        <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film">
+          {mediaArea}
+        </TvFrame>
+      );
     case "leaderboard":
       return <LeaderboardScreen title={`Topplista efter omgång ${view.roundNumber}`} teams={teams} />;
     case "finalLeaderboard":

@@ -49,23 +49,52 @@ describe("getShowingFilmUrl", () => {
 
   it("gives the TV a link to the film of the question showing now", async () => {
     const { t, questionId } = await gameShowing("question");
-    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toContain("film-key");
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { screen: { kind: "question", questionId } })).resolves.toContain("film-key");
   });
 
   it("gives nothing once the question no longer shows", async () => {
     const { t, questionId } = await gameShowing("answer");
-    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toBeNull();
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { screen: { kind: "question", questionId } })).resolves.toBeNull();
   });
 
   it("gives nothing for a question without a film", async () => {
     const { t, quizId, questionId } = await setupQuestionWithFile();
     await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 }));
-    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toBeNull();
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { screen: { kind: "question", questionId } })).resolves.toBeNull();
   });
 
   it("gives nothing when no game is running", async () => {
     const { t, questionId } = await setupQuestionWithFile();
-    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { questionId })).resolves.toBeNull();
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { screen: { kind: "question", questionId } })).resolves.toBeNull();
+  });
+
+  it("gives a link to a På spåret film while its film screen shows", async () => {
+    const t = setupConvexTest();
+    const screen = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", {
+        quizId,
+        position: 0,
+        title: "På spåret",
+        kind: "paSparet",
+        films: [{ id: "f1", video: { ...video, r2Key: "stad-key" } }],
+      });
+      await ctx.db.insert("questions", {
+        quizId,
+        roundId,
+        position: 0,
+        prompt: "Vilken stad?",
+        timeLimitSeconds: null,
+        media: null,
+        hostNotes: "",
+        filmId: "f1",
+        content: { type: "freeText", fields: [{ label: "", acceptedAnswers: ["Oslo"] }], pointsPerField: 1, fuzzy: true },
+      });
+      const filmScreen = { kind: "film" as const, roundId, filmId: "f1" };
+      await ctx.db.insert("games", { quizId, endedAt: null, screen: filmScreen, screenIndex: 3 });
+      return filmScreen;
+    });
+    await expect(t.mutation(api.media.mutations.getShowingFilmUrl, { screen })).resolves.toContain("stad-key");
   });
 });
 

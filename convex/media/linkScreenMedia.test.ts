@@ -16,17 +16,17 @@ describe("linkScreenMedia", () => {
 
   it("links a video's still, or none when it has none", async () => {
     const t = setupConvexTest();
-    const questionId = "q1" as Id<"questions">;
+    const screen = { kind: "question" as const, questionId: "q1" as Id<"questions"> };
     const shown = await t.run(async (ctx) => {
       const posterId = await ctx.storage.store(new Blob(["still"]));
       return [
-        await linkScreenMedia(ctx, { kind: "video", questionId, posterId }),
-        await linkScreenMedia(ctx, { kind: "video", questionId, posterId: null }),
+        await linkScreenMedia(ctx, { kind: "video", screen, posterId, showsCluePoints: true }),
+        await linkScreenMedia(ctx, { kind: "video", screen, posterId: null, showsCluePoints: false }),
       ];
     });
     expect(shown).toEqual([
-      { kind: "video", questionId, posterUrl: expect.any(String) },
-      { kind: "video", questionId, posterUrl: null },
+      { kind: "video", screen, posterUrl: expect.any(String), showsCluePoints: true },
+      { kind: "video", screen, posterUrl: null, showsCluePoints: false },
     ]);
   });
 
