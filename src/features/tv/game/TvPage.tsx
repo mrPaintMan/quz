@@ -33,5 +33,15 @@ function CurrentScreen() {
 
   if (game === undefined || joinUrl === null) return <Idle text="Hämtar quizet…" />;
   if (game === null) return <Idle text="Inget quiz pågår just nu." />;
-  return <TvScreen view={game.view} quizTitle={game.quizTitle} joinUrl={joinUrl} teams={teams} timer={game.timer} />;
+  return (
+    <TvScreen
+      view={game.view}
+      quizTitle={game.quizTitle}
+      joinUrl={joinUrl}
+      teams={teams}
+      media={game.media}
+      timer={game.timer}
+      playback={game.playback}
+    />
+  );
 }

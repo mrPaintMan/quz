@@ -11,6 +11,7 @@ import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
 import { EndGameButton } from "./EndGameButton";
+import { PlaybackControls } from "./PlaybackControls";
 import { screenLabel } from "./screenLabel";
 import { TimerControls } from "./TimerControls";
 import { TvPreview } from "./TvPreview";
@@ -18,7 +19,7 @@ import { TvPreview } from "./TvPreview";
 type RunningGame = NonNullable<FunctionReturnType<typeof api.games.queries.getRunningGame>>;
 
 // The hosts' view of the night: what the TV shows now and what comes next, both drawn as the TV
-// draws them, with the controls for stepping on and for the question's timer.
+// draws them but silent, with the controls for stepping on and for the question's timer and clip.
 export function LiveControl({ game }: { game: RunningGame }) {
   const teams = useQuery(api.teams.queries.listTeams, { gameId: game._id }) ?? [];
   const next = useHostQuery(api.games.queries.getNextScreen, { gameId: game._id });
@@ -44,13 +45,14 @@ export function LiveControl({ game }: { game: RunningGame }) {
         <section className="flex flex-col gap-3">
           <h2 className="text-sm text-muted-foreground">Visas på TV:n nu</h2>
           <TvPreview>
-            <TvScreen view={game.view} timer={game.timer} {...screenProps} />
+            <TvScreen view={game.view} media={game.media} timer={game.timer} playback={game.playback} silent {...screenProps} />
           </TvPreview>
           <p role="status" className="text-lg font-semibold">
             {screenLabel(game.view)}
           </p>
           <div className="flex flex-wrap items-center gap-3">
             {game.timer && <TimerControls gameId={gameId} timer={game.timer} />}
+            {game.playback && <PlaybackControls gameId={gameId} playback={game.playback} />}
             <div className="ml-auto flex gap-3">
               <Button variant="outline" size="lg" onClick={() => run(() => goToPrevious({ gameId, from: game.screen }))}>
                 Föregående
@@ -67,9 +69,9 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {next && (
             <>
               <TvPreview>
-                <TvScreen view={next} timer={null} {...screenProps} />
+                <TvScreen view={next.view} media={next.media} timer={null} playback={null} silent {...screenProps} />
               </TvPreview>
-              <p className="font-semibold">{screenLabel(next)}</p>
+              <p className="font-semibold">{screenLabel(next.view)}</p>
             </>
           )}
         </section>

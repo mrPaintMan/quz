@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M2 continues: media playback from the admin (question images on the TV, audio and video played on the TV and started from the admin), then På spåret playback and draft saving and locking.
+M2 continues: På spåret playback (the trip film with its clues, then the films before their questions), then draft saving and locking.
 
 ## Milestones
 
@@ -63,7 +63,7 @@ M2 continues: media playback from the admin (question images on the TV, audio an
 - [x] TV fits any browser window: a 16:9 stage scaled to the window (D37)
 - [x] Lobby fits all 12 teams: names flow and wrap, smaller when long (D37)
 - [x] Admin: live control with the TV now and next drawn small, Nästa and Föregående; question timer with pause and +15 s on the TV, phones and admin (D38)
-- [ ] Admin: media playback (question images on the TV; audio and video played on the TV, started from the admin)
+- [x] Admin: media playback: question pictures on the TV with the question and its answer; sound and video played on the TV with Spela and Pausa in the admin (D39)
 - [ ] På spåret: TV loads the film ahead, film position kept on the server, admin shows the active clue and time to the next (`activeClueIndex`, D30)
 - [ ] På spåret films: TV plays each film, then its questions; phones answer after the film (D32)
 - [ ] Draft saving and locking, including on timer end (D16)
@@ -108,3 +108,4 @@ M2 continues: media playback from the admin (question images on the TV, audio an
 - 2026-10-25: Screen sequence: round intro, each question then its answer, leaderboards between rounds and a final one, films before their questions in På spåret; next and previous on the server (D35).
 - 2026-10-26: TV at /tv (lobby with QR code, rules, round intro, text placeholders), phones join and follow at /, "Starta quiz" and a bare live control (D36). Tried end to end on dev in the browser pane.
 - 2026-10-29: Live control shows the TV now and next; question timer with pause and +15 s on the TV, phones and admin. Keyboard shortcuts and pausing the whole quiz dropped (D38). Not yet tried in a browser: the cloud session's network blocks Convex.
+- 2026-11-01: Question media on the TV, sound and video played from the admin, TV setup for sound in `docs/deploy.md` (D39). Not yet tried in a browser.

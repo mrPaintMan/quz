@@ -22,7 +22,9 @@ describe("startGame", () => {
       quizTitle: "Julquiz 2026",
       screen: { kind: "lobby" },
       view: { kind: "lobby" },
+      media: null,
       timer: null,
+      playback: null,
     });
   });
 
@@ -238,5 +240,81 @@ describe("the question timer", () => {
   it("refuses a wrong passphrase", async () => {
     const { t, gameId } = await atTimedQuestion();
     await expect(t.mutation(api.games.mutations.resumeGameTimer, { hostPassphrase: "fel", gameId, from: running })).rejects.toThrow("Fel lösenord.");
+  });
+});
+
+describe("the question's clip", () => {
+  type TestConvex = Awaited<ReturnType<typeof setupQuiz>>["t"];
+  const runningGame = async (t: TestConvex) => (await t.query(api.games.queries.getRunningGame, {}))!;
+  const playbackNow = async (t: TestConvex) => (await runningGame(t)).playback!;
+  const step = async (t: TestConvex, gameId: Id<"games">, direction: "next" | "previous") => {
+    const mutation = direction === "next" ? api.games.mutations.goToNextScreen : api.games.mutations.goToPreviousScreen;
+    await t.mutation(mutation, { ...host, gameId, from: (await runningGame(t)).screen });
+  };
+
+  // A game showing a question with a sound clip.
+  async function atQuestionWithSound() {
+    const { t, quizId, questionId } = await setupQuiz();
+    const storageId = await t.run((ctx) => ctx.storage.store(new Blob(["ljud"])));
+    await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media: { kind: "audio", storageId } });
+    const gameId = await t.mutation(api.games.mutations.startGame, { ...host, quizId });
+    for (let i = 0; i < 3; i++) await step(t, gameId, "next");
+    return { t, gameId };
+  }
+
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ["Date"] });
+    vi.setSystemTime(100_000);
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it("waits at the start when its question shows", async () => {
+    const { t } = await atQuestionWithSound();
+    expect((await runningGame(t)).playback).toEqual({ kind: "paused", positionMs: 0 });
+  });
+
+  it("plays and pauses where it got to", async () => {
+    const { t, gameId } = await atQuestionWithSound();
+    await t.mutation(api.games.mutations.playMedia, { ...host, gameId, from: await playbackNow(t) });
+    expect((await runningGame(t)).playback).toEqual({ kind: "playing", startedAt: 100_000 });
+    vi.setSystemTime(104_000);
+    await t.mutation(api.games.mutations.pauseMedia, { ...host, gameId, from: await playbackNow(t) });
+    expect((await runningGame(t)).playback).toEqual({ kind: "paused", positionMs: 4_000 });
+  });
+
+  it("counts two presses from the same playback once", async () => {
+    const { t, gameId } = await atQuestionWithSound();
+    const from = await playbackNow(t);
+    await t.mutation(api.games.mutations.playMedia, { ...host, gameId, from });
+    vi.setSystemTime(104_000);
+    await t.mutation(api.games.mutations.playMedia, { ...host, gameId, from });
+    expect((await runningGame(t)).playback).toEqual({ kind: "playing", startedAt: 100_000 });
+  });
+
+  it("stops on the next screen and starts over when stepping back", async () => {
+    const { t, gameId } = await atQuestionWithSound();
+    await t.mutation(api.games.mutations.playMedia, { ...host, gameId, from: await playbackNow(t) });
+    await step(t, gameId, "next");
+    expect((await runningGame(t)).playback).toBeNull();
+    await step(t, gameId, "previous");
+    expect((await runningGame(t)).playback).toEqual({ kind: "paused", positionMs: 0 });
+  });
+
+  it("refuses a game that has ended", async () => {
+    const { t, gameId } = await atQuestionWithSound();
+    await t.mutation(api.games.mutations.endGame, { ...host, gameId });
+    await expect(
+      t.mutation(api.games.mutations.playMedia, { ...host, gameId, from: { kind: "paused", positionMs: 0 } }),
+    ).rejects.toThrow("Quizet är slut.");
+  });
+
+  it("refuses a wrong passphrase", async () => {
+    const { t, gameId } = await atQuestionWithSound();
+    await expect(
+      t.mutation(api.games.mutations.pauseMedia, { hostPassphrase: "fel", gameId, from: { kind: "paused", positionMs: 0 } }),
+    ).rejects.toThrow("Fel lösenord.");
   });
 });

@@ -1,6 +1,11 @@
 import { ConvexError, v } from "convex/values";
-import { hostMutation } from "../auth/hostFunctions";
 import { rulesFor } from "@/domain/questionTypes/registry";
+import { findQuestionInRounds } from "@/domain/rounds/findQuestionInRounds";
+import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
+import { mutation } from "../_generated/server";
+import { hostMutation } from "../auth/hostFunctions";
+import { findRunningGame } from "../games/findRunningGame";
+import { placeOfGame } from "../games/placeOfGame";
 import { questionMedia } from "../questions/table";
 import { touchQuiz } from "../quizzes/touchQuiz";
 import { getOrThrow } from "../shared/getOrThrow";
@@ -25,6 +30,21 @@ export const generateFilmUploadUrl = hostMutation({
 export const getFilmUrl = hostMutation({
   args: { r2Key: v.string() },
   handler: async (_ctx, { r2Key }) => filmStorage.getUrl(r2Key, { expiresIn: FILM_LINK_SECONDS }),
+});
+
+// Public, for the TV: the film of the question it shows, and only while that question shows, so
+// no one can watch a clip before its question. null otherwise, or if the question has no film.
+export const getShowingFilmUrl = mutation({
+  args: { questionId: v.id("questions") },
+  handler: async (ctx, { questionId }) => {
+    const game = await findRunningGame(ctx);
+    if (game === null) return null;
+    const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
+    if (!isSameScreen(sequence[screenIndex], { kind: "question", questionId })) return null;
+    const media = findQuestionInRounds(rounds, questionId)?.media;
+    if (media?.kind !== "video") return null;
+    return filmStorage.getUrl(media.r2Key, { expiresIn: FILM_LINK_SECONDS });
+  },
 });
 
 export const setQuestionMedia = hostMutation({

@@ -19,6 +19,8 @@ The words Quz uses in its Swedish UI, so every screen says the same thing. Add t
 | The scores after the last round | **Slutresultat** | Sluttopplista |
 | A team joining on its phone | **Gå med**, with **Lagets namn** and **Lagets färg** | Anmäl, registrera |
 | The shared screen | **TV:n** ("Titta på TV:n.", "Öppna TV-vyn", "Visas på TV:n nu", "Nästa på TV:n") | skärmen, storbildsskärmen |
+| A question's sound or video | **Klipp**, **Spela** / **Pausa**; on the TV **Ljudklipp**, **Videoklipp**, **Lyssna!** | Media, Spela upp (only in the editor) |
+| Sound blocked by the browser | **Klicka för att slå på ljudet** | |
 | The question's countdown | **Pausa** / **Fortsätt**, **+15 s**; at zero **Tiden är ute!** | Starta om, Tiden är slut |
 
 Messages say what to do, in a full sentence ending with a period: "Lägg till minst 2 alternativ att sortera."
