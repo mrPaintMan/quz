@@ -76,6 +76,7 @@ src/
     rounds/  teams/  ordering/  text/  time/ # which types fit a round, list moves, number and answer-key text, "Sparat för …"
     timer/                       # the question timer: start, pause, resume, +15 s, seconds left
     media/  playback/            # which media a screen shows; a clip's play, pause and position
+    answers/                     # when an answer may be saved: time out with grace, closed questions, matching type
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/  matching/          # leaderboard, fuzzy text matching …
   features/

@@ -10,7 +10,11 @@
 
 import type * as adjustments_table from "../adjustments/table.js";
 import type * as answers_answerContent from "../answers/answerContent.js";
+import type * as answers_lockDraftsOfQuestion from "../answers/lockDraftsOfQuestion.js";
+import type * as answers_mutations from "../answers/mutations.js";
+import type * as answers_requireAnswerable from "../answers/requireAnswerable.js";
 import type * as answers_table from "../answers/table.js";
+import type * as answers_timeOut from "../answers/timeOut.js";
 import type * as auth_hostFunctions from "../auth/hostFunctions.js";
 import type * as auth_isHostPassphrase from "../auth/isHostPassphrase.js";
 import type * as auth_queries from "../auth/queries.js";
@@ -90,7 +94,11 @@ import type {
 declare const fullApi: ApiFromModules<{
   "adjustments/table": typeof adjustments_table;
   "answers/answerContent": typeof answers_answerContent;
+  "answers/lockDraftsOfQuestion": typeof answers_lockDraftsOfQuestion;
+  "answers/mutations": typeof answers_mutations;
+  "answers/requireAnswerable": typeof answers_requireAnswerable;
   "answers/table": typeof answers_table;
+  "answers/timeOut": typeof answers_timeOut;
   "auth/hostFunctions": typeof auth_hostFunctions;
   "auth/isHostPassphrase": typeof auth_isHostPassphrase;
   "auth/queries": typeof auth_queries;

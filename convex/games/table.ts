@@ -18,6 +18,9 @@ export const gamesTable = defineTable({
   timer: v.optional(timer),
   // The clip of the question showing now, kept like the timer.
   playback: v.optional(playback),
+  // Questions the hosts have stepped on from: no team can answer them again, even if the hosts
+  // step back (D41). Left out until the first one; at most one entry per question.
+  closedQuestionIds: v.optional(v.array(v.id("questions"))),
 })
   .index("by_endedAt", ["endedAt"])
   .index("by_quizId", ["quizId"]);

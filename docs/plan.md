@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M2 continues: draft saving and locking, including on timer end (D16). Then M3, answering and grading.
+M2 is done. M3: answering and grading, starting with the answer input, TV display and grader per question type, which save drafts and send through D41's functions.
 
 ## Milestones
 
@@ -66,7 +66,7 @@ M2 continues: draft saving and locking, including on timer end (D16). Then M3, a
 - [x] Admin: media playback: question pictures on the TV with the question and its answer; sound and video played on the TV with Spela and Pausa in the admin (D39)
 - [x] På spåret: film position kept on the server, the trip's points over its film on the TV, admin shows the active clue and time to the next (D39, D40). Loading the film ahead is left out until the dry run shows a need
 - [x] På spåret films: TV plays each film on its own screen, then its questions (D40); phones answer them in M3
-- [ ] Draft saving and locking, including on timer end (D16)
+- [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
 - [ ] Answer input, TV display and grader for each question type
@@ -110,4 +110,5 @@ M2 continues: draft saving and locking, including on timer end (D16). Then M3, a
 - 2026-10-29: Live control shows the TV now and next; question timer with pause and +15 s on the TV, phones and admin. Keyboard shortcuts and pausing the whole quiz dropped (D38). Not yet tried in a browser: the cloud session's network blocks Convex.
 - 2026-11-01: Question media on the TV, sound and video played from the admin, TV setup for sound in `docs/deploy.md` (D39). Not yet tried in a browser.
 - 2026-11-01: På spåret: the trip's points over its film on the TV, the active clue in the admin, films before their questions played on the TV (D40). Not yet tried in a browser.
+- 2026-11-02: Drafts and locking on the server: save, send, lock 2 s after the time is out, Nästa closes a question for good (D41). No answer inputs yet (M3).
 - 2026-11-02: The trip's points sat beside films whose shape didn't fill the space; videos now sit in a frame with the film's own shape (D40). Checked in Chromium with 16:9 and 4:3 films.
