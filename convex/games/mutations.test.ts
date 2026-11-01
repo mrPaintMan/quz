@@ -177,13 +177,21 @@ describe("the question timer", () => {
     expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 130_000 });
   });
 
-  it("is gone on the next screen and starts over when stepping back to the question", async () => {
+  it("is gone on other screens and starts over when the question shows again", async () => {
+    const { t, gameId } = await atTimedQuestion();
+    await step(t, gameId, "previous");
+    expect((await runningGame(t)).timer).toBeNull();
+    vi.setSystemTime(200_000);
+    await step(t, gameId, "next");
+    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 230_000 });
+  });
+
+  it("doesn't start again for a question stepped on from, which no one can answer", async () => {
     const { t, gameId } = await atTimedQuestion();
     await step(t, gameId, "next");
     expect((await runningGame(t)).timer).toBeNull();
-    vi.setSystemTime(200_000);
     await step(t, gameId, "previous");
-    expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 230_000 });
+    expect((await runningGame(t)).timer).toBeNull();
   });
 
   it("doesn't start for a question without a time limit", async () => {
@@ -217,9 +225,9 @@ describe("the question timer", () => {
   it("leaves the question's new timer alone when a press comes after a step", async () => {
     const { t, gameId } = await atTimedQuestion();
     const from = await timerNow(t);
-    await step(t, gameId, "next");
-    vi.setSystemTime(200_000);
     await step(t, gameId, "previous");
+    vi.setSystemTime(200_000);
+    await step(t, gameId, "next");
     await t.mutation(api.games.mutations.pauseGameTimer, { ...host, gameId, from });
     expect((await runningGame(t)).timer).toEqual({ kind: "running", endsAt: 230_000 });
   });

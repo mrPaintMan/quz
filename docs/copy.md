@@ -21,6 +21,7 @@ The words Quz uses in its Swedish UI, so every screen says the same thing. Add t
 | The shared screen | **TV:n** ("Titta på TV:n.", "Öppna TV-vyn", "Visas på TV:n nu", "Nästa på TV:n") | skärmen, storbildsskärmen |
 | A question's sound or video | **Klipp**, **Spela** / **Pausa**; on the TV **Ljudklipp**, **Videoklipp**, **Lyssna!** | Media, Spela upp (only in the editor) |
 | The trip's clue in the admin | **Ledtråd 2 av 5 · 8 poäng · nästa om 0:12**, **sista ledtråden**, **Filmen är slut.** | |
+| Answers refused by the server | **Frågan tar inte emot svar just nu.**, **Tiden är ute.**, **Ert svar är låst.**, **Svaret passar inte frågan.** | |
 | Sound blocked by the browser | **Klicka för att slå på ljudet** | |
 | The question's countdown | **Pausa** / **Fortsätt**, **+15 s**; at zero **Tiden är ute!** | Starta om, Tiden är slut |
 
