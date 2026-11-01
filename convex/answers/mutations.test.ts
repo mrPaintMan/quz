@@ -58,7 +58,7 @@ describe("saveAnswerDraft and sendAnswer", () => {
     await t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: guess(9) });
     expect(await answerOf(t, teamId)).toMatchObject({ content: guess(9), lockedAt: 100_000 });
     await expect(t.mutation(api.answers.mutations.saveAnswerDraft, { teamId, questionId, content: guess(1) })).rejects.toThrow(
-      "Ni har redan skickat ert svar.",
+      "Ert svar är låst.",
     );
   });
 
