@@ -30,7 +30,8 @@ export function TvMedia({ media, playback, silent }: TvMediaProps) {
     case "audio":
       return silent ? <ClipNote kind="audio" /> : <TvAudio url={media.url} playback={playback} />;
     case "video":
-      if (!silent) return <TvVideo questionId={media.questionId} posterUrl={media.posterUrl} playback={playback} />;
+      // Keyed by question, so the next question's video never starts with this one's film.
+      if (!silent) return <TvVideo key={media.questionId} questionId={media.questionId} posterUrl={media.posterUrl} playback={playback} />;
       return media.posterUrl ? <Still url={media.posterUrl} /> : <ClipNote kind="video" />;
   }
 }

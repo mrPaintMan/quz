@@ -73,4 +73,26 @@ describe("usePlaybackSync", () => {
     await act(async () => render(<Clip playback={{ kind: "playing", startedAt: 6_000 }} />));
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
   });
+
+  it("plays on from where it paused, whatever this device's clock says", async () => {
+    const { rerender } = await act(async () => render(<Clip playback={{ kind: "paused", positionMs: 2_000 }} />));
+    // The server's start, worked out on its clock, is 3 seconds before this device's idea of it.
+    await act(async () => rerender(<Clip playback={{ kind: "playing", startedAt: 5_000 }} />));
+    expect(clip().currentTime).toBe(2);
+  });
+
+  it("doesn't seek again for an equal playback from a later game update", async () => {
+    const { rerender } = await act(async () => render(<Clip playback={{ kind: "playing", startedAt: 6_000 }} />));
+    await act(async () => rerender(<Clip playback={{ kind: "playing", startedAt: 6_000 }} />));
+    expect(play).toHaveBeenCalledTimes(1);
+  });
+
+  it("stops asking for a click once the hosts pause", async () => {
+    vi.useRealTimers();
+    play.mockRejectedValueOnce(new DOMException("No sound before a click", "NotAllowedError"));
+    const { rerender } = await act(async () => render(<Clip playback={{ kind: "playing", startedAt: Date.now() }} />));
+    expect(screen.getByRole("button", { name: "Spela ljud" })).toBeInTheDocument();
+    await act(async () => rerender(<Clip playback={{ kind: "paused", positionMs: 1_000 }} />));
+    expect(screen.queryByRole("button", { name: "Spela ljud" })).not.toBeInTheDocument();
+  });
 });

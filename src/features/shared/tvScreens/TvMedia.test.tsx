@@ -35,6 +35,13 @@ describe("TvMedia", () => {
     expect(container.querySelector("video")).toBeInTheDocument();
   });
 
+  it("starts a fresh video for the next question", async () => {
+    const { container, rerender } = await act(async () => render(<TvMedia media={video} playback={paused} silent={false} />));
+    const first = container.querySelector("video");
+    await act(async () => rerender(<TvMedia media={{ ...video, questionId: "q2" as Id<"questions"> }} playback={paused} silent={false} />));
+    expect(container.querySelector("video")).not.toBe(first);
+  });
+
   it("only names a sound clip when silent", () => {
     const { container } = render(<TvMedia media={audio} playback={paused} silent />);
     expect(screen.getByText("Ljudklipp")).toBeInTheDocument();
