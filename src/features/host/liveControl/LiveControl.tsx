@@ -14,6 +14,7 @@ import { EndGameButton } from "./EndGameButton";
 import { PlaybackControls } from "./PlaybackControls";
 import { screenLabel } from "./screenLabel";
 import { TimerControls } from "./TimerControls";
+import { TripClueLine } from "./TripClueLine";
 import { TvPreview } from "./TvPreview";
 
 type RunningGame = NonNullable<FunctionReturnType<typeof api.games.queries.getRunningGame>>;
@@ -50,6 +51,9 @@ export function LiveControl({ game }: { game: RunningGame }) {
           <p role="status" className="text-lg font-semibold">
             {screenLabel(game.view)}
           </p>
+          {game.media?.kind === "video" && game.media.showsCluePoints && game.playback && (
+            <TripClueLine gameId={gameId} playback={game.playback} />
+          )}
           <div className="flex flex-wrap items-center gap-3">
             {game.timer && <TimerControls gameId={gameId} timer={game.timer} />}
             {game.playback && <PlaybackControls gameId={gameId} playback={game.playback} />}

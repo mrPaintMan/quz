@@ -1,4 +1,4 @@
-import { act, render } from "@testing-library/react";
+import { act, fireEvent, render, screen as page } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
 import { TvVideo } from "./TvVideo";
@@ -6,7 +6,14 @@ import { TvVideo } from "./TvVideo";
 const getFilmUrl = vi.fn();
 vi.mock("convex/react", () => ({ useMutation: () => getFilmUrl }));
 
-const questionId = "q1" as Id<"questions">;
+const screen = { kind: "question" as const, questionId: "q1" as Id<"questions"> };
+const paused = { kind: "paused" as const, positionMs: 0 };
+
+// The video element's own position and length, as the browser would report them.
+function playAt(video: HTMLVideoElement, currentTime: number, duration = 100) {
+  Object.defineProperty(video, "duration", { value: duration, configurable: true });
+  video.currentTime = currentTime;
+}
 
 describe("TvVideo", () => {
   beforeEach(() => {
@@ -18,22 +25,48 @@ describe("TvVideo", () => {
 
   afterEach(() => vi.restoreAllMocks());
 
-  it("asks for the question's film and shows its still until it plays", async () => {
+  it("asks for its screen's film and shows its still until it plays", async () => {
     const { container } = await act(async () =>
-      render(<TvVideo questionId={questionId} posterUrl="https://example.com/still.jpg" playback={{ kind: "paused", positionMs: 0 }} />),
+      render(<TvVideo screen={screen} posterUrl="https://example.com/still.jpg" playback={paused} showsCluePoints={false} />),
     );
     const video = container.querySelector("video");
-    expect(getFilmUrl).toHaveBeenCalledWith({ questionId });
+    expect(getFilmUrl).toHaveBeenCalledWith({ screen });
     expect(video).toHaveAttribute("src", "https://films.example.com/tomte.mp4");
     expect(video).toHaveAttribute("poster", "https://example.com/still.jpg");
   });
 
-  it("ignores a film link that arrives after the question has changed", async () => {
+  it("asks only once while game updates hand out equal screens", async () => {
+    const { rerender } = await act(async () => render(<TvVideo screen={screen} posterUrl={null} playback={null} showsCluePoints={false} />));
+    await act(async () => rerender(<TvVideo screen={{ ...screen }} posterUrl={null} playback={null} showsCluePoints={false} />));
+    expect(getFilmUrl).toHaveBeenCalledTimes(1);
+  });
+
+  it("ignores a film link that arrives after the screen has changed", async () => {
     let answer: (url: string) => void = () => {};
     getFilmUrl.mockReturnValueOnce(new Promise((resolve) => (answer = resolve)));
-    const { container, rerender } = render(<TvVideo questionId={questionId} posterUrl={null} playback={null} />);
-    await act(async () => rerender(<TvVideo questionId={"q2" as Id<"questions">} posterUrl={null} playback={null} />));
+    const { container, rerender } = render(<TvVideo screen={screen} posterUrl={null} playback={null} showsCluePoints={false} />);
+    const next = { ...screen, questionId: "q2" as Id<"questions"> };
+    await act(async () => rerender(<TvVideo screen={next} posterUrl={null} playback={null} showsCluePoints={false} />));
     await act(async () => answer("https://films.example.com/old.mp4"));
     expect(container.querySelector("video")).toHaveAttribute("src", "https://films.example.com/tomte.mp4");
+  });
+
+  it("shows the trip's points once its film plays, and hides them when it ends", async () => {
+    const { container } = await act(async () => render(<TvVideo screen={screen} posterUrl={null} playback={paused} showsCluePoints />));
+    const video = container.querySelector("video")!;
+    expect(page.queryByText("10")).not.toBeInTheDocument();
+    playAt(video, 30);
+    fireEvent.playing(video);
+    expect(page.getByText("8")).toHaveClass("opacity-100");
+    fireEvent.ended(video);
+    expect(page.getByText("8")).toHaveClass("opacity-0");
+  });
+
+  it("shows no points over other films", async () => {
+    const { container } = await act(async () => render(<TvVideo screen={screen} posterUrl={null} playback={paused} showsCluePoints={false} />));
+    const video = container.querySelector("video")!;
+    playAt(video, 30);
+    fireEvent.playing(video);
+    expect(page.queryByText("8")).not.toBeInTheDocument();
   });
 });

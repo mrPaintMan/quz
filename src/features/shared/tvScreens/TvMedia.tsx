@@ -30,8 +30,16 @@ export function TvMedia({ media, playback, silent }: TvMediaProps) {
     case "audio":
       return silent ? <ClipNote kind="audio" /> : <TvAudio url={media.url} playback={playback} />;
     case "video":
-      // Keyed by question, so the next question's video never starts with this one's film.
-      if (!silent) return <TvVideo key={media.questionId} questionId={media.questionId} posterUrl={media.posterUrl} playback={playback} />;
-      return media.posterUrl ? <Still url={media.posterUrl} /> : <ClipNote kind="video" />;
+      if (silent) return media.posterUrl ? <Still url={media.posterUrl} /> : <ClipNote kind="video" />;
+      // Keyed by screen, so the next screen's video never starts with this one's film.
+      return (
+        <TvVideo
+          key={JSON.stringify(media.screen)}
+          screen={media.screen}
+          posterUrl={media.posterUrl}
+          playback={playback}
+          showsCluePoints={media.showsCluePoints}
+        />
+      );
   }
 }

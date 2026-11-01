@@ -7,7 +7,7 @@ const file = "file1" as Id<"_storage">;
 describe("playbackForMedia", () => {
   it.each([
     { kind: "audio" as const, storageId: file },
-    { kind: "video" as const, questionId: "q1" as Id<"questions">, posterId: null },
+    { kind: "video" as const, screen: { kind: "rules" as const }, posterId: null, showsCluePoints: false },
   ])("waits at the start of a %o clip", (media) => {
     expect(playbackForMedia(media)).toEqual({ kind: "paused", positionMs: 0 });
   });

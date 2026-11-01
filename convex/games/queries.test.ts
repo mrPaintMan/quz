@@ -146,3 +146,43 @@ describe("getNextScreen", () => {
     await expect(t.query(api.games.queries.getNextScreen, { hostPassphrase: "fel", gameId })).rejects.toThrow("Fel lösenord.");
   });
 });
+
+describe("getShowingTrip", () => {
+  async function gameShowingTrip(endedAt: number | null = null) {
+    const t = setupConvexTest();
+    const gameId = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "På spåret", kind: "paSparet" });
+      const questionId = await ctx.db.insert("questions", {
+        quizId,
+        roundId,
+        position: 0,
+        prompt: "Vart är vi på väg?",
+        timeLimitSeconds: null,
+        media: { kind: "video", r2Key: "resa", posterId: null, durationSeconds: 120 },
+        hostNotes: "",
+        content: { type: "paSparet", acceptedAnswers: ["Oslo"], fuzzy: true, clues: ["a", "b", "c", "d", "e"] },
+      });
+      return ctx.db.insert("games", { quizId, endedAt, screen: { kind: "question", questionId }, screenIndex: 3 });
+    });
+    return { t, gameId };
+  }
+
+  it("gives the hosts the trip's clues and film length while it shows", async () => {
+    const { t, gameId } = await gameShowingTrip();
+    await expect(t.query(api.games.queries.getShowingTrip, { ...host, gameId })).resolves.toEqual({
+      clues: ["a", "b", "c", "d", "e"],
+      durationSeconds: 120,
+    });
+  });
+
+  it("is null for a game that has ended", async () => {
+    const { t, gameId } = await gameShowingTrip(1);
+    await expect(t.query(api.games.queries.getShowingTrip, { ...host, gameId })).resolves.toBeNull();
+  });
+
+  it("refuses a wrong passphrase", async () => {
+    const { t, gameId } = await gameShowingTrip();
+    await expect(t.query(api.games.queries.getShowingTrip, { hostPassphrase: "fel", gameId })).rejects.toThrow("Fel lösenord.");
+  });
+});
