@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 
 const FADE_MS = 500;
 
-// The trip's current points in the film's lower-left corner, and nothing else, sized in stage
-// units to about a fifth of the film's height on the question screen. A new number
+// The trip's current points in the film's lower-left corner, and nothing else, sized in the
+// film's own units (FilmFrame): the digits are about a fifth of the film's height. A new number
 // waits for the old one to fade out, so two never show at once. The wait is a timer rather than
 // the end of the fade, which never comes when the browser skips animations.
 export function CluePointsOverlay({ points }: { points: number | null }) {
@@ -24,7 +24,7 @@ export function CluePointsOverlay({ points }: { points: number | null }) {
     <p
       aria-hidden="true"
       style={{ transitionDuration: `${FADE_MS}ms` }}
-      className={`pointer-events-none absolute bottom-[4%] left-[3%] text-[9cqw] leading-none font-bold text-white tabular-nums drop-shadow-[0_0.3cqw_0.6cqw_rgb(0_0_0/0.7)] transition-opacity ${isFadingOut || shown === null ? "opacity-0" : "opacity-100"}`}
+      className={`pointer-events-none absolute bottom-[4cqh] left-[3cqw] text-[27cqh] leading-none font-bold text-white tabular-nums drop-shadow-[0_0.5cqh_1cqh_rgb(0_0_0/0.7)] transition-opacity ${isFadingOut || shown === null ? "opacity-0" : "opacity-100"}`}
     >
       {shown}
     </p>

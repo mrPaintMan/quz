@@ -69,4 +69,13 @@ describe("TvVideo", () => {
     fireEvent.playing(video);
     expect(page.queryByText("8")).not.toBeInTheDocument();
   });
+
+  it("takes the film's own shape once it loads", async () => {
+    const { container } = await act(async () => render(<TvVideo screen={screen} posterUrl={null} playback={paused} showsCluePoints={false} />));
+    const video = container.querySelector("video")!;
+    Object.defineProperty(video, "videoWidth", { value: 1440 });
+    Object.defineProperty(video, "videoHeight", { value: 1080 });
+    fireEvent.loadedMetadata(video);
+    expect(video.parentElement!.style.aspectRatio).toBe(`${4 / 3} / 1`);
+  });
 });

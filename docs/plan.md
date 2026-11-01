@@ -110,3 +110,4 @@ M2 continues: draft saving and locking, including on timer end (D16). Then M3, a
 - 2026-10-29: Live control shows the TV now and next; question timer with pause and +15 s on the TV, phones and admin. Keyboard shortcuts and pausing the whole quiz dropped (D38). Not yet tried in a browser: the cloud session's network blocks Convex.
 - 2026-11-01: Question media on the TV, sound and video played from the admin, TV setup for sound in `docs/deploy.md` (D39). Not yet tried in a browser.
 - 2026-11-01: På spåret: the trip's points over its film on the TV, the active clue in the admin, films before their questions played on the TV (D40). Not yet tried in a browser.
+- 2026-11-02: The trip's points sat beside films whose shape didn't fill the space; videos now sit in a frame with the film's own shape (D40). Checked in Chromium with 16:9 and 4:3 films.
