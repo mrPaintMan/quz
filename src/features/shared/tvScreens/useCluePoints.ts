@@ -12,7 +12,14 @@ export function useCluePoints() {
   const [film, setFilm] = useState<FilmState>({ positionSeconds: 0, durationSeconds: 0, hasStarted: false, hasEnded: false });
   const read = (event: SyntheticEvent<HTMLVideoElement>, change: Partial<FilmState> = {}) => {
     const { currentTime, duration } = event.currentTarget;
-    setFilm((before) => ({ ...before, positionSeconds: currentTime, durationSeconds: duration, ...change }));
+    setFilm((before) => ({
+      positionSeconds: currentTime,
+      durationSeconds: duration,
+      // A film past its start has played, also when a reloaded TV only seeks to where it paused.
+      hasStarted: before.hasStarted || currentTime > 0,
+      hasEnded: before.hasEnded,
+      ...change,
+    }));
   };
   const points = film.hasStarted && !film.hasEnded ? cluePointsAt(film.positionSeconds, film.durationSeconds) : null;
   return {

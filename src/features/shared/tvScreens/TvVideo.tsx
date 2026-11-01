@@ -33,7 +33,7 @@ export function TvVideo({ screen, posterUrl, playback, showsCluePoints }: TvVide
   }, [getFilmUrl, screenKey]);
 
   return (
-    <div className="relative flex max-h-full min-h-0 justify-center @container">
+    <div className="relative flex max-h-full min-h-0 justify-center">
       <video
         ref={ref}
         src={filmUrl ?? undefined}

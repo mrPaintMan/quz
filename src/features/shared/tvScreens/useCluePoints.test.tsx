@@ -22,8 +22,14 @@ function at(currentTime: number) {
 describe("useCluePoints", () => {
   it("has no points before the film first plays", () => {
     render(<Film />);
-    fireEvent.timeUpdate(at(30));
+    fireEvent.timeUpdate(at(0));
     expect(screen.getByText("inga")).toBeInTheDocument();
+  });
+
+  it("shows the points of a paused film a reloaded TV seeks into", () => {
+    render(<Film />);
+    fireEvent.timeUpdate(at(30));
+    expect(screen.getByText("8")).toBeInTheDocument();
   });
 
   it("follows the film's position once it plays", () => {
