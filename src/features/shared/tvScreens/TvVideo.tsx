@@ -6,9 +6,13 @@ import { api } from "@convex/_generated/api";
 import type { Playback } from "@convex/games/playback";
 import type { Screen } from "@convex/games/screen";
 import { CluePointsOverlay } from "./CluePointsOverlay";
+import { FilmFrame } from "./FilmFrame";
 import { SoundBlockedButton } from "./SoundBlockedButton";
 import { useCluePoints } from "./useCluePoints";
 import { usePlaybackSync } from "./usePlaybackSync";
+
+// Most films are 16:9; the real shape is read from the film once it loads.
+const WIDESCREEN = 16 / 9;
 
 type TvVideoProps = { screen: Screen; posterUrl: string | null; playback: Playback | null; showsCluePoints: boolean };
 
@@ -17,6 +21,7 @@ type TvVideoProps = { screen: Screen; posterUrl: string | null; playback: Playba
 export function TvVideo({ screen, posterUrl, playback, showsCluePoints }: TvVideoProps) {
   const getFilmUrl = useMutation(api.media.mutations.getShowingFilmUrl);
   const [filmUrl, setFilmUrl] = useState<string | null>(null);
+  const [aspectRatio, setAspectRatio] = useState(WIDESCREEN);
   const { ref, blocked, sync } = usePlaybackSync<HTMLVideoElement>(playback);
   const { points, handlers } = useCluePoints();
   // Every game update hands out a new but equal screen; ask for the film only once per screen.
@@ -33,19 +38,23 @@ export function TvVideo({ screen, posterUrl, playback, showsCluePoints }: TvVide
   }, [getFilmUrl, screenKey]);
 
   return (
-    <div className="relative flex max-h-full min-h-0 justify-center">
+    <FilmFrame aspectRatio={aspectRatio}>
       <video
         ref={ref}
         src={filmUrl ?? undefined}
         poster={posterUrl ?? undefined}
         preload="auto"
         playsInline
-        onLoadedMetadata={sync}
+        onLoadedMetadata={(event) => {
+          const { videoWidth, videoHeight } = event.currentTarget;
+          if (videoWidth > 0 && videoHeight > 0) setAspectRatio(videoWidth / videoHeight);
+          sync();
+        }}
         {...(showsCluePoints ? handlers : {})}
-        className="max-h-full max-w-full rounded-[1cqw] object-contain"
+        className="size-full rounded-[1cqw] object-contain"
       />
       {showsCluePoints && <CluePointsOverlay points={points} />}
       {blocked && <SoundBlockedButton onClick={sync} />}
-    </div>
+    </FilmFrame>
   );
 }
