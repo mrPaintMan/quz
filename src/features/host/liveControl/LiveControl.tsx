@@ -8,11 +8,13 @@ import { HostHeader } from "@/features/host/shared/HostHeader";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { useAnsweredTeamIds } from "@/features/shared/answers/useAnsweredTeamIds";
+import { useScores } from "@/features/shared/scores/useScores";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
 import { AnswerStatusList } from "./AnswerStatusList";
 import { EndGameButton } from "./EndGameButton";
 import { PlaybackControls } from "./PlaybackControls";
+import { ScoreBoard } from "./ScoreBoard";
 import { screenLabel } from "./screenLabel";
 import { TimerControls } from "./TimerControls";
 import { TripClueLine } from "./TripClueLine";
@@ -27,6 +29,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const next = useHostQuery(api.games.queries.getNextScreen, { gameId: game._id });
   const joinUrl = useJoinUrl();
   const answeredTeamIds = useAnsweredTeamIds(game._id, game.screen);
+  const scores = useScores(game._id);
   const goToNext = useHostMutation(api.games.mutations.goToNextScreen);
   const goToPrevious = useHostMutation(api.games.mutations.goToPreviousScreen);
   const run = useRunAction();
@@ -34,7 +37,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
   if (joinUrl === null) return null;
-  const screenProps = { quizTitle: game.quizTitle, teams, joinUrl };
+  const screenProps = { quizTitle: game.quizTitle, teams, scores, joinUrl };
 
   return (
     <div className="flex min-h-svh flex-col">
@@ -101,6 +104,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
               <p className="font-semibold">{screenLabel(next.view)}</p>
             </>
           )}
+          <ScoreBoard scores={scores} />
         </section>
       </main>
     </div>

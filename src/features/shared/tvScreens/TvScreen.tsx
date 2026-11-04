@@ -4,6 +4,7 @@ import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { RevealedAnswerDisplay, ShownQuestionDisplay } from "@/features/shared/questionDisplays/QuestionDisplay";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
+import type { TeamScore } from "@/features/shared/scores/useScores";
 import { LeaderboardScreen } from "./LeaderboardScreen";
 import { LobbyScreen } from "./LobbyScreen";
 import { RulesScreen } from "./RulesScreen";
@@ -17,6 +18,8 @@ type TvScreenProps = {
   quizTitle: string;
   joinUrl: URL;
   teams: TvTeam[];
+  // The teams by score, for the leaderboards.
+  scores: TeamScore[];
   media: ShownMedia | null;
   imageUrls: ImageUrls;
   // How many teams have sent their answer to the question showing; null when not counted.
@@ -33,7 +36,7 @@ const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 // type is built in M3, and how many teams have answered. Drawn on the TV and, smaller, in the
 // hosts' live control.
 export function TvScreen(props: TvScreenProps) {
-  const { view, quizTitle, joinUrl, teams, media, imageUrls, answeredCount, timer, playback, silent = false } = props;
+  const { view, quizTitle, joinUrl, teams, scores, media, imageUrls, answeredCount, timer, playback, silent = false } = props;
   const mediaArea = media && (
     <div className="flex min-h-0 flex-1 items-center justify-center">
       <TvMedia media={media} playback={playback} silent={silent} />
@@ -74,8 +77,8 @@ export function TvScreen(props: TvScreenProps) {
         </TvFrame>
       );
     case "leaderboard":
-      return <LeaderboardScreen title={`Topplista efter omgång ${view.roundNumber}`} teams={teams} />;
+      return <LeaderboardScreen title={`Topplista efter omgång ${view.roundNumber}`} scores={scores} />;
     case "finalLeaderboard":
-      return <LeaderboardScreen title="Slutresultat" teams={teams} />;
+      return <LeaderboardScreen title="Slutresultat" scores={scores} />;
   }
 }

@@ -18,6 +18,8 @@ vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna",
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => nextScreen() }));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
 vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
+const scores = vi.fn();
+vi.mock("@/features/shared/scores/useScores", () => ({ useScores: () => scores() }));
 vi.mock("@/features/host/shared/useHostMutation", () => ({
   // The generated api hands out a new reference on each access, so pick by name.
   useHostMutation: (mutation: FunctionReference<"mutation">) =>
@@ -43,6 +45,7 @@ function renderControl({ view = { kind: "lobby" }, media = null, timer = null, p
 
 describe("LiveControl", () => {
   beforeEach(() => {
+    scores.mockReturnValue([]);
     nextScreen.mockReturnValue({ view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null });
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
@@ -115,6 +118,13 @@ describe("LiveControl", () => {
   it("lists no answers for a question not yet answered in the app", () => {
     renderControl({ view: question });
     expect(screen.queryByText("Svarat")).not.toBeInTheDocument();
+  });
+
+  it("shows the leaderboard as it stands", () => {
+    scores.mockReturnValue([{ _id: "t1", name: "Tomtarna", colour: "red", points: 4, rank: 1 }]);
+    renderControl();
+    expect(screen.getByRole("heading", { name: "Topplista" })).toBeInTheDocument();
+    expect(screen.getByText("4 p")).toBeInTheDocument();
   });
 
   it("links to the TV view", () => {

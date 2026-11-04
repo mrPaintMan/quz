@@ -21,6 +21,7 @@ const renderView = (view: ScreenView, { media = null, timer = null, answeredCoun
       quizTitle="Julquiz 2026"
       joinUrl={new URL("https://quz.nu/")}
       teams={teams}
+      scores={[]}
       media={media}
       imageUrls={{}}
       answeredCount={answeredCount}

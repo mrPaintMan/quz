@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 continues: scores (leaderboard on the TV and admin, own score on phones, summed from graded answers and adjustments, D6), then the other question types one by one: number, sort, match, ingredients, free text and list with the review queue, then activities and manual points.
+M3 continues with the other question types one by one: number, sort, match, ingredients, free text and list with the review queue, then activities and manual points.
 
 ## Milestones
 
@@ -73,7 +73,7 @@ M3 continues: scores (leaderboard on the TV and admin, own score on phones, summ
 - [ ] Fuzzy text matching and the review queue, per unique answer (D19). Use one shared answer normalizer for grading and for the editor's duplicate checks (`hasDuplicates`), so they can't disagree
 - [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
 - [ ] Host overrides and manual points
-- [ ] Leaderboard on the TV and admin, own score on phones
+- [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
 
 ### M4 · Highlights
 - [ ] På spåret: clue reveal and emergency brake
@@ -113,3 +113,4 @@ M3 continues: scores (leaderboard on the TV and admin, own score on phones, summ
 - 2026-11-02: Drafts and locking on the server: save, send, lock 2 s after the time is out, Nästa closes a question for good (D41). No answer inputs yet (M3).
 - 2026-11-02: The trip's points sat beside films whose shape didn't fill the space; videos now sit in a frame with the film's own shape (D40). Checked in Chromium with 16:9 and 4:3 films.
 - 2026-11-04: M3 started: multiple choice answered on the phone, options and the right one on the TV, who has answered in the admin (D42). Not tried in a browser with data.
+- 2026-11-04: Scores: leaderboards with points on the TV, a Topplista in the admin, own points on the phones, counting a question once Nästa closes it (D43).
