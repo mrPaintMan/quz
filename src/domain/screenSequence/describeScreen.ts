@@ -1,6 +1,7 @@
 import type { Id } from "@convex/_generated/dataModel";
 import type { Screen } from "@convex/games/screen";
 import type { QuestionContent } from "@convex/questions/questionContent";
+import { answeringOf, type RevealedAnswer, type ShownQuestion } from "@/domain/answering/registry";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
 type QuestionInRound = { _id: Id<"questions">; prompt: string; content: QuestionContent };
@@ -11,8 +12,9 @@ export type ScreenView =
   | { kind: "lobby" }
   | { kind: "rules"; roundCount: number; questionCount: number; activityCount: number }
   | { kind: "roundIntro"; roundNumber: number; title: string }
-  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; answeredInApp: boolean }
-  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string }
+  // `shown` is what the TV and phones show of the question; null until its type is built (M3).
+  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; answeredInApp: boolean; shown: ShownQuestion | null }
+  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string; revealed: RevealedAnswer | null }
   | { kind: "film"; roundNumber: number }
   | { kind: "leaderboard"; roundNumber: number }
   | { kind: "finalLeaderboard" };
@@ -60,11 +62,14 @@ export function describeScreen(screen: Screen, allRounds: RoundInQuiz[]): Screen
     }
     case "question": {
       const { question, ...place } = findQuestion(rounds, screen.questionId);
-      return { kind: "question", ...place, prompt: question.prompt, answeredInApp: rulesFor(question.content).answeredInApp };
+      const { content } = question;
+      const shown = answeringOf(content)?.show(content) ?? null;
+      return { kind: "question", ...place, prompt: question.prompt, answeredInApp: rulesFor(content).answeredInApp, shown };
     }
     case "answer": {
       const { question, ...place } = findQuestion(rounds, screen.questionId);
-      return { kind: "answer", ...place, prompt: question.prompt };
+      const { content } = question;
+      return { kind: "answer", ...place, prompt: question.prompt, revealed: answeringOf(content)?.reveal(content) ?? null };
     }
     case "film":
     case "leaderboard":

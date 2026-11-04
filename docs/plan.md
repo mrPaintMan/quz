@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M2 is done. M3: answering and grading, starting with the answer input, TV display and grader per question type, which save drafts and send through D41's functions.
+M3 continues: scores (leaderboard on the TV and admin, own score on phones, summed from graded answers and adjustments, D6), then the other question types one by one: number, sort, match, ingredients, free text and list with the review queue, then activities and manual points.
 
 ## Milestones
 
@@ -69,7 +69,7 @@ M2 is done. M3: answering and grading, starting with the answer input, TV displa
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type
+- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42)
 - [ ] Fuzzy text matching and the review queue, per unique answer (D19). Use one shared answer normalizer for grading and for the editor's duplicate checks (`hasDuplicates`), so they can't disagree
 - [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
 - [ ] Host overrides and manual points
@@ -112,3 +112,4 @@ M2 is done. M3: answering and grading, starting with the answer input, TV displa
 - 2026-11-01: På spåret: the trip's points over its film on the TV, the active clue in the admin, films before their questions played on the TV (D40). Not yet tried in a browser.
 - 2026-11-02: Drafts and locking on the server: save, send, lock 2 s after the time is out, Nästa closes a question for good (D41). No answer inputs yet (M3).
 - 2026-11-02: The trip's points sat beside films whose shape didn't fill the space; videos now sit in a frame with the film's own shape (D40). Checked in Chromium with 16:9 and 4:3 films.
+- 2026-11-04: M3 started: multiple choice answered on the phone, options and the right one on the TV, who has answered in the admin (D42). Not tried in a browser with data.

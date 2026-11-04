@@ -2,6 +2,8 @@ import type { Playback } from "@convex/games/playback";
 import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
+import { RevealedAnswerDisplay, ShownQuestionDisplay } from "@/features/shared/questionDisplays/QuestionDisplay";
+import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { LeaderboardScreen } from "./LeaderboardScreen";
 import { LobbyScreen } from "./LobbyScreen";
 import { RulesScreen } from "./RulesScreen";
@@ -16,6 +18,9 @@ type TvScreenProps = {
   joinUrl: URL;
   teams: TvTeam[];
   media: ShownMedia | null;
+  imageUrls: ImageUrls;
+  // How many teams have sent their answer to the question showing; null when not counted.
+  answeredCount: number | null;
   timer: Timer | null;
   playback: Playback | null;
   // Draws the screen without playing its clip, for the hosts' small copies of the TV.
@@ -24,10 +29,11 @@ type TvScreenProps = {
 
 const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
-// The screen the game is on. Questions, answers and films show their text and media for now;
-// each question type's display comes in M3. Drawn on the TV and, smaller, in the hosts' live
-// control.
-export function TvScreen({ view, quizTitle, joinUrl, teams, media, timer, playback, silent = false }: TvScreenProps) {
+// The screen the game is on. A question shows its type's display (such as the options) once that
+// type is built in M3, and how many teams have answered. Drawn on the TV and, smaller, in the
+// hosts' live control.
+export function TvScreen(props: TvScreenProps) {
+  const { view, quizTitle, joinUrl, teams, media, imageUrls, answeredCount, timer, playback, silent = false } = props;
   const mediaArea = media && (
     <div className="flex min-h-0 flex-1 items-center justify-center">
       <TvMedia media={media} playback={playback} silent={silent} />
@@ -48,12 +54,17 @@ export function TvScreen({ view, quizTitle, joinUrl, teams, media, timer, playba
           corner={<TvTimer timer={timer} />}
         >
           {mediaArea}
+          {view.shown && <ShownQuestionDisplay shown={view.shown} imageUrls={imageUrls} />}
+          {view.shown && answeredCount !== null && (
+            <p className="text-[2cqw] text-muted-foreground">{`${answeredCount} av ${teams.length} lag har svarat`}</p>
+          )}
         </TvFrame>
       );
     case "answer":
       return (
         <TvFrame eyebrow={`${roundLabel(view.roundNumber)} · Svar på fråga ${view.questionNumber}`} title={view.prompt}>
           {mediaArea}
+          {view.revealed && <RevealedAnswerDisplay revealed={view.revealed} imageUrls={imageUrls} />}
         </TvFrame>
       );
     case "film":

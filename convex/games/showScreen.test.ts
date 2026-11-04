@@ -25,8 +25,9 @@ describe("showScreen", () => {
       return showScreen(ctx, { kind: "question", questionId }, rounds);
     });
     expect(shown).toEqual({
-      view: { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: false },
+      view: { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: false, shown: null },
       media: { kind: "image", url: expect.any(String) },
+      imageUrls: {},
     });
   });
 });

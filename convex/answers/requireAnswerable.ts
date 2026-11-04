@@ -35,5 +35,5 @@ export async function requireAnswerable(ctx: QueryCtx, teamId: Id<"teams">, ques
   if (answer !== null && answer.lockedAt !== null) {
     throw new ConvexError("Ert svar är låst.");
   }
-  return { game, answer };
+  return { game, question, answer };
 }

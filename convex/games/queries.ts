@@ -29,6 +29,8 @@ export const getRunningGame = query({
       ...(await showScreen(ctx, screen, rounds)),
       timer: isStoredScreen ? (game.timer ?? null) : null,
       playback: isStoredScreen ? (game.playback ?? null) : null,
+      // A question stepped on from takes no more answers, even when shown again (D41).
+      isQuestionClosed: screen.kind === "question" && (game.closedQuestionIds ?? []).includes(screen.questionId),
     };
   },
 });
