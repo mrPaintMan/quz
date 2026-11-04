@@ -28,9 +28,13 @@ describe("multipleChoiceAnswering", () => {
     expect(multipleChoiceAnswering.imageIds(content)).toEqual([picture]);
   });
 
-  it("can be sent once an option is picked", () => {
-    expect(multipleChoiceAnswering.isComplete(answer(0))).toBe(true);
-    expect(multipleChoiceAnswering.isComplete(answer(null))).toBe(false);
+  it("can be sent once one of the options shown is picked", () => {
+    const shown = multipleChoiceAnswering.show(content);
+    expect(multipleChoiceAnswering.isComplete(shown, answer(1))).toBe(true);
+    expect(multipleChoiceAnswering.isComplete(shown, answer(null))).toBe(false);
+    expect(multipleChoiceAnswering.isComplete(shown, answer(2))).toBe(false);
+    expect(multipleChoiceAnswering.isComplete(shown, answer(-1))).toBe(false);
+    expect(multipleChoiceAnswering.isComplete(shown, answer(0.5))).toBe(false);
   });
 
   it("scores the full points for the right option and nothing otherwise", () => {

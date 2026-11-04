@@ -28,6 +28,7 @@ describe("getRunningGame", () => {
       imageUrls: {},
       timer: null,
       playback: null,
+      isQuestionClosed: false,
     });
   });
 
@@ -83,7 +84,15 @@ describe("getRunningGame's media, timer and clip", () => {
       ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3, timer, playback }),
     );
     const game = await t.query(api.games.queries.getRunningGame, {});
-    expect(game).toMatchObject({ media: { kind: "image", url: expect.any(String) }, timer, playback });
+    expect(game).toMatchObject({ media: { kind: "image", url: expect.any(String) }, timer, playback, isQuestionClosed: false });
+  });
+
+  it("says when the question showing is closed to answers", async () => {
+    const t = setupConvexTest();
+    const { quizId, questionId } = await insertQuizWithQuestion(t);
+    const screen = { kind: "question" as const, questionId };
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen, screenIndex: 3, closedQuestionIds: [questionId] }));
+    expect((await t.query(api.games.queries.getRunningGame, {}))?.isQuestionClosed).toBe(true);
   });
 
   it("leaves out the timer and clip of a question deleted during the game", async () => {

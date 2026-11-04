@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/_generated/api";
 import { useAnsweredTeamIds } from "@/features/shared/answers/useAnsweredTeamIds";
 import { QuzWordmark } from "@/features/shared/brand/QuzWordmark";
@@ -9,6 +8,7 @@ import type { TvTeam } from "@/features/shared/tvScreens/TeamList";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { TvStage } from "./TvStage";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
+import type { RunningGame } from "@/features/shared/game/RunningGame";
 
 function Idle({ text }: { text: string }) {
   return (
@@ -39,7 +39,6 @@ function CurrentScreen() {
   return <RunningGameScreen game={game} teams={teams} joinUrl={joinUrl} />;
 }
 
-type RunningGame = NonNullable<FunctionReturnType<typeof api.games.queries.getRunningGame>>;
 
 function RunningGameScreen({ game, teams, joinUrl }: { game: RunningGame; teams: TvTeam[]; joinUrl: URL }) {
   const answeredTeamIds = useAnsweredTeamIds(game._id, game.screen);

@@ -14,30 +14,35 @@ const shown = { type: "multipleChoice" as const, options: [{ text: "Sverige", im
 
 describe("FollowGame", () => {
   it("shows the team and what is going on", () => {
-    render(<FollowGame team={team} screen={{ kind: "lobby" }} view={{ kind: "lobby" }} imageUrls={{}} timer={null} />);
+    render(<FollowGame team={team} screen={{ kind: "lobby" }} view={{ kind: "lobby" }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
     expect(screen.getByText("Tomtarna")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Ni är med! Vi börjar snart.");
     expect(screen.queryByRole("timer")).not.toBeInTheDocument();
   });
 
   it("shows the question's timer", () => {
-    render(<FollowGame team={team} screen={questionScreen} view={question} imageUrls={{}} timer={{ kind: "paused", remainingMs: 42_000 }} />);
+    render(<FollowGame team={team} screen={questionScreen} view={question} imageUrls={{}} timer={{ kind: "paused", remainingMs: 42_000 }} isQuestionClosed={false} />);
     expect(screen.getByRole("timer")).toHaveTextContent("0:42");
   });
 
   it("points at the TV for a question its type can't be answered in the app yet", () => {
-    render(<FollowGame team={team} screen={questionScreen} view={question} imageUrls={{}} timer={null} />);
+    render(<FollowGame team={team} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} />);
     expect(screen.queryByText("Svarsruta")).not.toBeInTheDocument();
   });
 
   it("lets the team answer a question answered in the app", () => {
-    render(<FollowGame team={team} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} />);
+    render(<FollowGame team={team} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
     expect(screen.getByText("Svarsruta")).toBeInTheDocument();
   });
 
   it("tells the answer when the time is out", () => {
     const timer = { kind: "paused" as const, remainingMs: 0 };
-    render(<FollowGame team={team} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={timer} />);
+    render(<FollowGame team={team} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={timer} isQuestionClosed={false} />);
     expect(screen.getByText("Svarsruta, tiden ute")).toBeInTheDocument();
+  });
+
+  it("takes no answer for a question the hosts have stepped on from", () => {
+    render(<FollowGame team={team} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed />);
+    expect(screen.queryByText("Svarsruta")).not.toBeInTheDocument();
   });
 });

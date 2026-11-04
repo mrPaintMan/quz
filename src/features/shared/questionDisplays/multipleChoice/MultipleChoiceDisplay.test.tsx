@@ -27,4 +27,9 @@ describe("MultipleChoiceAnswer", () => {
     expect(right).toHaveClass("border-primary");
     expect(wrong).toHaveClass("opacity-40");
   });
+
+  it("shows all options plainly when no right option is set", () => {
+    render(<MultipleChoiceAnswer revealed={{ type: "multipleChoice", options, correctIndex: null }} imageUrls={imageUrls} />);
+    for (const option of screen.getAllByRole("listitem")) expect(option).not.toHaveClass("opacity-40");
+  });
 });

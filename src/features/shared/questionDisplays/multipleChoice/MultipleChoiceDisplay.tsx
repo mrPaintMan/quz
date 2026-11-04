@@ -44,7 +44,10 @@ export function MultipleChoiceQuestion({ shown, imageUrls }: ShownDisplayProps<"
   return <OptionGrid options={shown.options} imageUrls={imageUrls} lookOf={() => "asked"} />;
 }
 
-// The same options on the answer screen, with the right one lit up.
+// The same options on the answer screen, with the right one lit up; all plain if the hosts
+// haven't picked one, rather than all dimmed.
 export function MultipleChoiceAnswer({ revealed, imageUrls }: RevealedDisplayProps<"multipleChoice">) {
-  return <OptionGrid options={revealed.options} imageUrls={imageUrls} lookOf={(index) => (index === revealed.correctIndex ? "right" : "other")} />;
+  const { correctIndex } = revealed;
+  const lookOf = (index: number): OptionLook => (correctIndex === null ? "asked" : index === correctIndex ? "right" : "other");
+  return <OptionGrid options={revealed.options} imageUrls={imageUrls} lookOf={lookOf} />;
 }

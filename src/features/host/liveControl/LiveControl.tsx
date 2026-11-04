@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
@@ -18,8 +17,8 @@ import { screenLabel } from "./screenLabel";
 import { TimerControls } from "./TimerControls";
 import { TripClueLine } from "./TripClueLine";
 import { TvPreview } from "./TvPreview";
+import type { RunningGame } from "@/features/shared/game/RunningGame";
 
-type RunningGame = NonNullable<FunctionReturnType<typeof api.games.queries.getRunningGame>>;
 
 // The hosts' view of the night: what the TV shows now and what comes next, both drawn as the TV
 // draws them but silent, with the controls for stepping on and for the question's timer and clip.

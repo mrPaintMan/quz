@@ -147,6 +147,9 @@ describe("sendAnswer for a type whose answering is built", () => {
     await expect(
       t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: { type: "multipleChoice", optionIndex: null } }),
     ).rejects.toThrow("Fyll i svaret innan ni skickar det.");
+    await expect(
+      t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: { type: "multipleChoice", optionIndex: 7 } }),
+    ).rejects.toThrow("Fyll i svaret innan ni skickar det.");
     await t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: { type: "multipleChoice", optionIndex: 0 } });
   });
 });

@@ -30,6 +30,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
   const sendAnswer = useMutation(api.answers.mutations.sendAnswer);
   const [draft, setDraft] = useState<AnswerContent | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isSending, setIsSending] = useState(false);
   // The registry pairs each type with its own input; TypeScript can't follow the lookup.
   const Input = answerInputs[shown.type] as unknown as AnyInput | null;
 
@@ -41,9 +42,16 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
     setError(null);
     try {
       await action();
+      return true;
     } catch (failure) {
       setError(describeActionError(failure));
+      return false;
     }
+  };
+  const send = async (content: AnswerContent) => {
+    setIsSending(true);
+    await run(() => sendAnswer({ teamId, questionId, content }));
+    setIsSending(false);
   };
 
   return (
@@ -53,9 +61,10 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
         answer={answer}
         imageUrls={imageUrls}
         disabled={isLocked || isTimeOut}
-        onChange={(next) => {
+        onChange={async (next) => {
           setDraft(next);
-          void run(() => saveDraft({ teamId, questionId, content: next }));
+          // A refused change (such as after the time is out) falls back to the server's answer.
+          if (!(await run(() => saveDraft({ teamId, questionId, content: next })))) setDraft(null);
         }}
       />
       <div className="mt-auto flex flex-col gap-2.5">
@@ -69,14 +78,14 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
             <Button
               size="lg"
               className="min-h-14 text-lg"
-              disabled={isTimeOut || answer === null || !isAnswerComplete(answer)}
-              onClick={() => answer && run(() => sendAnswer({ teamId, questionId, content: answer }))}
+              disabled={isTimeOut || isSending || answer === null || !isAnswerComplete(shown, answer)}
+              onClick={() => answer && send(answer)}
             >
               Skicka svar
             </Button>
           </>
         )}
-        {error && (
+        {error && !isLocked && (
           <p role="alert" className="text-sm text-destructive">
             {error}
           </p>

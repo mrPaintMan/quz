@@ -15,11 +15,13 @@ describe("answeringOf", () => {
 
 describe("isAnswerComplete", () => {
   it("asks the answer's own type", () => {
-    expect(isAnswerComplete({ type: "multipleChoice", optionIndex: 2 })).toBe(true);
-    expect(isAnswerComplete({ type: "multipleChoice", optionIndex: null })).toBe(false);
+    const shown = { type: "multipleChoice" as const, options: [{ text: "Sverige", imageId: null }] };
+    expect(isAnswerComplete(shown, { type: "multipleChoice", optionIndex: 0 })).toBe(true);
+    expect(isAnswerComplete(shown, { type: "multipleChoice", optionIndex: null })).toBe(false);
+    expect(isAnswerComplete(null, { type: "multipleChoice", optionIndex: 0 })).toBe(false);
   });
 
   it("counts an answer of a type not built yet as complete", () => {
-    expect(isAnswerComplete({ type: "number", value: null })).toBe(true);
+    expect(isAnswerComplete(null, { type: "number", value: null })).toBe(true);
   });
 });

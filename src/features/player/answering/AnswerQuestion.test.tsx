@@ -77,4 +77,23 @@ describe("AnswerQuestion", () => {
     const { container } = renderAnswer();
     expect(container).toBeEmptyDOMElement();
   });
+
+  it("falls back to the server's answer when a change is refused", async () => {
+    saved.mockReturnValue({ content: { type: "multipleChoice", optionIndex: 0 }, isLocked: false });
+    mutations.saveAnswerDraft.mockRejectedValue(new ConvexError("Tiden är ute."));
+    renderAnswer();
+    await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("Tiden är ute.");
+    expect(screen.getByRole("button", { name: "A Sverige" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("can't be sent twice while sending", async () => {
+    let finish: () => void = () => {};
+    mutations.sendAnswer.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+    saved.mockReturnValue({ content: { type: "multipleChoice", optionIndex: 0 }, isLocked: false });
+    renderAnswer();
+    await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
+    expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
+    finish();
+  });
 });

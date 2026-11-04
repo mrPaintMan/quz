@@ -10,8 +10,9 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   reveal: (content: ContentOf<T>) => Revealed;
   // Pictures the question shows, such as image options, so the server can link them.
   imageIds: (content: ContentOf<T>) => Id<"_storage">[];
-  // Whether an answer is filled in enough to be sent.
-  isComplete: (answer: AnswerOf<T>) => boolean;
+  // Whether an answer is filled in enough to be sent, judged against what the question shows, so
+  // the phone and the server agree.
+  isComplete: (shown: Shown, answer: AnswerOf<T>) => boolean;
   // The points an answer scores, as graded automatically.
   grade: (content: ContentOf<T>, answer: AnswerOf<T>) => number;
 };

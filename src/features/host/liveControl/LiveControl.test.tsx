@@ -31,7 +31,7 @@ type GameState = { view?: ScreenView; media?: ShownMedia | null; timer?: Timer |
 
 function renderControl({ view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
   const screenNow = { kind: "lobby" as const };
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback };
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>

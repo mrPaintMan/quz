@@ -38,20 +38,21 @@ type AnyAnsweringRules = {
   show: (content: QuestionContent) => ShownQuestion;
   reveal: (content: QuestionContent) => RevealedAnswer;
   imageIds: (content: QuestionContent) => Id<"_storage">[];
-  isComplete: (answer: AnswerContent) => boolean;
+  isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
   grade: (content: QuestionContent, answer: AnswerContent) => number;
 };
 
+// TypeScript can't link a type to its entry on its own; Registry guarantees they match.
+const answeringOfType = (type: AnsweredType) => answeringRegistry[type] as unknown as AnyAnsweringRules | null;
+
 // The answering of a question's type, or null for an activity or a type not built yet.
 export function answeringOf(content: QuestionContent): AnyAnsweringRules | null {
-  if (!rulesFor(content).answeredInApp) return null;
-  // TypeScript can't link content.type to its entry on its own; Registry guarantees they match.
-  return answeringRegistry[content.type as AnsweredType] as unknown as AnyAnsweringRules | null;
+  return rulesFor(content).answeredInApp ? answeringOfType(content.type as AnsweredType) : null;
 }
 
-// Whether an answer is filled in enough to send, by its own type's rule; a type whose answering
-// isn't built yet has no rule and counts as complete.
-export function isAnswerComplete(answer: AnswerContent): boolean {
-  const answering = answeringRegistry[answer.type] as unknown as AnyAnsweringRules | null;
-  return answering?.isComplete(answer) ?? true;
+// Whether an answer is filled in enough to send, judged by its own type against what the question
+// shows; a type whose answering isn't built yet has no rule and counts as complete.
+export function isAnswerComplete(shown: ShownQuestion | null, answer: AnswerContent): boolean {
+  const answering = answeringOfType(answer.type);
+  return answering === null || (shown !== null && answering.isComplete(shown, answer));
 }

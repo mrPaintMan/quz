@@ -18,14 +18,15 @@ type FollowGameProps = {
   view: ScreenView;
   imageUrls: ImageUrls;
   timer: Timer | null;
+  isQuestionClosed: boolean;
 };
 
 // The team's phone during the game: it follows the TV by itself, and shows the answer input
-// while a question its type can be answered in the app is on the TV.
-export function FollowGame({ team, screen, view, imageUrls, timer }: FollowGameProps) {
+// while a question its type can be answered in the app is open on the TV.
+export function FollowGame({ team, screen, view, imageUrls, timer, isQuestionClosed }: FollowGameProps) {
   const secondsLeft = useSecondsLeft(timer);
   const shown = view.kind === "question" ? view.shown : null;
-  const isAnswering = shown !== null && screen.kind === "question";
+  const isAnswering = shown !== null && screen.kind === "question" && !isQuestionClosed;
   const clock = secondsLeft !== null && (
     <p role="timer" className={`font-bold text-primary tabular-nums ${isAnswering ? "text-xl" : "text-4xl"}`}>
       {timeLeftText(secondsLeft)}

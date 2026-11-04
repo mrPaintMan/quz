@@ -26,6 +26,7 @@ describe("startGame", () => {
       imageUrls: {},
       timer: null,
       playback: null,
+      isQuestionClosed: false,
     });
   });
 

@@ -3,13 +3,12 @@
 import { useQuery } from "convex/react";
 import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
-import type { FunctionReturnType } from "convex/server";
 import { JoinForm } from "@/features/player/join/JoinForm";
 import { useSavedTeamId } from "@/features/player/join/useSavedTeamId";
 import { FollowGame } from "./FollowGame";
 import { NoGameRunning } from "./NoGameRunning";
+import type { RunningGame } from "@/features/shared/game/RunningGame";
 
-type RunningGame = NonNullable<FunctionReturnType<typeof api.games.queries.getRunningGame>>;
 
 function Waiting() {
   return <p className="p-8 text-center text-muted-foreground">Hämtar quizet…</p>;
@@ -24,7 +23,7 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
   }, [isStale, saveTeamId]);
 
   if (teamId !== null && team === undefined) return <Waiting />;
-  if (team) return <FollowGame team={team} screen={game.screen} view={game.view} imageUrls={game.imageUrls} timer={game.timer} />;
+  if (team) return <FollowGame team={team} screen={game.screen} view={game.view} imageUrls={game.imageUrls} timer={game.timer} isQuestionClosed={game.isQuestionClosed} />;
   return (
     <main className="flex min-h-svh items-center justify-center p-5">
       <JoinForm gameId={game._id} quizTitle={game.quizTitle} onJoined={saveTeamId} />
