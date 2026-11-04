@@ -18,8 +18,8 @@ type TvScreenProps = {
   quizTitle: string;
   joinUrl: URL;
   teams: TvTeam[];
-  // The teams by score, for the leaderboards.
-  scores: TeamScore[];
+  // The teams by score, for the leaderboards; undefined while loading.
+  scores: TeamScore[] | undefined;
   media: ShownMedia | null;
   imageUrls: ImageUrls;
   // How many teams have sent their answer to the question showing; null when not counted.

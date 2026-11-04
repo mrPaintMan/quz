@@ -19,7 +19,7 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
   const team = useQuery(api.teams.queries.getTeam, teamId === null ? "skip" : { teamId });
   // A saved team from an earlier game, or one that is gone, can't play this one: join anew.
   const isStale = teamId !== null && team === null;
-  const points = useScores(game._id, Boolean(team)).find((score) => score._id === team?._id)?.points ?? null;
+  const points = useScores(game._id, Boolean(team))?.find((score) => score._id === team?._id)?.points ?? null;
   useEffect(() => {
     if (isStale) saveTeamId(null);
   }, [isStale, saveTeamId]);

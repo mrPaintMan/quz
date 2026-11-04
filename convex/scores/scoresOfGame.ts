@@ -1,16 +1,15 @@
 import { gradeAnswer } from "@/domain/scoring/gradeAnswer";
-import { rankTeams } from "@/domain/scoring/rankTeams";
+import { sumScores } from "@/domain/scoring/sumScores";
 import { TEAM_COLOURS } from "@/domain/teams/teamColours";
-import type { Doc, Id } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
+import { MAX_ADJUSTMENTS_PER_GAME } from "../games/deleteGame";
 import { teamsOfGame } from "../teams/teamsOfGame";
 
-// More than any night's bonuses and activity scores; a bound for the read, as Convex asks.
-const MAX_ADJUSTMENTS = 1000;
-
-// Each team's points from the questions closed so far (D41), so no score gives an answer away
-// before its answer screen, and the teams' drafts on the open question don't touch this read.
-async function pointsFromClosedQuestions(ctx: QueryCtx, game: Doc<"games">): Promise<Map<Id<"teams">, number>> {
+// The points of each locked answer to the questions closed so far (D41), so no score gives an
+// answer away before its answer screen, and the teams' drafts on the open question don't touch
+// this read.
+async function pointsFromClosedQuestions(ctx: QueryCtx, game: Doc<"games">) {
   const graded = await Promise.all(
     (game.closedQuestionIds ?? []).map(async (questionId) => {
       // A question deleted during the game no longer scores (D34).
@@ -25,21 +24,19 @@ async function pointsFromClosedQuestions(ctx: QueryCtx, game: Doc<"games">): Pro
         .map((answer) => ({ teamId: answer.teamId, points: gradeAnswer(question.content, answer.content) }));
     }),
   );
-  const points = new Map<Id<"teams">, number>();
-  for (const { teamId, points: earned } of graded.flat()) points.set(teamId, (points.get(teamId) ?? 0) + earned);
-  return points;
+  return graded.flat();
 }
 
 // The teams ranked by their score, summed from their answers and the hosts' points, never stored (D6).
 export async function scoresOfGame(ctx: QueryCtx, game: Doc<"games">) {
   const teams = await teamsOfGame(ctx, game._id);
-  const points = await pointsFromClosedQuestions(ctx, game);
   const adjustments = await ctx.db
     .query("adjustments")
     .withIndex("by_gameId", (q) => q.eq("gameId", game._id))
-    .take(MAX_ADJUSTMENTS);
-  for (const adjustment of adjustments) {
-    points.set(adjustment.teamId, (points.get(adjustment.teamId) ?? 0) + adjustment.points);
-  }
-  return rankTeams(teams.map(({ _id, name, colour }) => ({ _id, name, colour, points: points.get(_id) ?? 0 })));
+    .take(MAX_ADJUSTMENTS_PER_GAME);
+  const earned = [...(await pointsFromClosedQuestions(ctx, game)), ...adjustments];
+  return sumScores(
+    teams.map(({ _id, name, colour }) => ({ _id, name, colour })),
+    earned,
+  );
 }

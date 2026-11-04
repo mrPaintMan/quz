@@ -16,10 +16,10 @@ describe("useScores", () => {
     expect(result.current).toEqual([{ name: "Röda", points: 2 }]);
   });
 
-  it("follows nothing when not enabled, and is empty meanwhile", () => {
+  it("follows nothing when not enabled", () => {
     useQuery.mockReturnValue(undefined);
     const { result } = renderHook(() => useScores(gameId, false));
     expect(useQuery.mock.lastCall?.[1]).toBe("skip");
-    expect(result.current).toEqual([]);
+    expect(result.current).toBeUndefined();
   });
 });

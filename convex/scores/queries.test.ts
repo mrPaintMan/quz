@@ -77,4 +77,10 @@ describe("getScores", () => {
     await answer(blue, closed, 1, null);
     expect(await scores()).toEqual(["1 Lag 1 0", "1 Lag 2 0", "1 Lag 3 0"]);
   });
+
+  it("is empty for a game that is gone", async () => {
+    const { t, gameId } = await withGame();
+    await t.run((ctx) => ctx.db.delete("games", gameId));
+    await expect(t.query(api.scores.queries.getScores, { gameId })).resolves.toEqual([]);
+  });
 });

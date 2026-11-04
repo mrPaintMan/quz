@@ -8,7 +8,9 @@ const ONE_COLUMN_MAX = 6;
 
 // The teams by score, with shared places for equal points (D6); counts only answered questions
 // whose answer is out (D41).
-export function LeaderboardScreen({ title, scores }: { title: string; scores: TeamScore[] }) {
+// While the scores load the list is left out, rather than claiming no team has joined.
+export function LeaderboardScreen({ title, scores }: { title: string; scores: TeamScore[] | undefined }) {
+  if (scores === undefined) return <TvFrame title={title} />;
   const columns = scores.length > ONE_COLUMN_MAX ? "grid-cols-2" : "grid-cols-1";
   return (
     <TvFrame title={title}>

@@ -104,7 +104,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
               <p className="font-semibold">{screenLabel(next.view)}</p>
             </>
           )}
-          <ScoreBoard scores={scores} />
+          {scores && <ScoreBoard scores={scores} />}
         </section>
       </main>
     </div>

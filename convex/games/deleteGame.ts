@@ -5,7 +5,8 @@ import { teamsOfGame } from "../teams/teamsOfGame";
 
 // A night has some 50 questions and up to 12 teams, about 600 answers; this leaves room to spare.
 export const MAX_ANSWERS_PER_GAME = 4000;
-const MAX_ADJUSTMENTS_PER_GAME = 1000;
+// Far more than any night's bonuses and activity scores; also the bound scores read (scoresOfGame).
+export const MAX_ADJUSTMENTS_PER_GAME = 1000;
 
 // Deletes a game with everything the teams did in it.
 export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {

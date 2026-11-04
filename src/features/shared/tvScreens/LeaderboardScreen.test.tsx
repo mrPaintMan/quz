@@ -24,4 +24,10 @@ describe("LeaderboardScreen", () => {
     render(<LeaderboardScreen title="Slutresultat" scores={[]} />);
     expect(screen.getByText("Inga lag har anmält sig.")).toBeInTheDocument();
   });
+
+  it("shows only its title while the scores load", () => {
+    render(<LeaderboardScreen title="Slutresultat" scores={undefined} />);
+    expect(screen.getByRole("heading", { name: "Slutresultat" })).toBeInTheDocument();
+    expect(screen.queryByText("Inga lag har anmält sig.")).not.toBeInTheDocument();
+  });
 });
