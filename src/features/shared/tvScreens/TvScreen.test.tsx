@@ -7,15 +7,30 @@ import { TvScreen } from "./TvScreen";
 
 vi.mock("convex/react", () => ({ useMutation: () => vi.fn().mockResolvedValue(null) }));
 
-type Extras = { media?: ShownMedia | null; timer?: Timer | null };
+type Extras = { media?: ShownMedia | null; timer?: Timer | null; answeredCount?: number | null };
 
-const renderView = (view: ScreenView, { media = null, timer = null }: Extras = {}) =>
+const teams = [
+  { _id: "t1", name: "Röda", colour: "red" as const },
+  { _id: "t2", name: "Blå", colour: "blue" as const },
+];
+
+const renderView = (view: ScreenView, { media = null, timer = null, answeredCount = null }: Extras = {}) =>
   render(
-    <TvScreen view={view} quizTitle="Julquiz 2026" joinUrl={new URL("https://quz.nu/")} teams={[]} media={media} timer={timer} playback={null} />,
+    <TvScreen
+      view={view}
+      quizTitle="Julquiz 2026"
+      joinUrl={new URL("https://quz.nu/")}
+      teams={teams}
+      media={media}
+      imageUrls={{}}
+      answeredCount={answeredCount}
+      timer={timer}
+      playback={null}
+    />,
   );
 
-const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: true };
-const answer: ScreenView = { kind: "answer", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?" };
+const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: true, shown: null };
+const answer: ScreenView = { kind: "answer", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", revealed: null };
 const image: ShownMedia = { kind: "image", url: "https://example.com/tomte.jpg" };
 
 describe("TvScreen", () => {
@@ -23,8 +38,8 @@ describe("TvScreen", () => {
     [{ kind: "lobby" }, "Julquiz 2026", "Välkomna till"],
     [{ kind: "rules", roundCount: 1, questionCount: 2, activityCount: 0 }, "Så funkar kvällen", null],
     [{ kind: "roundIntro", roundNumber: 2, title: "Julmat" }, "Julmat", "Omgång 2"],
-    [{ kind: "question", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", answeredInApp: true }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
-    [{ kind: "answer", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?" }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
+    [{ kind: "question", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
+    [{ kind: "answer", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
     [{ kind: "film", roundNumber: 4 }, "Film", "Omgång 4"],
     [{ kind: "leaderboard", roundNumber: 1 }, "Topplista efter omgång 1", null],
     [{ kind: "finalLeaderboard" }, "Slutresultat", null],
@@ -54,5 +69,23 @@ describe("TvScreen", () => {
     const { container } = renderView({ kind: "film", roundNumber: 4 }, { media: film });
     expect(container.querySelector("video")).toBeInTheDocument();
     await act(async () => {});
+  });
+
+  it("shows a built type's question and how many teams have answered", () => {
+    const shown = { type: "multipleChoice" as const, options: [{ text: "Sverige", imageId: null }] };
+    renderView({ ...question, shown } as ScreenView, { answeredCount: 1 });
+    expect(screen.getByText("Sverige")).toBeInTheDocument();
+    expect(screen.getByText("1 av 2 lag har svarat")).toBeInTheDocument();
+  });
+
+  it("doesn't count answers to a question not yet answered in the app", () => {
+    renderView(question, { answeredCount: 0 });
+    expect(screen.queryByText(/lag har svarat/)).not.toBeInTheDocument();
+  });
+
+  it("reveals a built type's answer", () => {
+    const revealed = { type: "multipleChoice" as const, options: [{ text: "Sverige", imageId: null }], correctIndex: 0 };
+    renderView({ ...answer, revealed } as ScreenView);
+    expect(screen.getByText("Sverige")).toBeInTheDocument();
   });
 });

@@ -77,6 +77,7 @@ src/
     timer/                       # the question timer: start, pause, resume, +15 s, seconds left
     media/  playback/            # which media a screen shows; a clip's play, pause and position
     answers/                     # when an answer may be saved: time out with grace, closed questions, matching type
+    answering/                   # per-type answering registry: what is shown, revealed, complete and how it is graded (D42)
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/  matching/          # leaderboard, fuzzy text matching …
   features/
@@ -95,12 +96,13 @@ src/
     player/                      # teams on their phones
       game/                      # / (quz.nu): the page, no-game page, following the TV
       join/                      # join form, the team saved on the phone
-      answering/<type>/          # answer input for one type, plus registry.ts
+      answering/<type>/          # answer input for one type, plus registry.ts and the answering frame (draft, send, locked)
     tv/                          # the shared screen
       game/                      # /tv: the page and the 16:9 stage
     shared/                      # used by more than one audience: logo (brand/), map, team colours (teams/), error texts (errors/), the countdown (timer/)
       tvScreens/                 # lobby, rules, question, answer, leaderboard …, drawn on the TV and in the hosts' live control (D38)
       questionDisplays/<type>/   # TV display for one type, plus registry.ts; shared since the TV screens are
+      answers/                   # who has answered the question showing
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
 ```

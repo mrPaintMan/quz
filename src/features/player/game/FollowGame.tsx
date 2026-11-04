@@ -1,34 +1,68 @@
 "use client";
 
+import type { Id } from "@convex/_generated/dataModel";
+import type { Screen } from "@convex/games/screen";
 import type { Timer } from "@convex/games/timer";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import type { TeamColour } from "@/domain/teams/teamColours";
+import { AnswerQuestion } from "@/features/player/answering/AnswerQuestion";
+import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
 import { timeLeftText } from "@/features/shared/timer/timeLeftText";
 import { useSecondsLeft } from "@/features/shared/timer/useSecondsLeft";
 import { phoneScreenText } from "./phoneScreenText";
 
-type FollowGameProps = { team: { name: string; colour: TeamColour }; view: ScreenView; timer: Timer | null };
+type FollowGameProps = {
+  team: { _id: Id<"teams">; name: string; colour: TeamColour };
+  screen: Screen;
+  view: ScreenView;
+  imageUrls: ImageUrls;
+  timer: Timer | null;
+};
 
-// The team's phone during the game: it follows the TV by itself, so there is nothing to press.
-export function FollowGame({ team, view, timer }: FollowGameProps) {
+// The team's phone during the game: it follows the TV by itself, and shows the answer input
+// while a question its type can be answered in the app is on the TV.
+export function FollowGame({ team, screen, view, imageUrls, timer }: FollowGameProps) {
   const secondsLeft = useSecondsLeft(timer);
+  const shown = view.kind === "question" ? view.shown : null;
+  const isAnswering = shown !== null && screen.kind === "question";
+  const clock = secondsLeft !== null && (
+    <p role="timer" className={`font-bold text-primary tabular-nums ${isAnswering ? "text-xl" : "text-4xl"}`}>
+      {timeLeftText(secondsLeft)}
+    </p>
+  );
+
   return (
-    <main className="flex min-h-svh flex-col gap-8 p-5">
+    <main className="flex min-h-svh flex-col gap-6 p-5">
       <header className="flex items-center gap-2 font-semibold">
         <TeamDot colour={team.colour} />
         {team.name}
       </header>
-      <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <p role="status" className="text-2xl">
-          {phoneScreenText(view)}
-        </p>
-        {secondsLeft !== null && (
-          <p role="timer" className="text-4xl font-bold text-primary tabular-nums">
-            {timeLeftText(secondsLeft)}
+      {isAnswering ? (
+        <>
+          <div className="flex items-center justify-between gap-3">
+            <p role="status" className="text-muted-foreground">
+              {phoneScreenText(view)}
+            </p>
+            {clock}
+          </div>
+          <AnswerQuestion
+            key={screen.questionId}
+            teamId={team._id}
+            questionId={screen.questionId}
+            shown={shown}
+            imageUrls={imageUrls}
+            isTimeOut={secondsLeft === 0}
+          />
+        </>
+      ) : (
+        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+          <p role="status" className="text-2xl">
+            {phoneScreenText(view)}
           </p>
-        )}
-      </div>
+          {clock}
+        </div>
+      )}
     </main>
   );
 }

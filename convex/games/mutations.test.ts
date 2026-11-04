@@ -23,6 +23,7 @@ describe("startGame", () => {
       screen: { kind: "lobby" },
       view: { kind: "lobby" },
       media: null,
+      imageUrls: {},
       timer: null,
       playback: null,
     });

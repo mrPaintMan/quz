@@ -124,3 +124,30 @@ describe("closing a question", () => {
     expect(await answerOf(t, teamId)).toMatchObject({ content: guess(9) });
   });
 });
+
+describe("sendAnswer for a type whose answering is built", () => {
+  it("refuses an answer that isn't filled in", async () => {
+    const t = setupConvexTest();
+    const { teamId, questionId } = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Flerval", kind: "questions" });
+      const questionId = await ctx.db.insert("questions", {
+        quizId,
+        roundId,
+        position: 0,
+        prompt: "Vilket land?",
+        timeLimitSeconds: null,
+        media: null,
+        hostNotes: "",
+        content: { type: "multipleChoice", options: [{ text: "Sverige", imageId: null }], correctIndex: 0, points: 1 },
+      });
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 });
+      return { questionId, teamId: await ctx.db.insert("teams", { gameId, name: "Röda", colour: "red" }) };
+    });
+    await expect(
+      t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: { type: "multipleChoice", optionIndex: null } }),
+    ).rejects.toThrow("Fyll i svaret innan ni skickar det.");
+    await t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: { type: "multipleChoice", optionIndex: 0 } });
+  });
+});
+

@@ -47,12 +47,24 @@ describe("describeScreen", () => {
       questionNumber: 2,
       prompt: "Baka ett pepparkakshus",
       answeredInApp: false,
+      shown: null,
     });
     expect(describeScreen({ kind: "answer", questionId: questionId("q3") }, rounds)).toEqual({
       kind: "answer",
       roundNumber: 2,
       questionNumber: 1,
       prompt: "Vem är Kevin?",
+      revealed: null,
+    });
+  });
+
+  it("shows a built type's question without its answer, and reveals it on the answer screen", () => {
+    const options = [{ text: "Sverige", imageId: null }, { text: "Norge", imageId: null }];
+    const choice: QuestionContent = { type: "multipleChoice", options, correctIndex: 1, points: 1 };
+    const quiz = [{ _id: roundId("flerval"), title: "Flerval", questions: [{ _id: questionId("mc"), prompt: "Vilket land?", content: choice }] }];
+    expect(describeScreen({ kind: "question", questionId: questionId("mc") }, quiz)).toMatchObject({ shown: { type: "multipleChoice", options } });
+    expect(describeScreen({ kind: "answer", questionId: questionId("mc") }, quiz)).toMatchObject({
+      revealed: { type: "multipleChoice", options, correctIndex: 1 },
     });
   });
 

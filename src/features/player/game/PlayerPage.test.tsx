@@ -17,7 +17,7 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
-const game = { _id: "game1", quizTitle: "Julquiz 2026", screen: { kind: "lobby" }, view: { kind: "lobby" }, timer: null };
+const game = { _id: "game1", quizTitle: "Julquiz 2026", screen: { kind: "lobby" }, view: { kind: "lobby" }, imageUrls: {}, timer: null };
 
 describe("PlayerPage", () => {
   beforeEach(() => {

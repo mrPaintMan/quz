@@ -17,6 +17,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna", colour: "red" }] }));
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => nextScreen() }));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
+vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
 vi.mock("@/features/host/shared/useHostMutation", () => ({
   // The generated api hands out a new reference on each access, so pick by name.
   useHostMutation: (mutation: FunctionReference<"mutation">) =>
@@ -24,13 +25,13 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 }));
 
 const gameId = "game1" as Id<"games">;
-const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true };
+const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true, shown: null };
 
 type GameState = { view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
 
 function renderControl({ view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
   const screenNow = { kind: "lobby" as const };
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, timer, playback };
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>
@@ -103,6 +104,17 @@ describe("LiveControl", () => {
     const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: false };
     renderControl({ view: question, media: film, playback: { kind: "paused", positionMs: 0 } });
     expect(screen.queryByText("Ledtrådsrad")).not.toBeInTheDocument();
+  });
+
+  it("shows which teams have answered a question answered in the app", () => {
+    const shown = { type: "multipleChoice" as const, options: [{ text: "Sverige", imageId: null }] };
+    renderControl({ view: { ...question, shown } });
+    expect(screen.getByText("Svarat")).toBeInTheDocument();
+  });
+
+  it("lists no answers for a question not yet answered in the app", () => {
+    renderControl({ view: question });
+    expect(screen.queryByText("Svarat")).not.toBeInTheDocument();
   });
 
   it("links to the TV view", () => {

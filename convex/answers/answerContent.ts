@@ -26,3 +26,5 @@ export const answerContent = v.union(
 );
 
 export type AnswerContent = Infer<typeof answerContent>;
+export type AnsweredType = AnswerContent["type"];
+export type AnswerOf<T extends AnsweredType> = Extract<AnswerContent, { type: T }>;

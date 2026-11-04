@@ -25,6 +25,7 @@ describe("getRunningGame", () => {
       screen: { kind: "lobby" },
       view: { kind: "lobby" },
       media: null,
+      imageUrls: {},
       timer: null,
       playback: null,
     });
@@ -48,7 +49,7 @@ describe("getRunningGame", () => {
       await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 });
     });
     const game = await t.query(api.games.queries.getRunningGame, {});
-    expect(game?.view).toEqual({ kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vilken krydda?", answeredInApp: true });
+    expect(game?.view).toEqual({ kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vilken krydda?", answeredInApp: true, shown: null });
     expect(JSON.stringify(game)).not.toMatch(/kanel/i);
   });
 });
@@ -114,6 +115,7 @@ describe("getNextScreen", () => {
     await expect(t.query(api.games.queries.getNextScreen, { ...host, gameId })).resolves.toEqual({
       view: { kind: "roundIntro", roundNumber: 1, title: "Julmat" },
       media: null,
+      imageUrls: {},
     });
   });
 

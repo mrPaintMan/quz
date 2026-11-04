@@ -1,4 +1,5 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
+import { isAnswerComplete } from "@/domain/answering/registry";
 import type { Id } from "../_generated/dataModel";
 import { mutation, type MutationCtx } from "../_generated/server";
 import { answerContent, type AnswerContent } from "./answerContent";
@@ -9,6 +10,9 @@ type AnswerArgs = { teamId: Id<"teams">; questionId: Id<"questions">; content: A
 
 async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content }: AnswerArgs, lockedAt: number | null) {
   const { game, answer } = await requireAnswerable(ctx, teamId, questionId, content);
+  if (lockedAt !== null && !isAnswerComplete(content)) {
+    throw new ConvexError("Fyll i svaret innan ni skickar det.");
+  }
   if (answer) {
     await ctx.db.patch("answers", answer._id, { content, lockedAt });
     return;
