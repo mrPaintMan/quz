@@ -65,6 +65,7 @@ convex/
   answers/answerContent.ts       # union of the answer validators, for every type answered in the app
   questions/questionContent.ts   # union of all content validators, and the QuestionContent / QuestionType types
   auth/                          # passphrase check and hostQuery / hostMutation wrappers (D21)
+  scores/                        # the teams' scores, summed from answers and adjustments on every read (D6, D43)
   media/                         # upload URLs, attaching media, media URLs
   shared/                        # small helpers used by several tables, such as getOrThrow
 

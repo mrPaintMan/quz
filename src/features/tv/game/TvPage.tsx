@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useAnsweredTeamIds } from "@/features/shared/answers/useAnsweredTeamIds";
 import { QuzWordmark } from "@/features/shared/brand/QuzWordmark";
+import { useScores } from "@/features/shared/scores/useScores";
 import type { TvTeam } from "@/features/shared/tvScreens/TeamList";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { TvStage } from "./TvStage";
@@ -42,12 +43,15 @@ function CurrentScreen() {
 
 function RunningGameScreen({ game, teams, joinUrl }: { game: RunningGame; teams: TvTeam[]; joinUrl: URL }) {
   const answeredTeamIds = useAnsweredTeamIds(game._id, game.screen);
+  // Only the leaderboards show scores, so the TV follows them only there.
+  const scores = useScores(game._id, game.view.kind === "leaderboard" || game.view.kind === "finalLeaderboard");
   return (
     <TvScreen
       view={game.view}
       quizTitle={game.quizTitle}
       joinUrl={joinUrl}
       teams={teams}
+      scores={scores}
       media={game.media}
       imageUrls={game.imageUrls}
       answeredCount={answeredTeamIds?.length ?? null}

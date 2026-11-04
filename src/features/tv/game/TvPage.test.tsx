@@ -6,10 +6,15 @@ import { TvPage } from "./TvPage";
 
 const runningGame = vi.fn();
 const teams = vi.fn();
+const scores = vi.fn();
 vi.mock("convex/react", () => ({
   // The generated api hands out a new reference on each access, so compare by name.
-  useQuery: (query: FunctionReference<"query">, args?: unknown) =>
-    getFunctionName(query) === getFunctionName(api.games.queries.getRunningGame) ? runningGame() : args === "skip" ? undefined : teams(),
+  useQuery: (query: FunctionReference<"query">, args?: unknown) => {
+    if (args === "skip") return undefined;
+    const name = getFunctionName(query);
+    if (name === getFunctionName(api.games.queries.getRunningGame)) return runningGame();
+    return name === getFunctionName(api.scores.queries.getScores) ? scores() : teams();
+  },
 }));
 
 describe("TvPage", () => {
@@ -32,5 +37,19 @@ describe("TvPage", () => {
     render(<TvPage />);
     expect(screen.getByRole("heading", { level: 1, name: "Julquiz 2026" })).toBeInTheDocument();
     expect(screen.getByText("Tomtarna")).toBeInTheDocument();
+  });
+
+  it("shows the scores on a leaderboard", () => {
+    scores.mockReturnValue([{ _id: "t1", name: "Tomtarna", colour: "red", points: 7, rank: 1 }]);
+    runningGame.mockReturnValue({ _id: "game1", quizTitle: "Julquiz 2026", screen: { kind: "finalLeaderboard" }, view: { kind: "finalLeaderboard" }, media: null, imageUrls: {}, timer: null, playback: null });
+    render(<TvPage />);
+    expect(screen.getByText("7 p")).toBeInTheDocument();
+  });
+
+  it("doesn't follow the scores on other screens", () => {
+    scores.mockClear();
+    runningGame.mockReturnValue({ _id: "game1", quizTitle: "Julquiz 2026", screen: { kind: "lobby" }, view: { kind: "lobby" }, media: null, imageUrls: {}, timer: null, playback: null });
+    render(<TvPage />);
+    expect(scores).not.toHaveBeenCalled();
   });
 });

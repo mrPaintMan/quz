@@ -81,6 +81,8 @@ import type * as rounds_roundsOfQuiz from "../rounds/roundsOfQuiz.js";
 import type * as rounds_roundsWithQuestionsOfQuiz from "../rounds/roundsWithQuestionsOfQuiz.js";
 import type * as rounds_saveRoundOrder from "../rounds/saveRoundOrder.js";
 import type * as rounds_table from "../rounds/table.js";
+import type * as scores_queries from "../scores/queries.js";
+import type * as scores_scoresOfGame from "../scores/scoresOfGame.js";
 import type * as shared_getOrThrow from "../shared/getOrThrow.js";
 import type * as teams_mutations from "../teams/mutations.js";
 import type * as teams_queries from "../teams/queries.js";
@@ -167,6 +169,8 @@ declare const fullApi: ApiFromModules<{
   "rounds/roundsWithQuestionsOfQuiz": typeof rounds_roundsWithQuestionsOfQuiz;
   "rounds/saveRoundOrder": typeof rounds_saveRoundOrder;
   "rounds/table": typeof rounds_table;
+  "scores/queries": typeof scores_queries;
+  "scores/scoresOfGame": typeof scores_scoresOfGame;
   "shared/getOrThrow": typeof shared_getOrThrow;
   "teams/mutations": typeof teams_mutations;
   "teams/queries": typeof teams_queries;

@@ -16,6 +16,7 @@ The words Quz uses in its Swedish UI, so every screen says the same thing. Add t
 | Sort question ends | **Högst upp betyder / Längst ner betyder**, placeholders "Störst" / "Minst" | Början / Slutet |
 | Match question key | **Korrekta par** | Rätta par |
 | The scores between rounds | **Topplista** ("Topplista efter omgång 2") | Ställning, poängtabell |
+| Points | **12 p**, **2,5 p** | poäng after a number |
 | The scores after the last round | **Slutresultat** | Sluttopplista |
 | A team joining on its phone | **Gå med**, with **Lagets namn** and **Lagets färg** | Anmäl, registrera |
 | The shared screen | **TV:n** ("Titta på TV:n.", "Öppna TV-vyn", "Visas på TV:n nu", "Nästa på TV:n") | skärmen, storbildsskärmen |

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
 import { JoinForm } from "@/features/player/join/JoinForm";
 import { useSavedTeamId } from "@/features/player/join/useSavedTeamId";
+import { useScores } from "@/features/shared/scores/useScores";
 import { FollowGame } from "./FollowGame";
 import { NoGameRunning } from "./NoGameRunning";
 import type { RunningGame } from "@/features/shared/game/RunningGame";
@@ -18,12 +19,25 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
   const team = useQuery(api.teams.queries.getTeam, teamId === null ? "skip" : { teamId });
   // A saved team from an earlier game, or one that is gone, can't play this one: join anew.
   const isStale = teamId !== null && team === null;
+  const points = useScores(game._id, Boolean(team))?.find((score) => score._id === team?._id)?.points ?? null;
   useEffect(() => {
     if (isStale) saveTeamId(null);
   }, [isStale, saveTeamId]);
 
   if (teamId !== null && team === undefined) return <Waiting />;
-  if (team) return <FollowGame team={team} screen={game.screen} view={game.view} imageUrls={game.imageUrls} timer={game.timer} isQuestionClosed={game.isQuestionClosed} />;
+  if (team) {
+    return (
+      <FollowGame
+        team={team}
+        points={points}
+        screen={game.screen}
+        view={game.view}
+        imageUrls={game.imageUrls}
+        timer={game.timer}
+        isQuestionClosed={game.isQuestionClosed}
+      />
+    );
+  }
   return (
     <main className="flex min-h-svh items-center justify-center p-5">
       <JoinForm gameId={game._id} quizTitle={game.quizTitle} onJoined={saveTeamId} />
