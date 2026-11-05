@@ -8,8 +8,9 @@ type NumberAnswer = AnswerOf<"number">;
 export type NumberShown = { type: "number" };
 export type NumberRevealed = { type: "number"; answer: number | null };
 
-// Floating point makes 0.4 − 0.1 a hair over 0.3; distances this close count as equal.
-const TOLERANCE = 1e-9;
+// Floating point makes 0.4 − 0.1 a hair over 0.3, and its error grows with the numbers, so
+// distances closer than a billionth of the answer's size count as equal.
+const toleranceFor = (content: NumberContent) => 1e-9 * Math.max(1, Math.abs(content.answer ?? 0));
 
 const distanceOf = (content: NumberContent, answer: NumberAnswer) =>
   content.answer === null || answer.value === null ? null : Math.abs(answer.value - content.answer);
@@ -18,7 +19,7 @@ const distanceOf = (content: NumberContent, answer: NumberAnswer) =>
 function gradeByTiers(content: NumberContent, tiers: Extract<NumberContent["scoring"], { mode: "tiers" }>["tiers"], answer: NumberAnswer) {
   const distance = distanceOf(content, answer);
   if (distance === null) return 0;
-  const reached = tiers.filter((tier) => tier.within !== null && distance <= tier.within + TOLERANCE);
+  const reached = tiers.filter((tier) => tier.within !== null && distance <= tier.within + toleranceFor(content));
   return Math.max(0, ...reached.map((tier) => tier.points ?? 0));
 }
 
@@ -28,7 +29,7 @@ function gradeByCloseness(content: NumberContent, pointsByRank: (number | null)[
   const distances = answers.map((answer) => distanceOf(content, answer));
   return distances.map((distance) => {
     if (distance === null) return 0;
-    const closer = distances.filter((other) => other !== null && other < distance - TOLERANCE).length;
+    const closer = distances.filter((other) => other !== null && other < distance - toleranceFor(content)).length;
     return pointsByRank[closer] ?? 0;
   });
 }

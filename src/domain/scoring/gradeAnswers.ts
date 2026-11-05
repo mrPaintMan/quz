@@ -9,7 +9,9 @@ import { answeringOf } from "@/domain/answering/registry";
 // built yet, scores nothing.
 export function gradeAnswers(content: QuestionContent, answers: AnswerContent[]): number[] {
   const answering = answeringOf(content);
-  const fitting = answers.filter((answer) => isAnswerFor(content, answer));
+  const fits = answers.map((answer) => isAnswerFor(content, answer));
+  const fitting = answers.filter((_answer, index) => fits[index]);
   const points = answering === null ? [] : answering.grade(content, fitting);
-  return answers.map((answer) => (isAnswerFor(content, answer) ? (points[fitting.indexOf(answer)] ?? 0) : 0));
+  let next = 0;
+  return fits.map((fit) => (fit ? (points[next++] ?? 0) : 0));
 }

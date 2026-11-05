@@ -38,6 +38,11 @@ describe("numberAnswering", () => {
     expect(numberAnswering.grade(decimals, [guess(0.4)])).toEqual([1]);
   });
 
+  it("shares a place between equally close guesses to a large number", () => {
+    const large: ContentOf<"number"> = { type: "number", answer: 100_000_000.3, scoring: { mode: "closest", pointsByRank: [3, 2] } };
+    expect(numberAnswering.grade(large, [guess(100_000_000.2), guess(100_000_000.4)])).toEqual([3, 3]);
+  });
+
   it("gives the closest teams the points by place", () => {
     expect(numberAnswering.grade(closest, [guess(90), guess(101), guess(150), guess(200)])).toEqual([2, 3, 1, 0]);
   });
