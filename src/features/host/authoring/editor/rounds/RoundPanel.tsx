@@ -57,7 +57,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           <SortableList
             items={round.questions}
             getId={(question) => question._id}
-            nameOf={(index) => `fråga ${index + 1}`}
+            nameOf={(_question, index) => `fråga ${index + 1}`}
             onMove={(question, _fromIndex, toIndex) => move(question._id, toIndex)}
             className="flex flex-col gap-2"
             itemClassName={(question) => questionRowClassName(question._id === selectedQuestionId)}

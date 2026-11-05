@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { answeringOf, isAnswerComplete } from "./registry";
+import { answeringOf, isAnswerComplete, startingAnswerOf } from "./registry";
 
 describe("answeringOf", () => {
   it("gives a built type's answering", () => {
@@ -23,5 +23,13 @@ describe("isAnswerComplete", () => {
 
   it("counts an answer of a type not built yet as complete", () => {
     expect(isAnswerComplete(null, { type: "freeText", fields: [""] })).toBe(true);
+  });
+});
+
+describe("startingAnswerOf", () => {
+  it("asks the question's own type", () => {
+    const shown = { type: "sort" as const, items: ["B", "A"], firstLabel: "", lastLabel: "" };
+    expect(startingAnswerOf(shown)).toEqual({ type: "sort", order: ["B", "A"] });
+    expect(startingAnswerOf({ type: "number" })).toBeNull();
   });
 });

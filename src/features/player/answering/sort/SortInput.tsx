@@ -16,7 +16,7 @@ export function SortInput({ shown, answer, disabled, onChange }: AnswerInputProp
   const order = answer?.order ?? shown.items;
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm text-muted-foreground">{disabled ? "Er ordning" : "Håll och dra för att flytta"}</p>
+      {!disabled && <p className="text-sm text-muted-foreground">Håll och dra för att flytta</p>}
       <p className="text-sm font-medium">{shown.firstLabel}</p>
       {disabled ? (
         <ol className="flex flex-col gap-2 opacity-60">
@@ -31,7 +31,7 @@ export function SortInput({ shown, answer, disabled, onChange }: AnswerInputProp
         <SortableList
           items={order}
           getId={(item) => item}
-          nameOf={(index) => order[index]}
+          nameOf={(item) => item}
           onMove={(_item, fromIndex, toIndex) => onChange({ type: "sort", order: moveItem(order, fromIndex, toIndex) })}
           className="flex flex-col gap-2"
           renderItem={(item, { index, dragHandle }) => (

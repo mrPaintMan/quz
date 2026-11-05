@@ -40,6 +40,7 @@ type AnyAnsweringRules = {
   show: (content: QuestionContent) => ShownQuestion;
   reveal: (content: QuestionContent) => RevealedAnswer;
   imageIds: (content: QuestionContent) => Id<"_storage">[];
+  startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
   grade: (content: QuestionContent, answers: AnswerContent[]) => number[];
 };
@@ -50,6 +51,11 @@ const answeringOfType = (type: AnsweredType) => answeringRegistry[type] as unkno
 // The answering of a question's type, or null for an activity or a type not built yet.
 export function answeringOf(content: QuestionContent): AnyAnsweringRules | null {
   return rulesFor(content).answeredInApp ? answeringOfType(content.type as AnsweredType) : null;
+}
+
+// The team's answer before it changes anything, such as a sort question's shuffled order.
+export function startingAnswerOf(shown: ShownQuestion): AnswerContent | null {
+  return answeringOfType(shown.type)?.startingAnswer(shown) ?? null;
 }
 
 // Whether an answer is filled in enough to send, judged by its own type against what the question

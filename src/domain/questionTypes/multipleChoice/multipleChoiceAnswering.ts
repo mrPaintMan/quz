@@ -9,6 +9,7 @@ export const multipleChoiceAnswering: AnsweringRules<"multipleChoice", MultipleC
   reveal: ({ options, correctIndex }) => ({ type: "multipleChoice", options, correctIndex }),
   imageIds: ({ options }) => options.flatMap((option) => (option.imageId === null ? [] : [option.imageId])),
   // One of the options shown, so a stray number from a phone never counts as an answer.
+  startingAnswer: () => null,
   isComplete: (shown, { optionIndex }) => optionIndex !== null && Number.isInteger(optionIndex) && optionIndex >= 0 && optionIndex < shown.options.length,
   // The full points for the right option, nothing for any other.
   grade: (content, answers) =>

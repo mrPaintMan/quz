@@ -33,7 +33,7 @@ export function RoundList({ quizId, rounds, selectedRoundId, onSelectRound }: Ro
       <SortableList
         items={rounds}
         getId={(round) => round._id}
-        nameOf={(index) => `omgång ${index + 1}`}
+        nameOf={(_round, index) => `omgång ${index + 1}`}
         onMove={(round, _fromIndex, toIndex) => move(round._id, toIndex)}
         className="flex flex-col gap-1"
         itemClassName={(round) =>

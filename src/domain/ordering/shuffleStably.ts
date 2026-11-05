@@ -19,8 +19,8 @@ function randomFrom(seed: number): () => number {
   };
 }
 
-// The items shuffled the same way every time for the same items, so every phone, the TV and a
-// reloaded page show one order. Never the order given, so a sort question is never pre-solved.
+// The items shuffled the same way every time for the same items and seed, so every phone, the TV
+// and a reloaded page show one order.
 export function shuffleStably<T>(items: readonly T[], seedText: string): T[] {
   const random = randomFrom(hashText(seedText));
   const shuffled = [...items];
@@ -28,6 +28,5 @@ export function shuffleStably<T>(items: readonly T[], seedText: string): T[] {
     const other = Math.floor(random() * (index + 1));
     [shuffled[index], shuffled[other]] = [shuffled[other], shuffled[index]];
   }
-  const isUnchanged = shuffled.every((item, index) => item === items[index]);
-  return isUnchanged && items.length > 1 ? [...items.slice(1), items[0]] : shuffled;
+  return shuffled;
 }

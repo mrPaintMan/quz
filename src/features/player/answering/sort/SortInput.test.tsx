@@ -29,6 +29,6 @@ describe("SortInput", () => {
   it("can't be moved once locked", () => {
     render(<SortInput shown={shown} answer={null} imageUrls={{}} disabled onChange={vi.fn()} />);
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
-    expect(screen.getByText("Er ordning")).toBeInTheDocument();
+    expect(screen.queryByText("Håll och dra för att flytta")).not.toBeInTheDocument();
   });
 });

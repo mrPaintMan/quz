@@ -10,6 +10,9 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   reveal: (content: ContentOf<T>) => Revealed;
   // Pictures the question shows, such as image options, so the server can link them.
   imageIds: (content: ContentOf<T>) => Id<"_storage">[];
+  // What the team's answer is before it changes anything; null for most types, where nothing is
+  // picked yet. Not saved as a draft until the team changes it.
+  startingAnswer: (shown: Shown) => AnswerOf<T> | null;
   // Whether an answer is filled in enough to be sent, judged against what the question shows, so
   // the phone and the server agree.
   isComplete: (shown: Shown, answer: AnswerOf<T>) => boolean;
