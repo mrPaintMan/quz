@@ -8,11 +8,12 @@ import {
   type MultipleChoiceShown,
 } from "@/domain/questionTypes/multipleChoice/multipleChoiceAnswering";
 import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
+import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown | NumberShown;
-export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed;
+export type ShownQuestion = MultipleChoiceShown | NumberShown | SortShown;
+export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed | SortRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -24,7 +25,7 @@ export const answeringRegistry: Registry = {
   multipleChoice: multipleChoiceAnswering,
   freeText: null,
   number: numberAnswering,
-  sort: null,
+  sort: sortAnswering,
   match: null,
   list: null,
   ingredients: null,

@@ -90,7 +90,7 @@ src/
         editor/quiz|rounds|question/  # /admin/quizzes/[quizId]: the three editor columns
         questionEditors/<type>/  # editor for one type, plus registry.ts (label + editor per type)
         questionEditors/fields/  # form fields shared by the type editors
-        shared/                  # used by several authoring features: autosave, sortable lists, remove buttons, the keyboard drag test helper
+        shared/                  # used by several authoring features: autosave, remove buttons
         media/                   # uploads and previews
       liveControl/               # /admin/games/[gameId]: stepping through the night
       scoreHistory/
@@ -105,6 +105,7 @@ src/
       questionDisplays/<type>/   # TV display for one type, plus registry.ts; shared since the TV screens are
       answers/                   # who has answered the question showing
       forms/                     # form helpers used by hosts and players, such as useDraftText
+      sortable/                  # drag-to-reorder lists, used by the editor and the phones, and the keyboard drag test helper
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
 ```

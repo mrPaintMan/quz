@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import type { ContentOf } from "@convex/questions/questionContent";
-import { dragByKeyboard } from "@/features/host/authoring/shared/dragByKeyboard.setup";
+import { dragByKeyboard } from "@/features/shared/sortable/dragByKeyboard.setup";
 import { SortEditor } from "./SortEditor";
 
 const content: ContentOf<"sort"> = {

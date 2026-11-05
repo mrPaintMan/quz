@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
 import { hasFixedQuestionList } from "@/domain/rounds/hasFixedQuestionList";
 import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
-import { SortableList } from "@/features/host/authoring/shared/SortableList";
+import { SortableList } from "@/features/shared/sortable/SortableList";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";

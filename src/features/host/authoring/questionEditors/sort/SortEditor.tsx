@@ -7,7 +7,7 @@ import { removeAt } from "@/domain/ordering/removeAt";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
 import { RemoveRowButton } from "@/features/host/authoring/shared/RemoveRowButton";
-import { SortableList } from "@/features/host/authoring/shared/SortableList";
+import { SortableList } from "@/features/shared/sortable/SortableList";
 import { TextField } from "@/features/host/authoring/questionEditors/fields/TextField";
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 

@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { SortableList } from "@/features/host/authoring/shared/SortableList";
+import { SortableList } from "@/features/shared/sortable/SortableList";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { AddRoundForm } from "./AddRoundForm";

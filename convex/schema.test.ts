@@ -30,7 +30,7 @@ const oneAnswerOfEachType: AnswerContent[] = [
   { type: "multipleChoice", optionIndex: null },
   { type: "freeText", fields: ["kanel", ""] },
   { type: "number", value: 66 },
-  { type: "sort", order: [1, 0] },
+  { type: "sort", order: ["B", "A"] },
   { type: "match", rightIndexByLeft: [0, null] },
   { type: "list", items: ["Oslo", "Bern"] },
   { type: "ingredients", items: ["glögg", ""] },
