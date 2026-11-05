@@ -4,7 +4,7 @@ import { useId } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { parseLines } from "@/domain/text/parseLines";
-import { useDraftText } from "./useDraftText";
+import { useDraftText } from "@/features/shared/forms/useDraftText";
 
 const joinLines = (lines: string[]) => lines.join("\n");
 

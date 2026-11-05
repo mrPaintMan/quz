@@ -38,8 +38,6 @@ describe("multipleChoiceAnswering", () => {
   });
 
   it("scores the full points for the right option and nothing otherwise", () => {
-    expect(multipleChoiceAnswering.grade(content, answer(1))).toBe(2);
-    expect(multipleChoiceAnswering.grade(content, answer(0))).toBe(0);
-    expect(multipleChoiceAnswering.grade(content, answer(null))).toBe(0);
+    expect(multipleChoiceAnswering.grade(content, [answer(1), answer(0), answer(null)])).toEqual([2, 0, 0]);
   });
 });

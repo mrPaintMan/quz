@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 continues with the other question types one by one: number, sort, match, ingredients, free text and list with the review queue, then activities and manual points.
+M3 continues with the other question types one by one: sort, match, ingredients, free text and list with the review queue, then activities and manual points.
 
 ## Milestones
 
@@ -69,7 +69,7 @@ M3 continues with the other question types one by one: number, sort, match, ingr
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42)
+- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44)
 - [ ] Fuzzy text matching and the review queue, per unique answer (D19). Use one shared answer normalizer for grading and for the editor's duplicate checks (`hasDuplicates`), so they can't disagree
 - [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
 - [ ] Host overrides and manual points
@@ -114,3 +114,4 @@ M3 continues with the other question types one by one: number, sort, match, ingr
 - 2026-11-02: The trip's points sat beside films whose shape didn't fill the space; videos now sit in a frame with the film's own shape (D40). Checked in Chromium with 16:9 and 4:3 films.
 - 2026-11-04: M3 started: multiple choice answered on the phone, options and the right one on the TV, who has answered in the admin (D42). Not tried in a browser with data.
 - 2026-11-04: Scores: leaderboards with points on the TV, a Topplista in the admin, own points on the phones, counting a question once Nästa closes it (D43).
+- 2026-11-05: Gissa siffran: number field on the phone, the right number on the TV, poängnivåer and närmast vinner with shared places; grading takes all of a question's answers together (D44).

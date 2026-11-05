@@ -9,7 +9,7 @@ describe("answeringOf", () => {
 
   it("gives none for an activity or a type not built yet", () => {
     expect(answeringOf({ type: "activity", maxPoints: 5 })).toBeNull();
-    expect(answeringOf({ type: "number", answer: 9, scoring: { mode: "closest", pointsByRank: [3] } })).toBeNull();
+    expect(answeringOf({ type: "freeText", fields: [{ label: "", acceptedAnswers: ["kanel"] }], pointsPerField: 1, fuzzy: true })).toBeNull();
   });
 });
 
@@ -22,6 +22,6 @@ describe("isAnswerComplete", () => {
   });
 
   it("counts an answer of a type not built yet as complete", () => {
-    expect(isAnswerComplete(null, { type: "number", value: null })).toBe(true);
+    expect(isAnswerComplete(null, { type: "freeText", fields: [""] })).toBe(true);
   });
 });

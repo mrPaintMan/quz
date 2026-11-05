@@ -104,6 +104,7 @@ src/
       tvScreens/                 # lobby, rules, question, answer, leaderboard …, drawn on the TV and in the hosts' live control (D38)
       questionDisplays/<type>/   # TV display for one type, plus registry.ts; shared since the TV screens are
       answers/                   # who has answered the question showing
+      forms/                     # form helpers used by hosts and players, such as useDraftText
   components/ui/                 # shadcn/ui primitives
   app/                           # routes only
 ```

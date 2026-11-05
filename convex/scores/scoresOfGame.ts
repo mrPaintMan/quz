@@ -1,4 +1,4 @@
-import { gradeAnswer } from "@/domain/scoring/gradeAnswer";
+import { gradeAnswers } from "@/domain/scoring/gradeAnswers";
 import { sumScores } from "@/domain/scoring/sumScores";
 import { TEAM_COLOURS } from "@/domain/teams/teamColours";
 import type { Doc } from "../_generated/dataModel";
@@ -19,9 +19,12 @@ async function pointsFromClosedQuestions(ctx: QueryCtx, game: Doc<"games">) {
         .query("answers")
         .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", game._id).eq("questionId", questionId))
         .take(TEAM_COLOURS.length);
-      return answers
-        .filter((answer) => answer.lockedAt !== null)
-        .map((answer) => ({ teamId: answer.teamId, points: gradeAnswer(question.content, answer.content) }));
+      const locked = answers.filter((answer) => answer.lockedAt !== null);
+      const points = gradeAnswers(
+        question.content,
+        locked.map((answer) => answer.content),
+      );
+      return locked.map((answer, index) => ({ teamId: answer.teamId, points: points[index] }));
     }),
   );
   return graded.flat();

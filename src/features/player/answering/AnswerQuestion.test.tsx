@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { getFunctionName, type FunctionReference } from "convex/server";
@@ -38,7 +38,7 @@ describe("AnswerQuestion", () => {
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
     await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
     const content = { type: "multipleChoice", optionIndex: 1 };
-    expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content });
+    await waitFor(() => expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content }));
     await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
     expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content });
   });
@@ -95,5 +95,13 @@ describe("AnswerQuestion", () => {
     await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
     finish();
+  });
+
+  it("doesn't save a waiting draft over the answer it sends", async () => {
+    renderAnswer();
+    await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
+    await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    expect(mutations.saveAnswerDraft).not.toHaveBeenCalled();
   });
 });
