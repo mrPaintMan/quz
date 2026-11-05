@@ -6,9 +6,10 @@ import type { AnswerContent } from "@convex/answers/answerContent";
 // Long enough that typing saves once a pause, not once a key, so a large night stays cheap (D45).
 export const DRAFT_SAVE_DELAY_MS = 1000;
 
-// Saves a draft once the team has paused for a second. A draft still waiting is saved at once
-// when the page is hidden (the phone locks or switches app, which stops timers) and when the
-// question changes, so the fallback the answers lock to stays current (D16, D45).
+// Saves a draft once the team has paused for a second, or at once with `saveNow` when that second
+// could be too late. A draft still waiting is also sent when the page is hidden (the phone locks
+// or switches app, which stops timers); that is best effort, as the phone may freeze the page
+// before the save leaves it (D16, D45).
 export function useDraftSaver(save: (content: AnswerContent) => void) {
   const pending = useRef<{ content: AnswerContent; timer: ReturnType<typeof setTimeout> } | null>(null);
   const latestSave = useRef(save);
@@ -37,18 +38,28 @@ export function useDraftSaver(save: (content: AnswerContent) => void) {
     [cancel, flush],
   );
 
+  const saveNow = useCallback(
+    (content: AnswerContent) => {
+      cancel();
+      latestSave.current(content);
+    },
+    [cancel],
+  );
+
   useEffect(() => {
     const flushWhenHidden = () => {
       if (document.visibilityState === "hidden") flush();
     };
     document.addEventListener("visibilitychange", flushWhenHidden);
     window.addEventListener("pagehide", flush);
+    // No save on unmount: the question only goes when the hosts have moved on, and the server
+    // then refuses drafts for it.
     return () => {
+      cancel();
       document.removeEventListener("visibilitychange", flushWhenHidden);
       window.removeEventListener("pagehide", flush);
-      flush();
     };
-  }, [flush]);
+  }, [cancel, flush]);
 
-  return { schedule, cancel };
+  return { schedule, saveNow, cancel };
 }

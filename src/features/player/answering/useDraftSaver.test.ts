@@ -61,12 +61,24 @@ describe("useDraftSaver", () => {
     expect(save).not.toHaveBeenCalled();
   });
 
-  it("saves a waiting draft when the question changes", () => {
+  it("saves at once when asked, dropping a draft still waiting", () => {
+    const save = vi.fn();
+    const { result } = renderHook(() => useDraftSaver(save));
+    act(() => {
+      result.current.schedule(draft(1));
+      result.current.saveNow(draft(2));
+      vi.advanceTimersByTime(1000);
+    });
+    expect(save).toHaveBeenCalledExactlyOnceWith(draft(2));
+  });
+
+  it("drops a waiting draft when the question goes, as the server would refuse it", () => {
     const save = vi.fn();
     const { result, unmount } = renderHook(() => useDraftSaver(save));
     act(() => result.current.schedule(draft(7)));
     unmount();
-    expect(save).toHaveBeenCalledExactlyOnceWith(draft(7));
+    act(() => vi.advanceTimersByTime(1000));
+    expect(save).not.toHaveBeenCalled();
   });
 
   it("saves nothing on hiding with no draft waiting", () => {

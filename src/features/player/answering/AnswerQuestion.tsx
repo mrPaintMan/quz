@@ -20,12 +20,25 @@ type AnyInput = ComponentType<{
   onChange: (answer: AnswerContent) => void;
 }>;
 
-type AnswerQuestionProps = { teamId: Id<"teams">; questionId: Id<"questions">; shown: ShownQuestion; imageUrls: ImageUrls; isTimeOut: boolean };
+type AnswerQuestionProps = {
+  teamId: Id<"teams">;
+  questionId: Id<"questions">;
+  shown: ShownQuestion;
+  imageUrls: ImageUrls;
+  // The whole seconds left on the question's timer, on this phone's clock; null without a timer.
+  secondsLeft: number | null;
+};
+
+// With this little time left, a change is saved at once, as waiting for the team to pause could
+// miss the lock at time out (D45).
+const SAVE_AT_ONCE_SECONDS = 2;
 
 // The team answers on its phone and sending locks the answer (D16, D41); meanwhile the latest
-// change is kept on the server as a draft, without the team seeing it. Once locked, or once the time is out, the
-// answer stays on show but can't change. Remount it for each question.
-export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut }: AnswerQuestionProps) {
+// change is kept on the server as a draft, without the team seeing it (D45). Once locked, or once
+// the time is out, the answer stays on show but can't change. Remount it for each question, keyed
+// by the question, so a draft never carries over.
+export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft }: AnswerQuestionProps) {
+  const isTimeOut = secondsLeft === 0;
   const saved = useQuery(api.answers.queries.getTeamAnswer, { teamId, questionId });
   const saveDraft = useMutation(api.answers.mutations.saveAnswerDraft);
   const sendAnswer = useMutation(api.answers.mutations.sendAnswer);
@@ -54,10 +67,11 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
   const isLocked = saved?.isLocked ?? false;
   // A locked answer is the one on the server; until then the latest change on this phone.
   const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? null);
+  // A draft still waiting is dropped only once the answer is sent; if sending fails, it stays the
+  // fallback.
   const send = async (content: AnswerContent) => {
-    drafts.cancel();
     setIsSending(true);
-    await run(() => sendAnswer({ teamId, questionId, content }));
+    if (await run(() => sendAnswer({ teamId, questionId, content }))) drafts.cancel();
     setIsSending(false);
   };
 
@@ -70,7 +84,8 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
         disabled={isLocked || isTimeOut}
         onChange={(next) => {
           setDraft(next);
-          drafts.schedule(next);
+          if (secondsLeft !== null && secondsLeft <= SAVE_AT_ONCE_SECONDS) drafts.saveNow(next);
+          else drafts.schedule(next);
         }}
       />
       <div className="mt-auto flex flex-col gap-2.5">

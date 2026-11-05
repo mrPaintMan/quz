@@ -57,7 +57,7 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
             questionId={screen.questionId}
             shown={shown}
             imageUrls={imageUrls}
-            isTimeOut={secondsLeft === 0}
+            secondsLeft={secondsLeft}
           />
         </>
       ) : (

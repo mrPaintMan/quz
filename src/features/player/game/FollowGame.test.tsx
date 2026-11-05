@@ -4,7 +4,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { FollowGame } from "./FollowGame";
 
 vi.mock("@/features/player/answering/AnswerQuestion", () => ({
-  AnswerQuestion: ({ isTimeOut }: { isTimeOut: boolean }) => <p>{isTimeOut ? "Svarsruta, tiden ute" : "Svarsruta"}</p>,
+  AnswerQuestion: ({ secondsLeft }: { secondsLeft: number | null }) => <p>{secondsLeft === 0 ? "Svarsruta, tiden ute" : "Svarsruta"}</p>,
 }));
 
 const team = { _id: "t1" as Id<"teams">, name: "Tomtarna", colour: "red" as const };
