@@ -15,11 +15,12 @@ async function pointsFromClosedQuestions(ctx: QueryCtx, game: Doc<"games">) {
       // A question deleted during the game no longer scores (D34).
       const question = await ctx.db.get("questions", questionId);
       if (question === null) return [];
-      const answers = await ctx.db
+      const locked = await ctx.db
         .query("answers")
-        .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", game._id).eq("questionId", questionId))
+        .withIndex("by_gameId_and_questionId_and_lockedAt", (q) =>
+          q.eq("gameId", game._id).eq("questionId", questionId).gt("lockedAt", null),
+        )
         .take(TEAM_COLOURS.length);
-      const locked = answers.filter((answer) => answer.lockedAt !== null);
       const points = gradeAnswers(
         question.content,
         locked.map((answer) => answer.content),

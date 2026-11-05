@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { getFunctionName, type FunctionReference } from "convex/server";
@@ -38,7 +38,8 @@ describe("AnswerQuestion", () => {
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
     await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
     const content = { type: "multipleChoice", optionIndex: 1 };
-    expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content });
+    // Drafts wait for the team to pause (useDraftSaver).
+    await waitFor(() => expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content }), { timeout: 2000 });
     await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
     expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content });
   });
@@ -78,13 +79,13 @@ describe("AnswerQuestion", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("falls back to the server's answer when a change is refused", async () => {
-    saved.mockReturnValue({ content: { type: "multipleChoice", optionIndex: 0 }, isLocked: false });
+  it("shows nothing when a draft can't be saved, and keeps the team's pick", async () => {
     mutations.saveAnswerDraft.mockRejectedValue(new ConvexError("Tiden är ute."));
     renderAnswer();
     await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Tiden är ute.");
-    expect(screen.getByRole("button", { name: "A Sverige" })).toHaveAttribute("aria-pressed", "true");
+    await waitFor(() => expect(mutations.saveAnswerDraft).toHaveBeenCalled(), { timeout: 2000 });
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "B Norge" })).toHaveAttribute("aria-pressed", "true");
   });
 
   it("can't be sent twice while sending", async () => {
@@ -97,14 +98,11 @@ describe("AnswerQuestion", () => {
     finish();
   });
 
-  it("keeps a newer change when an older one is refused", async () => {
-    let refuse: (error: Error) => void = () => {};
-    mutations.saveAnswerDraft.mockReturnValueOnce(new Promise((_resolve, reject) => (refuse = reject)));
+  it("doesn't save a waiting draft over the answer it sends", async () => {
     renderAnswer();
-    await userEvent.click(screen.getByRole("button", { name: "A Sverige" }));
     await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
-    refuse(new ConvexError("Något gick fel."));
-    expect(await screen.findByRole("alert")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "B Norge" })).toHaveAttribute("aria-pressed", "true");
+    await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
+    await new Promise((resolve) => setTimeout(resolve, 1100));
+    expect(mutations.saveAnswerDraft).not.toHaveBeenCalled();
   });
 });

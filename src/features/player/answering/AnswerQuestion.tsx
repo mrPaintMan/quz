@@ -10,6 +10,7 @@ import { isAnswerComplete, type ShownQuestion } from "@/domain/answering/registr
 import { describeActionError } from "@/features/shared/errors/describeActionError";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { answerInputs } from "./registry";
+import { useDraftSaver } from "./useDraftSaver";
 
 type AnyInput = ComponentType<{
   shown: ShownQuestion;
@@ -21,8 +22,8 @@ type AnyInput = ComponentType<{
 
 type AnswerQuestionProps = { teamId: Id<"teams">; questionId: Id<"questions">; shown: ShownQuestion; imageUrls: ImageUrls; isTimeOut: boolean };
 
-// The team answers on its phone: each change is saved as a draft, so nothing is lost if the phone
-// sleeps, and sending locks the answer (D16, D41). Once locked, or once the time is out, the
+// The team answers on its phone and sending locks the answer (D16, D41); meanwhile the latest
+// change is kept on the server as a draft, without the team seeing it. Once locked, or once the time is out, the
 // answer stays on show but can't change. Remount it for each question.
 export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut }: AnswerQuestionProps) {
   const saved = useQuery(api.answers.queries.getTeamAnswer, { teamId, questionId });
@@ -41,13 +42,11 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
       return false;
     }
   };
-  // Saved at once, so a phone put to sleep right after a change loses nothing. A refused change
-  // (such as after the time is out) falls back to the server's answer, unless the team has
-  // changed it again since.
-  const saveChange = async (content: AnswerContent) => {
-    setDraft(content);
-    if (!(await run(() => saveDraft({ teamId, questionId, content })))) setDraft((current) => (current === content ? null : current));
-  };
+  // Drafts are a quiet fallback that the answers lock to when the time is out or the hosts move on:
+  // saved a second after the team pauses, and a save that fails shows nothing (D45).
+  const drafts = useDraftSaver((content) => {
+    saveDraft({ teamId, questionId, content }).catch(() => undefined);
+  });
   // The registry pairs each type with its own input; TypeScript can't follow the lookup.
   const Input = answerInputs[shown.type] as unknown as AnyInput | null;
 
@@ -56,6 +55,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
   // A locked answer is the one on the server; until then the latest change on this phone.
   const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? null);
   const send = async (content: AnswerContent) => {
+    drafts.cancel();
     setIsSending(true);
     await run(() => sendAnswer({ teamId, questionId, content }));
     setIsSending(false);
@@ -68,7 +68,10 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
         answer={answer}
         imageUrls={imageUrls}
         disabled={isLocked || isTimeOut}
-        onChange={(next) => void saveChange(next)}
+        onChange={(next) => {
+          setDraft(next);
+          drafts.schedule(next);
+        }}
       />
       <div className="mt-auto flex flex-col gap-2.5">
         {isLocked ? (

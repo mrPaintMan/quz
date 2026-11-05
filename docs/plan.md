@@ -115,3 +115,4 @@ M3 continues with the other question types one by one: sort, match, ingredients,
 - 2026-11-04: M3 started: multiple choice answered on the phone, options and the right one on the TV, who has answered in the admin (D42). Not tried in a browser with data.
 - 2026-11-04: Scores: leaderboards with points on the TV, a Topplista in the admin, own points on the phones, counting a question once Nästa closes it (D43).
 - 2026-11-05: Gissa siffran: number field on the phone, the right number on the TV, poängnivåer and närmast vinner with shared places; grading takes all of a question's answers together (D44). Not tried in a browser with data.
+- 2026-11-05: Ready for larger nights: drafts saved a second after the team pauses, and at once when the phone hides the page, without the team seeing it; counting and scores read only sent answers (D45). The 12-team cap remains a product decision.

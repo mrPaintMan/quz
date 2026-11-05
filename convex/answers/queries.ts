@@ -19,10 +19,13 @@ export const getTeamAnswer = query({
 export const getAnsweredTeamIds = query({
   args: { gameId: v.id("games"), questionId: v.id("questions") },
   handler: async (ctx, { gameId, questionId }) => {
+    // Drafts sort before every lock time (null first), so this range holds only locked answers.
     const answers = await ctx.db
       .query("answers")
-      .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", gameId).eq("questionId", questionId))
+      .withIndex("by_gameId_and_questionId_and_lockedAt", (q) =>
+        q.eq("gameId", gameId).eq("questionId", questionId).gt("lockedAt", null),
+      )
       .take(TEAM_COLOURS.length);
-    return answers.filter((answer) => answer.lockedAt !== null).map((answer) => answer.teamId);
+    return answers.map((answer) => answer.teamId);
   },
 });
