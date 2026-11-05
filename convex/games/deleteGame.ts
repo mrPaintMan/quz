@@ -12,7 +12,7 @@ export const MAX_ADJUSTMENTS_PER_GAME = 1000;
 export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {
   const answers = await ctx.db
     .query("answers")
-    .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", gameId))
+    .withIndex("by_gameId_and_questionId_and_lockedAt", (q) => q.eq("gameId", gameId))
     .take(MAX_ANSWERS_PER_GAME);
   const adjustments = await ctx.db
     .query("adjustments")

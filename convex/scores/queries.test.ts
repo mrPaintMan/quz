@@ -83,4 +83,17 @@ describe("getScores", () => {
     await t.run((ctx) => ctx.db.delete("games", gameId));
     await expect(t.query(api.scores.queries.getScores, { gameId })).resolves.toEqual([]);
   });
+
+  it("ranks the teams' guesses against each other for a closest-wins question", async () => {
+    const { t, gameId, closed, red, blue, green, scores } = await withGame();
+    await t.run(async (ctx) => {
+      await ctx.db.patch("questions", closed, { content: { type: "number", answer: 100, scoring: { mode: "closest", pointsByRank: [3, 2, 1] } } });
+      const guess = (teamId: typeof red, value: number) =>
+        ctx.db.insert("answers", { gameId, teamId, questionId: closed, content: { type: "number", value }, lockedAt: 1 });
+      await guess(red, 98);
+      await guess(blue, 102);
+      await guess(green, 120);
+    });
+    expect(await scores()).toEqual(["1 Lag 1 3", "1 Lag 2 3", "3 Lag 3 1"]);
+  });
 });

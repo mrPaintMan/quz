@@ -1,10 +1,11 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { ConvexError } from "convex/values";
 import { getFunctionName, type FunctionReference } from "convex/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
 import { AnswerQuestion } from "./AnswerQuestion";
+import { DRAFT_SAVE_DELAY_MS } from "./useDraftSaver";
 
 const saved = vi.fn();
 const mutations = { saveAnswerDraft: vi.fn(), sendAnswer: vi.fn() };
@@ -23,24 +24,38 @@ const shown = {
     { text: "Norge", imageId: null },
   ],
 };
+const norway = { type: "multipleChoice", optionIndex: 1 };
 
-const renderAnswer = (isTimeOut = false) =>
-  render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={shown} imageUrls={{}} isTimeOut={isTimeOut} />);
+const renderAnswer = (secondsLeft: number | null = null) =>
+  render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={shown} imageUrls={{}} secondsLeft={secondsLeft} />);
+// Clicks with simulated time, so the draft's second can be stepped over without waiting.
+const user = () => userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+const waitForDraftSave = () => act(() => vi.advanceTimersByTime(DRAFT_SAVE_DELAY_MS));
 
 describe("AnswerQuestion", () => {
   beforeEach(() => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
     saved.mockReturnValue(null);
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
-  it("saves each pick as a draft and sends the answer", async () => {
+  afterEach(() => vi.useRealTimers());
+
+  it("saves a pick as a draft once the team pauses, and sends the answer", async () => {
     renderAnswer();
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
-    await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
-    const content = { type: "multipleChoice", optionIndex: 1 };
-    expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content });
-    await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
-    expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content });
+    await user().click(screen.getByRole("button", { name: "B Norge" }));
+    expect(mutations.saveAnswerDraft).not.toHaveBeenCalled();
+    await waitForDraftSave();
+    expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content: norway });
+    await user().click(screen.getByRole("button", { name: "Skicka svar" }));
+    expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content: norway });
+  });
+
+  it("saves at once when the time is nearly out, so the lock at zero finds the change", async () => {
+    renderAnswer(2);
+    await user().click(screen.getByRole("button", { name: "B Norge" }));
+    expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content: norway });
   });
 
   it("picks up a draft saved earlier, such as before a reload", () => {
@@ -59,7 +74,7 @@ describe("AnswerQuestion", () => {
   });
 
   it("lets nothing change once the time is out", () => {
-    renderAnswer(true);
+    renderAnswer(0);
     expect(screen.getByRole("button", { name: "A Sverige" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
   });
@@ -67,24 +82,36 @@ describe("AnswerQuestion", () => {
   it("says why the server refused the answer", async () => {
     mutations.sendAnswer.mockRejectedValue(new ConvexError("Tiden är ute."));
     renderAnswer();
-    await userEvent.click(screen.getByRole("button", { name: "A Sverige" }));
-    await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
+    await user().click(screen.getByRole("button", { name: "A Sverige" }));
+    await user().click(screen.getByRole("button", { name: "Skicka svar" }));
     expect(await screen.findByRole("alert")).toHaveTextContent("Tiden är ute.");
   });
 
-  it("shows nothing while the team's answer loads", () => {
-    saved.mockReturnValue(undefined);
-    const { container } = renderAnswer();
-    expect(container).toBeEmptyDOMElement();
-  });
-
-  it("falls back to the server's answer when a change is refused", async () => {
-    saved.mockReturnValue({ content: { type: "multipleChoice", optionIndex: 0 }, isLocked: false });
+  it("shows nothing when a draft can't be saved, and keeps the team's pick", async () => {
     mutations.saveAnswerDraft.mockRejectedValue(new ConvexError("Tiden är ute."));
     renderAnswer();
-    await userEvent.click(screen.getByRole("button", { name: "B Norge" }));
-    expect(await screen.findByRole("alert")).toHaveTextContent("Tiden är ute.");
-    expect(screen.getByRole("button", { name: "A Sverige" })).toHaveAttribute("aria-pressed", "true");
+    await user().click(screen.getByRole("button", { name: "B Norge" }));
+    await waitForDraftSave();
+    expect(mutations.saveAnswerDraft).toHaveBeenCalled();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "B Norge" })).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("drops the waiting draft once the answer is sent", async () => {
+    renderAnswer();
+    await user().click(screen.getByRole("button", { name: "B Norge" }));
+    await user().click(screen.getByRole("button", { name: "Skicka svar" }));
+    await waitForDraftSave();
+    expect(mutations.saveAnswerDraft).not.toHaveBeenCalled();
+  });
+
+  it("keeps the waiting draft as the fallback when sending fails", async () => {
+    mutations.sendAnswer.mockRejectedValue(new ConvexError("Något gick fel."));
+    renderAnswer();
+    await user().click(screen.getByRole("button", { name: "B Norge" }));
+    await user().click(screen.getByRole("button", { name: "Skicka svar" }));
+    await waitForDraftSave();
+    expect(mutations.saveAnswerDraft).toHaveBeenCalledWith({ teamId, questionId, content: norway });
   });
 
   it("can't be sent twice while sending", async () => {
@@ -92,8 +119,14 @@ describe("AnswerQuestion", () => {
     mutations.sendAnswer.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
     saved.mockReturnValue({ content: { type: "multipleChoice", optionIndex: 0 }, isLocked: false });
     renderAnswer();
-    await userEvent.click(screen.getByRole("button", { name: "Skicka svar" }));
+    await user().click(screen.getByRole("button", { name: "Skicka svar" }));
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
-    finish();
+    await act(async () => finish());
+  });
+
+  it("shows nothing while the team's answer loads", () => {
+    saved.mockReturnValue(undefined);
+    const { container } = renderAnswer();
+    expect(container).toBeEmptyDOMElement();
   });
 });

@@ -21,8 +21,9 @@ async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content }: Ans
   await ctx.db.insert("answers", { gameId: game._id, teamId, questionId, content, lockedAt });
 }
 
-// Public, like joining (D3): the phone's saved team id is its only key (D34). Drafts are saved
-// as the team types, so a phone that sleeps loses nothing when the answers lock (D16).
+// Public, like joining (D3): the phone's saved team id is its only key (D34). A draft is the quiet
+// fallback an answer locks to when the time runs out or the hosts move on; phones save it a
+// second after the team pauses (D16, D45).
 export const saveAnswerDraft = mutation({
   args: answerArgs,
   handler: async (ctx, args) => saveAnswer(ctx, args, null),

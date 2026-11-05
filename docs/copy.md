@@ -22,7 +22,7 @@ The words Quz uses in its Swedish UI, so every screen says the same thing. Add t
 | The shared screen | **TV:n** ("Titta på TV:n.", "Öppna TV-vyn", "Visas på TV:n nu", "Nästa på TV:n") | skärmen, storbildsskärmen |
 | A question's sound or video | **Klipp**, **Spela** / **Pausa**; on the TV **Ljudklipp**, **Videoklipp**, **Lyssna!** | Media, Spela upp (only in the editor) |
 | The trip's clue in the admin | **Ledtråd 2 av 5 · 8 poäng · nästa om 0:12**, **sista ledtråden**, **Filmen är slut.** | |
-| Answering on the phone | **Välj ett alternativ**, **Skicka svar**, **Svaret låses när ni skickar det.**, **Svar skickat ✓** | Lämna in |
+| Answering on the phone | **Ert svar** (a typed answer), **Välj ett alternativ**, **Skicka svar**, **Svaret låses när ni skickar det.**, **Svar skickat ✓** | Lämna in |
 | Who has answered | TV: **4 av 6 lag har svarat**; admin: **Svarat** / **Väntar** | |
 | Answers refused by the server | **Frågan tar inte emot svar just nu.**, **Tiden är ute.**, **Ert svar är låst.**, **Svaret passar inte frågan.**, **Fyll i svaret innan ni skickar det.** | |
 | Sound blocked by the browser | **Klicka för att slå på ljudet** | |

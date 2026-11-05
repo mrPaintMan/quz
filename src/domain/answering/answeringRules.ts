@@ -13,6 +13,7 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   // Whether an answer is filled in enough to be sent, judged against what the question shows, so
   // the phone and the server agree.
   isComplete: (shown: Shown, answer: AnswerOf<T>) => boolean;
-  // The points an answer scores, as graded automatically.
-  grade: (content: ContentOf<T>, answer: AnswerOf<T>) => number;
+  // The points each of the question's locked answers scores, as graded automatically, in the
+  // order given. All answers come together, as some types rank the teams against each other.
+  grade: (content: ContentOf<T>, answers: AnswerOf<T>[]) => number[];
 };

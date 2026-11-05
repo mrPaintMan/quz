@@ -1,4 +1,4 @@
-import { gradeAnswer } from "@/domain/scoring/gradeAnswer";
+import { gradeAnswers } from "@/domain/scoring/gradeAnswers";
 import { sumScores } from "@/domain/scoring/sumScores";
 import { TEAM_COLOURS } from "@/domain/teams/teamColours";
 import type { Doc } from "../_generated/dataModel";
@@ -15,13 +15,17 @@ async function pointsFromClosedQuestions(ctx: QueryCtx, game: Doc<"games">) {
       // A question deleted during the game no longer scores (D34).
       const question = await ctx.db.get("questions", questionId);
       if (question === null) return [];
-      const answers = await ctx.db
+      const locked = await ctx.db
         .query("answers")
-        .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", game._id).eq("questionId", questionId))
+        .withIndex("by_gameId_and_questionId_and_lockedAt", (q) =>
+          q.eq("gameId", game._id).eq("questionId", questionId).gt("lockedAt", null),
+        )
         .take(TEAM_COLOURS.length);
-      return answers
-        .filter((answer) => answer.lockedAt !== null)
-        .map((answer) => ({ teamId: answer.teamId, points: gradeAnswer(question.content, answer.content) }));
+      const points = gradeAnswers(
+        question.content,
+        locked.map((answer) => answer.content),
+      );
+      return locked.map((answer, index) => ({ teamId: answer.teamId, points: points[index] }));
     }),
   );
   return graded.flat();

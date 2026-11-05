@@ -7,11 +7,12 @@ import {
   type MultipleChoiceRevealed,
   type MultipleChoiceShown,
 } from "@/domain/questionTypes/multipleChoice/multipleChoiceAnswering";
+import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown;
-export type RevealedAnswer = MultipleChoiceRevealed;
+export type ShownQuestion = MultipleChoiceShown | NumberShown;
+export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -22,7 +23,7 @@ type Registry = {
 export const answeringRegistry: Registry = {
   multipleChoice: multipleChoiceAnswering,
   freeText: null,
-  number: null,
+  number: numberAnswering,
   sort: null,
   match: null,
   list: null,
@@ -39,7 +40,7 @@ type AnyAnsweringRules = {
   reveal: (content: QuestionContent) => RevealedAnswer;
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
-  grade: (content: QuestionContent, answer: AnswerContent) => number;
+  grade: (content: QuestionContent, answers: AnswerContent[]) => number[];
 };
 
 // TypeScript can't link a type to its entry on its own; Registry guarantees they match.

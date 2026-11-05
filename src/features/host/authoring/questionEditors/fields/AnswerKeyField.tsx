@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { formatAnswerKey } from "@/domain/text/formatAnswerKey";
 import { parseAnswerKey, type AnswerKeyItem } from "@/domain/text/parseAnswerKey";
-import { useDraftText } from "./useDraftText";
+import { useDraftText } from "@/features/shared/forms/useDraftText";
 
 type AnswerKeyFieldProps = {
   label: string;

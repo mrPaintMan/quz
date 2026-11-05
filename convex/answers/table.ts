@@ -12,4 +12,6 @@ export const answersTable = defineTable({
   lockedAt: v.union(v.number(), v.null()),
 })
   .index("by_teamId_and_questionId", ["teamId", "questionId"])
-  .index("by_gameId_and_questionId", ["gameId", "questionId"]);
+  // With lockedAt last, the sent answers of a question are a range of their own: counting them
+  // reads no drafts, so a team's typing doesn't make the TV and hosts count again (D45).
+  .index("by_gameId_and_questionId_and_lockedAt", ["gameId", "questionId", "lockedAt"]);

@@ -10,6 +10,7 @@ import { isAnswerComplete, type ShownQuestion } from "@/domain/answering/registr
 import { describeActionError } from "@/features/shared/errors/describeActionError";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { answerInputs } from "./registry";
+import { useDraftSaver } from "./useDraftSaver";
 
 type AnyInput = ComponentType<{
   shown: ShownQuestion;
@@ -19,25 +20,31 @@ type AnyInput = ComponentType<{
   onChange: (answer: AnswerContent) => void;
 }>;
 
-type AnswerQuestionProps = { teamId: Id<"teams">; questionId: Id<"questions">; shown: ShownQuestion; imageUrls: ImageUrls; isTimeOut: boolean };
+type AnswerQuestionProps = {
+  teamId: Id<"teams">;
+  questionId: Id<"questions">;
+  shown: ShownQuestion;
+  imageUrls: ImageUrls;
+  // The whole seconds left on the question's timer, on this phone's clock; null without a timer.
+  secondsLeft: number | null;
+};
 
-// The team answers on its phone: each change is saved as a draft, so nothing is lost if the phone
-// sleeps, and sending locks the answer (D16, D41). Once locked, or once the time is out, the
-// answer stays on show but can't change. Remount it for each question.
-export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut }: AnswerQuestionProps) {
+// With this little time left, a change is saved at once, as waiting for the team to pause could
+// miss the lock at time out (D45).
+const SAVE_AT_ONCE_SECONDS = 2;
+
+// The team answers on its phone and sending locks the answer (D16, D41); meanwhile the latest
+// change is kept on the server as a draft, without the team seeing it (D45). Once locked, or once
+// the time is out, the answer stays on show but can't change. Remount it for each question, keyed
+// by the question, so a draft never carries over.
+export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft }: AnswerQuestionProps) {
+  const isTimeOut = secondsLeft === 0;
   const saved = useQuery(api.answers.queries.getTeamAnswer, { teamId, questionId });
   const saveDraft = useMutation(api.answers.mutations.saveAnswerDraft);
   const sendAnswer = useMutation(api.answers.mutations.sendAnswer);
   const [draft, setDraft] = useState<AnswerContent | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isSending, setIsSending] = useState(false);
-  // The registry pairs each type with its own input; TypeScript can't follow the lookup.
-  const Input = answerInputs[shown.type] as unknown as AnyInput | null;
-
-  if (saved === undefined || Input === null) return null;
-  const isLocked = saved?.isLocked ?? false;
-  // A locked answer is the one on the server; until then the latest change on this phone.
-  const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? null);
   const run = async (action: () => Promise<unknown>) => {
     setError(null);
     try {
@@ -48,9 +55,23 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
       return false;
     }
   };
+  // Drafts are a quiet fallback that the answers lock to when the time is out or the hosts move on:
+  // saved a second after the team pauses, and a save that fails shows nothing (D45).
+  const drafts = useDraftSaver((content) => {
+    saveDraft({ teamId, questionId, content }).catch(() => undefined);
+  });
+  // The registry pairs each type with its own input; TypeScript can't follow the lookup.
+  const Input = answerInputs[shown.type] as unknown as AnyInput | null;
+
+  if (saved === undefined || Input === null) return null;
+  const isLocked = saved?.isLocked ?? false;
+  // A locked answer is the one on the server; until then the latest change on this phone.
+  const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? null);
+  // A draft still waiting is dropped only once the answer is sent; if sending fails, it stays the
+  // fallback.
   const send = async (content: AnswerContent) => {
     setIsSending(true);
-    await run(() => sendAnswer({ teamId, questionId, content }));
+    if (await run(() => sendAnswer({ teamId, questionId, content }))) drafts.cancel();
     setIsSending(false);
   };
 
@@ -61,10 +82,10 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, isTimeOut
         answer={answer}
         imageUrls={imageUrls}
         disabled={isLocked || isTimeOut}
-        onChange={async (next) => {
+        onChange={(next) => {
           setDraft(next);
-          // A refused change (such as after the time is out) falls back to the server's answer.
-          if (!(await run(() => saveDraft({ teamId, questionId, content: next })))) setDraft(null);
+          if (secondsLeft !== null && secondsLeft <= SAVE_AT_ONCE_SECONDS) drafts.saveNow(next);
+          else drafts.schedule(next);
         }}
       />
       <div className="mt-auto flex flex-col gap-2.5">
