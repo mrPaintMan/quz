@@ -13,8 +13,9 @@ type SortableItemParts = { index: number; dragHandle: ReactNode };
 type SortableListProps<T> = {
   items: readonly T[];
   getId: (item: T, index: number) => string;
-  // What row `index` is called in labels, such as "omgång 2".
-  nameOf: (index: number) => string;
+  // What a row is called in labels, such as "omgång 2"; given the item, as the shown order can run
+  // ahead of the caller's list while a move is pending.
+  nameOf: (item: T, index: number) => string;
   // Gets the item itself, since indices into the caller's list go stale while an earlier move is pending.
   // May return a promise (a server move); the new order shows until it settles.
   onMove: (item: T, fromIndex: number, toIndex: number) => unknown;
@@ -56,7 +57,7 @@ export function SortableList<T>({ items, getId, nameOf, onMove, className, itemC
       accessibility={{
         screenReaderInstructions: swedishDragInstructions,
         announcements: swedishDragAnnouncements(
-          (id) => nameOf(ids.indexOf(id)),
+          (id) => nameOf(shown[ids.indexOf(id)], ids.indexOf(id)),
           (id) => ids.indexOf(id) + 1,
         ),
       }}
@@ -64,7 +65,7 @@ export function SortableList<T>({ items, getId, nameOf, onMove, className, itemC
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
         <ol className={className}>
           {shown.map((item, index) => (
-            <SortableRow key={ids[index]} id={ids[index]} name={nameOf(index)} className={itemClassName?.(item, index)}>
+            <SortableRow key={ids[index]} id={ids[index]} name={nameOf(item, index)} className={itemClassName?.(item, index)}>
               {(dragHandle) => renderItem(item, { index, dragHandle })}
             </SortableRow>
           ))}

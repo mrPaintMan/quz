@@ -8,7 +8,7 @@ function renderList(items: string[], onMove: (item: string, fromIndex: number, t
     <SortableList
       items={items}
       getId={(item) => item}
-      nameOf={(index) => `sak ${index + 1}`}
+      nameOf={(_item, index) => `sak ${index + 1}`}
       onMove={onMove}
       itemClassName={(item) => `rad-${item}`}
       renderItem={(item, { dragHandle }) => (

@@ -2,7 +2,7 @@ import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Doc, Id } from "@convex/_generated/dataModel";
-import { dragByKeyboard } from "@/features/host/authoring/shared/dragByKeyboard.setup";
+import { dragByKeyboard } from "@/features/shared/sortable/dragByKeyboard.setup";
 import { RoundPanel } from "./RoundPanel";
 
 const calls: { name: string; args: unknown }[] = [];

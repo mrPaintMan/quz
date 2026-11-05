@@ -24,6 +24,10 @@ describe("numberAnswering", () => {
     expect(numberAnswering.imageIds(tiers)).toEqual([]);
   });
 
+  it("starts with nothing typed", () => {
+    expect(numberAnswering.startingAnswer({ type: "number" })).toBeNull();
+  });
+
   it("can be sent once a number is typed", () => {
     expect(numberAnswering.isComplete({ type: "number" }, guess(3.5))).toBe(true);
     expect(numberAnswering.isComplete({ type: "number" }, guess(null))).toBe(false);

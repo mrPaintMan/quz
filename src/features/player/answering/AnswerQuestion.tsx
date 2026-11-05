@@ -6,7 +6,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent } from "@convex/answers/answerContent";
 import { Button } from "@/components/ui/button";
-import { isAnswerComplete, type ShownQuestion } from "@/domain/answering/registry";
+import { isAnswerComplete, startingAnswerOf, type ShownQuestion } from "@/domain/answering/registry";
 import { describeActionError } from "@/features/shared/errors/describeActionError";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { answerInputs } from "./registry";
@@ -65,8 +65,11 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
 
   if (saved === undefined || Input === null) return null;
   const isLocked = saved?.isLocked ?? false;
-  // A locked answer is the one on the server; until then the latest change on this phone.
-  const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? null);
+  // A locked answer is the one on the server; until then the latest change on this phone, or the
+  // answer the question starts from, such as a sort question's shuffled order.
+  const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? startingAnswerOf(shown));
+  // Out of time with nothing on the server: the team has no answer, whatever the input still shows.
+  const hasNoAnswer = isTimeOut && saved === null && draft === null;
   // A draft still waiting is dropped only once the answer is sent; if sending fails, it stays the
   // fallback.
   const send = async (content: AnswerContent) => {
@@ -92,6 +95,10 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
         {isLocked ? (
           <p aria-live="polite" className="text-center text-lg font-semibold">
             Svar skickat ✓
+          </p>
+        ) : hasNoAnswer ? (
+          <p aria-live="polite" className="text-center text-lg font-semibold">
+            Inget svar sparades.
           </p>
         ) : (
           <>
