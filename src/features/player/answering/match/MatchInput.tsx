@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { rowsOfAnswer, tapRow, textsOfRows, type RowByLeft, type Selection } from "@/domain/questionTypes/match/matchRows";
+import { leftOfRight, rowsOfAnswer, tapRow, textsOfRows, type RowByLeft, type Selection } from "@/domain/questionTypes/match/matchRows";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
 
 // Every row is this tall with this gap, so the lines between the lists follow from the row
@@ -37,9 +37,16 @@ function Row({ text, colour, isSelected, disabled, label, onTap }: RowProps) {
 // The team taps an item on one side, then its partner on the other, and a line in the pair's
 // colour joins them; tapping a paired item takes its pair apart (D47).
 export function MatchInput({ shown, answer, disabled, onChange }: AnswerInputProps<"match">) {
-  const [rowByLeft, setRowByLeft] = useState<RowByLeft>(() =>
-    answer ? rowsOfAnswer(answer.rightByLeft, shown.right) : shown.left.map(() => null),
-  );
+  const rowsOf = (from: typeof answer): RowByLeft => (from ? rowsOfAnswer(from.rightByLeft, shown.right) : shown.left.map(() => null));
+  // The rows are kept here, so a repeated right-hand text stays in the row the team tapped; they
+  // follow the answer whenever it changes from outside, such as when the server locks its draft.
+  const [rowByLeft, setRowByLeft] = useState<RowByLeft>(() => rowsOf(answer));
+  const answerKey = JSON.stringify(answer?.rightByLeft ?? null);
+  const [followedKey, setFollowedKey] = useState(answerKey);
+  if (answerKey !== followedKey) {
+    setFollowedKey(answerKey);
+    setRowByLeft(rowsOf(answer));
+  }
   const [selection, setSelection] = useState<Selection>(null);
   const pairCount = rowByLeft.filter((row) => row !== null).length;
   const height = Math.max(shown.left.length, shown.right.length) * (ROW_HEIGHT + ROW_GAP) - ROW_GAP;
@@ -48,11 +55,12 @@ export function MatchInput({ shown, answer, disabled, onChange }: AnswerInputPro
     const next = tapRow(rowByLeft, selection, tapped);
     setSelection(next.selection);
     if (next.rowByLeft !== rowByLeft) {
+      const changed = { type: "match" as const, rightByLeft: textsOfRows(next.rowByLeft, shown.right) };
       setRowByLeft(next.rowByLeft);
-      onChange({ type: "match", rightByLeft: textsOfRows(next.rowByLeft, shown.right) });
+      setFollowedKey(JSON.stringify(changed.rightByLeft));
+      onChange(changed);
     }
   };
-  const leftOfRight = (row: number) => rowByLeft.indexOf(row);
   const isSelected = (side: "left" | "right", index: number) => selection?.side === side && selection.index === index;
 
   return (
@@ -83,7 +91,7 @@ export function MatchInput({ shown, answer, disabled, onChange }: AnswerInputPro
         </svg>
         <div className="flex flex-col" style={{ gap: ROW_GAP }}>
           {shown.right.map((text, index) => {
-            const left = leftOfRight(index);
+            const left = leftOfRight(rowByLeft, index);
             return (
               <Row
                 key={index}

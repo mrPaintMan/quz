@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rowsOfAnswer, tapRow, textsOfRows } from "./matchRows";
+import { leftOfRight, rowsOfAnswer, tapRow, textsOfRows } from "./matchRows";
 
 const right = ["ABBA", "Roxette", "ABBA"];
 
@@ -41,8 +41,24 @@ describe("tapRow", () => {
     expect(tapRow([1, null, null], { side: "left", index: 2 }, { side: "right", index: 1 }).rowByLeft).toEqual([null, null, 1]);
   });
 
-  it("takes a paired left row apart when tapped with nothing selected, from either side", () => {
+  it("takes a pair apart when an item in it is tapped, from either side", () => {
     expect(tapRow([1, null, null], null, { side: "left", index: 0 }).rowByLeft).toEqual(none);
     expect(tapRow([1, null, null], null, { side: "right", index: 1 }).rowByLeft).toEqual(none);
+  });
+
+  it("takes a pair apart even while another row on that side is selected", () => {
+    expect(tapRow([null, 2, null], { side: "left", index: 0 }, { side: "left", index: 1 })).toEqual({ rowByLeft: none, selection: null });
+  });
+
+  it("keeps the same rows when a pair is joined again, so nothing new is saved", () => {
+    const rows = [2, null, null];
+    expect(tapRow(rows, { side: "left", index: 0 }, { side: "right", index: 2 }).rowByLeft).toBe(rows);
+  });
+});
+
+describe("leftOfRight", () => {
+  it("finds the left row a right row is joined to", () => {
+    expect(leftOfRight([null, 2], 2)).toBe(1);
+    expect(leftOfRight([null, 2], 0)).toBe(-1);
   });
 });

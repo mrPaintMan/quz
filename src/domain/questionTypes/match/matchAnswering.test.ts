@@ -39,6 +39,10 @@ describe("matchAnswering", () => {
     expect(matchAnswering.isComplete(shown, joined("ABBA"))).toBe(false);
   });
 
+  it("scores nothing for an answer using an item more often than it is shown", () => {
+    expect(matchAnswering.grade(content, [joined("ABBA", "ABBA", "ABBA")])).toEqual([0]);
+  });
+
   it("scores the points per pair for each right pair, either copy of a repeated item counting", () => {
     expect(matchAnswering.grade(content, [joined("ABBA", "Roxette", "ABBA"), joined("Roxette", null, "ABBA"), joined(null, null, null)])).toEqual([3, 1, 0]);
   });

@@ -17,7 +17,13 @@ export const matchAnswering: AnsweringRules<"match", MatchShown, MatchRevealed> 
     const joined = rightByLeft.filter((right) => right !== null);
     return rightByLeft.length === shown.left.length && joined.length > 0 && isDrawnFrom(joined, shown.right);
   },
-  // The points per pair for each right pair; an item left unpaired scores nothing.
+  // The points per pair for each right pair; an item left unpaired scores nothing. An answer that
+  // uses a right-hand item more often than it is shown, which no phone can send, scores nothing,
+  // so a repeated text can't be collected for every left-hand item.
   grade: ({ pairs, pointsPerPair }, answers) =>
-    answers.map(({ rightByLeft }) => pairs.filter((pair, index) => rightByLeft[index] === pair.right).length * (pointsPerPair ?? 0)),
+    answers.map(({ rightByLeft }) => {
+      const joined = rightByLeft.filter((right) => right !== null);
+      if (!isDrawnFrom(joined, pairs.map((pair) => pair.right))) return 0;
+      return pairs.filter((pair, index) => rightByLeft[index] === pair.right).length * (pointsPerPair ?? 0);
+    }),
 };
