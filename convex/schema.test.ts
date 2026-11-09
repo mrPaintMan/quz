@@ -31,7 +31,7 @@ const oneAnswerOfEachType: AnswerContent[] = [
   { type: "freeText", fields: ["kanel", ""] },
   { type: "number", value: 66 },
   { type: "sort", order: ["B", "A"] },
-  { type: "match", rightIndexByLeft: [0, null] },
+  { type: "match", rightByLeft: ["Norge", null] },
   { type: "list", items: ["Oslo", "Bern"] },
   { type: "ingredients", items: ["glögg", ""] },
   { type: "drawing", strokes: [[0.1, 0.2, 0.3, 0.4]] },

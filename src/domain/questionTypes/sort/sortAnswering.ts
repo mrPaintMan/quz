@@ -1,5 +1,6 @@
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
-import { shuffleStably } from "@/domain/ordering/shuffleStably";
+import { isDrawnFrom } from "@/domain/ordering/isDrawnFrom";
+import { shuffleUnsolved } from "@/domain/ordering/shuffleUnsolved";
 
 type SortLabels = { firstLabel: string; lastLabel: string };
 
@@ -9,32 +10,11 @@ export type SortShown = SortLabels & { type: "sort"; items: string[] };
 export type SortRevealed = SortShown;
 
 // An order is complete when it holds each item shown exactly once.
-function isOrderOf(order: string[], items: string[]): boolean {
-  const left = new Map<string, number>();
-  for (const item of items) left.set(item, (left.get(item) ?? 0) + 1);
-  for (const item of order) {
-    const count = left.get(item) ?? 0;
-    if (count === 0) return false;
-    left.set(item, count - 1);
-  }
-  return order.length === items.length;
-}
-
-// The items shuffled from their alphabetical order and seeded by it, so the result says nothing
-// about the right order: the phone runs the same shuffle, and could work the order back out of
-// anything made from it. Should the shuffle land on the right order (1 in 120 for five items), it
-// moves the first item last, so the question is never shown solved; only then does the order
-// shown hint at the answer.
-function shuffledFor(items: string[]): string[] {
-  const alphabetical = [...items].sort();
-  const shuffled = shuffleStably(alphabetical, alphabetical.join("\n"));
-  const isSolved = shuffled.every((item, index) => item === items[index]);
-  return isSolved && items.length > 1 ? [...shuffled.slice(1), shuffled[0]] : shuffled;
-}
+const isOrderOf = (order: string[], items: string[]) => order.length === items.length && isDrawnFrom(order, items);
 
 export const sortAnswering: AnsweringRules<"sort", SortShown, SortRevealed> = {
   // The same order on every screen and after a reload (D46).
-  show: ({ items, firstLabel, lastLabel }) => ({ type: "sort", items: shuffledFor(items), firstLabel, lastLabel }),
+  show: ({ items, firstLabel, lastLabel }) => ({ type: "sort", items: shuffleUnsolved(items), firstLabel, lastLabel }),
   reveal: ({ items, firstLabel, lastLabel }) => ({ type: "sort", items, firstLabel, lastLabel }),
   imageIds: () => [],
   // The shuffled order can be sent as it is, though it is no draft until the team moves an item.

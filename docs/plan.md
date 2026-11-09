@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 continues with the other question types one by one: match, ingredients, free text and list with the review queue, then activities and manual points.
+M3 continues with the other question types one by one: ingredients, free text and list with the review queue, then activities and manual points.
 
 ## Milestones
 
@@ -69,7 +69,7 @@ M3 continues with the other question types one by one: match, ingredients, free 
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46)
+- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47)
 - [ ] Fuzzy text matching and the review queue, per unique answer (D19). Use one shared answer normalizer for grading and for the editor's duplicate checks (`hasDuplicates`), so they can't disagree
 - [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
 - [ ] Host overrides and manual points
@@ -117,3 +117,4 @@ M3 continues with the other question types one by one: match, ingredients, free 
 - 2026-11-05: Gissa siffran: number field on the phone, the right number on the TV, poängnivåer and närmast vinner with shared places; grading takes all of a question's answers together (D44). Not tried in a browser with data.
 - 2026-11-05: Ready for larger nights: drafts saved a second after the team pauses, and at once when the phone hides the page, without the team seeing it; counting and scores read only sent answers (D45). The 12-team cap remains a product decision.
 - 2026-11-05: Sortera: drag to reorder on the phone, a stable shuffle that is never the right order, the right order on the TV, points per right place (D46). Not tried in a browser with data.
+- 2026-11-09: Para ihop: tap to pair with coloured lines on the phone, both lists and then the right pairs on the TV, points per right pair, partial answers allowed (D47). Not tried in a browser with data. The cloud environment now installs the npm packages in its setup script.
