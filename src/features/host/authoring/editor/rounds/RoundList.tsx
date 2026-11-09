@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { SortableList } from "@/features/host/authoring/shared/SortableList";
+import { SortableList } from "@/features/shared/sortable/SortableList";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { AddRoundForm } from "./AddRoundForm";
@@ -33,7 +33,7 @@ export function RoundList({ quizId, rounds, selectedRoundId, onSelectRound }: Ro
       <SortableList
         items={rounds}
         getId={(round) => round._id}
-        nameOf={(index) => `omgång ${index + 1}`}
+        nameOf={(_round, index) => `omgång ${index + 1}`}
         onMove={(round, _fromIndex, toIndex) => move(round._id, toIndex)}
         className="flex flex-col gap-1"
         itemClassName={(round) =>

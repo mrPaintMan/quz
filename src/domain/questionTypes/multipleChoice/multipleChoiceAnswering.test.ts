@@ -28,6 +28,10 @@ describe("multipleChoiceAnswering", () => {
     expect(multipleChoiceAnswering.imageIds(content)).toEqual([picture]);
   });
 
+  it("starts with nothing picked", () => {
+    expect(multipleChoiceAnswering.startingAnswer(multipleChoiceAnswering.show(content))).toBeNull();
+  });
+
   it("can be sent once one of the options shown is picked", () => {
     const shown = multipleChoiceAnswering.show(content);
     expect(multipleChoiceAnswering.isComplete(shown, answer(1))).toBe(true);

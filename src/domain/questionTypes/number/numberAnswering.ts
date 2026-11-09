@@ -39,6 +39,7 @@ export const numberAnswering: AnsweringRules<"number", NumberShown, NumberReveal
   show: () => ({ type: "number" }),
   reveal: ({ answer }) => ({ type: "number", answer }),
   imageIds: () => [],
+  startingAnswer: () => null,
   isComplete: (_shown, { value }) => value !== null && Number.isFinite(value),
   grade: (content, answers) => {
     const { scoring } = content;

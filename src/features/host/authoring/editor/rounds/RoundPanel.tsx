@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { allowedQuestionTypes } from "@/domain/rounds/allowedQuestionTypes";
 import { hasFixedQuestionList } from "@/domain/rounds/hasFixedQuestionList";
 import { useAutosave } from "@/features/host/authoring/shared/useAutosave";
-import { SortableList } from "@/features/host/authoring/shared/SortableList";
+import { SortableList } from "@/features/shared/sortable/SortableList";
 import { ConfirmButton } from "@/features/host/shared/ConfirmButton";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
@@ -57,7 +57,7 @@ export function RoundPanel({ round, selectedQuestionId, onSelectQuestion, onDele
           <SortableList
             items={round.questions}
             getId={(question) => question._id}
-            nameOf={(index) => `fråga ${index + 1}`}
+            nameOf={(_question, index) => `fråga ${index + 1}`}
             onMove={(question, _fromIndex, toIndex) => move(question._id, toIndex)}
             className="flex flex-col gap-2"
             itemClassName={(question) => questionRowClassName(question._id === selectedQuestionId)}

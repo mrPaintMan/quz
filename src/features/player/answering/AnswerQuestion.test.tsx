@@ -74,6 +74,7 @@ describe("AnswerQuestion", () => {
   });
 
   it("lets nothing change once the time is out", () => {
+    saved.mockReturnValue({ content: { type: "multipleChoice", optionIndex: 0 }, isLocked: false });
     renderAnswer(0);
     expect(screen.getByRole("button", { name: "A Sverige" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Skicka svar" })).toBeDisabled();
@@ -128,5 +129,19 @@ describe("AnswerQuestion", () => {
     saved.mockReturnValue(undefined);
     const { container } = renderAnswer();
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("says when the time ran out with nothing saved", () => {
+    renderAnswer(0);
+    expect(screen.getByText("Inget svar sparades.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Skicka svar" })).not.toBeInTheDocument();
+  });
+
+  it("can send the order a sort question starts from, without a draft", async () => {
+    const sortShown = { type: "sort" as const, items: ["Avatar", "Titanic"], firstLabel: "Äldst", lastLabel: "Nyast" };
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={sortShown} imageUrls={{}} secondsLeft={null} />);
+    await user().click(screen.getByRole("button", { name: "Skicka svar" }));
+    expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content: { type: "sort", order: ["Avatar", "Titanic"] } });
+    expect(mutations.saveAnswerDraft).not.toHaveBeenCalled();
   });
 });
