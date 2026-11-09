@@ -16,6 +16,14 @@ const PAIR_COLOURS = ["#e8b04b", "#6fb08a", "#8fa8d9", "#d65a55", "#c58fd1", "#5
 const middleOf = (row: number) => row * (ROW_HEIGHT + ROW_GAP) + ROW_HEIGHT / 2;
 const colourOf = (left: number) => PAIR_COLOURS[left % PAIR_COLOURS.length];
 
+// A Bézier S-curve from a left row to a right row, leaving and arriving level, like the
+// wireframe's lines; its ends reach just inside the rows' borders.
+function curveBetween(leftRow: number, rightRow: number): string {
+  const [fromX, toX, midX] = [-2, LINES_WIDTH + 2, LINES_WIDTH / 2];
+  const [fromY, toY] = [middleOf(leftRow), middleOf(rightRow)];
+  return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
+}
+
 type RowProps = { text: string; colour: string | null; isSelected: boolean; disabled: boolean; label: string; onTap: () => void };
 
 function Row({ text, colour, isSelected, disabled, label, onTap }: RowProps) {
@@ -85,7 +93,7 @@ export function MatchInput({ shown, answer, disabled, onChange }: AnswerInputPro
         <svg aria-hidden="true" width={LINES_WIDTH} height={height} className="overflow-visible">
           {rowByLeft.map((row, left) =>
             row === null ? null : (
-              <line key={left} x1={-2} y1={middleOf(left)} x2={LINES_WIDTH + 2} y2={middleOf(row)} stroke={colourOf(left)} strokeWidth={4} strokeLinecap="round" />
+              <path key={left} d={curveBetween(left, row)} fill="none" stroke={colourOf(left)} strokeWidth={4} strokeLinecap="round" />
             ),
           )}
         </svg>

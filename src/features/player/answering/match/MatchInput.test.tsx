@@ -32,7 +32,9 @@ describe("MatchInput", () => {
     await userEvent.click(screen.getByRole("button", { name: "Lista A: Dancing Queen" }));
     await userEvent.click(screen.getByRole("button", { name: "Lista B: ABBA" }));
     expect(onChange).toHaveBeenLastCalledWith({ type: "match", rightByLeft: ["ABBA", null] });
-    expect(container.querySelectorAll("line")).toHaveLength(1);
+    expect(container.querySelectorAll("path")).toHaveLength(1);
+    // A curve from the middle of left row 0 to the middle of right row 1, leaving and arriving level.
+    expect(container.querySelector("path")).toHaveAttribute("d", "M -2 32 C 20 32, 20 108, 42 108");
     expect(screen.getByText(/1 av 2 par/)).toBeInTheDocument();
   });
 
@@ -54,10 +56,10 @@ describe("MatchInput", () => {
     const onChange = vi.fn();
     const answer = { type: "match" as const, rightByLeft: ["ABBA", "Roxette"] };
     const { container } = render(<Answering start={answer} onChange={onChange} />);
-    expect(container.querySelectorAll("line")).toHaveLength(2);
+    expect(container.querySelectorAll("path")).toHaveLength(2);
     await userEvent.click(screen.getByRole("button", { name: "Lista B: ABBA" }));
     expect(onChange).toHaveBeenLastCalledWith({ type: "match", rightByLeft: [null, "Roxette"] });
-    expect(container.querySelectorAll("line")).toHaveLength(1);
+    expect(container.querySelectorAll("path")).toHaveLength(1);
   });
 
   it("can't change once locked", () => {
@@ -69,7 +71,7 @@ describe("MatchInput", () => {
   it("follows an answer changed from outside, such as the draft the server locked", () => {
     const { container, rerender } = render(<MatchInput shown={shown} answer={null} imageUrls={{}} disabled={false} onChange={vi.fn()} />);
     rerender(<MatchInput shown={shown} answer={{ type: "match", rightByLeft: ["ABBA", null] }} imageUrls={{}} disabled onChange={vi.fn()} />);
-    expect(container.querySelectorAll("line")).toHaveLength(1);
+    expect(container.querySelectorAll("path")).toHaveLength(1);
     expect(screen.getByText("1 av 2 par")).toBeInTheDocument();
   });
 });
