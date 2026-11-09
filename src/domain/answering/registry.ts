@@ -2,6 +2,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent, AnsweredType } from "@convex/answers/answerContent";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { rulesFor } from "@/domain/questionTypes/registry";
+import { matchAnswering, type MatchRevealed, type MatchShown } from "@/domain/questionTypes/match/matchAnswering";
 import {
   multipleChoiceAnswering,
   type MultipleChoiceRevealed,
@@ -12,8 +13,8 @@ import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/quest
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown | NumberShown | SortShown;
-export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed | SortRevealed;
+export type ShownQuestion = MultipleChoiceShown | NumberShown | SortShown | MatchShown;
+export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed | SortRevealed | MatchRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -26,7 +27,7 @@ export const answeringRegistry: Registry = {
   freeText: null,
   number: numberAnswering,
   sort: sortAnswering,
-  match: null,
+  match: matchAnswering,
   list: null,
   ingredients: null,
   drawing: null,
