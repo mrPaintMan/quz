@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { AnsweredType } from "@convex/answers/answerContent";
 import type { AnswerInputProps } from "./AnswerInputProps";
+import { FreeTextInput } from "./freeText/FreeTextInput";
 import { IngredientsInput } from "./ingredients/IngredientsInput";
 import { MatchInput } from "./match/MatchInput";
 import { MultipleChoiceInput } from "./multipleChoice/MultipleChoiceInput";
@@ -11,7 +12,7 @@ import { SortInput } from "./sort/SortInput";
 // M3, as in the domain's answering registry; the phone then keeps pointing at the TV.
 export const answerInputs: { [T in AnsweredType]: ComponentType<AnswerInputProps<T>> | null } = {
   multipleChoice: MultipleChoiceInput,
-  freeText: null,
+  freeText: FreeTextInput,
   number: NumberInput,
   sort: SortInput,
   match: MatchInput,

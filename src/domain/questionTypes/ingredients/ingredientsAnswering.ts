@@ -16,7 +16,7 @@ export const ingredientsAnswering: AnsweringRules<"ingredients", IngredientsShow
   isComplete: (shown, { items }) => items.length === shown.count && items.some((item) => !isBlank(item)),
   // The points per ingredient for each ingredient guessed, in any field and order, counted once
   // however often it is written. A guess matches an accepted spelling compared as everywhere
-  // else (normalizeForComparison); near misses score once fuzzy matching comes (D19, D48).
+  // else (normalizeForComparison); near misses are left to the AI judge (D50).
   // Empty texts (a blank field, a spelling of only a full stop) never match anything.
   grade: ({ items, pointsPerItem }, answers) => {
     const spellingsOf = items.map((item) => item.spellings.map(normalizeForComparison).filter((spelling) => spelling !== ""));

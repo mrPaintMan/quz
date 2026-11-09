@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 continues with fuzzy matching and the hosts' review queue (D19) together with free text, which ingredients then get too; then lists with the AI judge, then activities and manual points.
+M3 continues with the AI judge and the hosts' review queue for free text and ingredients (D50): exact answers first, Claude Haiku 5.5 judges the rest when the question closes, its verdicts count at once and unsure ones go to the queue. The user sets `ANTHROPIC_API_KEY` in Convex dev and production before trying it. Then lists, then activities and manual points.
 
 ## Milestones
 
@@ -69,9 +69,10 @@ M3 continues with fuzzy matching and the hosts' review queue (D19) together with
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until fuzzy matching (D48)
-- [ ] Fuzzy text matching and the review queue, per unique answer (D19). Use one shared answer normalizer for grading and for the editor's duplicate checks (`hasDuplicates`), so they can't disagree
-- [ ] AI judge for list questions, suggestions confirmed by hosts (D19)
+- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Fritext, exact answers until the AI judge (D49)
+- [ ] AI judge and the review queue, per unique answer, for free text and ingredients (D50; replaces fuzzy matching). The shared answer normalizer is in place (D48)
+- [ ] AI judge and review for list questions (D50)
+- [ ] Later: show each team which of its answers were judged right or wrong (D50)
 - [ ] Host overrides and manual points
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
 
@@ -119,3 +120,4 @@ M3 continues with fuzzy matching and the hosts' review queue (D19) together with
 - 2026-11-05: Sortera: drag to reorder on the phone, a stable shuffle that is never the right order, the right order on the TV, points per right place (D46). Not tried in a browser with data.
 - 2026-11-09: Para ihop: tap to pair with coloured lines on the phone, both lists and then the right pairs on the TV, points per right pair, partial answers allowed (D47). Not tried in a browser with data. The cloud environment now installs the npm packages in its setup script.
 - 2026-11-09: Gissa ingredienserna: a field per ingredient on the phone, the ingredients on the TV, points per ingredient guessed by an accepted spelling; one text comparison shared by grading and the duplicate checks (D48). Not tried in a browser with data.
+- 2026-11-09: Fritext: a field per sub-question on the phone, the sub-questions and then their answers on the TV, points per field answered with an accepted answer (D49). Decided the AI judge replaces fuzzy matching, with Claude Haiku 5.5 and verdicts that count at once (D50). Not tried in a browser with data.

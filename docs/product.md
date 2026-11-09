@@ -35,11 +35,11 @@ Every question has: a prompt shown on the TV, points, an optional time limit, op
 | Type | Team answers by | Grading |
 |---|---|---|
 | Multiple choice | Picking one option (A–D, text or image) | Auto |
-| Free text | Typing in 1–3 fields; each field can have a label written by the hosts (for example the sub-question repeated). One field is plain free text | Auto per field against a list of accepted spellings, with fuzzy matching; uncertain answers go to the review queue |
+| Free text | Typing in 1–3 fields; each field can have a label written by the hosts (for example the sub-question repeated). One field is plain free text | Auto per field against a list of accepted spellings; the AI judge decides near answers, unsure ones go to the review queue |
 | Guess the number | Typing a number on a number pad | Auto: tolerance tiers (for example ±1 for 3p) or closest wins (top 3 get 3/2/1) |
 | Sort | Dragging items into order | Auto, points per item in the right position |
 | Match | Drawing lines between two lists | Auto, points per correct pair |
-| List as many as you can | Typing items one at a time; duplicates are refused; submits itself when the time runs out | Per correct item (for example 0.5p each). Layered: an optional answer key (pasted in bulk, may be empty for open lists), fuzzy matching against it, then the hosts review each unique unknown item once for all teams, optionally with AI suggestions to confirm (see "Grading") |
+| List as many as you can | Typing items one at a time; duplicates are refused; submits itself when the time runs out | Per correct item (for example 0.5p each). Layered: an optional answer key (pasted in bulk, may be empty for open lists), the AI judge for unknown items, then the hosts review each unique unsure item once for all teams (see "Grading") |
 | Ingredients | Filling in unordered fields (for example the 5 ingredients of a drink) | Auto per correct item, order doesn't matter |
 | Drawing | Drawing with a finger; submits itself when the time runs out | Hosts score by hand; drawings are shown on the TV during review |
 | Map pin | Placing a pin on a map | Auto: points if the pin is within a set radius of the target. The target and the radius are shown on the map when the answer is revealed |
@@ -67,7 +67,7 @@ På spåret: the trip comes first, as a question with its answer screen; then ea
 
 - Automatic grading gives each answer, or each item of an answer, one of: correct, wrong, needs review.
 - **Review is per unique answer, not per team.** If four teams wrote "Oslo", the hosts judge "Oslo" once and the decision applies to all four. A decision on a list or free-text question is also added to that question's answer key, so a copied quiz keeps it.
-- **AI judge (optional, per list question):** when the question locks, the unknown items are sent to Claude, which suggests correct, wrong or unsure for each. Suggestions are shown in the review queue and only count once the hosts confirm them; unsure items stay open. If the call fails, everything stays in the review queue as usual.
+- **AI judge (on by default, per question, for typed answers):** when the question closes for answering, the texts that don't match an accepted answer exactly are sent to Claude Haiku 5.5, which judges each one correct, wrong or unsure. Correct and wrong count at once; unsure texts go to the review queue. If the call fails, everything unmatched goes to the review queue. Turned off, only exact answers count. Later: each team sees which of its answers were judged right or wrong.
 - Hosts can always override any grading.
 
 ## Behaviour

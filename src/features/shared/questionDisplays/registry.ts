@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { AnsweredType } from "@convex/answers/answerContent";
+import { FreeTextAnswer, FreeTextQuestion } from "./freeText/FreeTextDisplay";
 import { IngredientsAnswer, IngredientsQuestion } from "./ingredients/IngredientsDisplay";
 import { MatchAnswer, MatchQuestion } from "./match/MatchDisplay";
 import { MultipleChoiceAnswer, MultipleChoiceQuestion } from "./multipleChoice/MultipleChoiceDisplay";
@@ -16,7 +17,7 @@ type DisplayRegistration<T extends AnsweredType> = {
 // its answering is built in M3, as in the domain's answering registry.
 export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | null } = {
   multipleChoice: { Question: MultipleChoiceQuestion, Answer: MultipleChoiceAnswer },
-  freeText: null,
+  freeText: { Question: FreeTextQuestion, Answer: FreeTextAnswer },
   number: { Question: NumberQuestion, Answer: NumberAnswer },
   sort: { Question: SortQuestion, Answer: SortAnswer },
   match: { Question: MatchQuestion, Answer: MatchAnswer },
