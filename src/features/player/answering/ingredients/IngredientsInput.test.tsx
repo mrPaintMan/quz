@@ -45,4 +45,9 @@ describe("IngredientsInput", () => {
     expect(screen.getByLabelText("Ingrediens 1")).toBeDisabled();
     expect(screen.queryByText("Tomma rader är okej.")).not.toBeInTheDocument();
   });
+
+  it("keeps one field per ingredient when the hosts change how many while the question shows", () => {
+    render(<IngredientsInput shown={{ type: "ingredients", count: 4 }} answer={{ type: "ingredients", items: ["Vodka", "", ""] }} imageUrls={{}} disabled={false} onChange={vi.fn()} />);
+    expect(screen.getAllByRole("textbox")).toHaveLength(4);
+  });
 });

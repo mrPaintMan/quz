@@ -22,4 +22,8 @@ describe("normalizeForComparison", () => {
   it("keeps misspellings apart", () => {
     expect(normalizeForComparison("kanell")).not.toBe(normalizeForComparison("kanel"));
   });
+
+  it("treats an accent typed as one letter and one pasted as a letter plus a mark as equal", () => {
+    expect(normalizeForComparison("Kahlu\u0301a")).toBe(normalizeForComparison("Kahl\u00faa"));
+  });
 });

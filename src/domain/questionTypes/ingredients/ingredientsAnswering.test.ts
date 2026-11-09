@@ -38,6 +38,11 @@ describe("ingredientsAnswering", () => {
     expect(ingredientsAnswering.grade(content, [guesses("vodka", "Vodka", "vodka")])).toEqual([1]);
   });
 
+  it("never counts an empty field, even against a spelling of only a full stop", () => {
+    const odd = { ...content, items: [{ spellings: ["."] }, { spellings: ["Vodka"] }] };
+    expect(ingredientsAnswering.grade(odd, [guesses("", "vodka")])).toEqual([1]);
+  });
+
   it("doesn't count a misspelling yet", () => {
     expect(ingredientsAnswering.grade(content, [guesses("wodka", "", "")])).toEqual([0]);
   });

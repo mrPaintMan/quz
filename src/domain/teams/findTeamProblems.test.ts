@@ -19,6 +19,10 @@ describe("findTeamProblems", () => {
     expect(messagesFor({ name: "a".repeat(31), colour: "green" }, [])).toEqual(["Lagets namn får vara högst 30 tecken."]);
   });
 
+  it("counts doubled spaces and end punctuation towards the length, as the name is stored with them", () => {
+    expect(messagesFor({ name: `Tomtarna${",".repeat(30)}`, colour: "green" }, [])).toEqual(["Lagets namn får vara högst 30 tecken."]);
+  });
+
   it("counts an emoji as one character", () => {
     expect(messagesFor({ name: "🎅".repeat(30), colour: "green" }, [])).toEqual([]);
   });

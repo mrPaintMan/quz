@@ -17,10 +17,13 @@ export const ingredientsAnswering: AnsweringRules<"ingredients", IngredientsShow
   // The points per ingredient for each ingredient guessed, in any field and order, counted once
   // however often it is written. A guess matches an accepted spelling compared as everywhere
   // else (normalizeForComparison); near misses score once fuzzy matching comes (D19, D48).
-  grade: ({ items, pointsPerItem }, answers) =>
-    answers.map((answer) => {
-      const guesses = new Set(answer.items.map(normalizeForComparison));
-      const guessed = items.filter((item) => item.spellings.some((spelling) => guesses.has(normalizeForComparison(spelling))));
+  // Empty texts (a blank field, a spelling of only a full stop) never match anything.
+  grade: ({ items, pointsPerItem }, answers) => {
+    const spellingsOf = items.map((item) => item.spellings.map(normalizeForComparison).filter((spelling) => spelling !== ""));
+    return answers.map((answer) => {
+      const guesses = new Set(answer.items.map(normalizeForComparison).filter((guess) => guess !== ""));
+      const guessed = spellingsOf.filter((spellings) => spellings.some((spelling) => guesses.has(spelling)));
       return guessed.length * (pointsPerItem ?? 0);
-    }),
+    });
+  },
 };

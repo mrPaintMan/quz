@@ -3,7 +3,9 @@
 // can never disagree (D48). Case, spaces at the ends, doubled spaces and a full stop or comma at
 // the end don't count; misspellings do, until fuzzy matching (D19).
 export function normalizeForComparison(text: string): string {
+  // NFC first, so an accent typed as one letter and one pasted as a letter plus a mark are equal.
   return text
+    .normalize("NFC")
     .toLocaleLowerCase("sv")
     .replace(/\s+/g, " ")
     .trim()

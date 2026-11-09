@@ -10,7 +10,8 @@ describe("hasDuplicates", () => {
     expect(hasDuplicates(["Åre", " åre "])).toBe(true);
   });
 
-  it("ignores blank values", () => {
+  it("ignores blank values, and values of only a full stop or comma", () => {
     expect(hasDuplicates(["", " ", "Oslo"])).toBe(false);
+    expect(hasDuplicates([".", ",", "Oslo"])).toBe(false);
   });
 });

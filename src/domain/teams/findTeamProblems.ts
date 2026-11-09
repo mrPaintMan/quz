@@ -16,7 +16,8 @@ export function findTeamProblems(team: Team, joinedTeams: Team[]): Problem[] {
   const name = normalizeForComparison(team.name);
   return [
     ...problemIf(isBlank(team.name), "Skriv lagets namn."),
-    ...problemIf([...name].length > MAX_TEAM_NAME_LENGTH, `Lagets namn får vara högst ${MAX_TEAM_NAME_LENGTH} tecken.`),
+    // Measured as stored (trimmed), not as compared, which drops doubled spaces and end punctuation.
+    ...problemIf([...team.name.trim()].length > MAX_TEAM_NAME_LENGTH, `Lagets namn får vara högst ${MAX_TEAM_NAME_LENGTH} tecken.`),
     ...problemIf(
       joinedTeams.some((joined) => normalizeForComparison(joined.name) === name),
       "Ett annat lag heter redan så. Välj ett annat namn.",

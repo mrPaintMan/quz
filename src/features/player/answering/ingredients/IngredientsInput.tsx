@@ -6,7 +6,8 @@ import type { AnswerInputProps } from "@/features/player/answering/AnswerInputPr
 
 // One numbered field per ingredient, in any order; empty rows are fine (as in the wireframe).
 export function IngredientsInput({ shown, answer, disabled, onChange }: AnswerInputProps<"ingredients">) {
-  const items = answer?.items ?? Array.from({ length: shown.count }, () => "");
+  // Always one field per ingredient, also if the hosts change how many while the question shows.
+  const items = Array.from({ length: shown.count }, (_, index) => answer?.items[index] ?? "");
   const filled = items.filter((item) => !isBlank(item)).length;
   const write = (index: number, text: string) =>
     onChange({ type: "ingredients", items: items.map((item, other) => (other === index ? text : item)) });
