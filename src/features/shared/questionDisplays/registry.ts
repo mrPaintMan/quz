@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 import type { AnsweredType } from "@convex/answers/answerContent";
+import { IngredientsAnswer, IngredientsQuestion } from "./ingredients/IngredientsDisplay";
 import { MatchAnswer, MatchQuestion } from "./match/MatchDisplay";
 import { MultipleChoiceAnswer, MultipleChoiceQuestion } from "./multipleChoice/MultipleChoiceDisplay";
 import { NumberAnswer, NumberQuestion } from "./number/NumberDisplay";
@@ -20,7 +21,7 @@ export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | n
   sort: { Question: SortQuestion, Answer: SortAnswer },
   match: { Question: MatchQuestion, Answer: MatchAnswer },
   list: null,
-  ingredients: null,
+  ingredients: { Question: IngredientsQuestion, Answer: IngredientsAnswer },
   drawing: null,
   mapPin: null,
   paSparet: null,
