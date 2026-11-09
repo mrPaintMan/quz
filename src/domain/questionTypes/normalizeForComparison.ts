@@ -1,3 +1,12 @@
+// How two texts are compared wherever the app asks whether they are the same: grading typed
+// answers against their spellings, and the editor's and team names' duplicate checks, so the two
+// can never disagree (D48). Case, spaces at the ends, doubled spaces and a full stop or comma at
+// the end don't count; misspellings do, until fuzzy matching (D19).
 export function normalizeForComparison(text: string): string {
-  return text.trim().toLocaleLowerCase("sv");
+  return text
+    .toLocaleLowerCase("sv")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/[.,]+$/, "")
+    .trim();
 }

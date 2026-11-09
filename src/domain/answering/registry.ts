@@ -2,6 +2,11 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent, AnsweredType } from "@convex/answers/answerContent";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { rulesFor } from "@/domain/questionTypes/registry";
+import {
+  ingredientsAnswering,
+  type IngredientsRevealed,
+  type IngredientsShown,
+} from "@/domain/questionTypes/ingredients/ingredientsAnswering";
 import { matchAnswering, type MatchRevealed, type MatchShown } from "@/domain/questionTypes/match/matchAnswering";
 import {
   multipleChoiceAnswering,
@@ -13,8 +18,8 @@ import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/quest
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown | NumberShown | SortShown | MatchShown;
-export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed | SortRevealed | MatchRevealed;
+export type ShownQuestion = MultipleChoiceShown | NumberShown | SortShown | MatchShown | IngredientsShown;
+export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed | SortRevealed | MatchRevealed | IngredientsRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -29,7 +34,7 @@ export const answeringRegistry: Registry = {
   sort: sortAnswering,
   match: matchAnswering,
   list: null,
-  ingredients: null,
+  ingredients: ingredientsAnswering,
   drawing: null,
   mapPin: null,
   paSparet: null,

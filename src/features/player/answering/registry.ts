@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import type { AnsweredType } from "@convex/answers/answerContent";
 import type { AnswerInputProps } from "./AnswerInputProps";
+import { IngredientsInput } from "./ingredients/IngredientsInput";
 import { MatchInput } from "./match/MatchInput";
 import { MultipleChoiceInput } from "./multipleChoice/MultipleChoiceInput";
 import { NumberInput } from "./number/NumberInput";
@@ -15,7 +16,7 @@ export const answerInputs: { [T in AnsweredType]: ComponentType<AnswerInputProps
   sort: SortInput,
   match: MatchInput,
   list: null,
-  ingredients: null,
+  ingredients: IngredientsInput,
   drawing: null,
   mapPin: null,
   paSparet: null,
