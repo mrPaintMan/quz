@@ -35,7 +35,8 @@ function Row({ text, colour, isSelected, disabled, label, onTap }: RowProps) {
       aria-label={label}
       onClick={onTap}
       style={{ height: ROW_HEIGHT, borderColor: colour ?? undefined }}
-      className={`flex items-center rounded-2xl border-2 px-3 text-left text-base leading-tight disabled:opacity-60 ${isSelected ? "border-foreground bg-secondary" : colour ? "bg-secondary" : "border-border bg-card"}`}
+      // Above the lines, so a line's end tucks under the item's border instead of crossing it.
+      className={`relative z-10 flex items-center rounded-2xl border-2 px-3 text-left text-base leading-tight disabled:opacity-60 ${isSelected ? "border-foreground bg-secondary" : colour ? "bg-secondary" : "border-border bg-card"}`}
     >
       <span className="line-clamp-2">{text}</span>
     </button>
