@@ -1,9 +1,10 @@
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
+import { firstFilledIn } from "@/domain/questionTypes/firstFilledIn";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import { normalizeForComparison } from "@/domain/questionTypes/normalizeForComparison";
 
 // While asked, each field's label (blank with a single field, whose editor hides the label); on
-// the answer screen, each field's label with its first accepted answer.
+// the answer screen, each field's label with its first filled-in accepted answer.
 export type FreeTextShown = { type: "freeText"; labels: string[] };
 export type FreeTextRevealed = { type: "freeText"; fields: { label: string; answer: string }[] };
 
@@ -13,7 +14,7 @@ export const freeTextAnswering: AnsweringRules<"freeText", FreeTextShown, FreeTe
   show: ({ fields }) => ({ type: "freeText", labels: labelsOf(fields) }),
   reveal: ({ fields }) => {
     const labels = labelsOf(fields);
-    return { type: "freeText", fields: fields.map((field, index) => ({ label: labels[index], answer: field.acceptedAnswers[0] ?? "" })) };
+    return { type: "freeText", fields: fields.map((field, index) => ({ label: labels[index], answer: firstFilledIn(field.acceptedAnswers) })) };
   },
   imageIds: () => [],
   startingAnswer: () => null,

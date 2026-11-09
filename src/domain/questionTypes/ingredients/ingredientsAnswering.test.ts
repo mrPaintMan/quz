@@ -15,8 +15,9 @@ describe("ingredientsAnswering", () => {
     expect(ingredientsAnswering.show(content)).toEqual({ type: "ingredients", count: 3 });
   });
 
-  it("reveals each ingredient by its first spelling", () => {
+  it("reveals each ingredient by its first filled-in spelling", () => {
     expect(ingredientsAnswering.reveal(content)).toEqual({ type: "ingredients", items: ["Vodka", "Kahlúa", "Grädde"] });
+    expect(ingredientsAnswering.reveal({ ...content, items: [{ spellings: ["", " Is "] }] })).toEqual({ type: "ingredients", items: ["Is"] });
   });
 
   it("starts with nothing written", () => {

@@ -1,15 +1,16 @@
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
+import { firstFilledIn } from "@/domain/questionTypes/firstFilledIn";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import { normalizeForComparison } from "@/domain/questionTypes/normalizeForComparison";
 
 // While asked, only how many ingredients there are; on the answer screen, each ingredient by its
-// first spelling.
+// first filled-in spelling.
 export type IngredientsShown = { type: "ingredients"; count: number };
 export type IngredientsRevealed = { type: "ingredients"; items: string[] };
 
 export const ingredientsAnswering: AnsweringRules<"ingredients", IngredientsShown, IngredientsRevealed> = {
   show: ({ items }) => ({ type: "ingredients", count: items.length }),
-  reveal: ({ items }) => ({ type: "ingredients", items: items.map((item) => item.spellings[0] ?? "") }),
+  reveal: ({ items }) => ({ type: "ingredients", items: items.map((item) => firstFilledIn(item.spellings)) }),
   imageIds: () => [],
   startingAnswer: () => null,
   // One text per field; empty rows are fine as long as one is filled in.

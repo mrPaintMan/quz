@@ -10,7 +10,7 @@ describe("fieldTitle", () => {
     expect(fieldTitle(["Artist", " "], 1)).toBe("Delfråga b)");
   });
 
-  it("numbers a field beyond the letters", () => {
-    expect(fieldTitle(["", "", "", ""], 3)).toBe("Delfråga 4)");
+  it("trims the label", () => {
+    expect(fieldTitle([" Artist "], 0)).toBe("a) Artist");
   });
 });

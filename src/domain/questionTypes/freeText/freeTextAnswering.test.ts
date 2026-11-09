@@ -25,7 +25,7 @@ describe("freeTextAnswering", () => {
     expect(freeTextAnswering.show(single)).toEqual({ type: "freeText", labels: [""] });
   });
 
-  it("reveals each field's first accepted answer", () => {
+  it("reveals each field's first filled-in accepted answer", () => {
     expect(freeTextAnswering.reveal(twoFields)).toEqual({
       type: "freeText",
       fields: [
@@ -33,9 +33,9 @@ describe("freeTextAnswering", () => {
         { label: "Låt", answer: "Happy New Year" },
       ],
     });
-    expect(freeTextAnswering.reveal({ ...single, fields: [{ label: "", acceptedAnswers: [] }] })).toEqual({
+    expect(freeTextAnswering.reveal({ ...single, fields: [{ label: "", acceptedAnswers: [" ", " Saffran "] }] })).toEqual({
       type: "freeText",
-      fields: [{ label: "", answer: "" }],
+      fields: [{ label: "", answer: "Saffran" }],
     });
   });
 

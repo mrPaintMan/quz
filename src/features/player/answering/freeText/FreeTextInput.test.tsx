@@ -45,8 +45,12 @@ describe("FreeTextInput", () => {
     expect(screen.queryByText("Ni kan lämna ett fält tomt.")).not.toBeInTheDocument();
   });
 
-  it("keeps one field per sub-question when the hosts change how many while the question shows", () => {
-    render(<FreeTextInput shown={{ type: "freeText", labels: ["Artist", "Låt", "År"] }} answer={{ type: "freeText", fields: ["ABBA", ""] }} imageUrls={{}} disabled={false} onChange={vi.fn()} />);
-    expect(screen.getAllByRole("textbox")).toHaveLength(3);
+  it("keeps one field per sub-question when the hosts add one while the question shows", async () => {
+    const onChange = vi.fn();
+    const shown = { type: "freeText" as const, labels: ["Artist", "Låt", "År"] };
+    render(<FreeTextInput shown={shown} answer={{ type: "freeText", fields: ["ABBA", "Waterloo"] }} imageUrls={{}} disabled={false} onChange={onChange} />);
+    expect(screen.getAllByRole("textbox").map((field) => (field as HTMLInputElement).value)).toEqual(["ABBA", "Waterloo", ""]);
+    await userEvent.type(screen.getByLabelText("c) År"), "1");
+    expect(onChange).toHaveBeenLastCalledWith({ type: "freeText", fields: ["ABBA", "Waterloo", "1"] });
   });
 });

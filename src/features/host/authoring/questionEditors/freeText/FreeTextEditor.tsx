@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { removeAt } from "@/domain/ordering/removeAt";
+import { subQuestionLetter } from "@/domain/questionTypes/freeText/subQuestionLetter";
 import { replaceAt } from "@/domain/ordering/replaceAt";
 import { LinesField } from "@/features/host/authoring/questionEditors/fields/LinesField";
 import { NumberField } from "@/features/host/authoring/questionEditors/fields/NumberField";
@@ -11,7 +12,6 @@ import { TextField } from "@/features/host/authoring/questionEditors/fields/Text
 import type { QuestionEditorProps } from "@/features/host/authoring/questionEditors/QuestionEditorProps";
 
 const MAX_FIELDS = 3;
-const LETTERS = "abc";
 
 export function FreeTextEditor({ content, onChange }: QuestionEditorProps<"freeText">) {
   const { fields } = content;
@@ -25,9 +25,9 @@ export function FreeTextEditor({ content, onChange }: QuestionEditorProps<"freeT
         <section key={index} className="flex flex-col gap-3 rounded-lg border bg-card p-3">
           {withSubQuestions && (
             <div className="flex items-center justify-between">
-              <h3 className="font-medium">Delfråga {LETTERS[index]})</h3>
+              <h3 className="font-medium">Delfråga {subQuestionLetter(index)})</h3>
               <RemoveRowButton
-                name={`delfråga ${LETTERS[index]}`}
+                name={`delfråga ${subQuestionLetter(index)}`}
                 onRemove={() => onChange({ ...content, fields: removeAt(fields, index) })}
               />
             </div>
