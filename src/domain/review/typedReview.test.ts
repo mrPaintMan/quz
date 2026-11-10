@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradeTyped, rightItems, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { givenNames, gradeTyped, rightItems, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -125,6 +125,24 @@ describe("open slots", () => {
     expect(rightItems(list, content, [{ items: ["Gothenburg", "Lund"] }, { items: ["Göteborg"] }], verdicts)).toEqual([
       { name: "Göteborg", teamCount: 2 },
       { name: "Lund", teamCount: 1 },
+    ]);
+  });
+});
+
+describe("givenNames", () => {
+  it("gives each name once per slot as first given, alphabetically, leaving out options and wrong", () => {
+    const verdicts = [
+      { slot: 0, text: "malmoe", target: " Malmö " },
+      { slot: 0, text: "malmö", target: "malmö" },
+      { slot: 0, text: "lund", target: "Lund" },
+      { slot: 1, text: "lund", target: "Lund" },
+      { slot: 0, text: "gbg", target: 0 },
+      { slot: 0, text: "oslo", target: null },
+    ];
+    expect(givenNames(verdicts)).toEqual([
+      { slot: 0, name: "Lund" },
+      { slot: 0, name: "Malmö" },
+      { slot: 1, name: "Lund" },
     ]);
   });
 });

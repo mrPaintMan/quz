@@ -78,27 +78,24 @@ export function gradeTyped<Content, Answer>(
   answers: Answer[],
   verdicts: Verdict[],
 ): number[] {
+  const itemsOf = matcher(review, content, verdicts);
+  return answers.map((answer) => itemsOf(answer).size * review.pointsPerMatch(content));
+}
+
+// For a question and its verdicts: the distinct items an answer's texts count as, by an exact
+// spelling or else by a verdict, each keyed and with its name.
+function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, verdicts: Verdict[]) {
   const slots = review.slots(content);
   const exact = exactMatches(slots);
   const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
-  return answers.map((answer) => matchedItems(slots, exact, judged, review, answer).size * review.pointsPerMatch(content));
-}
-
-// The distinct items an answer's texts count as, by an exact spelling or else by a verdict, with
-// how each was first named.
-function matchedItems<Content, Answer>(
-  slots: ReviewSlot[],
-  exact: Map<string, number>,
-  judged: Map<string, Target>,
-  review: TypedReview<Content, Answer>,
-  answer: Answer,
-) {
-  const matched = new Map<string, string>();
-  for (const [key, { slot }] of writtenTexts(review, slots, answer)) {
-    const item = itemOf(slots, exact, slot, exact.get(key) ?? judged.get(key) ?? null);
-    if (item !== null && !matched.has(item.key)) matched.set(item.key, item.name);
-  }
-  return matched;
+  return (answer: Answer) => {
+    const matched = new Map<string, string>();
+    for (const [key, { slot }] of writtenTexts(review, slots, answer)) {
+      const item = itemOf(slots, exact, slot, exact.get(key) ?? judged.get(key) ?? null);
+      if (item !== null && !matched.has(item.key)) matched.set(item.key, item.name);
+    }
+    return matched;
+  };
 }
 
 // Each item the teams got right, once, with how many teams got it, most often first, for the
@@ -109,12 +106,10 @@ export function rightItems<Content, Answer>(
   answers: Answer[],
   verdicts: Verdict[],
 ): { name: string; teamCount: number }[] {
-  const slots = review.slots(content);
-  const exact = exactMatches(slots);
-  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
+  const itemsOf = matcher(review, content, verdicts);
   const items = new Map<string, { name: string; teamCount: number }>();
   for (const answer of answers) {
-    for (const [key, name] of matchedItems(slots, exact, judged, review, answer)) {
+    for (const [key, name] of itemsOf(answer)) {
       const item = items.get(key);
       if (item) item.teamCount += 1;
       else items.set(key, { name, teamCount: 1 });
@@ -148,4 +143,16 @@ export function textsToReview<Content, Answer>(review: TypedReview<Content, Answ
     }
   }
   return [...items.values()].sort((a, b) => a.slot - b.slot || a.text.localeCompare(b.text, "sv"));
+}
+
+// The names verdicts gave right items outside an open slot's key, once each as first given (two
+// forms of a name are one item), alphabetically, for the AI judge and the hosts' "Samma som" (D53).
+export function givenNames(verdicts: Verdict[]): { slot: number; name: string }[] {
+  const names = new Map<string, { slot: number; name: string }>();
+  for (const { slot, target } of verdicts) {
+    if (typeof target !== "string") continue;
+    const key = keyOf(slot, normalizeForComparison(target));
+    if (!names.has(key)) names.set(key, { slot, name: target.trim() });
+  }
+  return [...names.values()].sort((a, b) => a.slot - b.slot || a.name.localeCompare(b.name, "sv"));
 }

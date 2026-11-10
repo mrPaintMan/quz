@@ -61,6 +61,14 @@ describe("ListInput", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
+  it("adds what is typed when the field loses focus, so a last answer isn't lost", async () => {
+    const onChange = vi.fn();
+    render(<Answering onChange={onChange} />);
+    await userEvent.type(screen.getByLabelText("Nytt svar"), "Uppsala");
+    await userEvent.click(document.body);
+    expect(onChange).toHaveBeenLastCalledWith({ type: "list", items: ["Uppsala"] });
+  });
+
   it("removes an answer", async () => {
     const onChange = vi.fn();
     render(<Answering onChange={onChange} start={{ type: "list", items: ["Oslo", "Bergen"] }} />);
@@ -73,5 +81,6 @@ describe("ListInput", () => {
     expect(screen.queryByLabelText("Nytt svar")).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Ta bort Oslo" })).not.toBeInTheDocument();
     expect(screen.getByText("1 svar")).toBeInTheDocument();
+    expect(screen.queryByText("Bara tillagda svar räknas.")).not.toBeInTheDocument();
   });
 });

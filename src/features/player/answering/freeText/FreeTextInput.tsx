@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { Input } from "@/components/ui/input";
+import { MAX_TYPED_TEXT_LENGTH } from "@/domain/answering/registry";
 import { Label } from "@/components/ui/label";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
 import { fieldTitle } from "@/domain/questionTypes/freeText/fieldTitle";
@@ -27,6 +28,7 @@ export function FreeTextInput({ shown, answer, disabled, onChange }: AnswerInput
             value={field}
             disabled={disabled}
             autoComplete="off"
+            maxLength={MAX_TYPED_TEXT_LENGTH}
             onChange={(event) => write(index, event.target.value)}
             className="h-13 text-lg"
           />

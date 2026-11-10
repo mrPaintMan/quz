@@ -10,15 +10,16 @@ const MODEL = "claude-haiku-5-5";
 
 type Job = { message: string; slots: ReviewSlot[]; items: ReviewItem[] };
 
-// One call to Claude about a question's texts, read into verdicts. A slow API fails within about
-// 40 seconds (one retry), so the hosts soon know to judge themselves.
+// One call to Claude about a question's texts, read into verdicts. The reply has room for some 500
+// verdicts, a full night's list; a slow API fails within about two minutes (one retry), so the
+// hosts soon know to judge themselves.
 async function askClaude(job: Job): Promise<Verdict[]> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) throw new Error("ANTHROPIC_API_KEY is not set");
-  const client = new Anthropic({ apiKey, timeout: 20_000, maxRetries: 1 });
+  const client = new Anthropic({ apiKey, timeout: 60_000, maxRetries: 1 });
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 8000,
+    max_tokens: 16_000,
     system: JUDGE_INSTRUCTIONS,
     output_config: { effort: "low", format: { type: "json_schema", schema: JUDGE_REPLY_SCHEMA } },
     messages: [{ role: "user", content: job.message }],

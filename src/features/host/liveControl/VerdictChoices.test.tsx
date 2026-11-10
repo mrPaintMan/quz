@@ -45,6 +45,9 @@ describe("VerdictChoices", () => {
     rerender(<VerdictChoices slot={slot} item={{ written: "Malmoe", isJudged: true, target: "Malmö" }} onChoose={vi.fn()} />);
     expect(screen.getByRole("button", { name: "Rätt" })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByLabelText("Samma som…")).toHaveValue("=Malmö");
+    // A name given in another case is the same item.
+    rerender(<VerdictChoices slot={slot} item={{ written: "Malmoe", isJudged: true, target: "malmö" }} onChoose={vi.fn()} />);
+    expect(screen.getByLabelText("Samma som…")).toHaveValue("=Malmö");
   });
 
   it("has no list to pick from in an open slot with nothing to be the same as", () => {

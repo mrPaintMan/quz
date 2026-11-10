@@ -1,8 +1,7 @@
 import { v } from "convex/values";
 import { reviewOf } from "@/domain/answering/registry";
 import { judgeMessage, usesAiJudge } from "@/domain/review/aiJudge";
-import { normalizeForComparison } from "@/domain/questionTypes/normalizeForComparison";
-import { withVerdicts, type Verdict } from "@/domain/review/typedReview";
+import { givenNames, withVerdicts } from "@/domain/review/typedReview";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery, type MutationCtx, type QueryCtx } from "../_generated/server";
@@ -38,18 +37,6 @@ export async function startAiJudging(ctx: MutationCtx, ids: GameQuestion) {
   await ctx.scheduler.runAfter(0, internal.aiJudge.judge.judgeQuestion, ids);
 }
 
-// The names already given to right items outside a list's key, each once, so the AI judge names
-// new forms of them the same way (D53).
-function knownItemsOf(verdicts: Verdict[]) {
-  const names = new Map<string, { field: number; name: string }>();
-  for (const { slot, target } of verdicts) {
-    if (typeof target !== "string") continue;
-    const key = JSON.stringify([slot, normalizeForComparison(target)]);
-    if (!names.has(key)) names.set(key, { field: slot, name: target.trim() });
-  }
-  return [...names.values()];
-}
-
 // What to ask the AI judge about a question: the sent texts no spelling matched and no one has
 // judged yet. null when there is nothing to ask.
 export const prepareJudging = internalQuery({
@@ -65,7 +52,7 @@ export const prepareJudging = internalQuery({
       .map(({ slot, text, written, teamCount }) => ({ slot, text, written, teamCount }));
     if (items.length === 0) return null;
     const slots = review.slots(question.content);
-    return { message: judgeMessage(question.prompt, slots, items, knownItemsOf(verdicts)), slots, items };
+    return { message: judgeMessage(question.prompt, slots, items, givenNames(verdicts).map(({ slot, name }) => ({ field: slot, name }))), slots, items };
   },
 });
 

@@ -37,7 +37,9 @@ export function VerdictChoices({ slot, item, onChoose }: { slot: Slot; item: Ite
     ...slot.options.map((label, index) => ({ value: `#${index}`, label, target: index as Target })),
     ...slot.names.filter((name) => normalizeForComparison(name) !== own).map((name) => ({ value: `=${name}`, label: name, target: name as Target })),
   ];
-  const chosen = item.isJudged && !isOwn ? choices.find((choice) => choice.target === item.target)?.value : undefined;
+  const isTarget = (target: Target) =>
+    typeof target === "string" && typeof item.target === "string" ? normalizeForComparison(target) === normalizeForComparison(item.target) : target === item.target;
+  const chosen = item.isJudged && !isOwn ? choices.find((choice) => isTarget(choice.target))?.value : undefined;
   const prompt = slot.isOpen ? "Samma som…" : "Rätt som…";
 
   return (

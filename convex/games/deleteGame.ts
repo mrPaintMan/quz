@@ -7,8 +7,8 @@ import { teamsOfGame } from "../teams/teamsOfGame";
 export const MAX_ANSWERS_PER_GAME = 4000;
 // Far more than any night's bonuses and activity scores; also the bound scores read (scoresOfGame).
 export const MAX_ADJUSTMENTS_PER_GAME = 1000;
-// Some 50 questions with a few dozen judged texts each, with room to spare.
-export const MAX_VERDICTS_PER_GAME = 4000;
+// Some 50 questions with a few dozen judged texts each, and a few full lists, with room to spare.
+export const MAX_VERDICTS_PER_GAME = 8000;
 // Far more questions than a night has; bounds the AI judge's progress records of a game.
 export const MAX_QUESTIONS_PER_GAME = 1000;
 

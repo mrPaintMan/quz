@@ -1,6 +1,7 @@
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { reviewOf } from "@/domain/answering/registry";
 import { isBlank } from "@/domain/questionTypes/isBlank";
+import { normalizeForComparison } from "@/domain/questionTypes/normalizeForComparison";
 import type { ReviewItem, ReviewSlot, Target, Verdict } from "./typedReview";
 
 // What the AI judge is told once, before each question's texts (D52).
@@ -62,7 +63,7 @@ export function judgeMessage(prompt: string, slots: ReviewSlot[], items: ReviewI
 function rightTarget(slot: ReviewSlot | undefined, entry: Record<string, unknown>): Target | undefined {
   const { option, item } = entry;
   if (typeof option === "number" && Number.isInteger(option) && option >= 0 && option < (slot?.options.length ?? 0)) return option;
-  if (slot?.isOpen && typeof item === "string" && !isBlank(item)) return item.trim();
+  if (slot?.isOpen && typeof item === "string" && normalizeForComparison(item) !== "") return item.trim();
   return undefined;
 }
 

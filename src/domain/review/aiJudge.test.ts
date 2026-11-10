@@ -112,7 +112,7 @@ describe("readJudgeReply", () => {
       verdicts: [
         { id: 0, verdict: "right", option: 0, item: "" },
         { id: 1, verdict: "right", option: -1, item: " Malmö " },
-        { id: 2, verdict: "right", option: -1, item: "" },
+        { id: 2, verdict: "right", option: -1, item: " . " },
       ],
     };
     expect(readJudgeReply(reply, open, texts)).toEqual([

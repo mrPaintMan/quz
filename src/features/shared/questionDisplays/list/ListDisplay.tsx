@@ -20,8 +20,8 @@ export function ListAnswer({ revealed }: RevealedDisplayProps<"list">) {
   return (
     <div className="flex flex-col gap-[0.8cqw]">
       <ul className={`grid gap-[0.6cqw] ${columns}`}>
-        {shown.map((item) => (
-          <li key={item.name} className="flex items-baseline justify-between gap-[1cqw] rounded-[0.8cqw] bg-card px-[1.2cqw] py-[0.5cqw] text-[1.8cqw]">
+        {shown.map((item, index) => (
+          <li key={index} className="flex items-baseline justify-between gap-[1cqw] rounded-[0.8cqw] bg-card px-[1.2cqw] py-[0.5cqw] text-[1.8cqw]">
             <span className="truncate font-semibold">{item.name}</span>
             <span className="shrink-0 text-[1.3cqw] text-muted-foreground">{item.teamCount} lag</span>
           </li>

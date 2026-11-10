@@ -16,8 +16,11 @@ export function ListInput({ answer, disabled, onChange }: AnswerInputProps<"list
   const field = useRef<HTMLInputElement>(null);
   const items = answer?.items ?? [];
 
-  const add = () => {
+  // Adds what is typed; also when the field loses focus, such as on tapping "Skicka svar", so a last
+  // answer isn't lost. Pressing "Lägg till" keeps the keyboard up for the next one.
+  const add = (keepFocus: boolean) => {
     const item = text.trim();
+    if (keepFocus) field.current?.focus();
     if (item === "") return;
     if (items.some((existing) => normalizeForComparison(existing) === normalizeForComparison(item))) {
       setProblem("Det finns redan.");
@@ -28,8 +31,6 @@ export function ListInput({ answer, disabled, onChange }: AnswerInputProps<"list
       setText("");
       setProblem(null);
     }
-    // Keeps the keyboard up on a phone for the next answer.
-    field.current?.focus();
   };
   const remove = (index: number) => onChange({ type: "list", items: items.filter((_, other) => other !== index) });
 
@@ -40,7 +41,7 @@ export function ListInput({ answer, disabled, onChange }: AnswerInputProps<"list
           className="flex gap-2"
           onSubmit={(event) => {
             event.preventDefault();
-            add();
+            add(true);
           }}
         >
           <Input
@@ -51,6 +52,7 @@ export function ListInput({ answer, disabled, onChange }: AnswerInputProps<"list
             aria-label="Nytt svar"
             autoComplete="off"
             enterKeyHint="done"
+            onBlur={() => add(false)}
             onChange={(event) => {
               setText(event.target.value);
               setProblem(null);
@@ -67,7 +69,10 @@ export function ListInput({ answer, disabled, onChange }: AnswerInputProps<"list
           {problem}
         </p>
       )}
-      <p className="text-sm text-primary">{items.length} svar</p>
+      <p className="flex justify-between gap-3 text-sm">
+        <span className="text-primary">{items.length} svar</span>
+        {!disabled && <span className="text-muted-foreground">Bara tillagda svar räknas.</span>}
+      </p>
       <ul className="flex flex-col gap-1.5">
         {items
           .map((item, index) => ({ item, index }))
