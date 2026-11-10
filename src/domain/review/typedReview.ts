@@ -6,8 +6,9 @@ import { normalizeForComparison } from "@/domain/questionTypes/normalizeForCompa
 export type ReviewSlot = { title: string; options: { label: string; spellings: string[] }[] };
 
 // The hosts' decision on a text written in a slot, compared as normalized: the option it counts
-// as, or null for wrong. Shared by every team that wrote the same text there.
-export type Verdict = { slot: number; text: string; target: number | null };
+// as, or null for wrong. Shared by every team that wrote the same text there. byAi marks one the
+// AI judge gave (D52).
+export type Verdict = { slot: number; text: string; target: number | null; byAi?: boolean };
 
 // A text that matched no accepted spelling exactly, with how it was first written and how many
 // teams wrote it, for the hosts to judge once.
@@ -70,13 +71,13 @@ export function gradeTyped<Content, Answer>(
   });
 }
 
-// Each text to review with the hosts' verdict on it so far: judged or not, and the option it
-// counts as (null for wrong, or while unjudged).
+// Each text to review with the verdict on it so far: judged or not, the option it counts as (null
+// for wrong, or while unjudged) and whether the AI judge gave it.
 export function withVerdicts(items: ReviewItem[], verdicts: Verdict[]) {
-  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
+  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict]));
   return items.map((item) => {
-    const target = judged.get(keyOf(item.slot, item.text));
-    return { ...item, isJudged: target !== undefined, target: target ?? null };
+    const verdict = judged.get(keyOf(item.slot, item.text));
+    return { ...item, isJudged: verdict !== undefined, target: verdict?.target ?? null, byAi: verdict?.byAi ?? false };
   });
 }
 

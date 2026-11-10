@@ -64,8 +64,8 @@ export function FreeTextEditor({ content, onChange }: QuestionEditorProps<"freeT
         className="max-w-40"
       />
       <SwitchField
-        label="Rätta med ungefärlig matchning"
-        description="Nästan rättstavat räknas; osäkra svar hamnar hos er för granskning."
+        label="Låt AI bedöma nästan rätt svar"
+        description="Svar som inte stämmer exakt bedöms av AI när frågan stängs; osäkra hamnar hos er för granskning."
         checked={content.fuzzy}
         onChange={(fuzzy) => onChange({ ...content, fuzzy })}
       />

@@ -19,6 +19,6 @@ describe("verdictsOfQuestion", () => {
       await ctx.db.insert("verdicts", { gameId: otherGameId, questionId, slot: 0, text: "saffron", target: 0 });
       return verdictsOfQuestion(ctx, gameId, questionId);
     });
-    expect(verdicts).toEqual([{ slot: 0, text: "safran", target: 0 }]);
+    expect(verdicts).toEqual([{ slot: 0, text: "safran", target: 0, byAi: false }]);
   });
 });

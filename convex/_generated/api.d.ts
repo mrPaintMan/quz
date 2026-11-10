@@ -9,6 +9,9 @@
  */
 
 import type * as adjustments_table from "../adjustments/table.js";
+import type * as aiJudge_judge from "../aiJudge/judge.js";
+import type * as aiJudge_judging from "../aiJudge/judging.js";
+import type * as aiJudge_table from "../aiJudge/table.js";
 import type * as answers_answerContent from "../answers/answerContent.js";
 import type * as answers_lockedAnswersOfQuestion from "../answers/lockedAnswersOfQuestion.js";
 import type * as answers_lockDraftsOfQuestion from "../answers/lockDraftsOfQuestion.js";
@@ -103,6 +106,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "adjustments/table": typeof adjustments_table;
+  "aiJudge/judge": typeof aiJudge_judge;
+  "aiJudge/judging": typeof aiJudge_judging;
+  "aiJudge/table": typeof aiJudge_table;
   "answers/answerContent": typeof answers_answerContent;
   "answers/lockedAnswersOfQuestion": typeof answers_lockedAnswersOfQuestion;
   "answers/lockDraftsOfQuestion": typeof answers_lockDraftsOfQuestion;

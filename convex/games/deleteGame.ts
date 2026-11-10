@@ -9,6 +9,8 @@ export const MAX_ANSWERS_PER_GAME = 4000;
 export const MAX_ADJUSTMENTS_PER_GAME = 1000;
 // Some 50 questions with a few dozen judged texts each, with room to spare.
 export const MAX_VERDICTS_PER_GAME = 4000;
+// Far more questions than a night has; bounds the AI judge's progress records of a game.
+export const MAX_QUESTIONS_PER_GAME = 1000;
 
 // Deletes a game with everything the teams did in it.
 export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {
@@ -24,11 +26,16 @@ export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {
     .query("verdicts")
     .withIndex("by_gameId_and_questionId_and_slot_and_text", (q) => q.eq("gameId", gameId))
     .take(MAX_VERDICTS_PER_GAME);
+  const aiJudgings = await ctx.db
+    .query("aiJudgings")
+    .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", gameId))
+    .take(MAX_QUESTIONS_PER_GAME);
   // Deleting only part of a game would leave answers pointing at a game that is gone.
   if (
     answers.length === MAX_ANSWERS_PER_GAME ||
     adjustments.length === MAX_ADJUSTMENTS_PER_GAME ||
-    verdicts.length === MAX_VERDICTS_PER_GAME
+    verdicts.length === MAX_VERDICTS_PER_GAME ||
+    aiJudgings.length === MAX_QUESTIONS_PER_GAME
   ) {
     throw new ConvexError("Spelet har för många svar för att tas bort på en gång.");
   }
@@ -37,6 +44,7 @@ export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {
     ...answers.map((answer) => ctx.db.delete("answers", answer._id)),
     ...adjustments.map((adjustment) => ctx.db.delete("adjustments", adjustment._id)),
     ...verdicts.map((verdict) => ctx.db.delete("verdicts", verdict._id)),
+    ...aiJudgings.map((judging) => ctx.db.delete("aiJudgings", judging._id)),
     ...teams.map((team) => ctx.db.delete("teams", team._id)),
   ]);
   await ctx.db.delete("games", gameId);

@@ -11,12 +11,19 @@ Not done yet: these steps need your Convex and Vercel logins. Do them once, then
    npx convex env set HOST_PASSPHRASE "<production passphrase>" --prod
    ```
 
-3. In the dashboard: **Settings → URL & Deploy Key → Generate Production Deploy Key**. Copy it for step 2.
+3. Set the Anthropic API key for the AI judge (D52) on both deployments, from console.anthropic.com (an account with a little prepaid credit). Without it the judge marks every question failed and the hosts judge by hand:
+
+   ```bash
+   npx convex env set ANTHROPIC_API_KEY "<key>"
+   npx convex env set ANTHROPIC_API_KEY "<key>" --prod
+   ```
+
+4. In the dashboard: **Settings → URL & Deploy Key → Generate Production Deploy Key**. Copy it for step 2.
 
 ## 2. Vercel project
 
 1. On vercel.com: **Add New → Project**, import `mrPaintMan/quz`. Framework preset: Next.js (detected).
-2. Environment variable: `CONVEX_DEPLOY_KEY` = the production deploy key from step 1.3 (Production environment only).
+2. Environment variable: `CONVEX_DEPLOY_KEY` = the production deploy key from step 1.4 (Production environment only).
 3. Override the **Build Command** so every deploy also deploys the Convex functions and passes the URL to Next.js:
 
    ```bash

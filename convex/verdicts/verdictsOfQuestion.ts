@@ -11,5 +11,5 @@ export async function verdictsOfQuestion(ctx: QueryCtx, gameId: Id<"games">, que
     .query("verdicts")
     .withIndex("by_gameId_and_questionId_and_slot_and_text", (q) => q.eq("gameId", gameId).eq("questionId", questionId))
     .take(MAX_VERDICTS_PER_QUESTION);
-  return verdicts.map(({ slot, text, target }) => ({ slot, text, target }));
+  return verdicts.map(({ slot, text, target, byAi }) => ({ slot, text, target, byAi: byAi ?? false }));
 }
