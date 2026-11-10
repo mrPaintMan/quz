@@ -8,7 +8,8 @@ import { verdictsOfQuestion } from "./verdictsOfQuestion";
 
 // Host-only, as it shows what the teams wrote: the typed texts of a closed question that matched
 // no accepted spelling, each once with how many teams wrote it and the verdict so far (D51), and
-// how the AI judge is getting on (D50). null for a question without typed answers, one still open, or one that is gone.
+// how the AI judge is getting on (D52). null for a question without typed answers, one still
+// open, or one that is gone.
 export const getReview = hostQuery({
   args: { gameId: v.id("games"), questionId: v.id("questions") },
   handler: async (ctx, { gameId, questionId }) => {

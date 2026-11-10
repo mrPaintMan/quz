@@ -1,8 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { atLobby, setupConvexTest } from "../test.setup";
 import { moveScreen } from "./moveScreen";
 
 describe("moveScreen", () => {
+  // Keeps convex-test from running a queued AI judge on its own.
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("saves the new screen with its place in the sequence", async () => {
     const t = setupConvexTest();
     const game = await t.run(async (ctx) => {

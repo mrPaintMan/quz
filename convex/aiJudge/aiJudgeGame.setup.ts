@@ -36,3 +36,9 @@ export async function setupJudging(content: QuestionContent = freeText) {
   });
   return { t, ...ids };
 }
+
+// Marks the question as being judged, as closing it does, without queueing the AI judge: convex-test
+// would run the queued action on its own.
+export async function markJudging({ t, gameId, questionId }: Awaited<ReturnType<typeof setupJudging>>) {
+  await t.run((ctx) => ctx.db.insert("aiJudgings", { gameId, questionId, status: "judging" }));
+}

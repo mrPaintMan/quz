@@ -78,6 +78,16 @@ describe("readJudgeReply", () => {
     expect(readJudgeReply(reply, slots, items)).toEqual([{ slot: 1, text: "gin", target: null }]);
   });
 
+  it("counts only an id's first entry, even when that one is unsure", () => {
+    const reply = {
+      verdicts: [
+        { id: 0, verdict: "unsure", option: 0 },
+        { id: 0, verdict: "right", option: 0 },
+      ],
+    };
+    expect(readJudgeReply(reply, slots, items)).toEqual([]);
+  });
+
   it("gives nothing for a reply of the wrong shape", () => {
     expect(readJudgeReply(null, slots, items)).toEqual([]);
     expect(readJudgeReply({ verdicts: "alla rätt" }, slots, items)).toEqual([]);

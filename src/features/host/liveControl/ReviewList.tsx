@@ -10,7 +10,7 @@ import { useHostQuery } from "@/features/host/shared/useHostQuery";
 // On a typed question's answer screen: each text no accepted spelling matched, once for every
 // team that wrote it, for the hosts to judge right (as which answer, when there are several) or
 // wrong (D51). The AI judge fills in what it is sure of, marked AI, and the hosts can change it
-// (D50). Unjudged texts score nothing, so the night never waits on the list.
+// (D52). Unjudged texts score nothing, so the night never waits on the list.
 export function ReviewList({ gameId, questionId }: { gameId: Id<"games">; questionId: Id<"questions"> }) {
   const review = useHostQuery(api.verdicts.queries.getReview, { gameId, questionId });
   const judge = useHostMutation(api.verdicts.mutations.judgeText);
@@ -25,7 +25,7 @@ export function ReviewList({ gameId, questionId }: { gameId: Id<"games">; questi
         {review.items.length > 0 && <span className="text-sm text-muted-foreground">{left === 0 ? "Allt granskat" : `${left} kvar`}</span>}
       </div>
       {review.aiStatus === "judging" && <p className="text-sm text-primary">AI:n bedömer svaren…</p>}
-      {review.aiStatus === "failed" && <p className="text-sm text-destructive">AI:n kunde inte bedöma svaren. Granska dem själva.</p>}
+      {review.aiStatus === "failed" && left > 0 && <p className="text-sm text-destructive">AI:n kunde inte bedöma svaren. Granska dem själva.</p>}
       {review.items.length === 0 ? (
         <p className="text-sm text-muted-foreground">Inga svar att granska.</p>
       ) : (

@@ -3,7 +3,7 @@ import { reviewOf } from "@/domain/answering/registry";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import type { ReviewItem, ReviewSlot, Verdict } from "./typedReview";
 
-// What the AI judge is told once, before each question's texts (D50).
+// What the AI judge is told once, before each question's texts (D52).
 export const JUDGE_INSTRUCTIONS = `You judge typed answers in a Swedish Christmas quiz played by friends. Each answer belongs to a field of the question, and each field has one or more accepted answers, numbered as options. For every answer, decide whether the team meant one of its field's accepted answers.
 
 - right: it clearly names the same thing as an accepted answer, allowing misspellings, typos, missing or wrong accents, another word order, singular or plural, definite forms, abbreviations and common alternative names. Set option to that accepted answer's number.
@@ -59,8 +59,11 @@ const isRecord = (value: unknown): value is Record<string, unknown> => typeof va
 export function readJudgeReply(reply: unknown, slots: ReviewSlot[], items: ReviewItem[]): Verdict[] {
   const entries = isRecord(reply) && Array.isArray(reply.verdicts) ? reply.verdicts : [];
   const verdicts = new Map<number, Verdict>();
+  // Only an id's first entry counts, whatever it says.
+  const seen = new Set<number>();
   for (const entry of entries) {
-    if (!isRecord(entry) || typeof entry.id !== "number" || verdicts.has(entry.id)) continue;
+    if (!isRecord(entry) || typeof entry.id !== "number" || seen.has(entry.id)) continue;
+    seen.add(entry.id);
     const item = items[entry.id];
     if (item === undefined) continue;
     const optionCount = slots[item.slot]?.options.length ?? 0;

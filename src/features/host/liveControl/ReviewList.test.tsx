@@ -83,4 +83,11 @@ describe("ReviewList", () => {
     renderList();
     expect(screen.getByText("AI:n kunde inte bedöma svaren. Granska dem själva.")).toBeInTheDocument();
   });
+
+  it("drops the AI's failure once the hosts have judged everything", () => {
+    review.mockReturnValue({ slots: [{ title: "", options: ["Saffran"] }], items: [item(0, "safran", { isJudged: true, target: 0 })], aiStatus: "failed" });
+    renderList();
+    expect(screen.getByText("Allt granskat")).toBeInTheDocument();
+    expect(screen.queryByText(/AI:n kunde inte/)).not.toBeInTheDocument();
+  });
 });

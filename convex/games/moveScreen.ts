@@ -18,7 +18,7 @@ import { requireRunningGame } from "./requireRunningGame";
 // double press or both hosts pressing at once moves only one screen. A question's timer starts
 // over each time the question shows, also when stepping back to it, and so does its clip.
 // Stepping on from a question closes it and locks its drafts (D41), and the first time also asks
-// the AI judge about its typed texts (D50); a closed question shows again without a timer, as no
+// the AI judge about its typed texts (D52); a closed question shows again without a timer, as no
 // one can answer it.
 export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Screen, step: 1 | -1) {
   const game = await requireRunningGame(ctx, gameId);

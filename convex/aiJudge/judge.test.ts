@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { internal } from "../_generated/api";
-import { setupJudging } from "./aiJudgeGame.setup";
+import { markJudging, setupJudging } from "./aiJudgeGame.setup";
 import { aiJudgingOf } from "./judging";
 
 const { create } = vi.hoisted(() => ({ create: vi.fn() }));
@@ -18,6 +18,7 @@ const replyWith = (verdicts: unknown[], stop_reason = "end_turn") => ({
 async function judge() {
   const setup = await setupJudging();
   const { t, gameId, questionId } = setup;
+  await markJudging(setup);
   await t.action(internal.aiJudge.judge.judgeQuestion, { gameId, questionId });
   return t.run(async (ctx) => ({
     verdicts: (await ctx.db.query("verdicts").collect()).map(({ text, target, byAi }) => ({ text, target, byAi })),
@@ -67,7 +68,9 @@ describe("judgeQuestion", () => {
   });
 
   it("marks the judging done without asking when nothing is left to judge", async () => {
-    const { t, gameId, questionId } = await setupJudging();
+    const setup = await setupJudging();
+    const { t, gameId, questionId } = setup;
+    await markJudging(setup);
     await t.run(async (ctx) => {
       await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "kanel", target: null });
       await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "safran", target: 0 });

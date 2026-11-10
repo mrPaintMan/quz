@@ -1,7 +1,7 @@
 import { defineTable } from "convex/server";
 import { v } from "convex/values";
 
-// How the AI judge is getting on with a question in a game, for the hosts' review list (D50).
+// How the AI judge is getting on with a question in a game, for the hosts' review list (D52).
 export const aiJudgingsTable = defineTable({
   gameId: v.id("games"),
   questionId: v.id("questions"),

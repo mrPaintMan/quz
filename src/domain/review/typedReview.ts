@@ -7,7 +7,7 @@ export type ReviewSlot = { title: string; options: { label: string; spellings: s
 
 // The hosts' decision on a text written in a slot, compared as normalized: the option it counts
 // as, or null for wrong. Shared by every team that wrote the same text there. byAi marks one the
-// AI judge gave (D50).
+// AI judge gave (D52).
 export type Verdict = { slot: number; text: string; target: number | null; byAi?: boolean };
 
 // A text that matched no accepted spelling exactly, with how it was first written and how many
