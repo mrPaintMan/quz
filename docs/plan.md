@@ -72,7 +72,7 @@ M3 continues with lists (answer input, TV, the review list and the AI judge, D50
 - [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Fritext, exact answers until the AI judge (D49)
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
-- [ ] AI judge and review for list questions (D50)
+- [ ] AI judge and review for list questions (D50). When lists and På spåret are built, replace their editors' old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) and the list's "Låt AI föreslå rättning" with the AI judge's switch
 - [ ] Later: show each team which of its answers were judged right or wrong (D50)
 - [ ] Host overrides and manual points
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
