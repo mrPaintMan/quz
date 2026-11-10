@@ -2,6 +2,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent, AnsweredType } from "@convex/answers/answerContent";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { rulesFor } from "@/domain/questionTypes/registry";
+import { freeTextAnswering, type FreeTextRevealed, type FreeTextShown } from "@/domain/questionTypes/freeText/freeTextAnswering";
 import {
   ingredientsAnswering,
   type IngredientsRevealed,
@@ -18,8 +19,14 @@ import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/quest
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown | NumberShown | SortShown | MatchShown | IngredientsShown;
-export type RevealedAnswer = MultipleChoiceRevealed | NumberRevealed | SortRevealed | MatchRevealed | IngredientsRevealed;
+export type ShownQuestion = MultipleChoiceShown | FreeTextShown | NumberShown | SortShown | MatchShown | IngredientsShown;
+export type RevealedAnswer =
+  | MultipleChoiceRevealed
+  | FreeTextRevealed
+  | NumberRevealed
+  | SortRevealed
+  | MatchRevealed
+  | IngredientsRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -29,7 +36,7 @@ type Registry = {
 // phones keep pointing at the TV for it. Activities are scored by the hosts and have none.
 export const answeringRegistry: Registry = {
   multipleChoice: multipleChoiceAnswering,
-  freeText: null,
+  freeText: freeTextAnswering,
   number: numberAnswering,
   sort: sortAnswering,
   match: matchAnswering,

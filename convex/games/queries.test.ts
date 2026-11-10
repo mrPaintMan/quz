@@ -50,7 +50,7 @@ describe("getRunningGame", () => {
       await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 });
     });
     const game = await t.query(api.games.queries.getRunningGame, {});
-    expect(game?.view).toEqual({ kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vilken krydda?", answeredInApp: true, shown: null });
+    expect(game?.view).toEqual({ kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vilken krydda?", answeredInApp: true, shown: { type: "freeText", labels: [""] } });
     expect(JSON.stringify(game)).not.toMatch(/kanel/i);
   });
 });

@@ -1,5 +1,6 @@
 import type { ContentOf } from "@convex/questions/questionContent";
 import { hasSpelling } from "@/domain/questionTypes/hasSpelling";
+import { subQuestionLetter } from "./subQuestionLetter";
 import { problemIf } from "@/domain/questionTypes/problemIf";
 import { problemIfNotPositive } from "@/domain/questionTypes/problemIfNotPositive";
 import type { QuestionTypeRules } from "@/domain/questionTypes/questionTypeRules";
@@ -15,7 +16,7 @@ function findFieldProblems(content: FreeTextContent) {
   return content.fields.flatMap((field, index) =>
     problemIf(
       !hasSpelling(field.acceptedAnswers),
-      single ? "Lägg till minst ett godkänt svar." : `Delfråga ${index + 1} saknar godkänt svar.`,
+      single ? "Lägg till minst ett godkänt svar." : `Delfråga ${subQuestionLetter(index)}) saknar godkänt svar.`,
     ),
   );
 }

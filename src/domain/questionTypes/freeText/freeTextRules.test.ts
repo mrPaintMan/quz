@@ -29,7 +29,7 @@ describe("freeTextRules", () => {
 
   it("names the sub-question that lacks an accepted answer", () => {
     expect(messagesFor({ ...validContent, fields: [field(["a"]), field([])] })).toEqual([
-      "Delfråga 2 saknar godkänt svar.",
+      "Delfråga b) saknar godkänt svar.",
     ]);
   });
 

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { describeScreen } from "./describeScreen";
 
 const freeText: QuestionContent = { type: "freeText", fields: [{ label: "", acceptedAnswers: ["kanel"] }], pointsPerField: 1, fuzzy: true };
+const list: QuestionContent = { type: "list", acceptedItems: [], pointsPerItem: 1, fuzzy: true, aiAssist: false };
 const activity: QuestionContent = { type: "activity", maxPoints: 5 };
 const roundId = (id: string) => id as Id<"rounds">;
 const questionId = (id: string) => id as Id<"questions">;
@@ -17,7 +18,7 @@ const rounds = [
       { _id: questionId("q2"), prompt: "Baka ett pepparkakshus", content: activity },
     ],
   },
-  { _id: roundId("julfilm"), title: "Julfilm", questions: [{ _id: questionId("q3"), prompt: "Vem är Kevin?", content: freeText }] },
+  { _id: roundId("julfilm"), title: "Julfilm", questions: [{ _id: questionId("q3"), prompt: "Nämn julfilmer", content: list }] },
 ];
 
 describe("describeScreen", () => {
@@ -53,7 +54,7 @@ describe("describeScreen", () => {
       kind: "answer",
       roundNumber: 2,
       questionNumber: 1,
-      prompt: "Vem är Kevin?",
+      prompt: "Nämn julfilmer",
       revealed: null,
     });
   });
