@@ -7,6 +7,7 @@ import { stepScreen } from "@/domain/screenSequence/stepScreen";
 import { startTimerForScreen } from "@/domain/timer/startTimerForScreen";
 import type { Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
+import { startAiJudging } from "../aiJudge/judging";
 import { lockDraftsOfQuestion } from "../answers/lockDraftsOfQuestion";
 import { scheduleTimeOutLock } from "../answers/timeOut";
 import type { Screen } from "./screen";
@@ -16,8 +17,9 @@ import { requireRunningGame } from "./requireRunningGame";
 // Steps from the screen the host saw, and does nothing if the game has already moved on, so a
 // double press or both hosts pressing at once moves only one screen. A question's timer starts
 // over each time the question shows, also when stepping back to it, and so does its clip.
-// Stepping on from a question closes it and locks its drafts (D41); a closed question shows
-// again without a timer, as no one can answer it.
+// Stepping on from a question closes it and locks its drafts (D41), and the first time also asks
+// the AI judge about its typed texts (D50); a closed question shows again without a timer, as no
+// one can answer it.
 export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Screen, step: 1 | -1) {
   const game = await requireRunningGame(ctx, gameId);
   const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
@@ -36,4 +38,7 @@ export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Sc
     closedQuestionIds,
   });
   await scheduleTimeOutLock(ctx, { _id: gameId, screen, timer });
+  if (closingId !== null && !(game.closedQuestionIds ?? []).includes(closingId)) {
+    await startAiJudging(ctx, { gameId, questionId: closingId });
+  }
 }

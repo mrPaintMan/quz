@@ -12,7 +12,7 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () =
 
 const gameId = "game1" as Id<"games">;
 const questionId = "q1" as Id<"questions">;
-const item = (slot: number, text: string, extra = {}) => ({ slot, text, written: text, teamCount: 1, isJudged: false, target: null, ...extra });
+const item = (slot: number, text: string, extra = {}) => ({ slot, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
 
 function renderList() {
   render(
@@ -34,7 +34,7 @@ describe("ReviewList", () => {
   });
 
   it("says when there is nothing to judge", () => {
-    review.mockReturnValue({ slots: [{ title: "", options: ["Saffran"] }], items: [] });
+    review.mockReturnValue({ slots: [{ title: "", options: ["Saffran"] }], items: [], aiStatus: null });
     renderList();
     expect(screen.getByText("Inga svar att granska.")).toBeInTheDocument();
   });
@@ -46,6 +46,7 @@ describe("ReviewList", () => {
         { title: "b) Låt", options: ["Waterloo"] },
       ],
       items: [item(0, "abbba", { written: "Abbba", teamCount: 2 }), item(1, "waterlo", { isJudged: true, target: 0 })],
+      aiStatus: null,
     });
     renderList();
     expect(screen.getByText("1 kvar")).toBeInTheDocument();
@@ -61,11 +62,25 @@ describe("ReviewList", () => {
   });
 
   it("asks which ingredient a text counts as", async () => {
-    review.mockReturnValue({ slots: [{ title: "", options: ["Vodka", "Kahlúa"] }], items: [item(0, "kahlua", { isJudged: true, target: null })] });
+    review.mockReturnValue({ slots: [{ title: "", options: ["Vodka", "Kahlúa"] }], items: [item(0, "kahlua", { isJudged: true, target: null })], aiStatus: null });
     renderList();
     expect(screen.getByText("Allt granskat")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Fel" })).toHaveAttribute("aria-pressed", "true");
     await userEvent.click(screen.getByRole("button", { name: "Kahlúa" }));
     expect(judgeText).toHaveBeenCalledWith({ gameId, questionId, slot: 0, text: "kahlua", target: 1 });
+  });
+
+  it("says while the AI judges, and marks the verdicts it gave", () => {
+    review.mockReturnValue({ slots: [{ title: "", options: ["Saffran"] }], items: [item(0, "safran", { isJudged: true, target: 0, byAi: true }), item(0, "gurkmeja")], aiStatus: "judging" });
+    renderList();
+    expect(screen.getByText("AI:n bedömer svaren…")).toBeInTheDocument();
+    expect(within(screen.getByText("safran").closest("li")!).getByTitle("Bedömt av AI")).toBeInTheDocument();
+    expect(within(screen.getByText("gurkmeja").closest("li")!).queryByTitle("Bedömt av AI")).not.toBeInTheDocument();
+  });
+
+  it("says when the AI couldn't judge, so the hosts do it themselves", () => {
+    review.mockReturnValue({ slots: [{ title: "", options: ["Saffran"] }], items: [item(0, "safran")], aiStatus: "failed" });
+    renderList();
+    expect(screen.getByText("AI:n kunde inte bedöma svaren. Granska dem själva.")).toBeInTheDocument();
   });
 });

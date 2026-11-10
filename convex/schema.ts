@@ -1,5 +1,6 @@
 import { defineSchema } from "convex/server";
 import { adjustmentsTable } from "./adjustments/table";
+import { aiJudgingsTable } from "./aiJudge/table";
 import { answersTable } from "./answers/table";
 import { gamesTable } from "./games/table";
 import { questionsTable } from "./questions/table";
@@ -17,4 +18,5 @@ export default defineSchema({
   answers: answersTable,
   adjustments: adjustmentsTable,
   verdicts: verdictsTable,
+  aiJudgings: aiJudgingsTable,
 });

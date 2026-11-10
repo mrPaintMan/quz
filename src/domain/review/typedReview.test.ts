@@ -79,13 +79,13 @@ describe("withVerdicts", () => {
     ];
     const verdicts = [
       { slot: 1, text: "gin", target: null },
-      { slot: 1, text: "wodka", target: 0 },
+      { slot: 1, text: "wodka", target: 0, byAi: true },
       { slot: 0, text: "wodka", target: 0 },
     ];
-    expect(withVerdicts(items, verdicts).map(({ text, isJudged, target }) => [text, isJudged, target])).toEqual([
-      ["abbba", false, null],
-      ["gin", true, null],
-      ["wodka", true, 0],
+    expect(withVerdicts(items, verdicts).map(({ text, isJudged, target, byAi }) => [text, isJudged, target, byAi])).toEqual([
+      ["abbba", false, null, false],
+      ["gin", true, null, false],
+      ["wodka", true, 0, true],
     ]);
   });
 });

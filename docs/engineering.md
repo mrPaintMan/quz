@@ -81,7 +81,7 @@ src/
     answering/                   # per-type answering registry: what is shown, revealed, complete and how it is graded (D42)
     screenSequence/              # derives the TV screen order from a quiz (D15)
     scoring/                     # grading answers and summing the leaderboard (D43)
-    review/                      # the hosts' verdicts on typed texts, shared by the types that have them (D51)
+    review/                      # the hosts' verdicts on typed texts and the AI judge's prompt and reply (D51, D52)
   features/
     host/                        # the two hosts
       shared/                    # host session, useHostQuery / useHostMutation, header, confirm button

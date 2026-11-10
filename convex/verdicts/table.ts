@@ -12,4 +12,6 @@ export const verdictsTable = defineTable({
   text: v.string(),
   // The accepted answer, by its place in the slot, that the text counts as; null for wrong.
   target: v.union(v.number(), v.null()),
+  // Set when the AI judge gave the verdict (D50); a host's verdict replaces it.
+  byAi: v.optional(v.boolean()),
 }).index("by_gameId_and_questionId_and_slot_and_text", ["gameId", "questionId", "slot", "text"]);

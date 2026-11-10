@@ -14,8 +14,8 @@ export function IngredientsEditor({ content, onChange }: QuestionEditorProps<"in
       <AnswerKeyField label="Ingredienser" value={content.items} onChange={(items) => onChange({ ...content, items })} />
       <NumberField label="Poäng per rätt ingrediens" value={content.pointsPerItem} onChange={(pointsPerItem) => onChange({ ...content, pointsPerItem })} className="max-w-48" />
       <SwitchField
-        label="Rätta med ungefärlig matchning"
-        description="Nästan rättstavat räknas; osäkra svar hamnar hos er för granskning."
+        label="Låt AI bedöma nästan rätt svar"
+        description="Svar som inte stämmer exakt bedöms av AI när frågan stängs; osäkra hamnar hos er för granskning."
         checked={content.fuzzy}
         onChange={(fuzzy) => onChange({ ...content, fuzzy })}
       />

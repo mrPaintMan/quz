@@ -47,12 +47,12 @@ describe("FreeTextEditor", () => {
     expect(screen.getByLabelText("Poäng per delfråga")).toBeInTheDocument();
   });
 
-  it("edits the points and fuzzy matching", async () => {
+  it("edits the points and whether the AI judges near answers", async () => {
     const onChange = vi.fn();
     render(<FreeTextEditor content={single} onChange={onChange} />);
     await userEvent.type(screen.getByLabelText("Poäng"), "5");
     expect(onChange.mock.lastCall?.[0].pointsPerField).toBe(15);
-    await userEvent.click(screen.getByRole("switch"));
+    await userEvent.click(screen.getByRole("switch", { name: "Låt AI bedöma nästan rätt svar" }));
     expect(onChange.mock.lastCall?.[0].fuzzy).toBe(false);
   });
 

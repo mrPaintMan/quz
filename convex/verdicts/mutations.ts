@@ -40,7 +40,7 @@ export const judgeText = hostMutation({
       )
       .unique();
     if (existing) {
-      await ctx.db.patch("verdicts", existing._id, { target });
+      await ctx.db.patch("verdicts", existing._id, { target, byAi: undefined });
       return;
     }
     await ctx.db.insert("verdicts", { gameId, questionId, slot, text: normalized, target });

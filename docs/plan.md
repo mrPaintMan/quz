@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 continues with the AI judge (D50), filling in the hosts' review list (D51): Claude Haiku 5.5 judges the unmatched texts when the question closes, right and wrong count at once and unsure ones wait for the hosts. Still open with the user: whether judging starts on Nästa (suggested) or as soon as every team has sent. The user has set `ANTHROPIC_API_KEY` in Convex dev and production. Then lists, then activities and manual points.
+M3 continues with lists (answer input, TV, the review list and the AI judge, D50–D52), then activities and manual points. First, try the AI judge on a real night in dev: the cloud sessions can't reach Convex, so it has only run against a fake Claude in tests.
 
 ## Milestones
 
@@ -71,7 +71,7 @@ M3 continues with the AI judge (D50), filling in the hosts' review list (D51): C
 ### M3 · Answering and grading, all types
 - [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Fritext, exact answers until the AI judge (D49)
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
-- [ ] AI judge filling in the review list (D50; replaces fuzzy matching)
+- [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
 - [ ] AI judge and review for list questions (D50)
 - [ ] Later: show each team which of its answers were judged right or wrong (D50)
 - [ ] Host overrides and manual points
@@ -123,3 +123,4 @@ M3 continues with the AI judge (D50), filling in the hosts' review list (D51): C
 - 2026-11-09: Gissa ingredienserna: a field per ingredient on the phone, the ingredients on the TV, points per ingredient guessed by an accepted spelling; one text comparison shared by grading and the duplicate checks (D48). Not tried in a browser with data.
 - 2026-11-09: Fritext: a field per sub-question on the phone, the sub-questions and then their answers on the TV, points per field answered with an accepted answer (D49). Decided the AI judge replaces fuzzy matching, with Claude Haiku 5.5 and verdicts that count at once (D50). Not tried in a browser with data.
 - 2026-11-10: The hosts' review list: on a Fritext or ingredients answer screen, each unmatched text once with Rätt / Fel (or which ingredient), shared by every team that wrote it and counted in the scores at once (D51). Not tried in a browser with data.
+- 2026-11-10: The AI judge: when Nästa closes a Fritext or ingredients question, Claude Haiku 5.5 judges the unmatched texts in one call; right and wrong count at once and are marked AI in the review list, unsure ones and failed calls are left to the hosts (D52). Tried only against a fake Claude in tests, not in a browser with data.

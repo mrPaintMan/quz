@@ -9,10 +9,17 @@ describe("getReview", () => {
       { title: "a) Artist", options: ["ABBA"] },
       { title: "b) Låt", options: ["Waterloo"] },
     ]);
+    expect(review?.aiStatus).toBeNull();
     expect(review?.items).toEqual([
-      { slot: 0, text: "abbba", written: "Abbba", teamCount: 1, isJudged: false, target: null },
-      { slot: 1, text: "waterlo", written: "Waterlo", teamCount: 2, isJudged: false, target: null },
+      { slot: 0, text: "abbba", written: "Abbba", teamCount: 1, isJudged: false, target: null, byAi: false },
+      { slot: 1, text: "waterlo", written: "Waterlo", teamCount: 2, isJudged: false, target: null, byAi: false },
     ]);
+  });
+
+  it("says how the AI judge is getting on", async () => {
+    const game = await setup();
+    await game.t.run((ctx) => ctx.db.insert("aiJudgings", { gameId: game.gameId, questionId: game.questionId, status: "failed" }));
+    expect((await reviewIn(game))?.aiStatus).toBe("failed");
   });
 
   it("is null while the question is open, and for a question without typed answers", async () => {

@@ -18,6 +18,15 @@ describe("judgeText", () => {
     expect(await t.run((ctx) => ctx.db.query("verdicts").collect())).toHaveLength(1);
   });
 
+  it("replaces the AI judge's verdict with the hosts' own", async () => {
+    const { t, gameId, questionId } = await setup();
+    await t.run((ctx) => ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "abbba", target: null, byAi: true }));
+    await t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text: "Abbba", target: 0 });
+    const [verdict] = await t.run((ctx) => ctx.db.query("verdicts").collect());
+    expect(verdict).toMatchObject({ target: 0 });
+    expect(verdict.byAi).toBeUndefined();
+  });
+
   it("refuses a question that is still open", async () => {
     const { t, gameId, questionId } = await setup({ closed: false });
     await expect(
