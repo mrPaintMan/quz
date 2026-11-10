@@ -10,6 +10,7 @@
 
 import type * as adjustments_table from "../adjustments/table.js";
 import type * as answers_answerContent from "../answers/answerContent.js";
+import type * as answers_lockedAnswersOfQuestion from "../answers/lockedAnswersOfQuestion.js";
 import type * as answers_lockDraftsOfQuestion from "../answers/lockDraftsOfQuestion.js";
 import type * as answers_mutations from "../answers/mutations.js";
 import type * as answers_queries from "../answers/queries.js";
@@ -88,6 +89,11 @@ import type * as teams_mutations from "../teams/mutations.js";
 import type * as teams_queries from "../teams/queries.js";
 import type * as teams_table from "../teams/table.js";
 import type * as teams_teamsOfGame from "../teams/teamsOfGame.js";
+import type * as verdicts_mutations from "../verdicts/mutations.js";
+import type * as verdicts_queries from "../verdicts/queries.js";
+import type * as verdicts_table from "../verdicts/table.js";
+import type * as verdicts_textsToReviewOfQuestion from "../verdicts/textsToReviewOfQuestion.js";
+import type * as verdicts_verdictsOfQuestion from "../verdicts/verdictsOfQuestion.js";
 
 import type {
   ApiFromModules,
@@ -98,6 +104,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "adjustments/table": typeof adjustments_table;
   "answers/answerContent": typeof answers_answerContent;
+  "answers/lockedAnswersOfQuestion": typeof answers_lockedAnswersOfQuestion;
   "answers/lockDraftsOfQuestion": typeof answers_lockDraftsOfQuestion;
   "answers/mutations": typeof answers_mutations;
   "answers/queries": typeof answers_queries;
@@ -176,6 +183,11 @@ declare const fullApi: ApiFromModules<{
   "teams/queries": typeof teams_queries;
   "teams/table": typeof teams_table;
   "teams/teamsOfGame": typeof teams_teamsOfGame;
+  "verdicts/mutations": typeof verdicts_mutations;
+  "verdicts/queries": typeof verdicts_queries;
+  "verdicts/table": typeof verdicts_table;
+  "verdicts/textsToReviewOfQuestion": typeof verdicts_textsToReviewOfQuestion;
+  "verdicts/verdictsOfQuestion": typeof verdicts_verdictsOfQuestion;
 }>;
 
 /**

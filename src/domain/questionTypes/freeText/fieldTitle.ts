@@ -1,4 +1,4 @@
-import { subQuestionLetter } from "@/domain/questionTypes/freeText/subQuestionLetter";
+import { subQuestionLetter } from "./subQuestionLetter";
 
 // A sub-question's title on the phones and the TV: its letter, then its label ("a) Artist"), or
 // "Delfråga a)", as the editor heads it, when the hosts left the label blank.

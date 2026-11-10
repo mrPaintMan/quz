@@ -14,6 +14,7 @@ import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
 import { AnswerStatusList } from "./AnswerStatusList";
 import { EndGameButton } from "./EndGameButton";
 import { PlaybackControls } from "./PlaybackControls";
+import { ReviewList } from "./ReviewList";
 import { ScoreBoard } from "./ScoreBoard";
 import { screenLabel } from "./screenLabel";
 import { TimerControls } from "./TimerControls";
@@ -71,6 +72,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {game.view.kind === "question" && game.view.shown && answeredTeamIds && (
             <AnswerStatusList teams={teams} answeredTeamIds={answeredTeamIds} />
           )}
+          {game.screen.kind === "answer" && <ReviewList gameId={gameId} questionId={game.screen.questionId} />}
           <div className="flex flex-wrap items-center gap-3">
             {game.timer && <TimerControls gameId={gameId} timer={game.timer} />}
             {game.playback && <PlaybackControls gameId={gameId} playback={game.playback} />}

@@ -16,6 +16,7 @@ import {
 } from "@/domain/questionTypes/multipleChoice/multipleChoiceAnswering";
 import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
 import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
+import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
@@ -55,7 +56,8 @@ type AnyAnsweringRules = {
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
-  grade: (content: QuestionContent, answers: AnswerContent[]) => number[];
+  grade: (content: QuestionContent, answers: AnswerContent[], verdicts?: Verdict[]) => number[];
+  review?: TypedReview<QuestionContent, AnswerContent>;
 };
 
 // TypeScript can't link a type to its entry on its own; Registry guarantees they match.
@@ -64,6 +66,11 @@ const answeringOfType = (type: AnsweredType) => answeringRegistry[type] as unkno
 // The answering of a question's type, or null for an activity or a type not built yet.
 export function answeringOf(content: QuestionContent): AnyAnsweringRules | null {
   return rulesFor(content).answeredInApp ? answeringOfType(content.type as AnsweredType) : null;
+}
+
+// How a question's typed answers are judged by the hosts, or null for a type without typed answers.
+export function reviewOf(content: QuestionContent): TypedReview<QuestionContent, AnswerContent> | null {
+  return answeringOf(content)?.review ?? null;
 }
 
 // The team's answer before it changes anything, such as a sort question's shuffled order.
