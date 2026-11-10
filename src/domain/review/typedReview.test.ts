@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradeTyped, textsToReview, type TypedReview } from "./typedReview";
+import { gradeTyped, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -60,7 +60,32 @@ describe("textsToReview", () => {
     ]);
   });
 
+  it("leaves out texts in a slot without accepted answers, as nothing can count them", () => {
+    const empty: TypedReview<Content, Answer> = { ...review, slots: () => [{ title: "", options: [] }] };
+    expect(textsToReview(empty, content, [answer("gin")])).toEqual([]);
+  });
+
   it("keeps the same text in two slots apart", () => {
     expect(textsToReview(review, content, [answer("gin", "gin")]).map((item) => item.slot)).toEqual([0, 1]);
+  });
+});
+
+describe("withVerdicts", () => {
+  it("adds the hosts' verdict so far to each text", () => {
+    const items = [
+      { slot: 0, text: "abbba", written: "Abbba", teamCount: 2 },
+      { slot: 1, text: "gin", written: "Gin", teamCount: 1 },
+      { slot: 1, text: "wodka", written: "Wodka", teamCount: 1 },
+    ];
+    const verdicts = [
+      { slot: 1, text: "gin", target: null },
+      { slot: 1, text: "wodka", target: 0 },
+      { slot: 0, text: "wodka", target: 0 },
+    ];
+    expect(withVerdicts(items, verdicts).map(({ text, isJudged, target }) => [text, isJudged, target])).toEqual([
+      ["abbba", false, null],
+      ["gin", true, null],
+      ["wodka", true, 0],
+    ]);
   });
 });

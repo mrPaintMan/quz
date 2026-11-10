@@ -37,7 +37,7 @@ export const freeTextAnswering: AnsweringRules<"freeText", FreeTextShown, FreeTe
   // One text per field; with sub-questions, a team may leave some blank as long as one is filled in.
   isComplete: (shown, { fields }) => fields.length === shown.labels.length && fields.some((field) => !isBlank(field)),
   // The points per field for each field whose text matches one of that field's own accepted
-  // answers, compared as everywhere else (normalizeForComparison); the hosts judge the rest (D51).
-  grade: (content, answers) => gradeTyped(freeTextReview, content, answers, []),
+  // answers, compared as everywhere else (normalizeForComparison), or by the hosts' verdict (D51).
+  grade: (content, answers, verdicts = []) => gradeTyped(freeTextReview, content, answers, verdicts),
   review: freeTextReview,
 };

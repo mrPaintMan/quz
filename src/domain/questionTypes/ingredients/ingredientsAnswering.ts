@@ -26,7 +26,7 @@ export const ingredientsAnswering: AnsweringRules<"ingredients", IngredientsShow
   isComplete: (shown, { items }) => items.length === shown.count && items.some((item) => !isBlank(item)),
   // The points per ingredient for each ingredient guessed, in any field and order, counted once
   // however often it is written. A guess matches an accepted spelling compared as everywhere else
-  // (normalizeForComparison); the hosts judge the rest (D51). Empty texts never match anything.
-  grade: (content, answers) => gradeTyped(ingredientsReview, content, answers, []),
+  // (normalizeForComparison), or by the hosts' verdict (D51). Empty texts never match anything.
+  grade: (content, answers, verdicts = []) => gradeTyped(ingredientsReview, content, answers, verdicts),
   review: ingredientsReview,
 };

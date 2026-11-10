@@ -4,6 +4,7 @@ import { normalizeForComparison } from "@/domain/questionTypes/normalizeForCompa
 import { hostMutation } from "../auth/hostFunctions";
 import { requireRunningGame } from "../games/requireRunningGame";
 import { getOrThrow } from "../shared/getOrThrow";
+import { textsToReviewOfQuestion } from "./textsToReviewOfQuestion";
 
 // The hosts judge a typed text once for every team that wrote it in that slot: the accepted answer
 // it counts as, by its place, or null for wrong (D51). Judging again changes the verdict, and the
@@ -22,13 +23,14 @@ export const judgeText = hostMutation({
     if (!(game.closedQuestionIds ?? []).includes(questionId)) {
       throw new ConvexError("Svaren kan granskas när frågan har stängt.");
     }
-    const slots = reviewOf(question.content)?.slots(question.content) ?? [];
-    const options = slots[slot]?.options ?? [];
+    const review = reviewOf(question.content);
     const normalized = normalizeForComparison(text);
-    if (!Number.isInteger(slot) || options.length === 0 || normalized === "") {
-      throw new ConvexError("Svaret finns inte att granska.");
-    }
-    if (target !== null && !(Number.isInteger(target) && target >= 0 && target < options.length)) {
+    // Only texts a team sent are judged, which also bounds how many verdicts a question gets.
+    const items = review === null ? [] : await textsToReviewOfQuestion(ctx, gameId, question, review);
+    const options = review?.slots(question.content)[slot]?.options ?? [];
+    const isSent = items.some((item) => item.slot === slot && item.text === normalized);
+    const isOption = target === null || (Number.isInteger(target) && target >= 0 && target < options.length);
+    if (!isSent || !isOption) {
       throw new ConvexError("Svaret finns inte att granska.");
     }
     const existing = await ctx.db

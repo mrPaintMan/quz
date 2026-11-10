@@ -16,7 +16,7 @@ import {
 } from "@/domain/questionTypes/multipleChoice/multipleChoiceAnswering";
 import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
 import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
-import type { TypedReview } from "@/domain/review/typedReview";
+import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 import type { AnsweringRules } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
@@ -56,7 +56,7 @@ type AnyAnsweringRules = {
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
-  grade: (content: QuestionContent, answers: AnswerContent[]) => number[];
+  grade: (content: QuestionContent, answers: AnswerContent[], verdicts?: Verdict[]) => number[];
   review?: TypedReview<QuestionContent, AnswerContent>;
 };
 

@@ -37,13 +37,14 @@ function exactMatches(slots: ReviewSlot[]) {
   return exact;
 }
 
-// The non-blank texts of an answer in slots that exist, normalized, each once as first written.
-function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slotCount: number, answer: Answer) {
+// The non-blank texts of an answer in slots that exist and have an accepted answer, normalized,
+// each once as first written.
+function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slots: ReviewSlot[], answer: Answer) {
   const texts = new Map<string, { slot: number; text: string; written: string }>();
   for (const { slot, text } of review.texts(answer)) {
     const normalized = normalizeForComparison(text);
     const key = keyOf(slot, normalized);
-    if (normalized !== "" && slot < slotCount && !texts.has(key)) texts.set(key, { slot, text: normalized, written: text.trim() });
+    if (normalized !== "" && (slots[slot]?.options.length ?? 0) > 0 && !texts.has(key)) texts.set(key, { slot, text: normalized, written: text.trim() });
   }
   return [...texts.entries()];
 }
@@ -61,11 +62,21 @@ export function gradeTyped<Content, Answer>(
   const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
   return answers.map((answer) => {
     const matched = new Set<string>();
-    for (const [key, { slot }] of writtenTexts(review, slots.length, answer)) {
+    for (const [key, { slot }] of writtenTexts(review, slots, answer)) {
       const target = exact.get(key) ?? judged.get(key) ?? null;
       if (target !== null && target < slots[slot].options.length) matched.add(keyOf(slot, String(target)));
     }
     return matched.size * review.pointsPerMatch(content);
+  });
+}
+
+// Each text to review with the hosts' verdict on it so far: judged or not, and the option it
+// counts as (null for wrong, or while unjudged).
+export function withVerdicts(items: ReviewItem[], verdicts: Verdict[]) {
+  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
+  return items.map((item) => {
+    const target = judged.get(keyOf(item.slot, item.text));
+    return { ...item, isJudged: target !== undefined, target: target ?? null };
   });
 }
 
@@ -76,7 +87,7 @@ export function textsToReview<Content, Answer>(review: TypedReview<Content, Answ
   const exact = exactMatches(slots);
   const items = new Map<string, ReviewItem>();
   for (const answer of answers) {
-    for (const [key, text] of writtenTexts(review, slots.length, answer)) {
+    for (const [key, text] of writtenTexts(review, slots, answer)) {
       if (exact.has(key)) continue;
       const item = items.get(key);
       if (item) item.teamCount += 1;

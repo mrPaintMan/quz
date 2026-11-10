@@ -92,6 +92,7 @@ import type * as teams_teamsOfGame from "../teams/teamsOfGame.js";
 import type * as verdicts_mutations from "../verdicts/mutations.js";
 import type * as verdicts_queries from "../verdicts/queries.js";
 import type * as verdicts_table from "../verdicts/table.js";
+import type * as verdicts_textsToReviewOfQuestion from "../verdicts/textsToReviewOfQuestion.js";
 import type * as verdicts_verdictsOfQuestion from "../verdicts/verdictsOfQuestion.js";
 
 import type {
@@ -185,6 +186,7 @@ declare const fullApi: ApiFromModules<{
   "verdicts/mutations": typeof verdicts_mutations;
   "verdicts/queries": typeof verdicts_queries;
   "verdicts/table": typeof verdicts_table;
+  "verdicts/textsToReviewOfQuestion": typeof verdicts_textsToReviewOfQuestion;
   "verdicts/verdictsOfQuestion": typeof verdicts_verdictsOfQuestion;
 }>;
 

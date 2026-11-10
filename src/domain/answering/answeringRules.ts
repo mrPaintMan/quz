@@ -1,7 +1,7 @@
 import type { Id } from "@convex/_generated/dataModel";
 import type { AnsweredType, AnswerOf } from "@convex/answers/answerContent";
 import type { ContentOf } from "@convex/questions/questionContent";
-import type { TypedReview } from "@/domain/review/typedReview";
+import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 
 // How one question type is answered in the app (D14). `Shown` is what the TV and the phones may
 // know while the question is asked, never its answer key; `Revealed` is what the answer screen
@@ -19,8 +19,8 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   isComplete: (shown: Shown, answer: AnswerOf<T>) => boolean;
   // The points each of the question's locked answers scores, as graded automatically, in the
   // order given. All answers come together, as some types rank the teams against each other.
-  grade: (content: ContentOf<T>, answers: AnswerOf<T>[]) => number[];
-  // For typed answers only: how texts no accepted spelling matches are judged by the hosts, whose
-  // verdicts then count as well (D51).
+  // Types with typed answers also count the hosts' verdicts (D51); the others ignore them.
+  grade: (content: ContentOf<T>, answers: AnswerOf<T>[], verdicts?: Verdict[]) => number[];
+  // For typed answers only: the slots and texts the hosts' review list judges (D51).
   review?: TypedReview<ContentOf<T>, AnswerOf<T>>;
 };

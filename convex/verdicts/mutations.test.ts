@@ -25,6 +25,15 @@ describe("judgeText", () => {
     ).rejects.toThrow("när frågan har stängt");
   });
 
+  it("refuses a text no team sent, or one that matched exactly", async () => {
+    const { t, gameId, questionId } = await setup();
+    const judge = (text: string) => t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text, target: 0 });
+    await expect(judge("Agnetha")).rejects.toThrow("finns inte att granska");
+    await expect(judge("Abba")).rejects.toThrow("finns inte att granska");
+    // The green team's text is only a draft.
+    await expect(t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 1, text: "Mamma mia", target: 0 })).rejects.toThrow("finns inte att granska");
+  });
+
   it("refuses a slot, option or text that doesn't exist", async () => {
     const { t, gameId, questionId } = await setup();
     const judge = (slot: number, text: string, target: number | null) =>
