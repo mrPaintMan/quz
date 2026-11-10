@@ -4,7 +4,7 @@ import { useId } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
-import { fieldTitle } from "@/features/shared/questionDisplays/freeText/fieldTitle";
+import { fieldTitle } from "@/domain/questionTypes/freeText/fieldTitle";
 
 // One field per sub-question, titled by its letter and label; a single field is just "Ert svar".
 export function FreeTextInput({ shown, answer, disabled, onChange }: AnswerInputProps<"freeText">) {

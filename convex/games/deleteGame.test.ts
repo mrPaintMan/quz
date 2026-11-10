@@ -3,7 +3,7 @@ import { atLobby, setupConvexTest } from "../test.setup";
 import { deleteGame, MAX_ANSWERS_PER_GAME } from "./deleteGame";
 
 describe("deleteGame", () => {
-  it("deletes the game with its teams, answers and adjustments, and leaves other games alone", async () => {
+  it("deletes the game with its teams, answers, adjustments and verdicts, and leaves other games alone", async () => {
     const t = setupConvexTest();
     const remaining = await t.run(async (ctx) => {
       const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
@@ -23,23 +23,24 @@ describe("deleteGame", () => {
         const teamId = await ctx.db.insert("teams", { gameId, name: "Tomtarna", colour: "red" });
         await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "number", value: 4 }, lockedAt: 1 });
         await ctx.db.insert("adjustments", { gameId, teamId, questionId: null, points: 2, note: "Bonus" });
+        await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "fyra", target: null });
         return gameId;
       };
       const gameId = await addPlayedGame();
       const otherGameId = await addPlayedGame();
 
       await deleteGame(ctx, gameId);
-      const count = async (table: "games" | "teams" | "answers" | "adjustments") => (await ctx.db.query(table).collect()).length;
+      const count = async (table: "games" | "teams" | "answers" | "adjustments" | "verdicts") => (await ctx.db.query(table).collect()).length;
       return {
         game: await ctx.db.get("games", gameId),
         otherGame: (await ctx.db.get("games", otherGameId))?._id,
         otherGameId,
-        counts: [await count("games"), await count("teams"), await count("answers"), await count("adjustments")],
+        counts: [await count("games"), await count("teams"), await count("answers"), await count("adjustments"), await count("verdicts")],
       };
     });
     expect(remaining.game).toBeNull();
     expect(remaining.otherGame).toBe(remaining.otherGameId);
-    expect(remaining.counts).toEqual([1, 1, 1, 1]);
+    expect(remaining.counts).toEqual([1, 1, 1, 1, 1]);
   });
 
   it("refuses rather than delete only part of a game with too many answers", async () => {

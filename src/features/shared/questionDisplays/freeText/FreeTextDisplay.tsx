@@ -1,5 +1,5 @@
 import type { RevealedDisplayProps, ShownDisplayProps } from "@/features/shared/questionDisplays/QuestionDisplayProps";
-import { fieldTitle } from "./fieldTitle";
+import { fieldTitle } from "@/domain/questionTypes/freeText/fieldTitle";
 
 // With sub-questions, their titles, so everyone sees what each field asks; a single field adds
 // nothing beyond the prompt.

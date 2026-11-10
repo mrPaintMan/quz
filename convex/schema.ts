@@ -6,6 +6,7 @@ import { questionsTable } from "./questions/table";
 import { quizzesTable } from "./quizzes/table";
 import { roundsTable } from "./rounds/table";
 import { teamsTable } from "./teams/table";
+import { verdictsTable } from "./verdicts/table";
 
 export default defineSchema({
   quizzes: quizzesTable,
@@ -15,4 +16,5 @@ export default defineSchema({
   teams: teamsTable,
   answers: answersTable,
   adjustments: adjustmentsTable,
+  verdicts: verdictsTable,
 });

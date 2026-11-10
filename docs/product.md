@@ -66,7 +66,7 @@ På spåret: the trip comes first, as a question with its answer screen; then ea
 ## Grading
 
 - Automatic grading gives each answer, or each item of an answer, one of: correct, wrong, needs review.
-- **Review is per unique answer, not per team.** If four teams wrote "Oslo", the hosts judge "Oslo" once and the decision applies to all four. A decision on a list or free-text question is also added to that question's answer key, so a copied quiz keeps it.
+- **Review is per unique answer, not per team.** If four teams wrote "Oslo", the hosts judge "Oslo" once and the decision applies to all four. Decisions belong to that night only. Unjudged answers score nothing, so the night never waits on the list.
 - **AI judge (on by default, per question, for typed answers):** when the question closes for answering, the texts that don't match an accepted answer exactly are sent to Claude Haiku 5.5, which judges each one correct, wrong or unsure. Correct and wrong count at once; unsure texts go to the review queue. If the call fails, everything unmatched goes to the review queue. Turned off, only exact answers count. Later: each team sees which of its answers were judged right or wrong.
 - Hosts can always override any grading.
 

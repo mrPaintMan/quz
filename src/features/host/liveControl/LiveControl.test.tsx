@@ -4,6 +4,7 @@ import { getFunctionName, type FunctionReference } from "convex/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
 import type { Playback } from "@convex/games/playback";
+import type { Screen } from "@convex/games/screen";
 import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
@@ -17,6 +18,7 @@ vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna", colour: "red" }] }));
 vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => nextScreen() }));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
+vi.mock("./ReviewList", () => ({ ReviewList: ({ questionId }: { questionId: string }) => <p>Granskning av {questionId}</p> }));
 vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
 const scores = vi.fn();
 vi.mock("@/features/shared/scores/useScores", () => ({ useScores: () => scores() }));
@@ -29,10 +31,9 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 const gameId = "game1" as Id<"games">;
 const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true, shown: null };
 
-type GameState = { view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
+type GameState = { screenNow?: Screen; view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
 
-function renderControl({ view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
-  const screenNow = { kind: "lobby" as const };
+function renderControl({ screenNow = { kind: "lobby" }, view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
   const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
@@ -54,6 +55,17 @@ describe("LiveControl", () => {
     renderControl();
     expect(screen.getByRole("status")).toHaveTextContent("Lobby");
     expect(screen.getByText("Tomtarna")).toBeInTheDocument();
+  });
+
+  it("shows the review list on an answer screen only", () => {
+    const questionId = "q1" as Id<"questions">;
+    renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", revealed: null } });
+    expect(screen.getByText("Granskning av q1")).toBeInTheDocument();
+  });
+
+  it("shows no review list on other screens", () => {
+    renderControl();
+    expect(screen.queryByText(/Granskning av/)).not.toBeInTheDocument();
   });
 
   it("shows what comes next", () => {

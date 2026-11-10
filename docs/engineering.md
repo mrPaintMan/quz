@@ -80,7 +80,8 @@ src/
     answers/                     # when an answer may be saved: time out with grace, closed questions, matching type
     answering/                   # per-type answering registry: what is shown, revealed, complete and how it is graded (D42)
     screenSequence/              # derives the TV screen order from a quiz (D15)
-    scoring/  matching/          # leaderboard, fuzzy text matching …
+    scoring/                     # grading answers and summing the leaderboard (D43)
+    review/                      # the hosts' verdicts on typed texts, shared by the types that have them (D51)
   features/
     host/                        # the two hosts
       shared/                    # host session, useHostQuery / useHostMutation, header, confirm button
