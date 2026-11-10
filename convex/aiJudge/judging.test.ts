@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { internal } from "../_generated/api";
 import { aiJudgingOf, startAiJudging } from "./judging";
+import { setupList } from "../verdicts/reviewGame.setup";
 import { freeText, markJudging, setupJudging } from "./aiJudgeGame.setup";
 
 describe("startAiJudging", () => {
@@ -40,6 +41,17 @@ describe("prepareJudging", () => {
     const job = await t.query(internal.aiJudge.judging.prepareJudging, { gameId, questionId });
     expect(job?.items).toEqual([{ slot: 0, text: "safran", written: "Safran", teamCount: 1 }]);
     expect(JSON.parse(job!.message).answers).toEqual([{ id: 0, field: 0, text: "Safran" }]);
+  });
+
+  it("tells the AI judge the names already given to list items outside the key", async () => {
+    const { t, gameId, questionId } = await setupList();
+    await t.run(async (ctx) => {
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "lund", target: "Lund" });
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "lunds stad", target: "lund" });
+    });
+    const job = await t.query(internal.aiJudge.judging.prepareJudging, { gameId, questionId });
+    expect(JSON.parse(job!.message).fields[0]).toMatchObject({ open: true, knownItems: ["Lund"] });
+    expect(job?.items.map((item) => item.text)).toEqual(["gothenburg"]);
   });
 
   it("is null when there is nothing left to ask", async () => {

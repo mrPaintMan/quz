@@ -8,6 +8,7 @@ import {
   type IngredientsRevealed,
   type IngredientsShown,
 } from "@/domain/questionTypes/ingredients/ingredientsAnswering";
+import { listAnswering, MAX_LIST_ITEMS, type ListRevealed, type ListShown } from "@/domain/questionTypes/list/listAnswering";
 import { matchAnswering, type MatchRevealed, type MatchShown } from "@/domain/questionTypes/match/matchAnswering";
 import {
   multipleChoiceAnswering,
@@ -17,16 +18,17 @@ import {
 import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
 import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
 import type { TypedReview, Verdict } from "@/domain/review/typedReview";
-import type { AnsweringRules } from "./answeringRules";
+import type { AnsweringRules, Graded } from "./answeringRules";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown | FreeTextShown | NumberShown | SortShown | MatchShown | IngredientsShown;
+export type ShownQuestion = MultipleChoiceShown | FreeTextShown | NumberShown | SortShown | MatchShown | ListShown | IngredientsShown;
 export type RevealedAnswer =
   | MultipleChoiceRevealed
   | FreeTextRevealed
   | NumberRevealed
   | SortRevealed
   | MatchRevealed
+  | ListRevealed
   | IngredientsRevealed;
 
 type Registry = {
@@ -41,7 +43,7 @@ export const answeringRegistry: Registry = {
   number: numberAnswering,
   sort: sortAnswering,
   match: matchAnswering,
-  list: null,
+  list: listAnswering,
   ingredients: ingredientsAnswering,
   drawing: null,
   mapPin: null,
@@ -52,7 +54,8 @@ export const answeringRegistry: Registry = {
 // answers; the server checks an answer's type against its question first (isAnswerFor).
 type AnyAnsweringRules = {
   show: (content: QuestionContent) => ShownQuestion;
-  reveal: (content: QuestionContent) => RevealedAnswer;
+  reveal: (content: QuestionContent, graded?: Graded<AnswerContent>) => RevealedAnswer;
+  revealsAnswers?: boolean;
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
@@ -84,3 +87,15 @@ export function isAnswerComplete(shown: ShownQuestion | null, answer: AnswerCont
   const answering = answeringOfType(answer.type);
   return answering === null || (shown !== null && answering.isComplete(shown, answer));
 }
+
+// The longest typed text, and the most texts, one answer may hold: far more than a team writes, and
+// it bounds what the server and the AI judge read (D53). A list's own cap is the same count.
+export const MAX_TYPED_TEXT_LENGTH = 200;
+export const MAX_TYPED_TEXTS = MAX_LIST_ITEMS;
+
+// Whether an answer's typed texts stay within those bounds; answers without typed texts always do.
+export function fitsAnswerLimits(answer: AnswerContent): boolean {
+  const texts = answeringOfType(answer.type)?.review?.texts(answer) ?? [];
+  return texts.length <= MAX_TYPED_TEXTS && texts.every(({ text }) => text.length <= MAX_TYPED_TEXT_LENGTH);
+}
+

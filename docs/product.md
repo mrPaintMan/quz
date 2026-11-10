@@ -39,7 +39,7 @@ Every question has: a prompt shown on the TV, points, an optional time limit, op
 | Guess the number | Typing a number on a number pad | Auto: tolerance tiers (for example ±1 for 3p) or closest wins (top 3 get 3/2/1) |
 | Sort | Dragging items into order | Auto, points per item in the right position |
 | Match | Drawing lines between two lists | Auto, points per correct pair |
-| List as many as you can | Typing items one at a time; duplicates are refused; submits itself when the time runs out | Per correct item (for example 0.5p each). Layered: an optional answer key (pasted in bulk, may be empty for open lists), the AI judge for unknown items, then the hosts review each unique unsure item once for all teams (see "Grading") |
+| List as many as you can | Typing items one at a time; duplicates are refused; submits itself when the time runs out | Per correct item (for example 0.5p each). Layered: an optional answer key (pasted in bulk, may be incomplete or empty), the AI judge for unknown items, also right ones outside the key, then the hosts review each unique unsure item once for all teams (see "Grading"). Two forms of one answer count once. The answer screen shows the items the teams got right |
 | Ingredients | Filling in unordered fields (for example the 5 ingredients of a drink) | Auto per correct item, order doesn't matter |
 | Drawing | Drawing with a finger; submits itself when the time runs out | Hosts score by hand; drawings are shown on the TV during review |
 | Map pin | Placing a pin on a map | Auto: points if the pin is within a set radius of the target. The target and the radius are shown on the map when the answer is revealed |

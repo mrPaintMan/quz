@@ -9,8 +9,8 @@ export function ListEditor({ content, onChange }: QuestionEditorProps<"list">) {
   return (
     <div className="flex flex-col gap-4">
       <p className="text-sm text-muted-foreground">
-        Deltagarna skriver så många svar de kan tills tiden tar slut. Facit får vara ofullständigt: svar som inte finns där
-        granskar ni en gång för alla lag.
+        Deltagarna skriver så många svar de kan tills tiden tar slut. Facit får vara ofullständigt: rätta svar som inte finns
+        där räknas också, och samma svar i olika former räknas en gång.
       </p>
       <AnswerKeyField
         label="Facit (valfritt)"
@@ -19,16 +19,10 @@ export function ListEditor({ content, onChange }: QuestionEditorProps<"list">) {
       />
       <NumberField label="Poäng per rätt svar" value={content.pointsPerItem} onChange={(pointsPerItem) => onChange({ ...content, pointsPerItem })} className="max-w-48" />
       <SwitchField
-        label="Rätta med ungefärlig matchning"
-        description="Nästan rättstavat räknas; osäkra svar hamnar hos er för granskning."
+        label="Låt AI bedöma nästan rätt svar"
+        description="Svar som inte stämmer exakt med facit bedöms av AI när frågan stängs, också rätta svar som saknas i facit; osäkra hamnar hos er för granskning."
         checked={content.fuzzy}
         onChange={(fuzzy) => onChange({ ...content, fuzzy })}
-      />
-      <SwitchField
-        label="Låt AI föreslå rättning"
-        description="Svar som inte finns i facit skickas till Claude, som föreslår rätt eller fel. Ni bekräftar alltid själva."
-        checked={content.aiAssist}
-        onChange={(aiAssist) => onChange({ ...content, aiAssist })}
       />
     </div>
   );

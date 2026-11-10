@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradeTyped, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { gradeTyped, rightItems, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -89,3 +89,43 @@ describe("withVerdicts", () => {
     ]);
   });
 });
+
+describe("open slots", () => {
+  type List = { items: string[] };
+  const list: TypedReview<Content, List> = {
+    slots: () => [{ title: "", options: [{ label: "Göteborg", spellings: ["Göteborg"] }], isOpen: true }],
+    texts: ({ items }) => items.map((text) => ({ slot: 0, text })),
+    pointsPerMatch: ({ points }) => points,
+  };
+
+  it("lists every text without an exact match for review, also with an empty key", () => {
+    const empty: TypedReview<Content, List> = { ...list, slots: () => [{ title: "", options: [], isOpen: true }] };
+    expect(textsToReview(empty, content, [{ items: ["Lund"] }]).map((item) => item.text)).toEqual(["lund"]);
+  });
+
+  it("counts a named item once, and a name that is a key spelling as that key item", () => {
+    const verdicts = [
+      { slot: 0, text: "lund", target: "Lund" },
+      { slot: 0, text: "lunds stad", target: " LUND " },
+      { slot: 0, text: "gothenburg", target: "göteborg" },
+      { slot: 0, text: "blank", target: " " },
+    ];
+    expect(gradeTyped(list, content, [{ items: ["Lund", "Lunds stad", "Gothenburg", "Göteborg", "Blank"] }], verdicts)).toEqual([4]);
+  });
+
+  it("ignores a name in a slot that isn't open", () => {
+    expect(gradeTyped(review, content, [answer("Abbba")], [{ slot: 0, text: "abbba", target: "ABBA-gruppen" }])).toEqual([0]);
+  });
+
+  it("names the items the teams got right by the key's label or the verdict's name", () => {
+    const verdicts = [
+      { slot: 0, text: "lund", target: "Lund" },
+      { slot: 0, text: "gothenburg", target: 0 },
+    ];
+    expect(rightItems(list, content, [{ items: ["Gothenburg", "Lund"] }, { items: ["Göteborg"] }], verdicts)).toEqual([
+      { name: "Göteborg", teamCount: 2 },
+      { name: "Lund", teamCount: 1 },
+    ]);
+  });
+});
+

@@ -2,13 +2,17 @@ import { normalizeForComparison } from "@/domain/questionTypes/normalizeForCompa
 
 // One group a typed text is judged in, such as a free-text field or all of an ingredients
 // question's fields together. Its options are the accepted answers a text there may count as;
-// a verdict names one by its place (D51).
-export type ReviewSlot = { title: string; options: { label: string; spellings: string[] }[] };
+// a verdict names one by its place (D51). In an open slot (a list, whose key may be incomplete) a
+// right text may also count as an item outside the key, named by the verdict (D53).
+export type ReviewSlot = { title: string; options: { label: string; spellings: string[] }[]; isOpen?: boolean };
 
-// The hosts' decision on a text written in a slot, compared as normalized: the option it counts
-// as, or null for wrong. Shared by every team that wrote the same text there. byAi marks one the
-// AI judge gave (D52).
-export type Verdict = { slot: number; text: string; target: number | null; byAi?: boolean };
+// What a verdict says a text counts as: an option by its place, an item outside the key by its
+// name (open slots only), or null for wrong.
+export type Target = number | string | null;
+
+// The hosts' decision on a text written in a slot, compared as normalized. Shared by every team
+// that wrote the same text there. byAi marks one the AI judge gave (D52).
+export type Verdict = { slot: number; text: string; target: Target; byAi?: boolean };
 
 // A text that matched no accepted spelling exactly, with how it was first written and how many
 // teams wrote it, for the hosts to judge once.
@@ -38,20 +42,36 @@ function exactMatches(slots: ReviewSlot[]) {
   return exact;
 }
 
-// The non-blank texts of an answer in slots that exist and have an accepted answer, normalized,
-// each once as first written.
+const canCount = (slot: ReviewSlot | undefined) => slot !== undefined && (slot.isOpen === true || slot.options.length > 0);
+
+// The item a target counts as in its slot: a key no other item shares, and its name as shown. An
+// option goes by its label; a name in an open slot by itself, unless it is one of the key's
+// spellings, which makes it that option. null for wrong, or for a target that no longer fits.
+function itemOf(slots: ReviewSlot[], exact: Map<string, number>, slot: number, target: Target) {
+  const options = slots[slot]?.options ?? [];
+  const option = typeof target === "string" ? exact.get(keyOf(slot, normalizeForComparison(target))) : target;
+  if (typeof option === "number") {
+    return option >= 0 && option < options.length ? { key: keyOf(slot, `#${option}`), name: options[option].label } : null;
+  }
+  if (typeof target !== "string" || !slots[slot]?.isOpen || normalizeForComparison(target) === "") return null;
+  return { key: keyOf(slot, `=${normalizeForComparison(target)}`), name: target.trim() };
+}
+
+// The non-blank texts of an answer in slots that exist and can count something (an accepted answer,
+// or open), normalized, each once as first written.
 function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slots: ReviewSlot[], answer: Answer) {
   const texts = new Map<string, { slot: number; text: string; written: string }>();
   for (const { slot, text } of review.texts(answer)) {
     const normalized = normalizeForComparison(text);
     const key = keyOf(slot, normalized);
-    if (normalized !== "" && (slots[slot]?.options.length ?? 0) > 0 && !texts.has(key)) texts.set(key, { slot, text: normalized, written: text.trim() });
+    if (normalized !== "" && canCount(slots[slot]) && !texts.has(key)) texts.set(key, { slot, text: normalized, written: text.trim() });
   }
   return [...texts.entries()];
 }
 
-// Each answer's points: every distinct option its texts count as, by an exact spelling or else
-// by the hosts' verdict, scores the points per match. Unjudged texts score nothing.
+// Each answer's points: every distinct item its texts count as, by an exact spelling or else by a
+// verdict, scores the points per match, so two forms of one answer score once (D53). Unjudged
+// texts score nothing.
 export function gradeTyped<Content, Answer>(
   review: TypedReview<Content, Answer>,
   content: Content,
@@ -61,14 +81,46 @@ export function gradeTyped<Content, Answer>(
   const slots = review.slots(content);
   const exact = exactMatches(slots);
   const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
-  return answers.map((answer) => {
-    const matched = new Set<string>();
-    for (const [key, { slot }] of writtenTexts(review, slots, answer)) {
-      const target = exact.get(key) ?? judged.get(key) ?? null;
-      if (target !== null && target < slots[slot].options.length) matched.add(keyOf(slot, String(target)));
+  return answers.map((answer) => matchedItems(slots, exact, judged, review, answer).size * review.pointsPerMatch(content));
+}
+
+// The distinct items an answer's texts count as, by an exact spelling or else by a verdict, with
+// how each was first named.
+function matchedItems<Content, Answer>(
+  slots: ReviewSlot[],
+  exact: Map<string, number>,
+  judged: Map<string, Target>,
+  review: TypedReview<Content, Answer>,
+  answer: Answer,
+) {
+  const matched = new Map<string, string>();
+  for (const [key, { slot }] of writtenTexts(review, slots, answer)) {
+    const item = itemOf(slots, exact, slot, exact.get(key) ?? judged.get(key) ?? null);
+    if (item !== null && !matched.has(item.key)) matched.set(item.key, item.name);
+  }
+  return matched;
+}
+
+// Each item the teams got right, once, with how many teams got it, most often first, for the
+// answer screen of a list (D53).
+export function rightItems<Content, Answer>(
+  review: TypedReview<Content, Answer>,
+  content: Content,
+  answers: Answer[],
+  verdicts: Verdict[],
+): { name: string; teamCount: number }[] {
+  const slots = review.slots(content);
+  const exact = exactMatches(slots);
+  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
+  const items = new Map<string, { name: string; teamCount: number }>();
+  for (const answer of answers) {
+    for (const [key, name] of matchedItems(slots, exact, judged, review, answer)) {
+      const item = items.get(key);
+      if (item) item.teamCount += 1;
+      else items.set(key, { name, teamCount: 1 });
     }
-    return matched.size * review.pointsPerMatch(content);
-  });
+  }
+  return [...items.values()].sort((a, b) => b.teamCount - a.teamCount || a.name.localeCompare(b.name, "sv"));
 }
 
 // Each text to review with the verdict on it so far: judged or not, the option it counts as (null

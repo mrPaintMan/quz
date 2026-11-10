@@ -154,3 +154,21 @@ describe("sendAnswer for a type whose answering is built", () => {
   });
 });
 
+
+describe("saveAnswerDraft for typed answers", () => {
+  it("refuses a list longer than the cap, or a text that is too long", async () => {
+    const t = setupConvexTest();
+    const { teamId, questionId } = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Listor", kind: "questions" });
+      const content = { type: "list" as const, acceptedItems: [], pointsPerItem: 1, fuzzy: true, aiAssist: false };
+      const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Nämn julsånger", timeLimitSeconds: null, media: null, hostNotes: "", content });
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 });
+      return { questionId, teamId: await ctx.db.insert("teams", { gameId, name: "Röda", colour: "red" }) };
+    });
+    const save = (items: string[]) => t.mutation(api.answers.mutations.saveAnswerDraft, { teamId, questionId, content: { type: "list", items } });
+    await expect(save(Array.from({ length: 100 }, (_, index) => `Sång ${index}`))).resolves.toBeNull();
+    await expect(save(Array.from({ length: 101 }, (_, index) => `Sång ${index}`))).rejects.toThrow("för långt");
+    await expect(save(["x".repeat(201)])).rejects.toThrow("för långt");
+  });
+});

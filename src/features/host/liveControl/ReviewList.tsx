@@ -2,10 +2,11 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import type { Target } from "@/domain/review/typedReview";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
+import { VerdictChoices } from "./VerdictChoices";
 
 // On a typed question's answer screen: each text no accepted spelling matched, once for every
 // team that wrote it, for the hosts to judge right (as which answer, when there are several) or
@@ -39,8 +40,7 @@ export function ReviewList({ gameId, questionId }: { gameId: Id<"games">; questi
             {slot.title !== "" && <h4 className="mt-1 text-sm font-medium text-muted-foreground">{slot.title}</h4>}
             <ul className="flex flex-col">
               {items.map((item) => {
-                const choose = (target: number | null) => run(() => judge({ gameId, questionId, slot: item.slot, text: item.text, target }));
-                const isChosen = (target: number | null) => item.isJudged && item.target === target;
+                const choose = (target: Target) => run(() => judge({ gameId, questionId, slot: item.slot, text: item.text, target }));
                 return (
                   <li key={item.text} className="flex flex-wrap items-center gap-2 border-t py-2 first:border-t-0">
                     <span className="min-w-32 flex-1 font-medium break-words">
@@ -52,16 +52,7 @@ export function ReviewList({ gameId, questionId }: { gameId: Id<"games">; questi
                       )}
                     </span>
                     <span className="text-sm text-muted-foreground">{item.teamCount} lag</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {slot.options.map((label, target) => (
-                        <Button key={target} size="sm" variant={isChosen(target) ? "default" : "outline"} aria-pressed={isChosen(target)} onClick={() => choose(target)}>
-                          {slot.options.length === 1 ? "Rätt" : label}
-                        </Button>
-                      ))}
-                      <Button size="sm" variant={isChosen(null) ? "default" : "outline"} aria-pressed={isChosen(null)} onClick={() => choose(null)}>
-                        Fel
-                      </Button>
-                    </div>
+                    <VerdictChoices slot={slot} item={item} onChoose={choose} />
                   </li>
                 );
               })}

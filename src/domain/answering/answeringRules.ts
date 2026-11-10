@@ -3,12 +3,18 @@ import type { AnsweredType, AnswerOf } from "@convex/answers/answerContent";
 import type { ContentOf } from "@convex/questions/questionContent";
 import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 
+// A closed question's sent answers that fit it, with the verdicts on their texts.
+export type Graded<Answer> = { answers: Answer[]; verdicts: Verdict[] };
+
 // How one question type is answered in the app (D14). `Shown` is what the TV and the phones may
 // know while the question is asked, never its answer key; `Revealed` is what the answer screen
 // shows.
 export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   show: (content: ContentOf<T>) => Shown;
-  reveal: (content: ContentOf<T>) => Revealed;
+  // graded holds the question's sent answers and verdicts, for a type that reveals what the teams
+  // got right (revealsAnswers); the others reveal from the question alone.
+  reveal: (content: ContentOf<T>, graded?: Graded<AnswerOf<T>>) => Revealed;
+  revealsAnswers?: boolean;
   // Pictures the question shows, such as image options, so the server can link them.
   imageIds: (content: ContentOf<T>) => Id<"_storage">[];
   // What the team's answer is before it changes anything; null for most types, where nothing is

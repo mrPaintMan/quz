@@ -1,7 +1,9 @@
 import type { Id } from "@convex/_generated/dataModel";
+import type { AnswerContent } from "@convex/answers/answerContent";
 import type { Screen } from "@convex/games/screen";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { answeringOf, type RevealedAnswer, type ShownQuestion } from "@/domain/answering/registry";
+import type { Graded } from "@/domain/answering/answeringRules";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
 type QuestionInRound = { _id: Id<"questions">; prompt: string; content: QuestionContent };
@@ -47,8 +49,9 @@ function findRound(rounds: RoundInQuiz[], roundId: Id<"rounds">) {
 
 // Describes a screen of the sequence built from the same rounds (buildScreenSequence), so every
 // round and question it names is there. Rounds without questions aren't counted, as the night
-// skips them.
-export function describeScreen(screen: Screen, allRounds: RoundInQuiz[]): ScreenView {
+// skips them. graded is the answer screen's question's sent answers and verdicts, for a type that
+// reveals what the teams got right.
+export function describeScreen(screen: Screen, allRounds: RoundInQuiz[], graded?: Graded<AnswerContent>): ScreenView {
   const rounds = allRounds.filter((round) => round.questions.length > 0);
   switch (screen.kind) {
     case "lobby":
@@ -69,7 +72,7 @@ export function describeScreen(screen: Screen, allRounds: RoundInQuiz[]): Screen
     case "answer": {
       const { question, ...place } = findQuestion(rounds, screen.questionId);
       const { content } = question;
-      return { kind: "answer", ...place, prompt: question.prompt, revealed: answeringOf(content)?.reveal(content) ?? null };
+      return { kind: "answer", ...place, prompt: question.prompt, revealed: answeringOf(content)?.reveal(content, graded) ?? null };
     }
     case "film":
     case "leaderboard":

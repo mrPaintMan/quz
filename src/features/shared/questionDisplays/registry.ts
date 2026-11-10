@@ -2,6 +2,7 @@ import type { ComponentType } from "react";
 import type { AnsweredType } from "@convex/answers/answerContent";
 import { FreeTextAnswer, FreeTextQuestion } from "./freeText/FreeTextDisplay";
 import { IngredientsAnswer, IngredientsQuestion } from "./ingredients/IngredientsDisplay";
+import { ListAnswer, ListQuestion } from "./list/ListDisplay";
 import { MatchAnswer, MatchQuestion } from "./match/MatchDisplay";
 import { MultipleChoiceAnswer, MultipleChoiceQuestion } from "./multipleChoice/MultipleChoiceDisplay";
 import { NumberAnswer, NumberQuestion } from "./number/NumberDisplay";
@@ -21,7 +22,7 @@ export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | n
   number: { Question: NumberQuestion, Answer: NumberAnswer },
   sort: { Question: SortQuestion, Answer: SortAnswer },
   match: { Question: MatchQuestion, Answer: MatchAnswer },
-  list: null,
+  list: { Question: ListQuestion, Answer: ListAnswer },
   ingredients: { Question: IngredientsQuestion, Answer: IngredientsAnswer },
   drawing: null,
   mapPin: null,

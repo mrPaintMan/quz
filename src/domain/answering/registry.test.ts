@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { answeringOf, isAnswerComplete, reviewOf, startingAnswerOf } from "./registry";
+import { answeringOf, fitsAnswerLimits, isAnswerComplete, MAX_TYPED_TEXT_LENGTH, MAX_TYPED_TEXTS, reviewOf, startingAnswerOf } from "./registry";
 
 describe("answeringOf", () => {
   it("gives a built type's answering", () => {
@@ -9,7 +9,7 @@ describe("answeringOf", () => {
 
   it("gives none for an activity or a type not built yet", () => {
     expect(answeringOf({ type: "activity", maxPoints: 5 })).toBeNull();
-    expect(answeringOf({ type: "list", acceptedItems: [], pointsPerItem: 1, fuzzy: true, aiAssist: false })).toBeNull();
+    expect(answeringOf({ type: "drawing", maxPoints: 5 })).toBeNull();
   });
 });
 
@@ -22,7 +22,7 @@ describe("isAnswerComplete", () => {
   });
 
   it("counts an answer of a type not built yet as complete", () => {
-    expect(isAnswerComplete(null, { type: "list", items: [] })).toBe(true);
+    expect(isAnswerComplete(null, { type: "drawing", strokes: [] })).toBe(true);
   });
 });
 
@@ -40,5 +40,19 @@ describe("reviewOf", () => {
     expect(reviewOf(freeText)?.slots(freeText)).toEqual([{ title: "", options: [{ label: "Saffran", spellings: ["Saffran"] }] }]);
     expect(reviewOf({ type: "multipleChoice", options: [], correctIndex: null, points: 1 })).toBeNull();
     expect(reviewOf({ type: "activity", maxPoints: 5 })).toBeNull();
+  });
+});
+
+describe("fitsAnswerLimits", () => {
+  it("caps how many typed texts an answer holds and how long each is", () => {
+    const list = (count: number, text = "Oslo") => ({ type: "list" as const, items: Array.from({ length: count }, () => text) });
+    expect(fitsAnswerLimits(list(MAX_TYPED_TEXTS))).toBe(true);
+    expect(fitsAnswerLimits(list(MAX_TYPED_TEXTS + 1))).toBe(false);
+    expect(fitsAnswerLimits({ type: "freeText", fields: ["x".repeat(MAX_TYPED_TEXT_LENGTH)] })).toBe(true);
+    expect(fitsAnswerLimits({ type: "freeText", fields: ["x".repeat(MAX_TYPED_TEXT_LENGTH + 1)] })).toBe(false);
+  });
+
+  it("lets answers without typed texts through", () => {
+    expect(fitsAnswerLimits({ type: "number", value: 3 })).toBe(true);
   });
 });
