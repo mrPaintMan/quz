@@ -3,9 +3,9 @@ import { ANSWER_GRACE_MS } from "@/domain/answers/isTimeOut";
 import { internal } from "../_generated/api";
 import type { Doc } from "../_generated/dataModel";
 import { internalMutation, type MutationCtx } from "../_generated/server";
-import { lockDraftsOfQuestion } from "./lockDraftsOfQuestion";
+import { lockQuestion } from "./lockQuestion";
 
-// Locks a question's drafts once its time is out. Scheduled whenever its timer starts or changes;
+// Locks a question's answers once its time is out, which starts the AI judge (D55). Scheduled whenever its timer starts or changes;
 // a run whose timer has since been paused, extended or left behind does nothing, as a later run
 // covers the timer that replaced it.
 export const lockDraftsAtTimeOut = internalMutation({
@@ -14,7 +14,7 @@ export const lockDraftsAtTimeOut = internalMutation({
     const game = await ctx.db.get("games", gameId);
     const isSameQuestion = game?.screen.kind === "question" && game.screen.questionId === questionId;
     if (game?.endedAt !== null || !isSameQuestion || game.timer?.kind !== "running" || game.timer.endsAt !== endsAt) return;
-    await lockDraftsOfQuestion(ctx, gameId, questionId);
+    await lockQuestion(ctx, gameId, questionId);
   },
 });
 

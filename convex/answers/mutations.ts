@@ -4,6 +4,9 @@ import type { Id } from "../_generated/dataModel";
 import { mutation, type MutationCtx } from "../_generated/server";
 import { answerContent, type AnswerContent } from "./answerContent";
 import { requireAnswerable } from "./requireAnswerable";
+import { lockedAnswersOfQuestion } from "./lockedAnswersOfQuestion";
+import { lockQuestion } from "./lockQuestion";
+import { teamsOfGame } from "../teams/teamsOfGame";
 
 const answerArgs = { teamId: v.id("teams"), questionId: v.id("questions"), content: answerContent };
 type AnswerArgs = { teamId: Id<"teams">; questionId: Id<"questions">; content: AnswerContent };
@@ -17,11 +20,9 @@ async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content }: Ans
   if (lockedAt !== null && !isAnswerComplete(shown, content)) {
     throw new ConvexError("Fyll i svaret innan ni skickar det.");
   }
-  if (answer) {
-    await ctx.db.patch("answers", answer._id, { content, lockedAt });
-    return;
-  }
-  await ctx.db.insert("answers", { gameId: game._id, teamId, questionId, content, lockedAt });
+  if (answer) await ctx.db.patch("answers", answer._id, { content, lockedAt });
+  else await ctx.db.insert("answers", { gameId: game._id, teamId, questionId, content, lockedAt });
+  return game._id;
 }
 
 // Public, like joining (D3): the phone's saved team id is its only key (D34). A draft is the quiet
@@ -29,11 +30,18 @@ async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content }: Ans
 // second after the team pauses (D16, D45).
 export const saveAnswerDraft = mutation({
   args: answerArgs,
-  handler: async (ctx, args) => saveAnswer(ctx, args, null),
+  handler: async (ctx, args) => {
+    await saveAnswer(ctx, args, null);
+  },
 });
 
-// Sending saves the answer and locks it; it can't be changed after that (D16).
+// Sending saves the answer and locks it; it can't be changed after that (D16). Once every team has
+// sent, the question's answers are locked, which starts the AI judge (D55).
 export const sendAnswer = mutation({
   args: answerArgs,
-  handler: async (ctx, args) => saveAnswer(ctx, args, Date.now()),
+  handler: async (ctx, args) => {
+    const gameId = await saveAnswer(ctx, args, Date.now());
+    const [teams, locked] = await Promise.all([teamsOfGame(ctx, gameId), lockedAnswersOfQuestion(ctx, gameId, args.questionId)]);
+    if (locked.length >= teams.length) await lockQuestion(ctx, gameId, args.questionId);
+  },
 });

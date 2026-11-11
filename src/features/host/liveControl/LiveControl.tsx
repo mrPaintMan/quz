@@ -15,7 +15,7 @@ import { AnswerStatusList } from "./AnswerStatusList";
 import { EndGameButton } from "./EndGameButton";
 import { PlaybackControls } from "./PlaybackControls";
 import { QuestionNotes } from "./QuestionNotes";
-import { ReviewList } from "./ReviewList";
+import { ReviewList, type Review } from "./ReviewList";
 import { ScoreBoard } from "./ScoreBoard";
 import { ScoringRules } from "./ScoringRules";
 import { screenLabel } from "./screenLabel";
@@ -24,6 +24,14 @@ import { TripClueLine } from "./TripClueLine";
 import { TvPreview } from "./TvPreview";
 import type { RunningGame } from "@/features/shared/game/RunningGame";
 
+
+// Why Nästa waits, while the question's answers are being judged (D55); null when it doesn't.
+function nextWaitsFor(review: Review | null | undefined): string | null {
+  if (review?.phase === "judging") return "Nästa väntar på AI:n…";
+  if (review?.phase !== "reviewing") return null;
+  const left = review.items.filter((item) => !item.isJudged).length;
+  return `Nästa väntar tills alla svar är bedömda (${left} kvar).`;
+}
 
 // The hosts' view of the night: what the TV shows now and what comes next, both drawn as the TV
 // draws them but silent, with the controls for stepping on and for the question's timer and clip.
@@ -35,8 +43,11 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const scores = useScores(game._id);
   const goToNext = useHostMutation(api.games.mutations.goToNextScreen);
   const goToPrevious = useHostMutation(api.games.mutations.goToPreviousScreen);
+  const questionOnScreen = game.screen.kind === "question" || game.screen.kind === "answer" ? game.screen.questionId : null;
+  const review = useHostQuery(api.verdicts.queries.getReview, questionOnScreen ? { gameId: game._id, questionId: questionOnScreen } : "skip");
   const run = useRunAction();
   const gameId = game._id;
+  const waitingFor = nextWaitsFor(review);
   const notes = next?.notes;
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
@@ -81,7 +92,12 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {notes?.current && notes.current.questionId !== notes.next?.questionId && (
             <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
           )}
-          {game.screen.kind === "answer" && <ReviewList gameId={gameId} questionId={game.screen.questionId} />}
+          {review && questionOnScreen && <ReviewList gameId={gameId} questionId={questionOnScreen} review={review} />}
+          {waitingFor && (
+            <p role="status" className="text-right text-sm text-primary">
+              {waitingFor}
+            </p>
+          )}
           <div className="flex flex-wrap items-center gap-3">
             {game.timer && <TimerControls gameId={gameId} timer={game.timer} />}
             {game.playback && <PlaybackControls gameId={gameId} playback={game.playback} />}
@@ -92,7 +108,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
               {next === null ? (
                 <EndGameButton gameId={gameId} size="lg" variant="default" />
               ) : (
-                <Button size="lg" onClick={() => run(() => goToNext({ gameId, from: game.screen }))}>
+                <Button size="lg" disabled={waitingFor !== null} onClick={() => run(() => goToNext({ gameId, from: game.screen }))}>
                   Nästa
                 </Button>
               )}

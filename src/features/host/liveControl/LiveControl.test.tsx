@@ -16,7 +16,11 @@ const nextScreen = vi.fn();
 const mutations = { goToNextScreen: vi.fn(), goToPreviousScreen: vi.fn() };
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna", colour: "red" }] }));
-vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => nextScreen() }));
+const review = vi.fn();
+vi.mock("@/features/host/shared/useHostQuery", () => ({
+  useHostQuery: (query: FunctionReference<"query">, args: unknown) =>
+    getFunctionName(query).endsWith("getReview") ? (args === "skip" ? undefined : review()) : nextScreen(),
+}));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
 vi.mock("./ReviewList", () => ({ ReviewList: ({ questionId }: { questionId: string }) => <p>Granskning av {questionId}</p> }));
 vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
@@ -49,6 +53,7 @@ describe("LiveControl", () => {
   beforeEach(() => {
     scores.mockReturnValue([]);
     nextScreen.mockReturnValue(rulesNext);
+    review.mockReturnValue(null);
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
@@ -58,10 +63,30 @@ describe("LiveControl", () => {
     expect(screen.getByText("Tomtarna")).toBeInTheDocument();
   });
 
-  it("shows the review list on an answer screen only", () => {
+  it("shows the review list once a question's answers lock, on its question or answer screen", () => {
     const questionId = "q1" as Id<"questions">;
+    review.mockReturnValue({ slots: [], items: [], aiStatus: null, phase: "settled" });
     renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", revealed: null } });
     expect(screen.getByText("Granskning av q1")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeEnabled();
+  });
+
+  it("makes Nästa wait while the AI judges, and until every text is judged", () => {
+    const questionId = "q1" as Id<"questions">;
+    const item = (isJudged: boolean) => ({ slot: 0, text: "x", written: "x", teamCount: 1, isJudged, target: null, byAi: false });
+    review.mockReturnValue({ slots: [], items: [item(false)], aiStatus: "judging", phase: "judging" });
+    renderControl({ screenNow: { kind: "question", questionId }, view: question });
+    expect(screen.getByText("Nästa väntar på AI:n…")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
+  });
+
+  it("says how many texts are left to judge before Nästa", () => {
+    const questionId = "q1" as Id<"questions">;
+    const item = (isJudged: boolean) => ({ slot: 0, text: "x", written: "x", teamCount: 1, isJudged, target: null, byAi: false });
+    review.mockReturnValue({ slots: [], items: [item(false), item(false), item(true)], aiStatus: "done", phase: "reviewing" });
+    renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "?", revealed: null } });
+    expect(screen.getByText("Nästa väntar tills alla svar är bedömda (2 kvar).")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
   });
 
   it("shows no review list on other screens", () => {
