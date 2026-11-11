@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { pointsOf } from "@/domain/answering/outcome";
 import type { ContentOf } from "@convex/questions/questionContent";
 import { sortAnswering } from "./sortAnswering";
 
@@ -34,11 +35,11 @@ describe("sortAnswering", () => {
 
   it("scores the points per item for each item in its right place", () => {
     expect(
-      sortAnswering.grade(content, [
+      pointsOf(sortAnswering.outcomes(content, [
         order("Titanic", "Avatar", "Oppenheimer"),
         order("Titanic", "Oppenheimer", "Avatar"),
         order("Oppenheimer", "Titanic", "Avatar"),
-      ]),
+      ])),
     ).toEqual([3, 1, 0]);
   });
 
@@ -61,5 +62,13 @@ describe("sortAnswering", () => {
   it("isn't fooled by items with line breaks", () => {
     const shown = { ...sortAnswering.show(content), items: ["a\nb", "c"] };
     expect(sortAnswering.isComplete(shown, order("a", "b\nc"))).toBe(false);
+  });
+
+  it("says for each place what the team put there and what belongs there", () => {
+    expect(sortAnswering.outcomes(content, [order("Titanic", "Oppenheimer", "Avatar")])[0].parts).toEqual([
+      { label: "1.", given: "Titanic", result: "right", correct: "Titanic" },
+      { label: "2.", given: "Oppenheimer", result: "wrong", correct: "Avatar" },
+      { label: "3.", given: "Avatar", result: "wrong", correct: "Oppenheimer" },
+    ]);
   });
 });

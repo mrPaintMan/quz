@@ -3,7 +3,7 @@ import type { ContentOf } from "@convex/questions/questionContent";
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
 import { firstFilledIn } from "@/domain/questionTypes/firstFilledIn";
 import { isBlank } from "@/domain/questionTypes/isBlank";
-import { gradeTyped, type TypedReview } from "@/domain/review/typedReview";
+import { textOutcomes, type TypedReview } from "@/domain/review/typedReview";
 import { fieldTitle } from "./fieldTitle";
 
 // While asked, each field's label (blank with a single field, whose editor hides the label); on
@@ -40,6 +40,16 @@ export const freeTextAnswering: AnsweringRules<"freeText", FreeTextShown, FreeTe
   isComplete: (shown, { fields }) => fields.length === shown.labels.length && fields.some((field) => !isBlank(field)),
   // The points per field for each field whose text matches one of that field's own accepted
   // answers, compared as everywhere else (normalizeForComparison), or by the hosts' verdict (D51).
-  grade: (content, answers, verdicts = []) => gradeTyped(freeTextReview, content, answers, verdicts),
+  outcomes: (content, answers, verdicts = []) => {
+    const slots = freeTextReview.slots(content);
+    return textOutcomes(freeTextReview, content, answers, verdicts).map(({ points, texts }) => ({
+      points,
+      // One part per field, a blank one wrong, each beside its first accepted answer.
+      parts: slots.map((slot, index) => {
+        const text = texts.find((candidate) => candidate.slot === index);
+        return { label: slot.title, given: text?.written ?? "", result: text?.result ?? "wrong", correct: slot.options[0].label };
+      }),
+    }));
+  },
   review: freeTextReview,
 };

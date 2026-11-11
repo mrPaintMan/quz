@@ -3,7 +3,7 @@ import type { ContentOf } from "@convex/questions/questionContent";
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
 import { firstFilledIn } from "@/domain/questionTypes/firstFilledIn";
 import { isBlank } from "@/domain/questionTypes/isBlank";
-import { gradeTyped, rightItems, type TypedReview } from "@/domain/review/typedReview";
+import { rightItems, textOutcomes, type TypedReview } from "@/domain/review/typedReview";
 
 // The most a team may list; far more than a real team writes, and it bounds what the server and
 // the AI judge read (D53).
@@ -38,6 +38,11 @@ export const listAnswering: AnsweringRules<"list", ListShown, ListRevealed> = {
   isComplete: (_shown, { items }) => items.some((item) => !isBlank(item)),
   // The points per item for each distinct item listed: by an exact spelling of the key, or by a
   // verdict (D51, D53).
-  grade: (content, answers, verdicts = []) => gradeTyped(listReview, content, answers, verdicts),
+  outcomes: (content, answers, verdicts = []) =>
+    textOutcomes(listReview, content, answers, verdicts).map(({ points, texts }) => ({
+      points,
+      // One part per text written, blanks left out; another form of a counted item is a repeat.
+      parts: texts.map(({ written, result }) => ({ label: "", given: written, result, correct: "" })),
+    })),
   review: listReview,
 };

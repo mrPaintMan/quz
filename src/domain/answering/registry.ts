@@ -19,6 +19,7 @@ import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain
 import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
 import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 import type { AnsweringRules, Graded } from "./answeringRules";
+import type { Outcome } from "./outcome";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
 export type ShownQuestion = MultipleChoiceShown | FreeTextShown | NumberShown | SortShown | MatchShown | ListShown | IngredientsShown;
@@ -59,7 +60,7 @@ type AnyAnsweringRules = {
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
-  grade: (content: QuestionContent, answers: AnswerContent[], verdicts?: Verdict[]) => number[];
+  outcomes: (content: QuestionContent, answers: AnswerContent[], verdicts?: Verdict[]) => Outcome[];
   review?: TypedReview<QuestionContent, AnswerContent>;
 };
 

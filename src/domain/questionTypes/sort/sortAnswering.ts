@@ -21,6 +21,12 @@ export const sortAnswering: AnsweringRules<"sort", SortShown, SortRevealed> = {
   startingAnswer: ({ items }) => ({ type: "sort", order: items }),
   isComplete: (shown, { order }) => isOrderOf(order, shown.items),
   // The points per item for each item in its right place.
-  grade: ({ items, pointsPerItem }, answers) =>
-    answers.map(({ order }) => order.filter((item, index) => item === items[index]).length * (pointsPerItem ?? 0)),
+  outcomes: ({ items, pointsPerItem }, answers) =>
+    answers.map(({ order }) => {
+      const parts = items.map((correct, index) => {
+        const given = order[index] ?? "";
+        return { label: `${index + 1}.`, given, result: given === correct ? ("right" as const) : ("wrong" as const), correct };
+      });
+      return { points: parts.filter((part) => part.result === "right").length * (pointsPerItem ?? 0), parts };
+    }),
 };

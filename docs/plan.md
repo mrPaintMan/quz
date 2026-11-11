@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 is paused for the feedback round below (from the user's test night, 2026-11-11). Next: the phones' feedback (5), built on per-item outcomes (see the architecture notes). M3 then continues with activities and manual points, then drawing, map pin and På spåret.
+The feedback round from the user's test night (2026-11-11) is done. M3 continues with activities and manual points, then drawing, map pin and På spåret. Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
 
 ## Milestones
 
@@ -73,7 +73,7 @@ M3 is paused for the feedback round below (from the user's test night, 2026-11-1
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
 - [x] AI judge and review for list questions, two forms of one answer counting once (D53). When På spåret is built, replace its editor's old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) with the AI judge's switch
-- [ ] Later: show each team which of its answers were judged right or wrong (D50)
+- [x] Show each team which of its answers were judged right or wrong (D50, D58)
 - [ ] Host overrides and manual points
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
 
@@ -83,7 +83,7 @@ Agreed with the user, in this order:
 2. [x] Judging flow: the AI judge starts as soon as every team has sent or the time is out, and Nästa waits until every answer is judged, unsure ones included (D55)
 3. [x] The Granska box: every answer, exact matches read-only at the bottom; sections Att granska, Bedömda, Stämde med facit; each sub-question's correct answer by its title (D56)
 4. [x] Faster images: shrink on upload (at most 1920 px), and the TV loads the next screen's images ahead (the user accepts they can be found a screen early); the slow map test made fast (D57)
-5. [ ] Phones show what scored: from the answer screen until the next question, each team's own answer marked right or wrong per item, with its points; follows verdict changes
+5. [x] Phones show what scored: from the answer screen until the next question, each team's own answer marked right or wrong per item, with its points; follows verdict changes (D58)
 
 ### M4 · Highlights
 - [ ] På spåret: clue reveal and emergency brake
@@ -100,7 +100,7 @@ Agreed with the user, in this order:
 - [ ] Give the TV and the phones their own lighter live queries instead of all following `getRunningGame`, which rebuilds the sequence from the whole quiz on every change of the game (D35, D45, D53)
 - [ ] Rename the stored `fuzzy` switch to what it is now (the AI judge) and drop the list's unused `aiAssist`, with a data migration
 - [ ] A few browser tests against a local Convex, as the cloud sessions can't try the app with data
-- Folded into the feedback round instead: an explicit judging phase per question (round 2, D55), and per-item outcomes as the base of grading and the phones' feedback (round 5)
+- Folded into the feedback round instead, done: an explicit judging phase per question (round 2, D55), and per-part outcomes as the base of grading and the phones' feedback (round 5, D58)
 
 ## Log
 
@@ -143,3 +143,4 @@ Agreed with the user, in this order:
 - 2026-11-11: Feedback round 2, judging flow: answers lock when every team has sent, the time is out or Nästa closes the question, which starts the AI judge; Nästa waits until every answer is judged; one rule decides a question's judging phase (D55). Not tried in a browser with data.
 - 2026-11-11: Feedback round 3, the Granska box: every answer in three sections (Att granska on top, Bedömda, Stämde med facit read-only), and each sub-question's correct answer by its title (D56). Not tried in a browser with data.
 - 2026-11-11: Feedback round 4, faster pictures: shrunk on upload to at most 1920 px as WebP, and loaded ahead on the TV; the map's loading test uses tiny stand-in maps, so no test can time out (D57). Not tried in a browser with data.
+- 2026-11-11: Feedback round 5, phones show what scored: after the answer, the team's own answer part by part with its points, following verdicts; grading is now built from per-part outcomes, so the phones and the scores can't disagree (D58). Not tried in a browser with data.

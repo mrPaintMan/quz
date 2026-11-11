@@ -1,6 +1,7 @@
 import type { AnswerContent } from "@convex/answers/answerContent";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { isAnswerFor } from "@/domain/answers/isAnswerFor";
+import { pointsOf } from "@/domain/answering/outcome";
 import { answeringOf } from "@/domain/answering/registry";
 import type { Verdict } from "@/domain/review/typedReview";
 
@@ -12,7 +13,7 @@ export function gradeAnswers(content: QuestionContent, answers: AnswerContent[],
   const answering = answeringOf(content);
   const fits = answers.map((answer) => isAnswerFor(content, answer));
   const fitting = answers.filter((_answer, index) => fits[index]);
-  const points = answering === null ? [] : answering.grade(content, fitting, verdicts);
+  const points = answering === null ? [] : pointsOf(answering.outcomes(content, fitting, verdicts));
   let next = 0;
   return fits.map((fit) => (fit ? (points[next++] ?? 0) : 0));
 }

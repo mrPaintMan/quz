@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { givenNames, sortTexts, gradeTyped, rightItems, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -21,7 +21,30 @@ const review: TypedReview<Content, Answer> = {
 const content = { points: 2 };
 const answer = (first: string, ...pool: string[]) => ({ first, pool });
 
-describe("gradeTyped", () => {
+// Each answer's points, as textOutcomes counts them.
+function gradeTyped<A>(typed: TypedReview<Content, A>, of: Content, answers: A[], verdicts: Parameters<typeof textOutcomes>[3]) {
+  return textOutcomes(typed, of, answers, verdicts).map((outcome) => outcome.points);
+}
+
+describe("textOutcomes", () => {
+  it("says what each text counted as, in the order written", () => {
+    const verdicts = [
+      { slot: 1, text: "wodka", target: 0 },
+      { slot: 1, text: "mjölk", target: null },
+    ];
+    const [outcome] = textOutcomes(review, content, [answer("ABBA", "Vodka", "wodka", "mjölk", "gin")], verdicts);
+    expect(outcome.texts).toEqual([
+      { slot: 0, written: "ABBA", result: "right", item: "ABBA" },
+      { slot: 1, written: "Vodka", result: "right", item: "Vodka" },
+      { slot: 1, written: "wodka", result: "repeat", item: "Vodka" },
+      { slot: 1, written: "mjölk", result: "wrong", item: "" },
+      { slot: 1, written: "gin", result: "pending", item: "" },
+    ]);
+    expect(outcome.points).toBe(4);
+  });
+});
+
+describe("grading typed texts", () => {
   it("scores each option matched by an exact spelling, once however often it is written", () => {
     expect(gradeTyped(review, content, [answer("abba.", "vodka", "Vodka", "KAFFELIKÖR")], [])).toEqual([6]);
   });

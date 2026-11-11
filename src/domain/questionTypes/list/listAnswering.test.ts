@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { pointsOf } from "@/domain/answering/outcome";
 import type { ContentOf } from "@convex/questions/questionContent";
 import { listAnswering } from "./listAnswering";
 
@@ -23,7 +24,7 @@ describe("listAnswering", () => {
   });
 
   it("scores each key item listed once, however it is spelled", () => {
-    expect(listAnswering.grade(content, [listed("göteborg", "GBG", "Malmö."), listed("Lund")])).toEqual([1, 0]);
+    expect(pointsOf(listAnswering.outcomes(content, [listed("göteborg", "GBG", "Malmö."), listed("Lund")]))).toEqual([1, 0]);
   });
 
   it("counts right items outside the key by their names, two forms of one item once", () => {
@@ -33,7 +34,7 @@ describe("listAnswering", () => {
       { slot: 0, text: "gothenburg", target: 0 },
       { slot: 0, text: "uppsala", target: null },
     ];
-    expect(listAnswering.grade(content, [listed("Lund", "Lunds stad", "Gothenburg", "Göteborg", "Uppsala")], verdicts)).toEqual([1]);
+    expect(pointsOf(listAnswering.outcomes(content, [listed("Lund", "Lunds stad", "Gothenburg", "Göteborg", "Uppsala")], verdicts))).toEqual([1]);
   });
 
   it("reveals the items the teams got right, most often first, and nothing without answers", () => {
@@ -47,5 +48,18 @@ describe("listAnswering", () => {
       ],
     });
     expect(listAnswering.reveal(content)).toEqual({ type: "list", items: [] });
+  });
+
+  it("says what each item listed counted as", () => {
+    const verdicts = [
+      { slot: 0, text: "gothenburg", target: 0 },
+      { slot: 0, text: "oslo", target: null },
+    ];
+    expect(listAnswering.outcomes(content, [listed("Göteborg", "Gothenburg", "Oslo", "Lund")], verdicts)[0].parts.map((part) => [part.given, part.result])).toEqual([
+      ["Göteborg", "right"],
+      ["Gothenburg", "repeat"],
+      ["Oslo", "wrong"],
+      ["Lund", "pending"],
+    ]);
   });
 });
