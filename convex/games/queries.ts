@@ -1,10 +1,12 @@
 import { v } from "convex/values";
 import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
+import { picturesOnScreen } from "@/domain/media/picturesOnScreen";
 import { screenNotes } from "@/domain/screenSequence/screenNotes";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
+import { linkImages } from "../media/linkImages";
 import { getOrThrow } from "../shared/getOrThrow";
 import { findRunningGame } from "./findRunningGame";
 import { placeOfGame } from "./placeOfGame";
@@ -35,6 +37,19 @@ export const getRunningGame = query({
       // no more answers, even when shown again (D41, D55).
       isQuestionClosed: screen.kind === "question" && isQuestionLocked(game, screen.questionId),
     };
+  },
+});
+
+// Public, for the TV to load the next screen's pictures ahead, so they show at once (D57). Only
+// their links: anyone could find a picture a screen early, which the user accepts; the question's
+// text and answer stay hidden. Empty without a running game or past the last screen.
+export const getNextPictureUrls = query({
+  args: {},
+  handler: async (ctx) => {
+    const game = await findRunningGame(ctx);
+    if (game === null) return [];
+    const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
+    return Object.values(await linkImages(ctx, picturesOnScreen(sequence[screenIndex + 1], rounds)));
   },
 });
 

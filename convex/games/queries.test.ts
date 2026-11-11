@@ -207,3 +207,20 @@ describe("getShowingTrip", () => {
     await expect(t.query(api.games.queries.getShowingTrip, { hostPassphrase: "fel", gameId })).rejects.toThrow("Fel lösenord.");
   });
 });
+
+describe("getNextPictureUrls", () => {
+  it("links the next screen's pictures, for the TV to load ahead", async () => {
+    const t = setupConvexTest();
+    const { quizId, roundId } = await insertQuizWithQuestion(t, true);
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "roundIntro", roundId }, screenIndex: 2 }));
+    await expect(t.query(api.games.queries.getNextPictureUrls, {})).resolves.toEqual([expect.any(String)]);
+  });
+
+  it("is empty without a running game or a picture next", async () => {
+    const t = setupConvexTest();
+    await expect(t.query(api.games.queries.getNextPictureUrls, {})).resolves.toEqual([]);
+    const { quizId } = await insertQuizWithQuestion(t);
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, ...atLobby }));
+    await expect(t.query(api.games.queries.getNextPictureUrls, {})).resolves.toEqual([]);
+  });
+});
