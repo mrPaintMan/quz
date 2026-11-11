@@ -31,11 +31,15 @@ function describeRules(rounds: RoundInQuiz[]): ScreenView {
   };
 }
 
+// A question's place: its round's number and its number among the round's questions answered in
+// the app, as activities go by "Aktivitet" and take no number of their own (D54); an activity
+// carries the number of the questions before it, unused.
 function findQuestion(rounds: RoundInQuiz[], questionId: Id<"questions">) {
   for (const [roundIndex, round] of rounds.entries()) {
     const questionIndex = round.questions.findIndex((question) => question._id === questionId);
     if (questionIndex !== -1) {
-      return { roundNumber: roundIndex + 1, questionNumber: questionIndex + 1, question: round.questions[questionIndex] };
+      const questionNumber = round.questions.slice(0, questionIndex + 1).filter((question) => rulesFor(question.content).answeredInApp).length;
+      return { roundNumber: roundIndex + 1, questionNumber, question: round.questions[questionIndex] };
     }
   }
   throw new Error(`Question ${questionId} is not in the quiz.`);

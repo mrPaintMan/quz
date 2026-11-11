@@ -98,4 +98,3 @@ export function fitsAnswerLimits(answer: AnswerContent): boolean {
   const texts = answeringOfType(answer.type)?.review?.texts(answer) ?? [];
   return texts.length <= MAX_TYPED_TEXTS && texts.every(({ text }) => text.length <= MAX_TYPED_TEXT_LENGTH);
 }
-

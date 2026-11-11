@@ -29,6 +29,7 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 }));
 
 const gameId = "game1" as Id<"games">;
+const rulesNext = { view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null, notes: { current: null, next: null } };
 const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true, shown: null };
 
 type GameState = { screenNow?: Screen; view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
@@ -47,7 +48,7 @@ function renderControl({ screenNow = { kind: "lobby" }, view = { kind: "lobby" }
 describe("LiveControl", () => {
   beforeEach(() => {
     scores.mockReturnValue([]);
-    nextScreen.mockReturnValue({ view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null });
+    nextScreen.mockReturnValue(rulesNext);
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
@@ -74,10 +75,32 @@ describe("LiveControl", () => {
     expect(screen.getByText("Så funkar kvällen")).toBeInTheDocument();
   });
 
-  it("says when nothing comes after", () => {
+  it("says when nothing comes after, and offers to end the quiz instead of Nästa", () => {
     nextScreen.mockReturnValue(null);
     renderControl();
     expect(screen.getByText("Inget mer efter detta.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Nästa" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Avsluta quiz" })).toHaveLength(2);
+  });
+
+  it("shows the next screen's notes, and the notes of the question on the TV folded away", () => {
+    nextScreen.mockReturnValue({
+      ...rulesNext,
+      notes: {
+        current: { questionId: "q1", notes: "Manus för fråga 1", scoring: { kind: "Närmast vinner", rules: ["Plats 1: 3 p"] } },
+        next: { questionId: "q2", notes: "Manus för fråga 2", scoring: null },
+      },
+    });
+    renderControl({ view: question });
+    expect(screen.getByText("Manus för fråga 2")).toBeVisible();
+    expect(screen.getByText("Manus för fråga 1")).not.toBeVisible();
+    expect(screen.getByRole("heading", { name: "Poängsättning: Närmast vinner" })).toBeInTheDocument();
+  });
+
+  it("doesn't repeat the notes of a question moving on to its own answer", () => {
+    nextScreen.mockReturnValue({ ...rulesNext, notes: { current: { questionId: "q1", notes: "Manus", scoring: null }, next: { questionId: "q1", notes: "Manus", scoring: null } } });
+    renderControl({ view: question });
+    expect(screen.getAllByText("Manus")).toHaveLength(1);
   });
 
   it("steps from the screen showing now", async () => {

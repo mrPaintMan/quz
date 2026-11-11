@@ -40,6 +40,7 @@ describe("TvScreen", () => {
     [{ kind: "rules", roundCount: 1, questionCount: 2, activityCount: 0 }, "Så funkar kvällen", null],
     [{ kind: "roundIntro", roundNumber: 2, title: "Julmat" }, "Julmat", "Omgång 2"],
     [{ kind: "question", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
+    [{ kind: "question", roundNumber: 2, questionNumber: 4, prompt: "Baka ett pepparkakshus", answeredInApp: false, shown: null }, "Baka ett pepparkakshus", "Omgång 2 · Aktivitet"],
     [{ kind: "answer", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
     [{ kind: "film", roundNumber: 4 }, "Film", "Omgång 4"],
     [{ kind: "leaderboard", roundNumber: 1 }, "Topplista efter omgång 1", null],
@@ -48,6 +49,15 @@ describe("TvScreen", () => {
     renderView(view);
     expect(screen.getByRole("heading", { level: 1, name: title })).toBeInTheDocument();
     if (eyebrow) expect(screen.getByText(eyebrow)).toBeInTheDocument();
+  });
+
+  it("centres an activity's title, unless it has a picture", () => {
+    const activity: ScreenView = { ...question, answeredInApp: false };
+    const { unmount } = renderView(activity);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-[7cqw]");
+    unmount();
+    renderView(activity, { media: image });
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveClass("text-[7cqw]");
   });
 
   it("shows the question's timer", () => {

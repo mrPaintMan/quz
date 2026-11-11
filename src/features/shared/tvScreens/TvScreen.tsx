@@ -11,6 +11,7 @@ import { RulesScreen } from "./RulesScreen";
 import type { TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
 import { TvMedia } from "./TvMedia";
+import { questionPlace } from "./questionPlace";
 import { TvTimer } from "./TvTimer";
 
 type TvScreenProps = {
@@ -48,13 +49,15 @@ export function TvScreen(props: TvScreenProps) {
     case "rules":
       return <RulesScreen {...view} />;
     case "roundIntro":
-      return <TvFrame eyebrow={roundLabel(view.roundNumber)} title={view.title} />;
+      return <TvFrame eyebrow={roundLabel(view.roundNumber)} title={view.title} centered />;
     case "question":
       return (
+        // An activity's title stands centred, unless a picture or clip needs the room.
         <TvFrame
-          eyebrow={`${roundLabel(view.roundNumber)} · Fråga ${view.questionNumber}`}
+          eyebrow={`${roundLabel(view.roundNumber)} · ${questionPlace(view)}`}
           title={view.prompt}
           corner={<TvTimer timer={timer} />}
+          centered={!view.answeredInApp && !media}
         >
           {mediaArea}
           {view.shown && <ShownQuestionDisplay shown={view.shown} imageUrls={imageUrls} />}

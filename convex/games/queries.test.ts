@@ -125,7 +125,17 @@ describe("getNextScreen", () => {
       view: { kind: "roundIntro", roundNumber: 1, title: "Julmat" },
       media: null,
       imageUrls: {},
+      notes: { current: null, next: null },
     });
+  });
+
+  it("gives the notes of the next screen's question, and of the question on the TV", async () => {
+    const t = setupConvexTest();
+    const { quizId, roundId, questionId } = await insertQuizWithQuestion(t);
+    await t.run((ctx) => ctx.db.patch("questions", questionId, { hostNotes: "Alla upp och baka!" }));
+    const gameId = await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "roundIntro", roundId }, screenIndex: 2 }));
+    const next = await t.query(api.games.queries.getNextScreen, { ...host, gameId });
+    expect(next?.notes).toEqual({ current: null, next: { questionId, notes: "Alla upp och baka!", scoring: null } });
   });
 
   it("shows the next screen's media", async () => {

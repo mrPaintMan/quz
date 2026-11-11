@@ -1,4 +1,5 @@
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
+import { questionPlace } from "@/features/shared/tvScreens/questionPlace";
 
 // A short name for a screen, for the hosts' live control.
 export function screenLabel(view: ScreenView): string {
@@ -10,7 +11,7 @@ export function screenLabel(view: ScreenView): string {
     case "roundIntro":
       return `Omgång ${view.roundNumber}: ${view.title}`;
     case "question":
-      return `Omgång ${view.roundNumber} · Fråga ${view.questionNumber}`;
+      return `Omgång ${view.roundNumber} · ${questionPlace(view)}`;
     case "answer":
       return `Omgång ${view.roundNumber} · Svar på fråga ${view.questionNumber}`;
     case "film":

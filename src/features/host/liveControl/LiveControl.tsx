@@ -14,8 +14,10 @@ import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
 import { AnswerStatusList } from "./AnswerStatusList";
 import { EndGameButton } from "./EndGameButton";
 import { PlaybackControls } from "./PlaybackControls";
+import { QuestionNotes } from "./QuestionNotes";
 import { ReviewList } from "./ReviewList";
 import { ScoreBoard } from "./ScoreBoard";
+import { ScoringRules } from "./ScoringRules";
 import { screenLabel } from "./screenLabel";
 import { TimerControls } from "./TimerControls";
 import { TripClueLine } from "./TripClueLine";
@@ -35,6 +37,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const goToPrevious = useHostMutation(api.games.mutations.goToPreviousScreen);
   const run = useRunAction();
   const gameId = game._id;
+  const notes = next?.notes;
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
   if (joinUrl === null) return null;
@@ -72,6 +75,12 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {game.view.kind === "question" && game.view.shown && answeredTeamIds && (
             <AnswerStatusList teams={teams} answeredTeamIds={answeredTeamIds} />
           )}
+          {notes?.current?.scoring && <ScoringRules {...notes.current.scoring} />}
+          {/* The next screen's notes cover the same question while it moves to its answer; a new
+              question's notes start folded. */}
+          {notes?.current && notes.current.questionId !== notes.next?.questionId && (
+            <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
+          )}
           {game.screen.kind === "answer" && <ReviewList gameId={gameId} questionId={game.screen.questionId} />}
           <div className="flex flex-wrap items-center gap-3">
             {game.timer && <TimerControls gameId={gameId} timer={game.timer} />}
@@ -80,9 +89,13 @@ export function LiveControl({ game }: { game: RunningGame }) {
               <Button variant="outline" size="lg" onClick={() => run(() => goToPrevious({ gameId, from: game.screen }))}>
                 Föregående
               </Button>
-              <Button size="lg" onClick={() => run(() => goToNext({ gameId, from: game.screen }))}>
-                Nästa
-              </Button>
+              {next === null ? (
+                <EndGameButton gameId={gameId} size="lg" variant="default" />
+              ) : (
+                <Button size="lg" onClick={() => run(() => goToNext({ gameId, from: game.screen }))}>
+                  Nästa
+                </Button>
+              )}
             </div>
           </div>
         </section>
@@ -104,6 +117,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
                 />
               </TvPreview>
               <p className="font-semibold">{screenLabel(next.view)}</p>
+              {notes?.next && <QuestionNotes notes={notes.next.notes} />}
             </>
           )}
           {scores && <ScoreBoard scores={scores} />}

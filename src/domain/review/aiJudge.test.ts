@@ -122,4 +122,3 @@ describe("readJudgeReply", () => {
     expect(readJudgeReply({ verdicts: [{ id: 0, verdict: "right", option: -1, item: "Abba" }] }, slots, items)).toEqual([]);
   });
 });
-

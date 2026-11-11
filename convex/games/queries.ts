@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
+import { screenNotes } from "@/domain/screenSequence/screenNotes";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
@@ -35,8 +36,9 @@ export const getRunningGame = query({
   },
 });
 
-// For the hosts' preview of what comes next; host-only, so a team can't read the next
-// question early. null after the last screen and for an ended game.
+// For the hosts' preview of what comes next, with the notes of the question on the TV and of the
+// next screen's, and how a Gissa siffran question scores (D54); host-only, so a team can't read
+// the next question or the notes early. null after the last screen and for an ended game.
 export const getNextScreen = hostQuery({
   args: { gameId: v.id("games") },
   handler: async (ctx, { gameId }) => {
@@ -44,7 +46,9 @@ export const getNextScreen = hostQuery({
     if (game.endedAt !== null) return null;
     const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
     const next = sequence[screenIndex + 1];
-    return next === undefined ? null : showScreen(ctx, game._id, next, rounds);
+    if (next === undefined) return null;
+    const notes = { current: screenNotes(sequence[screenIndex], rounds), next: screenNotes(next, rounds) };
+    return { ...(await showScreen(ctx, game._id, next, rounds)), notes };
   },
 });
 

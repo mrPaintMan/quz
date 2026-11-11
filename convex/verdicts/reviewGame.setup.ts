@@ -67,4 +67,3 @@ export async function setupList() {
   });
   return { t, ...ids };
 }
-
