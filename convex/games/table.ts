@@ -21,6 +21,9 @@ export const gamesTable = defineTable({
   // Questions the hosts have stepped on from: no team can answer them again, even if the hosts
   // step back (D41). Left out until the first one; at most one entry per question.
   closedQuestionIds: v.optional(v.array(v.id("questions"))),
+  // Questions whose answers locked before Nästa, because every team had sent or the time ran out
+  // (D55): no team can answer them either. Left out until the first one.
+  lockedQuestionIds: v.optional(v.array(v.id("questions"))),
 })
   .index("by_endedAt", ["endedAt"])
   .index("by_quizId", ["quizId"]);

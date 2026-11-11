@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 is paused for the feedback round below (from the user's test night, 2026-11-11). Next: the Granska box and judging flow (2 and 3). M3 then continues with activities and manual points, then drawing, map pin and På spåret.
+M3 is paused for the feedback round below (from the user's test night, 2026-11-11). Next: the Granska box (3), then faster images (4) and the phones' feedback (5). M3 then continues with activities and manual points, then drawing, map pin and På spåret.
 
 ## Milestones
 
@@ -80,7 +80,7 @@ M3 is paused for the feedback round below (from the user's test night, 2026-11-1
 ### Feedback round (2026-11-11), paused M3
 Agreed with the user, in this order:
 1. [x] Running the night: next screen's notes under the preview, the TV question's notes folded away, Gissa siffran's scoring in the admin, "Avsluta quiz" in place of Nästa on the last screen, activities and round intros centred on the TV (D54)
-2. [ ] Judging flow: the AI judge starts as soon as every team has sent or the time is out, and Nästa waits until every answer is judged, unsure ones included
+2. [x] Judging flow: the AI judge starts as soon as every team has sent or the time is out, and Nästa waits until every answer is judged, unsure ones included (D55)
 3. [ ] The Granska box: every answer, exact matches read-only at the bottom; sections Att granska, Bedömda, Stämde med facit; each sub-question's correct answer by its title
 4. [ ] Faster images: shrink on upload (at most 1920 px), and the TV loads the next screen's images ahead (the user accepts they can be found a screen early)
 5. [ ] Phones show what scored: from the answer screen until the next question, each team's own answer marked right or wrong per item, with its points; follows verdict changes
@@ -95,6 +95,12 @@ Agreed with the user, in this order:
 - [ ] Final visual design and Christmas theme, TV-sized layout
 - [x] Custom domain (quz.nu)
 - [ ] Dry run with a few friends on real phones
+
+### Before next year's larger night (architecture review, 2026-11-11)
+- [ ] Give the TV and the phones their own lighter live queries instead of all following `getRunningGame`, which rebuilds the sequence from the whole quiz on every change of the game (D35, D45, D53)
+- [ ] Rename the stored `fuzzy` switch to what it is now (the AI judge) and drop the list's unused `aiAssist`, with a data migration
+- [ ] A few browser tests against a local Convex, as the cloud sessions can't try the app with data
+- Folded into the feedback round instead: an explicit judging phase per question (round 2, D55), and per-item outcomes as the base of grading and the phones' feedback (round 5)
 
 ## Log
 
@@ -134,3 +140,4 @@ Agreed with the user, in this order:
 - 2026-11-10: The AI judge: when Nästa closes a Fritext or ingredients question, Claude Haiku 5.5 judges the unmatched texts in one call; right and wrong count at once and are marked AI in the review list, unsure ones and failed calls are left to the hosts (D52). Tried only against a fake Claude in tests, not in a browser with data.
 - 2026-11-10: Nämn så många som möjligt: add answers one at a time on the phone, the items the teams got right on the TV, the AI judge and the review list naming right answers outside the key so two forms count once (D53). Not tried in a browser with data.
 - 2026-11-11: Feedback round 1, running the night: notes in the live control, Gissa siffran's scoring, Avsluta quiz on the last screen, centred activities and round intros on the TV (D54). Not tried in a browser with data.
+- 2026-11-11: Feedback round 2, judging flow: answers lock when every team has sent, the time is out or Nästa closes the question, which starts the AI judge; Nästa waits until every answer is judged; one rule decides a question's judging phase (D55). Not tried in a browser with data.

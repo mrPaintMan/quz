@@ -48,7 +48,7 @@ describe("judgeText", () => {
     const { t, gameId, questionId } = await setup({ closed: false });
     await expect(
       t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text: "abbba", target: 0 }),
-    ).rejects.toThrow("när frågan har stängt");
+    ).rejects.toThrow("när de är låsta");
   });
 
   it("refuses a text no team sent, or one that matched exactly", async () => {

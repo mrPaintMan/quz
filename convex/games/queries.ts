@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
 import { screenNotes } from "@/domain/screenSequence/screenNotes";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
@@ -30,8 +31,9 @@ export const getRunningGame = query({
       ...(await showScreen(ctx, game._id, screen, rounds)),
       timer: isStoredScreen ? (game.timer ?? null) : null,
       playback: isStoredScreen ? (game.playback ?? null) : null,
-      // A question stepped on from takes no more answers, even when shown again (D41).
-      isQuestionClosed: screen.kind === "question" && (game.closedQuestionIds ?? []).includes(screen.questionId),
+      // A question stepped on from, or locked when every team had sent or the time ran out, takes
+      // no more answers, even when shown again (D41, D55).
+      isQuestionClosed: screen.kind === "question" && isQuestionLocked(game, screen.questionId),
     };
   },
 });

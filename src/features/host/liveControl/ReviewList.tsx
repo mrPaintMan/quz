@@ -1,23 +1,24 @@
 "use client";
 
+import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import type { Target } from "@/domain/review/typedReview";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
-import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { VerdictChoices } from "./VerdictChoices";
 
-// On a typed question's answer screen: each text no accepted spelling matched, once for every
-// team that wrote it, for the hosts to judge right (as which answer, when there are several) or
-// wrong (D51). The AI judge fills in what it is sure of, marked AI, and the hosts can change it
-// (D52). Unjudged texts score nothing, so the night never waits on the list.
-export function ReviewList({ gameId, questionId }: { gameId: Id<"games">; questionId: Id<"questions"> }) {
-  const review = useHostQuery(api.verdicts.queries.getReview, { gameId, questionId });
+// Once a typed question's answers lock, on its question and answer screens (D55): each text no
+// accepted spelling matched, once for every team that wrote it, for the hosts to judge right (as
+// which answer, when there are several) or wrong (D51). The AI judge fills in what it is sure of,
+// marked AI, and the hosts can change it (D52). With the AI judge on, Nästa waits until every text
+// is judged; otherwise unjudged texts score nothing.
+export type Review = NonNullable<FunctionReturnType<typeof api.verdicts.queries.getReview>>;
+
+export function ReviewList({ gameId, questionId, review }: { gameId: Id<"games">; questionId: Id<"questions">; review: Review }) {
   const judge = useHostMutation(api.verdicts.mutations.judgeText);
   const run = useRunAction();
-  if (!review) return null;
-  const left = review.items.filter((item) => !item.isJudged).length;
+  const left = review.unjudged;
 
   return (
     <section className="flex flex-col gap-2 rounded-xl border bg-card p-4">

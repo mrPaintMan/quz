@@ -26,14 +26,11 @@ async function runningJudging(ctx: MutationCtx, ids: GameQuestion) {
   return judging?.status === "judging" ? judging : null;
 }
 
-// When Nästa closes a question whose typed texts the AI judges, asks it right away, so its
-// verdicts are in long before the leaderboard (D52).
+// When a question whose typed texts the AI judges locks, asks it right away, once (D52, D55).
 export async function startAiJudging(ctx: MutationCtx, ids: GameQuestion) {
   const question = await ctx.db.get("questions", ids.questionId);
-  if (question === null || !usesAiJudge(question.content)) return;
-  const judging = await aiJudgingOf(ctx, ids);
-  if (judging) await ctx.db.patch("aiJudgings", judging._id, { status: "judging" });
-  else await ctx.db.insert("aiJudgings", { ...ids, status: "judging" });
+  if (question === null || !usesAiJudge(question.content) || (await aiJudgingOf(ctx, ids)) !== null) return;
+  await ctx.db.insert("aiJudgings", { ...ids, status: "judging" });
   await ctx.scheduler.runAfter(0, internal.aiJudge.judge.judgeQuestion, ids);
 }
 
