@@ -10,7 +10,7 @@ export function screenLabel(view: ScreenView): string {
     case "roundIntro":
       return `Omgång ${view.roundNumber}: ${view.title}`;
     case "question":
-      return `Omgång ${view.roundNumber} · Fråga ${view.questionNumber}`;
+      return `Omgång ${view.roundNumber} · ${view.answeredInApp ? `Fråga ${view.questionNumber}` : "Aktivitet"}`;
     case "answer":
       return `Omgång ${view.roundNumber} · Svar på fråga ${view.questionNumber}`;
     case "film":

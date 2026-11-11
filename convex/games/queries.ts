@@ -6,6 +6,7 @@ import { hostQuery } from "../auth/hostFunctions";
 import { getOrThrow } from "../shared/getOrThrow";
 import { findRunningGame } from "./findRunningGame";
 import { placeOfGame } from "./placeOfGame";
+import { screenNotes } from "./screenNotes";
 import { showScreen } from "./showScreen";
 
 // Public: the TV and the phones open whatever game is running and follow its screen. They get
@@ -45,6 +46,19 @@ export const getNextScreen = hostQuery({
     const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
     const next = sequence[screenIndex + 1];
     return next === undefined ? null : showScreen(ctx, game._id, next, rounds);
+  },
+});
+
+// For the hosts: the notes of the question on the TV and of the next screen's, read as a script
+// into the next screen, and how a Gissa siffran question scores. Host-only, as notes may give
+// answers away. null for an ended game.
+export const getScreenNotes = hostQuery({
+  args: { gameId: v.id("games") },
+  handler: async (ctx, { gameId }) => {
+    const game = await getOrThrow(ctx, "games", gameId);
+    if (game.endedAt !== null) return null;
+    const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
+    return { current: screenNotes(sequence[screenIndex], rounds), next: screenNotes(sequence[screenIndex + 1], rounds) };
   },
 });
 

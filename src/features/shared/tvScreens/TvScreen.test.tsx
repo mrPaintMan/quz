@@ -40,6 +40,7 @@ describe("TvScreen", () => {
     [{ kind: "rules", roundCount: 1, questionCount: 2, activityCount: 0 }, "Så funkar kvällen", null],
     [{ kind: "roundIntro", roundNumber: 2, title: "Julmat" }, "Julmat", "Omgång 2"],
     [{ kind: "question", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
+    [{ kind: "question", roundNumber: 2, questionNumber: 4, prompt: "Baka ett pepparkakshus", answeredInApp: false, shown: null }, "Baka ett pepparkakshus", "Omgång 2 · Aktivitet"],
     [{ kind: "answer", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
     [{ kind: "film", roundNumber: 4 }, "Film", "Omgång 4"],
     [{ kind: "leaderboard", roundNumber: 1 }, "Topplista efter omgång 1", null],

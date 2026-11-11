@@ -16,7 +16,10 @@ const nextScreen = vi.fn();
 const mutations = { goToNextScreen: vi.fn(), goToPreviousScreen: vi.fn() };
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna", colour: "red" }] }));
-vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => nextScreen() }));
+const screenNotes = vi.fn();
+vi.mock("@/features/host/shared/useHostQuery", () => ({
+  useHostQuery: (query: FunctionReference<"query">) => (getFunctionName(query).endsWith("getScreenNotes") ? screenNotes() : nextScreen()),
+}));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
 vi.mock("./ReviewList", () => ({ ReviewList: ({ questionId }: { questionId: string }) => <p>Granskning av {questionId}</p> }));
 vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
@@ -48,6 +51,7 @@ describe("LiveControl", () => {
   beforeEach(() => {
     scores.mockReturnValue([]);
     nextScreen.mockReturnValue({ view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null });
+    screenNotes.mockReturnValue(null);
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
@@ -74,10 +78,29 @@ describe("LiveControl", () => {
     expect(screen.getByText("Så funkar kvällen")).toBeInTheDocument();
   });
 
-  it("says when nothing comes after", () => {
+  it("says when nothing comes after, and offers to end the quiz instead of Nästa", () => {
     nextScreen.mockReturnValue(null);
     renderControl();
     expect(screen.getByText("Inget mer efter detta.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Nästa" })).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Avsluta quiz" })).toHaveLength(2);
+  });
+
+  it("shows the next screen's notes, and the notes of the question on the TV folded away", () => {
+    screenNotes.mockReturnValue({
+      current: { questionId: "q1", notes: "Manus för fråga 1", scoring: ["Närmast vinner", "Plats 1: 3 p"] },
+      next: { questionId: "q2", notes: "Manus för fråga 2", scoring: null },
+    });
+    renderControl({ view: question });
+    expect(screen.getByText("Manus för fråga 2")).toBeVisible();
+    expect(screen.getByText("Manus för fråga 1")).not.toBeVisible();
+    expect(screen.getByRole("heading", { name: "Poängsättning: Närmast vinner" })).toBeInTheDocument();
+  });
+
+  it("doesn't repeat the notes of a question moving on to its own answer", () => {
+    screenNotes.mockReturnValue({ current: { questionId: "q1", notes: "Manus", scoring: null }, next: { questionId: "q1", notes: "Manus", scoring: null } });
+    renderControl({ view: question });
+    expect(screen.getAllByText("Manus")).toHaveLength(1);
   });
 
   it("steps from the screen showing now", async () => {

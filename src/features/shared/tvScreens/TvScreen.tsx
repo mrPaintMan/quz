@@ -48,13 +48,15 @@ export function TvScreen(props: TvScreenProps) {
     case "rules":
       return <RulesScreen {...view} />;
     case "roundIntro":
-      return <TvFrame eyebrow={roundLabel(view.roundNumber)} title={view.title} />;
+      return <TvFrame eyebrow={roundLabel(view.roundNumber)} title={view.title} centered />;
     case "question":
       return (
+        // An activity isn't answered in the app: its title stands centred, named as an activity.
         <TvFrame
-          eyebrow={`${roundLabel(view.roundNumber)} · Fråga ${view.questionNumber}`}
+          eyebrow={`${roundLabel(view.roundNumber)} · ${view.answeredInApp ? `Fråga ${view.questionNumber}` : "Aktivitet"}`}
           title={view.prompt}
           corner={<TvTimer timer={timer} />}
+          centered={!view.answeredInApp}
         >
           {mediaArea}
           {view.shown && <ShownQuestionDisplay shown={view.shown} imageUrls={imageUrls} />}

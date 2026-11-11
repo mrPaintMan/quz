@@ -27,6 +27,7 @@ The words Quz uses in its Swedish UI, so every screen says the same thing. Add t
 | Who has answered | TV: **4 av 6 lag har svarat**; admin: **Svarat** / **Väntar** | |
 | Answers refused by the server | **Frågan tar inte emot svar just nu.**, **Tiden är ute.**, **Ert svar är låst.**, **Svaret passar inte frågan.**, **Fyll i svaret innan ni skickar det.** | |
 | Sound blocked by the browser | **Klicka för att slå på ljudet** | |
+| The live control's notes and scoring | **Anteckningar**, **Anteckningar för frågan på TV:n**, **Poängsättning: Poängnivåer** / **Närmast vinner**, **Exakt rätt: 3 p**, **Inom ±1: 2 p**, **Plats 1: 3 p**, **Bästa nivån räknas.**, **Lika nära delar plats.**; on the TV an activity is **Aktivitet** | |
 | The question's countdown | **Pausa** / **Fortsätt**, **+15 s**; at zero **Tiden är ute!** | Starta om, Tiden är slut |
 
 Messages say what to do, in a full sentence ending with a period: "Lägg till minst 2 alternativ att sortera."

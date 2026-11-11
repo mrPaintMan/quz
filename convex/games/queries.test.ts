@@ -197,3 +197,25 @@ describe("getShowingTrip", () => {
     await expect(t.query(api.games.queries.getShowingTrip, { hostPassphrase: "fel", gameId })).rejects.toThrow("Fel lösenord.");
   });
 });
+
+describe("getScreenNotes", () => {
+  it("gives the notes of the question on the TV and of the next screen's", async () => {
+    const t = setupConvexTest();
+    const { quizId, roundId, questionId } = await insertQuizWithQuestion(t);
+    await t.run((ctx) => ctx.db.patch("questions", questionId, { hostNotes: "Alla upp och baka!" }));
+    const gameId = await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "roundIntro", roundId }, screenIndex: 2 }));
+    await expect(t.query(api.games.queries.getScreenNotes, { ...host, gameId })).resolves.toEqual({
+      current: null,
+      next: { questionId, notes: "Alla upp och baka!", scoring: null },
+    });
+  });
+
+  it("is null for an ended game, and only for the hosts", async () => {
+    const t = setupConvexTest();
+    const { quizId } = await insertQuizWithQuestion(t);
+    const gameId = await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: 1, ...atLobby }));
+    await expect(t.query(api.games.queries.getScreenNotes, { ...host, gameId })).resolves.toBeNull();
+    await expect(t.query(api.games.queries.getScreenNotes, { hostPassphrase: "fel", gameId })).rejects.toThrow();
+  });
+});
+
