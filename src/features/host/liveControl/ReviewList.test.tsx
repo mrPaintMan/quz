@@ -10,7 +10,7 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () =
 
 const gameId = "game1" as Id<"games">;
 const questionId = "q1" as Id<"questions">;
-const slot = (title: string, options: string[]) => ({ title, options, isOpen: false, names: [] });
+const slot = (title: string, options: string[], answer: string | null = null) => ({ title, answer, options, isOpen: false, names: [] });
 const item = (slotIndex: number, text: string, extra = {}) => ({ slot: slotIndex, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
 
 function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Partial<Pick<Review, "exact">>) {
@@ -25,11 +25,8 @@ function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Parti
   );
 }
 
-// The texts of a section, in order.
-const textsIn = (section: string) =>
-  within(screen.getByText(section).parentElement!)
-    .getAllByRole("listitem")
-    .map((row) => row.firstChild?.textContent);
+// The rows of a section, in order.
+const rowsIn = (section: string) => within(screen.getByText(section).parentElement!).getAllByRole("listitem");
 
 describe("ReviewList", () => {
   beforeEach(() => {
@@ -50,8 +47,11 @@ describe("ReviewList", () => {
     });
     const headings = screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent);
     expect(headings).toEqual(["Att granska", "Bedömda", "Stämde med facit"]);
-    expect(textsIn("Att granska")).toEqual(["gurkmeja"]);
-    expect(textsIn("Bedömda")).toEqual(["safranAI"]);
+    const [toJudge] = rowsIn("Att granska");
+    expect(toJudge).toHaveTextContent("gurkmeja");
+    const [judged] = rowsIn("Bedömda");
+    expect(judged).toHaveTextContent("safran");
+    expect(within(judged).getByTitle("Bedömt av AI")).toBeInTheDocument();
     const exact = within(screen.getByText("Saffran", { selector: "span" }).closest("li")!);
     expect(exact.getByText("3 lag")).toBeInTheDocument();
     expect(exact.getByText("= Saffran")).toBeInTheDocument();
@@ -60,13 +60,14 @@ describe("ReviewList", () => {
 
   it("gives each sub-question's correct answer by its title, and judges for every team that wrote a text", async () => {
     renderList({
-      slots: [slot("a) Artist", ["ABBA"]), slot("b) Låt", ["Waterloo"])],
+      slots: [slot("a) Artist", ["ABBA"], "ABBA"), slot("b) Låt", ["Waterloo"], "Waterloo"), slot("c) År", [])],
       items: [item(0, "abbba", { written: "Abbba", teamCount: 2 }), item(1, "waterlo", { isJudged: true, target: 0 })],
       aiStatus: null,
     });
     expect(screen.getByText("1 kvar")).toBeInTheDocument();
     expect(screen.getByText("a) Artist · facit: ABBA")).toBeInTheDocument();
     expect(screen.getByText("b) Låt · facit: Waterloo")).toBeInTheDocument();
+    expect(screen.queryByText(/c\) År/)).not.toBeInTheDocument();
     const abbba = within(screen.getByText("Abbba").closest("li")!);
     expect(abbba.getByText("2 lag")).toBeInTheDocument();
     await userEvent.click(abbba.getByRole("button", { name: "Rätt" }));

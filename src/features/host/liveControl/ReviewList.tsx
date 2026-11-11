@@ -13,7 +13,7 @@ export type Review = NonNullable<FunctionReturnType<typeof api.verdicts.queries.
 type Slot = Review["slots"][number];
 
 // A slot's heading: a sub-question's title, with its correct answer to compare with (D56).
-const slotHeading = (slot: Slot) => (slot.options.length === 1 ? `${slot.title} · facit: ${slot.options[0]}` : slot.title);
+const slotHeading = (slot: Slot) => (slot.answer ? `${slot.title} · facit: ${slot.answer}` : slot.title);
 
 // One of the box's sections, its rows grouped under their sub-question.
 function ReviewSection<Item extends { slot: number; text: string }>({

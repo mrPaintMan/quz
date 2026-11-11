@@ -1,5 +1,5 @@
 import { isAnswerFor } from "@/domain/answers/isAnswerFor";
-import { exactTexts, textsToReview, type TypedReview } from "@/domain/review/typedReview";
+import { sortTexts, type TypedReview } from "@/domain/review/typedReview";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import type { AnswerContent } from "../answers/answerContent";
@@ -17,5 +17,5 @@ export async function sentTextsOfQuestion(
   const answers = (await lockedAnswersOfQuestion(ctx, gameId, question._id))
     .map((answer) => answer.content)
     .filter((answer) => isAnswerFor(question.content, answer));
-  return { toReview: textsToReview(review, question.content, answers), exact: exactTexts(review, question.content, answers) };
+  return sortTexts(review, question.content, answers);
 }

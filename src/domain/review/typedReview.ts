@@ -3,8 +3,9 @@ import { normalizeForComparison } from "@/domain/questionTypes/normalizeForCompa
 // One group a typed text is judged in, such as a free-text field or all of an ingredients
 // question's fields together. Its options are the accepted answers a text there may count as;
 // a verdict names one by its place (D51). In an open slot (a list, whose key may be incomplete) a
-// right text may also count as an item outside the key, named by the verdict (D53).
-export type ReviewSlot = { title: string; options: { label: string; spellings: string[] }[]; isOpen?: boolean };
+// right text may also count as an item outside the key, named by the verdict (D53). answer is the
+// correct answer the hosts' box shows by a sub-question's title, when it has one (D56).
+export type ReviewSlot = { title: string; options: { label: string; spellings: string[] }[]; isOpen?: boolean; answer?: string };
 
 // What a verdict says a text counts as: an option by its place, an item outside the key by its
 // name (open slots only), or null for wrong.
@@ -128,47 +129,30 @@ export function withVerdicts(items: ReviewItem[], verdicts: Verdict[]) {
   });
 }
 
-// The texts no accepted spelling matches exactly, each once per slot with how many teams wrote
-// it, in slot and then alphabetical order so the hosts' list doesn't jump as verdicts come in.
-export function textsToReview<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[]): ReviewItem[] {
-  return countTexts(review, content, answers, (option) => option === undefined);
-}
-
-// The texts an accepted spelling matched exactly, each once per slot with how many teams wrote it
-// and the accepted answer it is, for the hosts to see beside the ones to judge (D56).
-export function exactTexts<Content, Answer>(
-  review: TypedReview<Content, Answer>,
-  content: Content,
-  answers: Answer[],
-): (ReviewItem & { answer: string })[] {
+// The texts the answers hold, each once per slot with how many teams wrote it, split into those no
+// accepted spelling matched, to judge (D51), and those one matched, with the answer they are (D56),
+// both in slot and then alphabetical order.
+export function sortTexts<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[]) {
   const slots = review.slots(content);
   const exact = exactMatches(slots);
-  return countTexts(review, content, answers, (option) => option !== undefined).map((item) => ({
-    ...item,
-    answer: slots[item.slot].options[exact.get(keyOf(item.slot, item.text)) ?? 0].label,
-  }));
-}
-
-// The distinct texts the answers hold, keeping those whose exact match (an option, or undefined)
-// passes, each once per slot with how many teams wrote it, in slot and then alphabetical order.
-function countTexts<Content, Answer>(
-  review: TypedReview<Content, Answer>,
-  content: Content,
-  answers: Answer[],
-  keeps: (option: number | undefined) => boolean,
-): ReviewItem[] {
-  const slots = review.slots(content);
-  const exact = exactMatches(slots);
-  const items = new Map<string, ReviewItem>();
+  const items = new Map<string, ReviewItem & { option: number | undefined }>();
   for (const answer of answers) {
     for (const [key, text] of writtenTexts(review, slots, answer)) {
-      if (!keeps(exact.get(key))) continue;
       const item = items.get(key);
       if (item) item.teamCount += 1;
-      else items.set(key, { ...text, teamCount: 1 });
+      else items.set(key, { ...text, teamCount: 1, option: exact.get(key) });
     }
   }
-  return [...items.values()].sort((a, b) => a.slot - b.slot || a.text.localeCompare(b.text, "sv"));
+  const sorted = [...items.values()].sort((a, b) => a.slot - b.slot || a.text.localeCompare(b.text, "sv"));
+  return {
+    toReview: sorted.filter((item) => item.option === undefined).map(({ option: _option, ...item }) => item),
+    exact: sorted.flatMap(({ option, ...item }) => (option === undefined ? [] : [{ ...item, answer: slots[item.slot].options[option].label }])),
+  };
+}
+
+// The texts no accepted spelling matched, for the hosts and the AI judge.
+export function textsToReview<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[]): ReviewItem[] {
+  return sortTexts(review, content, answers).toReview;
 }
 
 // The names verdicts gave right items outside an open slot's key, once each as first given (two

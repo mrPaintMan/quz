@@ -20,6 +20,8 @@ const freeTextReview: TypedReview<ContentOf<"freeText">, AnswerOf<"freeText">> =
     return fields.map((field, index) => ({
       title: labels.length > 1 ? fieldTitle(labels, index) : "",
       options: [{ label: firstFilledIn(field.acceptedAnswers), spellings: field.acceptedAnswers }],
+      // With sub-questions, the box shows each one's answer by its title (D56).
+      ...(labels.length > 1 && firstFilledIn(field.acceptedAnswers) !== "" ? { answer: firstFilledIn(field.acceptedAnswers) } : {}),
     }));
   },
   texts: ({ fields }) => fields.map((text, slot) => ({ slot, text })),
