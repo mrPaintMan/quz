@@ -1,6 +1,7 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
+import { MAX_TYPED_TEXT_LENGTH } from "@/domain/answering/registry";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
 
@@ -35,6 +36,7 @@ export function IngredientsInput({ shown, answer, disabled, onChange }: AnswerIn
               placeholder={`Ingrediens ${index + 1}`}
               aria-label={`Ingrediens ${index + 1}`}
               autoComplete="off"
+            maxLength={MAX_TYPED_TEXT_LENGTH}
               onChange={(event) => write(index, event.target.value)}
               className="h-13 text-lg"
             />

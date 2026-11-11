@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { answeringOf, isAnswerComplete } from "@/domain/answering/registry";
+import { answeringOf, fitsAnswerLimits, isAnswerComplete } from "@/domain/answering/registry";
 import type { Id } from "../_generated/dataModel";
 import { mutation, type MutationCtx } from "../_generated/server";
 import { answerContent, type AnswerContent } from "./answerContent";
@@ -10,6 +10,9 @@ type AnswerArgs = { teamId: Id<"teams">; questionId: Id<"questions">; content: A
 
 async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content }: AnswerArgs, lockedAt: number | null) {
   const { game, question, answer } = await requireAnswerable(ctx, teamId, questionId, content);
+  if (!fitsAnswerLimits(content)) {
+    throw new ConvexError("Svaret är för långt.");
+  }
   const shown = answeringOf(question.content)?.show(question.content) ?? null;
   if (lockedAt !== null && !isAnswerComplete(shown, content)) {
     throw new ConvexError("Fyll i svaret innan ni skickar det.");

@@ -1,18 +1,30 @@
 import { describe, expect, it } from "vitest";
 import { api } from "../_generated/api";
-import { reviewIn, setup } from "./reviewGame.setup";
+import { reviewIn, setup, setupList } from "./reviewGame.setup";
 
 describe("getReview", () => {
   it("lists the sent texts without an exact match once per field, with how many teams wrote them", async () => {
     const review = await reviewIn(await setup());
     expect(review?.slots).toEqual([
-      { title: "a) Artist", options: ["ABBA"] },
-      { title: "b) Låt", options: ["Waterloo"] },
+      { title: "a) Artist", options: ["ABBA"], isOpen: false, names: [] },
+      { title: "b) Låt", options: ["Waterloo"], isOpen: false, names: [] },
     ]);
     expect(review?.aiStatus).toBeNull();
     expect(review?.items).toEqual([
       { slot: 0, text: "abbba", written: "Abbba", teamCount: 1, isJudged: false, target: null, byAi: false },
       { slot: 1, text: "waterlo", written: "Waterlo", teamCount: 2, isJudged: false, target: null, byAi: false },
+    ]);
+  });
+
+  it("marks a list's slot open, with the names already given to items outside its key", async () => {
+    const game = await setupList();
+    await game.t.run((ctx) => ctx.db.insert("verdicts", { gameId: game.gameId, questionId: game.questionId, slot: 0, text: "lund", target: "Lund" }));
+    const review = await reviewIn(game);
+    expect(review?.slots).toEqual([{ title: "", options: ["Göteborg"], isOpen: true, names: ["Lund"] }]);
+    expect(review?.items.map(({ text, target }) => [text, target])).toEqual([
+      ["gothenburg", null],
+      ["lund", "Lund"],
+      ["lunds stad", null],
     ]);
   });
 

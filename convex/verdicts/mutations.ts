@@ -7,7 +7,8 @@ import { getOrThrow } from "../shared/getOrThrow";
 import { textsToReviewOfQuestion } from "./textsToReviewOfQuestion";
 
 // The hosts judge a typed text once for every team that wrote it in that slot: the accepted answer
-// it counts as, by its place, or null for wrong (D51). Judging again changes the verdict, and the
+// it counts as, by its place, a list item outside the key, by its name (D53), or null for wrong
+// (D51). Judging again changes the verdict, and the
 // scores follow, as they are summed on every read (D43).
 export const judgeText = hostMutation({
   args: {
@@ -15,7 +16,7 @@ export const judgeText = hostMutation({
     questionId: v.id("questions"),
     slot: v.number(),
     text: v.string(),
-    target: v.union(v.number(), v.null()),
+    target: v.union(v.number(), v.string(), v.null()),
   },
   handler: async (ctx, { gameId, questionId, slot, text, target }) => {
     const game = await requireRunningGame(ctx, gameId);
@@ -27,9 +28,13 @@ export const judgeText = hostMutation({
     const normalized = normalizeForComparison(text);
     // Only texts a team sent are judged, which also bounds how many verdicts a question gets.
     const items = review === null ? [] : await textsToReviewOfQuestion(ctx, gameId, question, review);
-    const options = review?.slots(question.content)[slot]?.options ?? [];
+    const reviewSlot = review?.slots(question.content)[slot];
+    const options = reviewSlot?.options ?? [];
     const isSent = items.some((item) => item.slot === slot && item.text === normalized);
-    const isOption = target === null || (Number.isInteger(target) && target >= 0 && target < options.length);
+    const isOption =
+      target === null ||
+      (typeof target === "number" && Number.isInteger(target) && target >= 0 && target < options.length) ||
+      (typeof target === "string" && reviewSlot?.isOpen === true && normalizeForComparison(target) !== "");
     if (!isSent || !isOption) {
       throw new ConvexError("Svaret finns inte att granska.");
     }

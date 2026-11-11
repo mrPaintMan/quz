@@ -26,7 +26,7 @@ export const getRunningGame = query({
       quizId: game.quizId,
       quizTitle: quiz.title,
       screen,
-      ...(await showScreen(ctx, screen, rounds)),
+      ...(await showScreen(ctx, game._id, screen, rounds)),
       timer: isStoredScreen ? (game.timer ?? null) : null,
       playback: isStoredScreen ? (game.playback ?? null) : null,
       // A question stepped on from takes no more answers, even when shown again (D41).
@@ -44,7 +44,7 @@ export const getNextScreen = hostQuery({
     if (game.endedAt !== null) return null;
     const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
     const next = sequence[screenIndex + 1];
-    return next === undefined ? null : showScreen(ctx, next, rounds);
+    return next === undefined ? null : showScreen(ctx, game._id, next, rounds);
   },
 });
 

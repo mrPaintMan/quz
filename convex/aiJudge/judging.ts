@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { reviewOf } from "@/domain/answering/registry";
 import { judgeMessage, usesAiJudge } from "@/domain/review/aiJudge";
-import { withVerdicts } from "@/domain/review/typedReview";
+import { givenNames, withVerdicts } from "@/domain/review/typedReview";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery, type MutationCtx, type QueryCtx } from "../_generated/server";
@@ -46,12 +46,13 @@ export const prepareJudging = internalQuery({
     // The switch is read again, in case the hosts turned it off after closing the question.
     const review = question && usesAiJudge(question.content) ? reviewOf(question.content) : null;
     if (!question || !review) return null;
-    const items = withVerdicts(await textsToReviewOfQuestion(ctx, gameId, question, review), await verdictsOfQuestion(ctx, gameId, questionId))
+    const verdicts = await verdictsOfQuestion(ctx, gameId, questionId);
+    const items = withVerdicts(await textsToReviewOfQuestion(ctx, gameId, question, review), verdicts)
       .filter((item) => !item.isJudged)
       .map(({ slot, text, written, teamCount }) => ({ slot, text, written, teamCount }));
     if (items.length === 0) return null;
     const slots = review.slots(question.content);
-    return { message: judgeMessage(question.prompt, slots, items), slots, items };
+    return { message: judgeMessage(question.prompt, slots, items, givenNames(verdicts).map(({ slot, name }) => ({ field: slot, name }))), slots, items };
   },
 });
 
@@ -59,7 +60,7 @@ export const prepareJudging = internalQuery({
 export const saveAiVerdicts = internalMutation({
   args: {
     ...gameQuestion,
-    verdicts: v.array(v.object({ slot: v.number(), text: v.string(), target: v.union(v.number(), v.null()) })),
+    verdicts: v.array(v.object({ slot: v.number(), text: v.string(), target: v.union(v.number(), v.string(), v.null()) })),
   },
   handler: async (ctx, { gameId, questionId, verdicts }) => {
     const judging = await runningJudging(ctx, { gameId, questionId });

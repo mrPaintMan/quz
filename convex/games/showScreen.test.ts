@@ -22,12 +22,42 @@ describe("showScreen", () => {
       });
       const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "question", questionId }, screenIndex: 3 });
       const { rounds } = await placeOfGame(ctx, (await ctx.db.get("games", gameId))!);
-      return showScreen(ctx, { kind: "question", questionId }, rounds);
+      return showScreen(ctx, gameId, { kind: "question", questionId }, rounds);
     });
     expect(shown).toEqual({
       view: { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: false, shown: null },
       media: { kind: "image", url: expect.any(String) },
       imageUrls: {},
+    });
+  });
+
+  it("reveals a list's items the teams got right, from their sent answers and the verdicts", async () => {
+    const t = setupConvexTest();
+    const shown = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Geografi", kind: "questions" });
+      const content = { type: "list" as const, acceptedItems: [{ spellings: ["Göteborg"] }], pointsPerItem: 1, fuzzy: true, aiAssist: false };
+      const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Nämn svenska städer", timeLimitSeconds: 60, media: null, hostNotes: "", content });
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "answer", questionId }, screenIndex: 4, closedQuestionIds: [questionId] });
+      const team = (name: string, colour: "red" | "blue") => ctx.db.insert("teams", { gameId, name, colour });
+      const [red, blue] = [await team("Röda", "red"), await team("Blå", "blue")];
+      await ctx.db.insert("answers", { gameId, teamId: red, questionId, content: { type: "list", items: ["göteborg", "Malmö", "Lund"] }, lockedAt: 1 });
+      await ctx.db.insert("answers", { gameId, teamId: blue, questionId, content: { type: "list", items: ["Gothenburg", "Malmoe"] }, lockedAt: 1 });
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "malmö", target: "Malmö" });
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "malmoe", target: "Malmö" });
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "gothenburg", target: 0 });
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "lund", target: null });
+      const { rounds } = await placeOfGame(ctx, (await ctx.db.get("games", gameId))!);
+      return showScreen(ctx, gameId, { kind: "answer", questionId }, rounds);
+    });
+    expect(shown.view).toMatchObject({
+      revealed: {
+        type: "list",
+        items: [
+          { name: "Göteborg", teamCount: 2 },
+          { name: "Malmö", teamCount: 2 },
+        ],
+      },
     });
   });
 });

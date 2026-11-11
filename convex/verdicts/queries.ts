@@ -1,6 +1,6 @@
 import { v } from "convex/values";
 import { reviewOf } from "@/domain/answering/registry";
-import { withVerdicts } from "@/domain/review/typedReview";
+import { givenNames, withVerdicts } from "@/domain/review/typedReview";
 import { aiJudgingOf } from "../aiJudge/judging";
 import { hostQuery } from "../auth/hostFunctions";
 import { textsToReviewOfQuestion } from "./textsToReviewOfQuestion";
@@ -19,9 +19,18 @@ export const getReview = hostQuery({
     const review = reviewOf(question.content);
     if (review === null) return null;
     const items = await textsToReviewOfQuestion(ctx, gameId, question, review);
+    const verdicts = await verdictsOfQuestion(ctx, gameId, questionId);
     return {
-      slots: review.slots(question.content).map(({ title, options }) => ({ title, options: options.map((option) => option.label) })),
-      items: withVerdicts(items, await verdictsOfQuestion(ctx, gameId, questionId)),
+      slots: review.slots(question.content).map(({ title, options, isOpen }, slot) => ({
+        title,
+        options: options.map((option) => option.label),
+        isOpen: isOpen === true,
+        // The names already given to right items outside an open slot's key (D53).
+        names: givenNames(verdicts)
+          .filter((given) => given.slot === slot)
+          .map((given) => given.name),
+      })),
+      items: withVerdicts(items, verdicts),
       aiStatus: (await aiJudgingOf(ctx, { gameId, questionId }))?.status ?? null,
     };
   },

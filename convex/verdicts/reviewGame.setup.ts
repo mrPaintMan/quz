@@ -46,3 +46,25 @@ export const reviewIn = ({ t, gameId, questionId }: Awaited<ReturnType<typeof se
 
 export const scoresOf = async (t: ReturnType<typeof setupConvexTest>, gameId: Id<"games">) =>
   (await t.query(api.scores.queries.getScores, { gameId })).map(({ name, points }) => `${name} ${points}`);
+
+// A running game on a closed list question, with a key of one city, whose two teams sent
+// "Gothenburg, Lund" and "Lunds stad".
+export async function setupList() {
+  const t = setupConvexTest();
+  const ids = await t.run(async (ctx) => {
+    const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+    const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Geografi", kind: "questions" });
+    const content = { type: "list" as const, acceptedItems: [{ spellings: ["Göteborg"] }], pointsPerItem: 1, fuzzy: true, aiAssist: false };
+    const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Nämn svenska städer", timeLimitSeconds: 60, media: null, hostNotes: "", content });
+    const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "answer", questionId }, screenIndex: 4, closedQuestionIds: [questionId] });
+    const answer = async (name: string, colour: "red" | "blue", items: string[]) => {
+      const teamId = await ctx.db.insert("teams", { gameId, name, colour });
+      await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "list", items }, lockedAt: 1 });
+    };
+    await answer("Röda", "red", ["Gothenburg", "Lund"]);
+    await answer("Blå", "blue", ["Lunds stad"]);
+    return { gameId, questionId };
+  });
+  return { t, ...ids };
+}
+

@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 continues with lists (answer input, TV, the review list and the AI judge, D50–D52), then activities and manual points. First, try the AI judge on a real night in dev: the cloud sessions can't reach Convex, so it has only run against a fake Claude in tests.
+M3 continues with activities and manual points, then the remaining types (drawing, map pin, På spåret). First, try the AI judge and lists on a real night in dev: the cloud sessions can't reach Convex, so they have only run against a fake Claude in tests.
 
 ## Milestones
 
@@ -69,10 +69,10 @@ M3 continues with lists (answer input, TV, the review list and the AI judge, D50
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Fritext, exact answers until the AI judge (D49)
+- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Fritext, exact answers until the AI judge (D49); Nämn så många som möjligt, with the right items on the TV (D53)
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
-- [ ] AI judge and review for list questions (D50). When lists and På spåret are built, replace their editors' old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) and the list's "Låt AI föreslå rättning" with the AI judge's switch
+- [x] AI judge and review for list questions, two forms of one answer counting once (D53). When På spåret is built, replace its editor's old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) with the AI judge's switch
 - [ ] Later: show each team which of its answers were judged right or wrong (D50)
 - [ ] Host overrides and manual points
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
@@ -124,3 +124,4 @@ M3 continues with lists (answer input, TV, the review list and the AI judge, D50
 - 2026-11-09: Fritext: a field per sub-question on the phone, the sub-questions and then their answers on the TV, points per field answered with an accepted answer (D49). Decided the AI judge replaces fuzzy matching, with Claude Haiku 5.5 and verdicts that count at once (D50). Not tried in a browser with data.
 - 2026-11-10: The hosts' review list: on a Fritext or ingredients answer screen, each unmatched text once with Rätt / Fel (or which ingredient), shared by every team that wrote it and counted in the scores at once (D51). Not tried in a browser with data.
 - 2026-11-10: The AI judge: when Nästa closes a Fritext or ingredients question, Claude Haiku 5.5 judges the unmatched texts in one call; right and wrong count at once and are marked AI in the review list, unsure ones and failed calls are left to the hosts (D52). Tried only against a fake Claude in tests, not in a browser with data.
+- 2026-11-10: Nämn så många som möjligt: add answers one at a time on the phone, the items the teams got right on the TV, the AI judge and the review list naming right answers outside the key so two forms count once (D53). Not tried in a browser with data.

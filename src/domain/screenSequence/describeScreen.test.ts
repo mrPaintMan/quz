@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { describeScreen } from "./describeScreen";
 
 const freeText: QuestionContent = { type: "freeText", fields: [{ label: "", acceptedAnswers: ["kanel"] }], pointsPerField: 1, fuzzy: true };
-const list: QuestionContent = { type: "list", acceptedItems: [], pointsPerItem: 1, fuzzy: true, aiAssist: false };
+const drawing: QuestionContent = { type: "drawing", maxPoints: 5 };
 const activity: QuestionContent = { type: "activity", maxPoints: 5 };
 const roundId = (id: string) => id as Id<"rounds">;
 const questionId = (id: string) => id as Id<"questions">;
@@ -18,7 +18,7 @@ const rounds = [
       { _id: questionId("q2"), prompt: "Baka ett pepparkakshus", content: activity },
     ],
   },
-  { _id: roundId("julfilm"), title: "Julfilm", questions: [{ _id: questionId("q3"), prompt: "Nämn julfilmer", content: list }] },
+  { _id: roundId("julfilm"), title: "Julfilm", questions: [{ _id: questionId("q3"), prompt: "Rita en tomte", content: drawing }] },
 ];
 
 describe("describeScreen", () => {
@@ -54,7 +54,7 @@ describe("describeScreen", () => {
       kind: "answer",
       roundNumber: 2,
       questionNumber: 1,
-      prompt: "Nämn julfilmer",
+      prompt: "Rita en tomte",
       revealed: null,
     });
   });
@@ -73,4 +73,14 @@ describe("describeScreen", () => {
     expect(() => describeScreen({ kind: "roundIntro", roundId: roundId("borta") }, rounds)).toThrow();
     expect(() => describeScreen({ kind: "question", questionId: questionId("borta") }, rounds)).toThrow();
   });
+
+  it("reveals from the question's answers and verdicts for a type that shows what the teams got right", () => {
+    const list: QuestionContent = { type: "list", acceptedItems: [{ spellings: ["Göteborg"] }], pointsPerItem: 1, fuzzy: true, aiAssist: false };
+    const quiz = [{ _id: roundId("listor"), title: "Listor", questions: [{ _id: questionId("l"), prompt: "Nämn städer", content: list }] }];
+    const graded = { answers: [{ type: "list" as const, items: ["göteborg", "Lund"] }], verdicts: [] };
+    expect(describeScreen({ kind: "answer", questionId: questionId("l") }, quiz, graded)).toMatchObject({
+      revealed: { type: "list", items: [{ name: "Göteborg", teamCount: 1 }] },
+    });
+  });
 });
+
