@@ -31,7 +31,13 @@ describe("AnswerFeedback", () => {
     expect(screen.getByText("Inget svar")).toBeInTheDocument();
     expect(screen.getByText("Bedöms…")).toBeInTheDocument();
     expect(screen.getByText("Räknas redan")).toBeInTheDocument();
-    expect(screen.getByText("Ni fick 2,5 p")).toBeInTheDocument();
+    expect(screen.getByText("Ni har fått 2,5 p än så länge.")).toBeInTheDocument();
+  });
+
+  it("gives the points as final once nothing waits for a verdict", () => {
+    feedback.mockReturnValue({ prompt: "Vilken krydda?", outcome: { points: 2, parts: [{ label: "", given: "Saffran", result: "right", correct: "Saffran" }] } });
+    render(<AnswerFeedback teamId={teamId} />);
+    expect(screen.getByText("Ni fick 2 p")).toBeInTheDocument();
   });
 
   it("says when the team didn't answer", () => {

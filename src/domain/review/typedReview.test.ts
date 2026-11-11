@@ -33,7 +33,7 @@ describe("textOutcomes", () => {
       { slot: 1, text: "mjölk", target: null },
     ];
     const [outcome] = textOutcomes(review, content, [answer("ABBA", "Vodka", "wodka", "mjölk", "gin")], verdicts);
-    expect(outcome.texts).toEqual([
+    expect(outcome.texts.map(({ key: _key, ...text }) => text)).toEqual([
       { slot: 0, written: "ABBA", result: "right", item: "ABBA" },
       { slot: 1, written: "Vodka", result: "right", item: "Vodka" },
       { slot: 1, written: "wodka", result: "repeat", item: "Vodka" },
@@ -41,6 +41,8 @@ describe("textOutcomes", () => {
       { slot: 1, written: "gin", result: "pending", item: "" },
     ]);
     expect(outcome.points).toBe(4);
+    // A repeat is the same item as the text it repeats.
+    expect(outcome.texts[2].key).toBe(outcome.texts[1].key);
   });
 });
 
@@ -138,6 +140,17 @@ describe("open slots", () => {
 
   it("ignores a name in a slot that isn't open", () => {
     expect(gradeTyped(review, content, [answer("Abbba")], [{ slot: 0, text: "abbba", target: "ABBA-gruppen" }])).toEqual([0]);
+  });
+
+  it("keeps two key items apart even when they share a label", () => {
+    const twins: TypedReview<Content, List> = {
+      ...list,
+      slots: () => [{ title: "", options: [{ label: "Anna", spellings: ["Anna Book"] }, { label: "Anna", spellings: ["Anna Bergendahl"] }], isOpen: true }],
+    };
+    expect(rightItems(twins, content, [{ items: ["Anna Book", "Anna Bergendahl"] }], [])).toEqual([
+      { name: "Anna", teamCount: 1 },
+      { name: "Anna", teamCount: 1 },
+    ]);
   });
 
   it("names the items the teams got right by the key's label or the verdict's name", () => {

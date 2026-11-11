@@ -1,3 +1,4 @@
+import type { Outcome, OutcomePart } from "@/domain/answering/outcome";
 import { normalizeForComparison } from "@/domain/questionTypes/normalizeForComparison";
 
 // One group a typed text is judged in, such as a free-text field or all of an ingredients
@@ -26,6 +27,14 @@ export type TypedReview<Content, Answer> = {
   texts: (answer: Answer) => { slot: number; text: string }[];
   pointsPerMatch: (content: Content) => number;
 };
+
+// What ingredients and lists show of each text written: no label, nothing beside it (D58).
+export function itemOutcomes<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]): Outcome[] {
+  return textOutcomes(review, content, answers, verdicts).map(({ points, texts }) => ({
+    points,
+    parts: texts.map(({ written, result }) => ({ label: "", given: written, result, correct: "" })),
+  }));
+}
 
 const keyOf = (slot: number, text: string) => JSON.stringify([slot, text]);
 
@@ -89,7 +98,8 @@ export function textOutcomes<Content, Answer>(
 }
 
 // One written text's outcome, with the name of the item it counted as when right or a repeat.
-export type TextOutcome = { slot: number; written: string; result: "right" | "wrong" | "pending" | "repeat"; item: string };
+// key tells items apart, as two can share a name.
+export type TextOutcome = { slot: number; written: string; result: OutcomePart["result"]; item: string; key: string };
 
 // For a question and its verdicts: what each text of an answer counts as, in the order written.
 function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, verdicts: Verdict[]) {
@@ -100,12 +110,12 @@ function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content:
     const matched = new Set<string>();
     return writtenTexts(review, slots, answer).map(([key, { slot, written }]) => {
       const target = exact.get(key) ?? judged.get(key);
-      if (target === undefined) return { slot, written, result: "pending", item: "" };
+      if (target === undefined) return { slot, written, result: "pending", item: "", key: "" };
       const item = itemOf(slots, exact, slot, target);
-      if (item === null) return { slot, written, result: "wrong", item: "" };
+      if (item === null) return { slot, written, result: "wrong", item: "", key: "" };
       const result = matched.has(item.key) ? "repeat" : "right";
       matched.add(item.key);
-      return { slot, written, result, item: item.name };
+      return { slot, written, result, item: item.name, key: item.key };
     });
   };
 }
@@ -121,9 +131,8 @@ export function rightItems<Content, Answer>(
   const outcomesOf = matcher(review, content, verdicts);
   const items = new Map<string, { name: string; teamCount: number }>();
   for (const answer of answers) {
-    for (const { slot, item: name, result } of outcomesOf(answer)) {
+    for (const { item: name, result, key } of outcomesOf(answer)) {
       if (result !== "right") continue;
-      const key = keyOf(slot, normalizeForComparison(name));
       const item = items.get(key);
       if (item) item.teamCount += 1;
       else items.set(key, { name, teamCount: 1 });

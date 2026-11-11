@@ -47,7 +47,11 @@ export function AnswerFeedback({ teamId }: { teamId: Id<"teams"> }) {
               );
             })}
           </ul>
-          <p className="text-lg font-semibold text-primary">Ni fick {formatPoints(outcome.points)}</p>
+          <p className="text-lg font-semibold text-primary">
+            {outcome.parts.some((part) => part.result === "pending")
+              ? `Ni har fått ${formatPoints(outcome.points)} än så länge.`
+              : `Ni fick ${formatPoints(outcome.points)}`}
+          </p>
         </>
       )}
     </section>

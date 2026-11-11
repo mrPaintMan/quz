@@ -1,6 +1,7 @@
 import { v } from "convex/values";
 import { answeringOf, reviewOf } from "@/domain/answering/registry";
-import { isAnswerFor } from "@/domain/answers/isAnswerFor";
+import { feedbackQuestionId } from "@/domain/answers/feedbackQuestionId";
+import { outcomesOfAnswers } from "@/domain/scoring/gradeAnswers";
 import { query } from "../_generated/server";
 import { verdictsOfQuestion } from "../verdicts/verdictsOfQuestion";
 import { lockedAnswersOfQuestion } from "./lockedAnswersOfQuestion";
@@ -36,14 +37,12 @@ export const getTeamFeedback = query({
   handler: async (ctx, { teamId }) => {
     const team = await ctx.db.get("teams", teamId);
     const game = team && (await ctx.db.get("games", team.gameId));
-    if (!game || game.endedAt !== null || game.screen.kind === "question") return null;
-    const questionId = game.screen.kind === "answer" ? game.screen.questionId : game.closedQuestionIds?.at(-1);
+    const questionId = game && game.endedAt === null ? feedbackQuestionId(game) : null;
     const question = questionId && (await ctx.db.get("questions", questionId));
-    const answering = question && answeringOf(question.content);
-    if (!question || !answering || !(game.closedQuestionIds ?? []).includes(question._id)) return null;
-    const locked = (await lockedAnswersOfQuestion(ctx, game._id, question._id)).filter((answer) => isAnswerFor(question.content, answer.content));
+    if (!game || !question || !answeringOf(question.content) || !(game.closedQuestionIds ?? []).includes(question._id)) return null;
+    const locked = await lockedAnswersOfQuestion(ctx, game._id, question._id);
     const verdicts = reviewOf(question.content) === null ? [] : await verdictsOfQuestion(ctx, game._id, question._id);
-    const outcomes = answering.outcomes(
+    const outcomes = outcomesOfAnswers(
       question.content,
       locked.map((answer) => answer.content),
       verdicts,
