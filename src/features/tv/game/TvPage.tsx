@@ -9,6 +9,7 @@ import type { TvTeam } from "@/features/shared/tvScreens/TeamList";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { TvStage } from "./TvStage";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
+import { usePreloadPictures } from "./usePreloadPictures";
 import type { RunningGame } from "@/features/shared/game/RunningGame";
 
 function Idle({ text }: { text: string }) {
@@ -42,6 +43,7 @@ function CurrentScreen() {
 
 
 function RunningGameScreen({ game, teams, joinUrl }: { game: RunningGame; teams: TvTeam[]; joinUrl: URL }) {
+  usePreloadPictures();
   const answeredTeamIds = useAnsweredTeamIds(game._id, game.screen);
   // Only the leaderboards show scores, so the TV follows them only there.
   const scores = useScores(game._id, game.view.kind === "leaderboard" || game.view.kind === "finalLeaderboard");
