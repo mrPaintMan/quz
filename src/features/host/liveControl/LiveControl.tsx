@@ -30,7 +30,6 @@ import type { RunningGame } from "@/features/shared/game/RunningGame";
 export function LiveControl({ game }: { game: RunningGame }) {
   const teams = useQuery(api.teams.queries.listTeams, { gameId: game._id }) ?? [];
   const next = useHostQuery(api.games.queries.getNextScreen, { gameId: game._id });
-  const notes = useHostQuery(api.games.queries.getScreenNotes, { gameId: game._id });
   const joinUrl = useJoinUrl();
   const answeredTeamIds = useAnsweredTeamIds(game._id, game.screen);
   const scores = useScores(game._id);
@@ -38,6 +37,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const goToPrevious = useHostMutation(api.games.mutations.goToPreviousScreen);
   const run = useRunAction();
   const gameId = game._id;
+  const notes = next?.notes;
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
   if (joinUrl === null) return null;
@@ -75,9 +75,12 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {game.view.kind === "question" && game.view.shown && answeredTeamIds && (
             <AnswerStatusList teams={teams} answeredTeamIds={answeredTeamIds} />
           )}
-          {notes?.current?.scoring && <ScoringRules lines={notes.current.scoring} />}
-          {/* The next screen's notes cover the same question while it moves to its answer. */}
-          {notes?.current && notes.current.questionId !== notes.next?.questionId && <QuestionNotes notes={notes.current.notes} folded />}
+          {notes?.current?.scoring && <ScoringRules {...notes.current.scoring} />}
+          {/* The next screen's notes cover the same question while it moves to its answer; a new
+              question's notes start folded. */}
+          {notes?.current && notes.current.questionId !== notes.next?.questionId && (
+            <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
+          )}
           {game.screen.kind === "answer" && <ReviewList gameId={gameId} questionId={game.screen.questionId} />}
           <div className="flex flex-wrap items-center gap-3">
             {game.timer && <TimerControls gameId={gameId} timer={game.timer} />}

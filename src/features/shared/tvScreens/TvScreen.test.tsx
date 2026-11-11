@@ -51,6 +51,15 @@ describe("TvScreen", () => {
     if (eyebrow) expect(screen.getByText(eyebrow)).toBeInTheDocument();
   });
 
+  it("centres an activity's title, unless it has a picture", () => {
+    const activity: ScreenView = { ...question, answeredInApp: false };
+    const { unmount } = renderView(activity);
+    expect(screen.getByRole("heading", { level: 1 })).toHaveClass("text-[7cqw]");
+    unmount();
+    renderView(activity, { media: image });
+    expect(screen.getByRole("heading", { level: 1 })).not.toHaveClass("text-[7cqw]");
+  });
+
   it("shows the question's timer", () => {
     renderView(question, { timer: { kind: "paused", remainingMs: 42_000 } });
     expect(screen.getByRole("timer")).toHaveTextContent("0:42");

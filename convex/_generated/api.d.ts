@@ -36,7 +36,6 @@ import type * as games_playback from "../games/playback.js";
 import type * as games_queries from "../games/queries.js";
 import type * as games_requireRunningGame from "../games/requireRunningGame.js";
 import type * as games_screen from "../games/screen.js";
-import type * as games_screenNotes from "../games/screenNotes.js";
 import type * as games_showScreen from "../games/showScreen.js";
 import type * as games_table from "../games/table.js";
 import type * as games_timer from "../games/timer.js";
@@ -134,7 +133,6 @@ declare const fullApi: ApiFromModules<{
   "games/queries": typeof games_queries;
   "games/requireRunningGame": typeof games_requireRunningGame;
   "games/screen": typeof games_screen;
-  "games/screenNotes": typeof games_screenNotes;
   "games/showScreen": typeof games_showScreen;
   "games/table": typeof games_table;
   "games/timer": typeof games_timer;

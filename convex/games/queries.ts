@@ -1,12 +1,12 @@
 import { v } from "convex/values";
 import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
+import { screenNotes } from "@/domain/screenSequence/screenNotes";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
 import { getOrThrow } from "../shared/getOrThrow";
 import { findRunningGame } from "./findRunningGame";
 import { placeOfGame } from "./placeOfGame";
-import { screenNotes } from "./screenNotes";
 import { showScreen } from "./showScreen";
 
 // Public: the TV and the phones open whatever game is running and follow its screen. They get
@@ -36,8 +36,9 @@ export const getRunningGame = query({
   },
 });
 
-// For the hosts' preview of what comes next; host-only, so a team can't read the next
-// question early. null after the last screen and for an ended game.
+// For the hosts' preview of what comes next, with the notes of the question on the TV and of the
+// next screen's, and how a Gissa siffran question scores (D54); host-only, so a team can't read
+// the next question or the notes early. null after the last screen and for an ended game.
 export const getNextScreen = hostQuery({
   args: { gameId: v.id("games") },
   handler: async (ctx, { gameId }) => {
@@ -45,20 +46,9 @@ export const getNextScreen = hostQuery({
     if (game.endedAt !== null) return null;
     const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
     const next = sequence[screenIndex + 1];
-    return next === undefined ? null : showScreen(ctx, game._id, next, rounds);
-  },
-});
-
-// For the hosts: the notes of the question on the TV and of the next screen's, read as a script
-// into the next screen, and how a Gissa siffran question scores. Host-only, as notes may give
-// answers away. null for an ended game.
-export const getScreenNotes = hostQuery({
-  args: { gameId: v.id("games") },
-  handler: async (ctx, { gameId }) => {
-    const game = await getOrThrow(ctx, "games", gameId);
-    if (game.endedAt !== null) return null;
-    const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
-    return { current: screenNotes(sequence[screenIndex], rounds), next: screenNotes(sequence[screenIndex + 1], rounds) };
+    if (next === undefined) return null;
+    const notes = { current: screenNotes(sequence[screenIndex], rounds), next: screenNotes(next, rounds) };
+    return { ...(await showScreen(ctx, game._id, next, rounds)), notes };
   },
 });
 

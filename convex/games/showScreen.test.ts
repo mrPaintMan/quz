@@ -25,7 +25,7 @@ describe("showScreen", () => {
       return showScreen(ctx, gameId, { kind: "question", questionId }, rounds);
     });
     expect(shown).toEqual({
-      view: { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: false, shown: null },
+      view: { kind: "question", roundNumber: 1, questionNumber: 0, prompt: "Vem är det?", answeredInApp: false, shown: null },
       media: { kind: "image", url: expect.any(String) },
       imageUrls: {},
     });

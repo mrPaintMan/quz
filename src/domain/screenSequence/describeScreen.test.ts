@@ -45,7 +45,7 @@ describe("describeScreen", () => {
     expect(describeScreen({ kind: "question", questionId: questionId("q2") }, rounds)).toEqual({
       kind: "question",
       roundNumber: 1,
-      questionNumber: 2,
+      questionNumber: 1,
       prompt: "Baka ett pepparkakshus",
       answeredInApp: false,
       shown: null,
@@ -69,6 +69,21 @@ describe("describeScreen", () => {
     });
   });
 
+  it("numbers the questions answered in the app, leaving activities out", () => {
+    const quiz = [
+      {
+        _id: roundId("blandat"),
+        title: "Blandat",
+        questions: [
+          { _id: questionId("a"), prompt: "Baka!", content: activity },
+          { _id: questionId("b"), prompt: "Vilken krydda?", content: freeText },
+        ],
+      },
+    ];
+    expect(describeScreen({ kind: "question", questionId: questionId("b") }, quiz)).toMatchObject({ questionNumber: 1 });
+    expect(describeScreen({ kind: "answer", questionId: questionId("b") }, quiz)).toMatchObject({ questionNumber: 1 });
+  });
+
   it("refuses a screen whose round or question isn't in the quiz", () => {
     expect(() => describeScreen({ kind: "roundIntro", roundId: roundId("borta") }, rounds)).toThrow();
     expect(() => describeScreen({ kind: "question", questionId: questionId("borta") }, rounds)).toThrow();
@@ -83,4 +98,3 @@ describe("describeScreen", () => {
     });
   });
 });
-

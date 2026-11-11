@@ -9,22 +9,16 @@ describe("describeNumberScoring", () => {
       { within: 1.5, points: 2.5 },
       { within: null, points: 9 },
     ];
-    expect(describeNumberScoring({ type: "number", answer: 9, scoring: { mode: "tiers", tiers } })).toEqual([
-      "Poängnivåer",
-      "Exakt rätt: 3 p",
-      "Inom ±1,5: 2,5 p",
-      "Inom ±5: 1 p",
-      "Bästa nivån räknas.",
-    ]);
+    expect(describeNumberScoring({ type: "number", answer: 9, scoring: { mode: "tiers", tiers } })).toEqual({
+      kind: "Poängnivåer",
+      rules: ["Exakt rätt: 3 p", "Inom ±1,5: 2,5 p", "Inom ±5: 1 p", "Bästa nivån räknas."],
+    });
   });
 
   it("lists the places for närmast vinner", () => {
-    expect(describeNumberScoring({ type: "number", answer: 9, scoring: { mode: "closest", pointsByRank: [3, 2, null] } })).toEqual([
-      "Närmast vinner",
-      "Plats 1: 3 p",
-      "Plats 2: 2 p",
-      "Plats 3: 0 p",
-      "Lika nära delar plats.",
-    ]);
+    expect(describeNumberScoring({ type: "number", answer: 9, scoring: { mode: "closest", pointsByRank: [3, 2, null] } })).toEqual({
+      kind: "Närmast vinner",
+      rules: ["Plats 1: 3 p", "Plats 2: 2 p", "Plats 3: 0 p", "Lika nära delar plats."],
+    });
   });
 });
