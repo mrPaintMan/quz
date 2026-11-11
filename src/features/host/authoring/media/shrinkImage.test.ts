@@ -6,9 +6,10 @@ const drawn: number[][] = [];
 
 // jsdom draws nothing, so the browser's picture tools are stand-ins: a 4000 × 3000 photo, and a
 // canvas that gives files of the type asked for (PNG for WebP when it "can't" write WebP).
-function fakeBrowser({ writesWebp = true, size = 100 } = {}) {
-  vi.stubGlobal("createImageBitmap", vi.fn(async () => ({ width: 4000, height: 3000, close: vi.fn() })));
+function fakeBrowser({ writesWebp = true, size = 100, width = 4000, height = 3000 } = {}) {
+  vi.stubGlobal("createImageBitmap", vi.fn(async () => ({ width, height, close: vi.fn() })));
   vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+    imageSmoothingQuality: "low",
     drawImage: (_bitmap: unknown, _x: number, _y: number, width: number, height: number) => drawn.push([width, height]),
   } as unknown as CanvasRenderingContext2D);
   vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation((done, type) =>
@@ -34,11 +35,19 @@ describe("shrinkImage", () => {
     expect(shrunk.size).toBe(100);
   });
 
-  it("falls back to JPEG where the browser can't write WebP, but keeps a PNG that may be transparent", async () => {
+  it("falls back to JPEG for a JPEG where the browser can't write WebP, but keeps formats that may be transparent", async () => {
     fakeBrowser({ writesWebp: false });
     expect((await shrinkImage(photo)).type).toBe("image/jpeg");
-    const png = new Blob(["x".repeat(1000)], { type: "image/png" });
-    expect(await shrinkImage(png)).toBe(png);
+    for (const type of ["image/png", "image/webp", "image/avif"]) {
+      const transparent = new Blob(["x".repeat(1000)], { type });
+      expect(await shrinkImage(transparent)).toBe(transparent);
+    }
+  });
+
+  it("keeps a picture already within 1920 pixels and under a megabyte as it is", async () => {
+    fakeBrowser({ width: 800, height: 600 });
+    expect(await shrinkImage(photo)).toBe(photo);
+    expect(drawn).toEqual([]);
   });
 
   it("keeps the original when redrawing wouldn't make it smaller", async () => {
