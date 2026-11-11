@@ -6,10 +6,12 @@ describe("getReview", () => {
   it("lists the sent texts without an exact match once per field, with how many teams wrote them", async () => {
     const review = await reviewIn(await setup());
     expect(review?.slots).toEqual([
-      { title: "a) Artist", options: ["ABBA"], isOpen: false, names: [] },
-      { title: "b) Låt", options: ["Waterloo"], isOpen: false, names: [] },
+      { title: "a) Artist", answer: "ABBA", options: ["ABBA"], isOpen: false, names: [] },
+      { title: "b) Låt", answer: "Waterloo", options: ["Waterloo"], isOpen: false, names: [] },
     ]);
     expect(review?.aiStatus).toBeNull();
+    // The red team's "Abba" matched exactly.
+    expect(review?.exact).toEqual([{ slot: 0, text: "abba", written: "Abba", teamCount: 1, answer: "ABBA" }]);
     expect(review?.items).toEqual([
       { slot: 0, text: "abbba", written: "Abbba", teamCount: 1, isJudged: false, target: null, byAi: false },
       { slot: 1, text: "waterlo", written: "Waterlo", teamCount: 2, isJudged: false, target: null, byAi: false },
@@ -20,7 +22,7 @@ describe("getReview", () => {
     const game = await setupList();
     await game.t.run((ctx) => ctx.db.insert("verdicts", { gameId: game.gameId, questionId: game.questionId, slot: 0, text: "lund", target: "Lund" }));
     const review = await reviewIn(game);
-    expect(review?.slots).toEqual([{ title: "", options: ["Göteborg"], isOpen: true, names: ["Lund"] }]);
+    expect(review?.slots).toEqual([{ title: "", answer: null, options: ["Göteborg"], isOpen: true, names: ["Lund"] }]);
     expect(review?.items.map(({ text, target }) => [text, target])).toEqual([
       ["gothenburg", null],
       ["lund", "Lund"],

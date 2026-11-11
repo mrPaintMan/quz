@@ -63,4 +63,11 @@ describe("freeTextAnswering", () => {
   it("doesn't count a misspelling", () => {
     expect(freeTextAnswering.grade(single, [texts("kanell")])).toEqual([0]);
   });
+
+  it("gives the hosts' box each sub-question's correct answer, when it has one", () => {
+    const withBlank = { ...twoFields, fields: [...twoFields.fields, { label: "År", acceptedAnswers: [" "] }] };
+    expect(freeTextAnswering.review?.slots(withBlank).map((slot) => slot.answer)).toEqual(["ABBA", "Happy New Year", undefined]);
+    expect(freeTextAnswering.review?.slots(single)[0].answer).toBeUndefined();
+  });
 });
+

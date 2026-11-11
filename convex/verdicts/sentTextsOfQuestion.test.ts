@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { reviewOf } from "@/domain/answering/registry";
 import { setupConvexTest } from "../test.setup";
-import { textsToReviewOfQuestion } from "./textsToReviewOfQuestion";
+import { sentTextsOfQuestion } from "./sentTextsOfQuestion";
 
-describe("textsToReviewOfQuestion", () => {
-  it("lists the unmatched texts of sent answers that still fit the question", async () => {
+describe("sentTextsOfQuestion", () => {
+  it("splits the texts of sent answers that still fit the question into those to judge and exact matches", async () => {
     const t = setupConvexTest();
     const items = await t.run(async (ctx) => {
       const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
@@ -19,8 +19,8 @@ describe("textsToReviewOfQuestion", () => {
       await ctx.db.insert("answers", { gameId, teamId: blue, questionId, content: { type: "freeText", fields: ["Kanel"] }, lockedAt: null });
       // Sent while the question was another type.
       await ctx.db.insert("answers", { gameId, teamId: green, questionId, content: { type: "number", value: 3 }, lockedAt: 1 });
-      return textsToReviewOfQuestion(ctx, gameId, (await ctx.db.get("questions", questionId))!, reviewOf(content)!);
+      return sentTextsOfQuestion(ctx, gameId, (await ctx.db.get("questions", questionId))!, reviewOf(content)!);
     });
-    expect(items).toEqual([{ slot: 0, text: "safran", written: "Safran", teamCount: 1 }]);
+    expect(items).toEqual({ toReview: [{ slot: 0, text: "safran", written: "Safran", teamCount: 1 }], exact: [] });
   });
 });
