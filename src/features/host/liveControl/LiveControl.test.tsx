@@ -33,6 +33,7 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 }));
 
 const gameId = "game1" as Id<"games">;
+const reviewItem = (isJudged: boolean) => ({ slot: 0, text: "x", written: "x", teamCount: 1, isJudged, target: null, byAi: false });
 const rulesNext = { view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null, notes: { current: null, next: null } };
 const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true, shown: null };
 
@@ -65,7 +66,7 @@ describe("LiveControl", () => {
 
   it("shows the review list once a question's answers lock, on its question or answer screen", () => {
     const questionId = "q1" as Id<"questions">;
-    review.mockReturnValue({ slots: [], items: [], aiStatus: null, phase: "settled" });
+    review.mockReturnValue({ slots: [], items: [], unjudged: 0, aiStatus: null, phase: "settled" });
     renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", revealed: null } });
     expect(screen.getByText("Granskning av q1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nästa" })).toBeEnabled();
@@ -73,17 +74,21 @@ describe("LiveControl", () => {
 
   it("makes Nästa wait while the AI judges, and until every text is judged", () => {
     const questionId = "q1" as Id<"questions">;
-    const item = (isJudged: boolean) => ({ slot: 0, text: "x", written: "x", teamCount: 1, isJudged, target: null, byAi: false });
-    review.mockReturnValue({ slots: [], items: [item(false)], aiStatus: "judging", phase: "judging" });
+    review.mockReturnValue({ slots: [], items: [reviewItem(false)], unjudged: 1, aiStatus: "judging", phase: "judging" });
     renderControl({ screenNow: { kind: "question", questionId }, view: question });
     expect(screen.getByText("Nästa väntar på AI:n…")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
   });
 
+  it("keeps Nästa disabled until the question's judging state has loaded", () => {
+    review.mockReturnValue(undefined);
+    renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: question });
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
+  });
+
   it("says how many texts are left to judge before Nästa", () => {
     const questionId = "q1" as Id<"questions">;
-    const item = (isJudged: boolean) => ({ slot: 0, text: "x", written: "x", teamCount: 1, isJudged, target: null, byAi: false });
-    review.mockReturnValue({ slots: [], items: [item(false), item(false), item(true)], aiStatus: "done", phase: "reviewing" });
+    review.mockReturnValue({ slots: [], items: [reviewItem(false), reviewItem(false), reviewItem(true)], unjudged: 2, aiStatus: "done", phase: "reviewing" });
     renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "?", revealed: null } });
     expect(screen.getByText("Nästa väntar tills alla svar är bedömda (2 kvar).")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();

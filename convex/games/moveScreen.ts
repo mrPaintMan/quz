@@ -1,4 +1,5 @@
 import { closeQuestion } from "@/domain/answers/closeQuestion";
+import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { questionClosedByStep } from "@/domain/answers/questionClosedByStep";
 import { mediaOnScreen } from "@/domain/media/mediaOnScreen";
 import { playbackForMedia } from "@/domain/playback/playbackForMedia";
@@ -30,7 +31,7 @@ export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Sc
   if (closingId !== null) await lockQuestion(ctx, gameId, closingId);
   const closedQuestionIds = closingId === null ? game.closedQuestionIds : closeQuestion(game.closedQuestionIds, closingId);
   const { screen, screenIndex: nextIndex } = stepScreen(sequence, game, step);
-  const isClosed = screen.kind === "question" && closedQuestionIds?.includes(screen.questionId);
+  const isClosed = screen.kind === "question" && isQuestionLocked({ ...game, closedQuestionIds }, screen.questionId);
   const timer = isClosed ? undefined : startTimerForScreen(screen, rounds, Date.now());
   await ctx.db.patch("games", gameId, {
     screen,

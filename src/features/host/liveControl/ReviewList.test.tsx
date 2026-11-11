@@ -13,10 +13,10 @@ const questionId = "q1" as Id<"questions">;
 const slot = (title: string, options: string[]) => ({ title, options, isOpen: false, names: [] });
 const item = (slot: number, text: string, extra = {}) => ({ slot, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
 
-function renderList(review: Omit<Review, "phase">) {
+function renderList(review: Omit<Review, "phase" | "unjudged">) {
   render(
     <ActionErrorProvider>
-      <ReviewList gameId={gameId} questionId={questionId} review={{ ...review, phase: "reviewing" }} />
+      <ReviewList gameId={gameId} questionId={questionId} review={{ ...review, phase: "reviewing", unjudged: review.items.filter((item) => !item.isJudged).length }} />
     </ActionErrorProvider>,
   );
 }

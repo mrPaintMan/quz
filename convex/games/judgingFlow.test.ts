@@ -58,4 +58,16 @@ describe("the judging flow", () => {
       t.mutation(api.games.mutations.goToPreviousScreen, { ...host, gameId, from: { kind: "answer", questionId } }),
     ).resolves.toBeNull();
   });
+
+  it("takes no more answers once every team has sent, from a team that joins late either", async () => {
+    const { t, gameId, questionId, red, blue } = await atQuestion();
+    const send = (teamId: typeof red, text: string) =>
+      t.mutation(api.answers.mutations.sendAnswer, { teamId, questionId, content: { type: "freeText", fields: [text] } });
+    await send(red, "Saffran");
+    await send(blue, "Saffran");
+    const late = await t.run((ctx) => ctx.db.insert("teams", { gameId, name: "Gröna", colour: "green" }));
+    await expect(send(late, "Safran")).rejects.toThrow("tar inte emot svar");
+    expect((await t.query(api.games.queries.getRunningGame, {}))?.isQuestionClosed).toBe(true);
+  });
 });
+

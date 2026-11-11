@@ -21,9 +21,10 @@ describe("judgingOfQuestion", () => {
     await expect(judgingIn(setup)).resolves.toMatchObject({ isLocked: false, items: [], phase: "open", canStepOn: true });
   });
 
-  it("counts the answers locked once the AI judge has started, before Nästa closes the question", async () => {
+  it("counts the answers locked before Nästa closes the question, as by time-out", async () => {
     const setup = await setupJudging();
     await reopen(setup);
+    await setup.t.run((ctx) => ctx.db.patch("games", setup.gameId, { lockedQuestionIds: [setup.questionId] }));
     await markJudging(setup);
     const judging = await judgingIn(setup);
     expect(judging).toMatchObject({ isLocked: true, aiStatus: "judging", phase: "judging", canStepOn: false });

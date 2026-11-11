@@ -29,8 +29,7 @@ import type { RunningGame } from "@/features/shared/game/RunningGame";
 function nextWaitsFor(review: Review | null | undefined): string | null {
   if (review?.phase === "judging") return "Nästa väntar på AI:n…";
   if (review?.phase !== "reviewing") return null;
-  const left = review.items.filter((item) => !item.isJudged).length;
-  return `Nästa väntar tills alla svar är bedömda (${left} kvar).`;
+  return `Nästa väntar tills alla svar är bedömda (${review.unjudged} kvar).`;
 }
 
 // The hosts' view of the night: what the TV shows now and what comes next, both drawn as the TV
@@ -48,6 +47,8 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const run = useRunAction();
   const gameId = game._id;
   const waitingFor = nextWaitsFor(review);
+  // Until the question's judging state has loaded, Nästa can't tell whether it must wait.
+  const isLoadingJudging = questionOnScreen !== null && review === undefined;
   const notes = next?.notes;
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
@@ -108,7 +109,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
               {next === null ? (
                 <EndGameButton gameId={gameId} size="lg" variant="default" />
               ) : (
-                <Button size="lg" disabled={waitingFor !== null} onClick={() => run(() => goToNext({ gameId, from: game.screen }))}>
+                <Button size="lg" disabled={waitingFor !== null || isLoadingJudging} onClick={() => run(() => goToNext({ gameId, from: game.screen }))}>
                   Nästa
                 </Button>
               )}

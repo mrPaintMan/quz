@@ -13,7 +13,7 @@ export const getReview = hostQuery({
     const game = await ctx.db.get("games", gameId);
     const question = await ctx.db.get("questions", questionId);
     if (game === null || question === null) return null;
-    const { isLocked, review, verdicts, items, aiStatus, phase } = await judgingOfQuestion(ctx, game, question);
+    const { isLocked, review, verdicts, items, unjudged, aiStatus, phase } = await judgingOfQuestion(ctx, game, question);
     if (!isLocked || review === null) return null;
     return {
       slots: review.slots(question.content).map(({ title, options, isOpen }, slot) => ({
@@ -26,6 +26,7 @@ export const getReview = hostQuery({
           .map((given) => given.name),
       })),
       items,
+      unjudged,
       aiStatus,
       phase,
     };
