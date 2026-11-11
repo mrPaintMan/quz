@@ -96,8 +96,8 @@ import type * as teams_teamsOfGame from "../teams/teamsOfGame.js";
 import type * as verdicts_judgingOfQuestion from "../verdicts/judgingOfQuestion.js";
 import type * as verdicts_mutations from "../verdicts/mutations.js";
 import type * as verdicts_queries from "../verdicts/queries.js";
+import type * as verdicts_sentTextsOfQuestion from "../verdicts/sentTextsOfQuestion.js";
 import type * as verdicts_table from "../verdicts/table.js";
-import type * as verdicts_textsToReviewOfQuestion from "../verdicts/textsToReviewOfQuestion.js";
 import type * as verdicts_verdictsOfQuestion from "../verdicts/verdictsOfQuestion.js";
 
 import type {
@@ -195,8 +195,8 @@ declare const fullApi: ApiFromModules<{
   "verdicts/judgingOfQuestion": typeof verdicts_judgingOfQuestion;
   "verdicts/mutations": typeof verdicts_mutations;
   "verdicts/queries": typeof verdicts_queries;
+  "verdicts/sentTextsOfQuestion": typeof verdicts_sentTextsOfQuestion;
   "verdicts/table": typeof verdicts_table;
-  "verdicts/textsToReviewOfQuestion": typeof verdicts_textsToReviewOfQuestion;
   "verdicts/verdictsOfQuestion": typeof verdicts_verdictsOfQuestion;
 }>;
 

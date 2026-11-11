@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-M3 is paused for the feedback round below (from the user's test night, 2026-11-11). Next: the Granska box (3), then faster images (4) and the phones' feedback (5). M3 then continues with activities and manual points, then drawing, map pin and På spåret.
+M3 is paused for the feedback round below (from the user's test night, 2026-11-11). Next: faster images (4), then the phones' feedback (5). M3 then continues with activities and manual points, then drawing, map pin and På spåret.
 
 ## Milestones
 
@@ -81,7 +81,7 @@ M3 is paused for the feedback round below (from the user's test night, 2026-11-1
 Agreed with the user, in this order:
 1. [x] Running the night: next screen's notes under the preview, the TV question's notes folded away, Gissa siffran's scoring in the admin, "Avsluta quiz" in place of Nästa on the last screen, activities and round intros centred on the TV (D54)
 2. [x] Judging flow: the AI judge starts as soon as every team has sent or the time is out, and Nästa waits until every answer is judged, unsure ones included (D55)
-3. [ ] The Granska box: every answer, exact matches read-only at the bottom; sections Att granska, Bedömda, Stämde med facit; each sub-question's correct answer by its title
+3. [x] The Granska box: every answer, exact matches read-only at the bottom; sections Att granska, Bedömda, Stämde med facit; each sub-question's correct answer by its title (D56)
 4. [ ] Faster images: shrink on upload (at most 1920 px), and the TV loads the next screen's images ahead (the user accepts they can be found a screen early)
 5. [ ] Phones show what scored: from the answer screen until the next question, each team's own answer marked right or wrong per item, with its points; follows verdict changes
 
@@ -141,3 +141,4 @@ Agreed with the user, in this order:
 - 2026-11-10: Nämn så många som möjligt: add answers one at a time on the phone, the items the teams got right on the TV, the AI judge and the review list naming right answers outside the key so two forms count once (D53). Not tried in a browser with data.
 - 2026-11-11: Feedback round 1, running the night: notes in the live control, Gissa siffran's scoring, Avsluta quiz on the last screen, centred activities and round intros on the TV (D54). Not tried in a browser with data.
 - 2026-11-11: Feedback round 2, judging flow: answers lock when every team has sent, the time is out or Nästa closes the question, which starts the AI judge; Nästa waits until every answer is judged; one rule decides a question's judging phase (D55). Not tried in a browser with data.
+- 2026-11-11: Feedback round 3, the Granska box: every answer in three sections (Att granska on top, Bedömda, Stämde med facit read-only), and each sub-question's correct answer by its title (D56). Not tried in a browser with data.

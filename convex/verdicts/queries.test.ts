@@ -10,6 +10,8 @@ describe("getReview", () => {
       { title: "b) Låt", options: ["Waterloo"], isOpen: false, names: [] },
     ]);
     expect(review?.aiStatus).toBeNull();
+    // The red team's "Abba" matched exactly.
+    expect(review?.exact).toEqual([{ slot: 0, text: "abba", written: "Abba", teamCount: 1, answer: "ABBA" }]);
     expect(review?.items).toEqual([
       { slot: 0, text: "abbba", written: "Abbba", teamCount: 1, isJudged: false, target: null, byAi: false },
       { slot: 1, text: "waterlo", written: "Waterlo", teamCount: 2, isJudged: false, target: null, byAi: false },

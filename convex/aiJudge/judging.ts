@@ -5,7 +5,7 @@ import { givenNames, withVerdicts } from "@/domain/review/typedReview";
 import { internal } from "../_generated/api";
 import type { Id } from "../_generated/dataModel";
 import { internalMutation, internalQuery, type MutationCtx, type QueryCtx } from "../_generated/server";
-import { textsToReviewOfQuestion } from "../verdicts/textsToReviewOfQuestion";
+import { sentTextsOfQuestion } from "../verdicts/sentTextsOfQuestion";
 import { verdictsOfQuestion } from "../verdicts/verdictsOfQuestion";
 
 type GameQuestion = { gameId: Id<"games">; questionId: Id<"questions"> };
@@ -44,7 +44,7 @@ export const prepareJudging = internalQuery({
     const review = question && usesAiJudge(question.content) ? reviewOf(question.content) : null;
     if (!question || !review) return null;
     const verdicts = await verdictsOfQuestion(ctx, gameId, questionId);
-    const items = withVerdicts(await textsToReviewOfQuestion(ctx, gameId, question, review), verdicts)
+    const items = withVerdicts((await sentTextsOfQuestion(ctx, gameId, question, review)).toReview, verdicts)
       .filter((item) => !item.isJudged)
       .map(({ slot, text, written, teamCount }) => ({ slot, text, written, teamCount }));
     if (items.length === 0) return null;

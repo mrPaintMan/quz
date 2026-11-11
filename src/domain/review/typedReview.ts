@@ -131,12 +131,38 @@ export function withVerdicts(items: ReviewItem[], verdicts: Verdict[]) {
 // The texts no accepted spelling matches exactly, each once per slot with how many teams wrote
 // it, in slot and then alphabetical order so the hosts' list doesn't jump as verdicts come in.
 export function textsToReview<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[]): ReviewItem[] {
+  return countTexts(review, content, answers, (option) => option === undefined);
+}
+
+// The texts an accepted spelling matched exactly, each once per slot with how many teams wrote it
+// and the accepted answer it is, for the hosts to see beside the ones to judge (D56).
+export function exactTexts<Content, Answer>(
+  review: TypedReview<Content, Answer>,
+  content: Content,
+  answers: Answer[],
+): (ReviewItem & { answer: string })[] {
+  const slots = review.slots(content);
+  const exact = exactMatches(slots);
+  return countTexts(review, content, answers, (option) => option !== undefined).map((item) => ({
+    ...item,
+    answer: slots[item.slot].options[exact.get(keyOf(item.slot, item.text)) ?? 0].label,
+  }));
+}
+
+// The distinct texts the answers hold, keeping those whose exact match (an option, or undefined)
+// passes, each once per slot with how many teams wrote it, in slot and then alphabetical order.
+function countTexts<Content, Answer>(
+  review: TypedReview<Content, Answer>,
+  content: Content,
+  answers: Answer[],
+  keeps: (option: number | undefined) => boolean,
+): ReviewItem[] {
   const slots = review.slots(content);
   const exact = exactMatches(slots);
   const items = new Map<string, ReviewItem>();
   for (const answer of answers) {
     for (const [key, text] of writtenTexts(review, slots, answer)) {
-      if (exact.has(key)) continue;
+      if (!keeps(exact.get(key))) continue;
       const item = items.get(key);
       if (item) item.teamCount += 1;
       else items.set(key, { ...text, teamCount: 1 });

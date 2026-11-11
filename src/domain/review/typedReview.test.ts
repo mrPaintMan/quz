@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { givenNames, gradeTyped, rightItems, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { exactTexts, givenNames, gradeTyped, rightItems, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -143,6 +143,17 @@ describe("givenNames", () => {
       { slot: 0, name: "Lund" },
       { slot: 0, name: "Malmö" },
       { slot: 1, name: "Lund" },
+    ]);
+  });
+});
+
+describe("exactTexts", () => {
+  it("lists each text an accepted spelling matched once per slot, with its teams and the answer it is", () => {
+    const answers = [answer("abba", "KAFFELIKÖR", "Vodka"), answer("ABBA.", "kaffelikör", "gin")];
+    expect(exactTexts(review, content, answers)).toEqual([
+      { slot: 0, text: "abba", written: "abba", teamCount: 2, answer: "ABBA" },
+      { slot: 1, text: "kaffelikör", written: "KAFFELIKÖR", teamCount: 2, answer: "Kahlúa" },
+      { slot: 1, text: "vodka", written: "Vodka", teamCount: 1, answer: "Vodka" },
     ]);
   });
 });

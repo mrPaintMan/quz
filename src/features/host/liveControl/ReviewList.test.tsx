@@ -11,37 +11,62 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () =
 const gameId = "game1" as Id<"games">;
 const questionId = "q1" as Id<"questions">;
 const slot = (title: string, options: string[]) => ({ title, options, isOpen: false, names: [] });
-const item = (slot: number, text: string, extra = {}) => ({ slot, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
+const item = (slotIndex: number, text: string, extra = {}) => ({ slot: slotIndex, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
 
-function renderList(review: Omit<Review, "phase" | "unjudged">) {
+function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Partial<Pick<Review, "exact">>) {
   render(
     <ActionErrorProvider>
-      <ReviewList gameId={gameId} questionId={questionId} review={{ ...review, phase: "reviewing", unjudged: review.items.filter((item) => !item.isJudged).length }} />
+      <ReviewList
+        gameId={gameId}
+        questionId={questionId}
+        review={{ exact: [], ...review, phase: "reviewing", unjudged: review.items.filter((candidate) => !candidate.isJudged).length }}
+      />
     </ActionErrorProvider>,
   );
 }
+
+// The texts of a section, in order.
+const textsIn = (section: string) =>
+  within(screen.getByText(section).parentElement!)
+    .getAllByRole("listitem")
+    .map((row) => row.firstChild?.textContent);
 
 describe("ReviewList", () => {
   beforeEach(() => {
     judgeText.mockReset().mockResolvedValue(null);
   });
 
-  it("says when there is nothing to judge", () => {
+  it("says when no team has sent anything yet", () => {
     renderList({ slots: [slot("", ["Saffran"])], items: [], aiStatus: null });
-    expect(screen.getByText("Inga svar att granska.")).toBeInTheDocument();
+    expect(screen.getByText("Inga svar ännu.")).toBeInTheDocument();
   });
 
-  it("judges a free-text answer right or wrong, for every team that wrote it", async () => {
+  it("puts the texts to judge on top, then the judged, then the exact matches, read-only", () => {
     renderList({
-      slots: [
-        slot("a) Artist", ["ABBA"]),
-        slot("b) Låt", ["Waterloo"]),
-      ],
+      slots: [slot("", ["Saffran"])],
+      items: [item(0, "safran", { isJudged: true, target: 0, byAi: true }), item(0, "gurkmeja")],
+      exact: [{ slot: 0, text: "saffran", written: "Saffran", teamCount: 3, answer: "Saffran" }],
+      aiStatus: "done",
+    });
+    const headings = screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent);
+    expect(headings).toEqual(["Att granska", "Bedömda", "Stämde med facit"]);
+    expect(textsIn("Att granska")).toEqual(["gurkmeja"]);
+    expect(textsIn("Bedömda")).toEqual(["safranAI"]);
+    const exact = within(screen.getByText("Saffran", { selector: "span" }).closest("li")!);
+    expect(exact.getByText("3 lag")).toBeInTheDocument();
+    expect(exact.getByText("= Saffran")).toBeInTheDocument();
+    expect(exact.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("gives each sub-question's correct answer by its title, and judges for every team that wrote a text", async () => {
+    renderList({
+      slots: [slot("a) Artist", ["ABBA"]), slot("b) Låt", ["Waterloo"])],
       items: [item(0, "abbba", { written: "Abbba", teamCount: 2 }), item(1, "waterlo", { isJudged: true, target: 0 })],
       aiStatus: null,
     });
     expect(screen.getByText("1 kvar")).toBeInTheDocument();
-    expect(screen.getByText("b) Låt")).toBeInTheDocument();
+    expect(screen.getByText("a) Artist · facit: ABBA")).toBeInTheDocument();
+    expect(screen.getByText("b) Låt · facit: Waterloo")).toBeInTheDocument();
     const abbba = within(screen.getByText("Abbba").closest("li")!);
     expect(abbba.getByText("2 lag")).toBeInTheDocument();
     await userEvent.click(abbba.getByRole("button", { name: "Rätt" }));
@@ -67,7 +92,7 @@ describe("ReviewList", () => {
     expect(within(screen.getByText("gurkmeja").closest("li")!).queryByTitle("Bedömt av AI")).not.toBeInTheDocument();
   });
 
-  it("says when the AI couldn't judge, so the hosts do it themselves", () => {
+  it("says when the AI couldn't judge, until the hosts have judged everything", () => {
     renderList({ slots: [slot("", ["Saffran"])], items: [item(0, "safran")], aiStatus: "failed" });
     expect(screen.getByText("AI:n kunde inte bedöma svaren. Granska dem själva.")).toBeInTheDocument();
   });
