@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isActivityPoints, isCorrection, roundPoints } from "./manualPoints";
+import { isHandPoints, isCorrection, roundPoints } from "./manualPoints";
 
 describe("roundPoints", () => {
   it("keeps two decimals", () => {
@@ -8,14 +8,14 @@ describe("roundPoints", () => {
   });
 });
 
-describe("isActivityPoints", () => {
+describe("isHandPoints", () => {
   it("allows 0 up to the activity's most, halves included", () => {
-    expect(isActivityPoints(0, 5)).toBe(true);
-    expect(isActivityPoints(4.5, 5)).toBe(true);
-    expect(isActivityPoints(5.5, 5)).toBe(false);
-    expect(isActivityPoints(-1, 5)).toBe(false);
-    expect(isActivityPoints(Number.NaN, 5)).toBe(false);
-    expect(isActivityPoints(12, null)).toBe(true);
+    expect(isHandPoints(0, 5)).toBe(true);
+    expect(isHandPoints(4.5, 5)).toBe(true);
+    expect(isHandPoints(5.5, 5)).toBe(false);
+    expect(isHandPoints(-1, 5)).toBe(false);
+    expect(isHandPoints(Number.NaN, 5)).toBe(false);
+    expect(isHandPoints(12, null)).toBe(true);
   });
 });
 

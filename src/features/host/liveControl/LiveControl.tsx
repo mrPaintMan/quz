@@ -11,10 +11,10 @@ import { useAnsweredTeamIds } from "@/features/shared/answers/useAnsweredTeamIds
 import { useScores } from "@/features/shared/scores/useScores";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
-import { ActivityScoring } from "./ActivityScoring";
 import { AnswerStatusList } from "./AnswerStatusList";
 import { Corrections } from "./Corrections";
 import { EndGameButton } from "./EndGameButton";
+import { HandScoring, type HandScoringState } from "./HandScoring";
 import { PlaybackControls } from "./PlaybackControls";
 import { QuestionNotes } from "./QuestionNotes";
 import { ReviewList, type Review } from "./ReviewList";
@@ -34,6 +34,21 @@ function nextWaitsFor(review: Review | null | undefined): string | null {
   return `Nästa väntar tills alla svar är bedömda (${review.unjudged} kvar).`;
 }
 
+// What the hosts score by hand on the screen showing now, and its heading: an activity while it
+// shows (D61), a drawing on its answer screen (D62); null otherwise.
+function handScoredTitle(view: RunningGame["view"]): string | null {
+  if (view.kind === "question" && !view.answeredInApp) return "Poäng för aktiviteten";
+  if (view.kind === "answer" && view.revealed?.type === "drawing") return "Poäng för teckningarna";
+  return null;
+}
+
+// Why Nästa waits for the hosts' own points, on a drawing's answer screen (D62); null when it doesn't.
+function nextWaitsForPoints(view: RunningGame["view"], scoring: HandScoringState | null | undefined): string | null {
+  if (view.kind !== "answer" || !scoring) return null;
+  const left = scoring.teams.filter((team) => team.points === null).length;
+  return left === 0 ? null : `Nästa väntar tills alla teckningar har poäng (${left} kvar).`;
+}
+
 // The hosts' view of the night: what the TV shows now and what comes next, both drawn as the TV
 // draws them but silent, with the controls for stepping on and for the question's timer and clip.
 export function LiveControl({ game }: { game: RunningGame }) {
@@ -48,9 +63,12 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const review = useHostQuery(api.verdicts.queries.getReview, questionOnScreen ? { gameId: game._id, questionId: questionOnScreen } : "skip");
   const run = useRunAction();
   const gameId = game._id;
-  const waitingFor = nextWaitsFor(review);
-  // Until the question's judging state has loaded, Nästa can't tell whether it must wait.
-  const isLoadingJudging = questionOnScreen !== null && review === undefined;
+  const handTitle = handScoredTitle(game.view);
+  const handScoring = useHostQuery(api.adjustments.queries.getHandPoints, handTitle && questionOnScreen ? { gameId: game._id, questionId: questionOnScreen } : "skip");
+  const waitingFor = nextWaitsFor(review) ?? nextWaitsForPoints(game.view, handScoring);
+  // Until the question's judging state, and any points by hand, have loaded, Nästa can't tell
+  // whether it must wait.
+  const isLoadingJudging = questionOnScreen !== null && (review === undefined || (handTitle !== null && handScoring === undefined));
   const notes = next?.notes;
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
@@ -95,8 +113,8 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {notes?.current && notes.current.questionId !== notes.next?.questionId && (
             <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
           )}
-          {game.view.kind === "question" && !game.view.answeredInApp && questionOnScreen && (
-            <ActivityScoring gameId={gameId} questionId={questionOnScreen} teams={teams} />
+          {handTitle && handScoring && questionOnScreen && (
+            <HandScoring gameId={gameId} questionId={questionOnScreen} title={handTitle} scoring={handScoring} teams={teams} />
           )}
           {review && questionOnScreen && <ReviewList gameId={gameId} questionId={questionOnScreen} review={review} />}
           {waitingFor && (

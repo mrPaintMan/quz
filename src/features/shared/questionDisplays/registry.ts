@@ -9,6 +9,7 @@ import { MultipleChoiceAnswer, MultipleChoiceQuestion } from "./multipleChoice/M
 import { NumberAnswer, NumberQuestion } from "./number/NumberDisplay";
 import { SortAnswer, SortQuestion } from "./sort/SortDisplay";
 import type { RevealedDisplayProps, ShownDisplayProps } from "./QuestionDisplayProps";
+import { DrawingAnswer, DrawingQuestion } from "./drawing/DrawingDisplay";
 
 type DisplayRegistration<T extends AnsweredType> = {
   Question: ComponentType<ShownDisplayProps<T>>;
@@ -25,7 +26,7 @@ export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | n
   match: { Question: MatchQuestion, Answer: MatchAnswer },
   list: { Question: ListQuestion, Answer: ListAnswer },
   ingredients: { Question: IngredientsQuestion, Answer: IngredientsAnswer },
-  drawing: null,
+  drawing: { Question: DrawingQuestion, Answer: DrawingAnswer },
   mapPin: { Question: MapPinQuestion, Answer: MapPinAnswer },
   paSparet: null,
 };

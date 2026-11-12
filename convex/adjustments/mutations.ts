@@ -1,11 +1,11 @@
 import { ConvexError, v } from "convex/values";
-import { isActivityPoints, isCorrection, roundPoints } from "@/domain/scoring/manualPoints";
+import { isHandPoints, isCorrection, roundPoints } from "@/domain/scoring/manualPoints";
 import type { Doc, Id } from "../_generated/dataModel";
 import type { QueryCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { requireRunningGame } from "../games/requireRunningGame";
 import { getOrThrow } from "../shared/getOrThrow";
-import { activityPointsOf } from "./activityPointsOf";
+import { handPointsOf, handScoringOf } from "./handPointsOf";
 
 async function requireTeamOf(ctx: QueryCtx, game: Doc<"games">, teamId: Id<"teams">) {
   const team = await getOrThrow(ctx, "teams", teamId);
@@ -13,20 +13,22 @@ async function requireTeamOf(ctx: QueryCtx, game: Doc<"games">, teamId: Id<"team
   return team;
 }
 
-// The hosts set a team's points for an activity of the quiz, from 0 up to its most, or clear them
-// with null; set again, they replace the earlier ones (D61). They count in the scores at once.
-export const setActivityPoints = hostMutation({
+// The hosts set a team's points for an activity, or for its drawing once sent, from 0 up to the
+// question's most, or clear them with null; set again, they replace the earlier ones (D61, D62).
+// They count in the scores at once.
+export const setHandPoints = hostMutation({
   args: { gameId: v.id("games"), questionId: v.id("questions"), teamId: v.id("teams"), points: v.union(v.number(), v.null()) },
   handler: async (ctx, { gameId, questionId, teamId, points }) => {
     const game = await requireRunningGame(ctx, gameId);
     const question = await getOrThrow(ctx, "questions", questionId);
-    if (question.quizId !== game.quizId || question.content.type !== "activity") throw new ConvexError("Frågan är ingen aktivitet i quizet.");
+    const scoring = question.quizId === game.quizId ? await handScoringOf(ctx, gameId, question) : null;
+    if (scoring === null) throw new ConvexError("Frågan får inga poäng för hand.");
     await requireTeamOf(ctx, game, teamId);
-    if (points !== null && !isActivityPoints(points, question.content.maxPoints)) {
-      const { maxPoints } = question.content;
-      throw new ConvexError(maxPoints === null ? "Poängen kan inte vara negativ." : `Poängen ska vara mellan 0 och ${maxPoints}.`);
+    if (!scoring.teams.some((team) => team.teamId === teamId)) throw new ConvexError("Laget skickade inget svar.");
+    if (points !== null && !isHandPoints(points, scoring.maxPoints)) {
+      throw new ConvexError(scoring.maxPoints === null ? "Poängen kan inte vara negativ." : `Poängen ska vara mellan 0 och ${scoring.maxPoints}.`);
     }
-    const existing = (await activityPointsOf(ctx, gameId, questionId)).find((adjustment) => adjustment.teamId === teamId);
+    const existing = (await handPointsOf(ctx, gameId, questionId)).find((adjustment) => adjustment.teamId === teamId);
     if (points === null) {
       if (existing) await ctx.db.delete("adjustments", existing._id);
       return;

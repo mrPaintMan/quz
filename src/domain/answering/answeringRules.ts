@@ -41,4 +41,9 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   outcomes: (content: ContentOf<T>, answers: AnswerOf<T>[], verdicts?: Verdict[]) => Outcome[];
   // For typed answers only: the slots and texts the hosts' review list judges (D51).
   review?: TypedReview<ContentOf<T>, AnswerOf<T>>;
+  // Whether the hosts give each answer its points by hand once it is shown, as for a drawing (D62);
+  // the points are adjustments, so outcomes score nothing and the phones read the points.
+  scoredByHand?: boolean;
+  // How big an answer may be, for a type whose answers can grow without typed texts (D62).
+  fitsLimits?: (answer: AnswerOf<T>) => boolean;
 };

@@ -2,6 +2,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent, AnsweredType } from "@convex/answers/answerContent";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { rulesFor } from "@/domain/questionTypes/registry";
+import { drawingAnswering, type DrawingRevealed, type DrawingShown } from "@/domain/questionTypes/drawing/drawingAnswering";
 import { freeTextAnswering, type FreeTextRevealed, type FreeTextShown } from "@/domain/questionTypes/freeText/freeTextAnswering";
 import {
   ingredientsAnswering,
@@ -31,7 +32,8 @@ export type ShownQuestion =
   | MatchShown
   | ListShown
   | IngredientsShown
-  | MapPinShown;
+  | MapPinShown
+  | DrawingShown;
 export type RevealedAnswer =
   | MultipleChoiceRevealed
   | FreeTextRevealed
@@ -40,7 +42,8 @@ export type RevealedAnswer =
   | MatchRevealed
   | ListRevealed
   | IngredientsRevealed
-  | MapPinRevealed;
+  | MapPinRevealed
+  | DrawingRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -56,7 +59,7 @@ export const answeringRegistry: Registry = {
   match: matchAnswering,
   list: listAnswering,
   ingredients: ingredientsAnswering,
-  drawing: null,
+  drawing: drawingAnswering,
   mapPin: mapPinAnswering,
   paSparet: null,
 };
@@ -74,6 +77,8 @@ type AnyAnsweringRules = {
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
   outcomes: (content: QuestionContent, answers: AnswerContent[], verdicts?: Verdict[]) => Outcome[];
   review?: TypedReview<QuestionContent, AnswerContent>;
+  scoredByHand?: boolean;
+  fitsLimits?: (answer: AnswerContent) => boolean;
 };
 
 // TypeScript can't link a type to its entry on its own; Registry guarantees they match.
@@ -106,8 +111,11 @@ export function isAnswerComplete(shown: ShownQuestion | null, answer: AnswerCont
 export const MAX_TYPED_TEXT_LENGTH = 200;
 export const MAX_TYPED_TEXTS = MAX_LIST_ITEMS;
 
-// Whether an answer's typed texts stay within those bounds; answers without typed texts always do.
+// Whether an answer's typed texts stay within those bounds, and the answer within its type's own,
+// such as a drawing's points (D62); other answers always do.
 export function fitsAnswerLimits(answer: AnswerContent): boolean {
-  const texts = answeringOfType(answer.type)?.review?.texts(answer) ?? [];
-  return texts.length <= MAX_TYPED_TEXTS && texts.every(({ text }) => text.length <= MAX_TYPED_TEXT_LENGTH);
+  const answering = answeringOfType(answer.type);
+  const texts = answering?.review?.texts(answer) ?? [];
+  const fitsTexts = texts.length <= MAX_TYPED_TEXTS && texts.every(({ text }) => text.length <= MAX_TYPED_TEXT_LENGTH);
+  return fitsTexts && (answering?.fitsLimits?.(answer) ?? true);
 }

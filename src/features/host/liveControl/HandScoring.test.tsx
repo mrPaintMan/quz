@@ -3,12 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
 import { ActionErrorProvider } from "@/features/host/shared/ActionErrorProvider";
-import { ActivityScoring } from "./ActivityScoring";
+import { HandScoring, type HandScoringState } from "./HandScoring";
 
-const activity = vi.fn();
-const setActivityPoints = vi.fn();
-vi.mock("@/features/host/shared/useHostQuery", () => ({ useHostQuery: () => activity() }));
-vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () => setActivityPoints }));
+const setHandPoints = vi.fn();
+vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () => setHandPoints }));
 
 const gameId = "game1" as Id<"games">;
 const questionId = "q1" as Id<"questions">;
@@ -19,30 +17,38 @@ const teams = [
   { _id: blue, name: "Renarna", colour: "blue" as const },
 ];
 
-const renderScoring = () =>
+// Both teams, Tomtarna with 2,5 p so far, unless given otherwise.
+const scoringOf = (maxPoints: number | null, redPoints: number | null = 2.5): HandScoringState => ({
+  maxPoints,
+  teams: [
+    { teamId: red, points: redPoints },
+    { teamId: blue, points: null },
+  ],
+});
+
+const renderScoring = (scoring = scoringOf(5)) =>
   render(
     <ActionErrorProvider>
-      <ActivityScoring gameId={gameId} questionId={questionId} teams={teams} />
+      <HandScoring gameId={gameId} questionId={questionId} title="Poäng för aktiviteten" scoring={scoring} teams={teams} />
     </ActionErrorProvider>,
   );
-const sent = () => setActivityPoints.mock.calls.map(([args]) => [args.teamId, args.points]);
+const sent = () => setHandPoints.mock.calls.map(([args]) => [args.teamId, args.points]);
 
-describe("ActivityScoring", () => {
+describe("HandScoring", () => {
   beforeEach(() => {
-    setActivityPoints.mockReset().mockResolvedValue(null);
-    activity.mockReturnValue({ maxPoints: 5, teams: [{ teamId: red, points: 2.5 }] });
+    setHandPoints.mockReset().mockResolvedValue(null);
   });
 
-  it("shows each team's points so far and the activity's most", () => {
+  it("shows each team's points so far and the question's most", () => {
     renderScoring();
+    expect(screen.getByRole("heading", { name: "Poäng för aktiviteten" })).toBeInTheDocument();
     expect(screen.getByText("Högst 5 p per lag.")).toBeInTheDocument();
     expect(screen.getByLabelText("Poäng för Tomtarna")).toHaveValue("2,5");
     expect(screen.getByLabelText("Poäng för Renarna")).toHaveValue("");
   });
 
   it("steps a whole point with − and +, within 0 and the most", async () => {
-    activity.mockReturnValue({ maxPoints: 5, teams: [{ teamId: red, points: 4.5 }] });
-    renderScoring();
+    renderScoring(scoringOf(5, 4.5));
     await userEvent.click(screen.getByRole("button", { name: "Plus för Tomtarna" }));
     await userEvent.click(screen.getByRole("button", { name: "Minus för Tomtarna" }));
     await userEvent.click(screen.getByRole("button", { name: "Plus för Renarna" }));
@@ -55,15 +61,14 @@ describe("ActivityScoring", () => {
   });
 
   it("stops + at the most", () => {
-    activity.mockReturnValue({ maxPoints: 5, teams: [{ teamId: red, points: 5 }] });
-    renderScoring();
+    renderScoring(scoringOf(5, 5));
     expect(screen.getByRole("button", { name: "Plus för Tomtarna" })).toBeDisabled();
   });
 
   it("sends typed points once the field is left or Enter is pressed, and clears them when emptied", async () => {
     renderScoring();
     await userEvent.type(screen.getByLabelText("Poäng för Renarna"), "3,5");
-    expect(setActivityPoints).not.toHaveBeenCalled();
+    expect(setHandPoints).not.toHaveBeenCalled();
     await userEvent.keyboard("{Enter}");
     await userEvent.clear(screen.getByLabelText("Poäng för Tomtarna"));
     await userEvent.tab();
@@ -81,20 +86,22 @@ describe("ActivityScoring", () => {
     expect(field).toHaveAttribute("aria-invalid", "true");
     await userEvent.click(screen.getByLabelText("Poäng för Tomtarna"));
     await userEvent.tab();
-    expect(setActivityPoints).not.toHaveBeenCalled();
+    expect(setHandPoints).not.toHaveBeenCalled();
   });
 
   it("has no cap when the activity has no most", async () => {
-    activity.mockReturnValue({ maxPoints: null, teams: [{ teamId: red, points: 40 }] });
-    renderScoring();
+    renderScoring(scoringOf(null, 40));
     expect(screen.queryByText(/Högst/)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Plus för Tomtarna" }));
     expect(sent()).toEqual([[red, 41]]);
   });
 
-  it("shows nothing until loaded, or for a question that isn't an activity", () => {
-    activity.mockReturnValue(null);
-    const { container } = renderScoring();
-    expect(container).toBeEmptyDOMElement();
+  it("lists only the teams it scores, and says when there are none", () => {
+    const { unmount } = renderScoring({ maxPoints: 5, teams: [{ teamId: blue, points: null }] });
+    expect(screen.queryByLabelText("Poäng för Tomtarna")).not.toBeInTheDocument();
+    expect(screen.getByLabelText("Poäng för Renarna")).toBeInTheDocument();
+    unmount();
+    renderScoring({ maxPoints: 5, teams: [] });
+    expect(screen.getByText("Inga svar.")).toBeInTheDocument();
   });
 });

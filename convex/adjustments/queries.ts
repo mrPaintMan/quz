@@ -2,17 +2,15 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
 import { MAX_ADJUSTMENTS_PER_GAME } from "../games/deleteGame";
-import { activityPointsOf } from "./activityPointsOf";
+import { handPointsOf, handScoringOf } from "./handPointsOf";
 
-// Host-only: an activity's most points and each team's points so far, for the hosts to set (D61);
-// null for a question that isn't an activity.
-export const getActivityPoints = hostQuery({
+// Host-only: the teams the hosts score by hand on a question, each with its points so far or null,
+// and the question's most points (D61, D62); null for a question the app scores.
+export const getHandPoints = hostQuery({
   args: { gameId: v.id("games"), questionId: v.id("questions") },
   handler: async (ctx, { gameId, questionId }) => {
     const question = await ctx.db.get("questions", questionId);
-    if (question?.content.type !== "activity") return null;
-    const given = await activityPointsOf(ctx, gameId, questionId);
-    return { maxPoints: question.content.maxPoints, teams: given.map(({ teamId, points }) => ({ teamId, points })) };
+    return question && handScoringOf(ctx, gameId, question);
   },
 });
 
@@ -32,12 +30,12 @@ export const listCorrections = hostQuery({
 // Public, for the team's own phone on an activity's screen: its points for that activity once the
 // hosts have given them; null otherwise (D61). Reads only the team and the activity's points, so
 // the game's timer and playback don't rerun it.
-export const getTeamActivityPoints = query({
+export const getTeamHandPoints = query({
   args: { teamId: v.id("teams"), questionId: v.id("questions") },
   handler: async (ctx, { teamId, questionId }) => {
     const team = await ctx.db.get("teams", teamId);
     if (!team) return null;
-    const own = (await activityPointsOf(ctx, team.gameId, questionId)).find((adjustment) => adjustment.teamId === teamId);
+    const own = (await handPointsOf(ctx, team.gameId, questionId)).find((adjustment) => adjustment.teamId === teamId);
     return own?.points ?? null;
   },
 });

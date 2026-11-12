@@ -55,7 +55,7 @@ describe("describeScreen", () => {
       roundNumber: 2,
       questionNumber: 1,
       prompt: "Rita en tomte",
-      revealed: null,
+      revealed: { type: "drawing", drawings: [] },
     });
   });
 

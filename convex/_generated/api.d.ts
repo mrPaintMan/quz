@@ -8,7 +8,7 @@
  * @module
  */
 
-import type * as adjustments_activityPointsOf from "../adjustments/activityPointsOf.js";
+import type * as adjustments_handPointsOf from "../adjustments/handPointsOf.js";
 import type * as adjustments_mutations from "../adjustments/mutations.js";
 import type * as adjustments_queries from "../adjustments/queries.js";
 import type * as adjustments_table from "../adjustments/table.js";
@@ -111,7 +111,7 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
-  "adjustments/activityPointsOf": typeof adjustments_activityPointsOf;
+  "adjustments/handPointsOf": typeof adjustments_handPointsOf;
   "adjustments/mutations": typeof adjustments_mutations;
   "adjustments/queries": typeof adjustments_queries;
   "adjustments/table": typeof adjustments_table;
