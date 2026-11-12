@@ -76,10 +76,10 @@ describe("freeTextAnswering", () => {
     expect(freeTextAnswering.outcomes(twoFields, [texts("Abbba", "")], verdicts)[0]).toEqual({
       points: 2,
       parts: [
-        { label: "a) Artist", given: "Abbba", result: "right", correct: "ABBA" },
-        { label: "b) Låt", given: "", result: "wrong", correct: "Happy New Year" },
+        { label: "a) Artist", given: "Abbba", result: "right", correct: "ABBA", points: 2 },
+        { label: "b) Låt", given: "", result: "wrong", correct: "Happy New Year", points: 0 },
       ],
     });
-    expect(freeTextAnswering.outcomes(single, [texts("Kanelen")])[0].parts).toEqual([{ label: "", given: "Kanelen", result: "pending", correct: "Kanel" }]);
+    expect(freeTextAnswering.outcomes(single, [texts("Kanelen")])[0].parts).toEqual([{ label: "", given: "Kanelen", result: "pending", correct: "Kanel", points: 0 }]);
   });
 });

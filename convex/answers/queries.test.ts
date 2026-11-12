@@ -79,7 +79,10 @@ describe("getTeamFeedback", () => {
       const { t, red, blue } = await afterQuestion(screen);
       await expect(t.query(api.answers.queries.getTeamFeedback, { teamId: red })).resolves.toEqual({
         prompt: "Vilken krydda?",
-        outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran" }] },
+        shown: { type: "freeText", labels: [""] },
+        imageUrls: {},
+        answer: { type: "freeText", fields: ["Safran"] },
+        outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran", points: 2 }] },
       });
       const blues = await t.query(api.answers.queries.getTeamFeedback, { teamId: blue });
       expect(blues?.outcome?.parts[0].result).toBe("pending");
@@ -88,8 +91,34 @@ describe("getTeamFeedback", () => {
 
   it("says a team didn't answer, and gives nothing while a question shows", async () => {
     const after = await afterQuestion("answer");
-    await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toEqual({ prompt: "Vilken krydda?", outcome: null });
+    await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toEqual({
+      prompt: "Vilken krydda?",
+      shown: { type: "freeText", labels: [""] },
+      imageUrls: {},
+      answer: null,
+      outcome: null,
+    });
     const during = await afterQuestion("question");
     await expect(during.t.query(api.answers.queries.getTeamFeedback, { teamId: during.red })).resolves.toBeNull();
   });
+
+  it("gives an answer that no longer fits the edited question no parts, and links the question's pictures", async () => {
+    const t = setupConvexTest();
+    const { teamId } = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Flerval", kind: "questions" });
+      const imageId = await ctx.storage.store(new Blob(["bild"]));
+      const content = { type: "multipleChoice" as const, options: [{ text: "", imageId }], correctIndex: 0, points: 1 };
+      const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Vem är det?", timeLimitSeconds: null, media: null, hostNotes: "", content });
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "answer", questionId }, screenIndex: 4, closedQuestionIds: [questionId] });
+      const teamId = await ctx.db.insert("teams", { gameId, name: "Röda", colour: "red" });
+      // Sent while the question was a Gissa siffran.
+      await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "number", value: 3 }, lockedAt: 1 });
+      return { teamId };
+    });
+    const feedback = await t.query(api.answers.queries.getTeamFeedback, { teamId });
+    expect(feedback).toMatchObject({ answer: null, outcome: { points: 0, parts: [] } });
+    expect(Object.values(feedback?.imageUrls ?? {})).toEqual([expect.any(String)]);
+  });
 });
+

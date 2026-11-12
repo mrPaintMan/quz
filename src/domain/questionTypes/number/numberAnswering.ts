@@ -49,7 +49,7 @@ export const numberAnswering: AnsweringRules<"number", NumberShown, NumberReveal
     const correct = content.answer === null ? "" : formatDecimal(content.answer);
     return answers.map(({ value }, index) => ({
       points: points[index],
-      parts: [{ label: "", given: value === null ? "" : formatDecimal(value), result: points[index] > 0 ? "right" : "wrong", correct }],
+      parts: [{ label: "", given: value === null ? "" : formatDecimal(value), result: points[index] > 0 ? "right" : "wrong", correct, points: points[index] }],
     }));
   },
 };

@@ -48,9 +48,9 @@ describe("multipleChoiceAnswering", () => {
 
   it("says which option the team picked beside the right one, a picture by its letter", () => {
     expect(multipleChoiceAnswering.outcomes(content, [answer(0), answer(1), answer(null)]).map((outcome) => outcome.parts[0])).toEqual([
-      { label: "", given: "A · Sverige", result: "wrong", correct: "B" },
-      { label: "", given: "B", result: "right", correct: "B" },
-      { label: "", given: "", result: "wrong", correct: "B" },
+      { label: "", given: "A · Sverige", result: "wrong", correct: "B", points: 0 },
+      { label: "", given: "B", result: "right", correct: "B", points: 2 },
+      { label: "", given: "", result: "wrong", correct: "B", points: 0 },
     ]);
   });
 });

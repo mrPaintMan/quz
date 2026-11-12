@@ -3,26 +3,12 @@
 import { useState } from "react";
 import { leftOfRight, rowsOfAnswer, tapRow, textsOfRows, type RowByLeft, type Selection } from "@/domain/questionTypes/match/matchRows";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
-
-// Every row is this tall with this gap, so the lines between the lists follow from the row
-// numbers alone, with nothing to measure.
-const ROW_HEIGHT = 64;
-const ROW_GAP = 12;
-const LINES_WIDTH = 40;
+import { curveBetween, LINES_WIDTH, listsHeight, ROW_GAP, ROW_HEIGHT } from "./matchGeometry";
 
 // One colour per pair, by its left row; told apart by lightness as well as hue.
 const PAIR_COLOURS = ["#e8b04b", "#6fb08a", "#8fa8d9", "#d65a55", "#c58fd1", "#5fc4c4", "#e39b6b", "#b8c25a"];
 
-const middleOf = (row: number) => row * (ROW_HEIGHT + ROW_GAP) + ROW_HEIGHT / 2;
 const colourOf = (left: number) => PAIR_COLOURS[left % PAIR_COLOURS.length];
-
-// A Bézier S-curve from a left row to a right row, leaving and arriving level, like the
-// wireframe's lines; its ends reach just inside the rows' borders.
-function curveBetween(leftRow: number, rightRow: number): string {
-  const [fromX, toX, midX] = [-2, LINES_WIDTH + 2, LINES_WIDTH / 2];
-  const [fromY, toY] = [middleOf(leftRow), middleOf(rightRow)];
-  return `M ${fromX} ${fromY} C ${midX} ${fromY}, ${midX} ${toY}, ${toX} ${toY}`;
-}
 
 type RowProps = { text: string; colour: string | null; isSelected: boolean; disabled: boolean; label: string; onTap: () => void };
 
@@ -58,7 +44,7 @@ export function MatchInput({ shown, answer, disabled, onChange }: AnswerInputPro
   }
   const [selection, setSelection] = useState<Selection>(null);
   const pairCount = rowByLeft.filter((row) => row !== null).length;
-  const height = Math.max(shown.left.length, shown.right.length) * (ROW_HEIGHT + ROW_GAP) - ROW_GAP;
+  const height = listsHeight(Math.max(shown.left.length, shown.right.length));
 
   const tap = (tapped: NonNullable<Selection>) => {
     const next = tapRow(rowByLeft, selection, tapped);

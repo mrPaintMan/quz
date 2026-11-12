@@ -26,8 +26,9 @@ export const sortAnswering: AnsweringRules<"sort", SortShown, SortRevealed> = {
     answers.map(({ order }) => {
       const parts = items.map((correct, index): OutcomePart => {
         const given = order[index] ?? "";
-        return { label: `${index + 1}.`, given, result: given === correct ? "right" : "wrong", correct };
+        const isRight = given === correct;
+        return { label: `${index + 1}.`, given, result: isRight ? "right" : "wrong", correct, points: isRight ? (pointsPerItem ?? 0) : 0 };
       });
-      return { points: parts.filter((part) => part.result === "right").length * (pointsPerItem ?? 0), parts };
+      return { points: parts.reduce((sum, part) => sum + part.points, 0), parts };
     }),
 };

@@ -24,6 +24,7 @@ export const multipleChoiceAnswering: AnsweringRules<"multipleChoice", MultipleC
       const isRight = optionIndex !== null && optionIndex === correctIndex;
       const given = optionIndex === null ? "" : optionName(options, optionIndex);
       const correct = correctIndex === null ? "" : optionName(options, correctIndex);
-      return { points: isRight ? (points ?? 0) : 0, parts: [{ label: "", given, result: isRight ? "right" : "wrong", correct }] };
+      const scored = isRight ? (points ?? 0) : 0;
+      return { points: scored, parts: [{ label: "", given, result: isRight ? "right" : "wrong", correct, points: scored }] };
     }),
 };

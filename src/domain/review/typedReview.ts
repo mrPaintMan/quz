@@ -32,7 +32,7 @@ export type TypedReview<Content, Answer> = {
 export function itemOutcomes<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]): Outcome[] {
   return textOutcomes(review, content, answers, verdicts).map(({ points, texts }) => ({
     points,
-    parts: texts.map(({ written, result }) => ({ label: "", given: written, result, correct: "" })),
+    parts: texts.map(({ written, result, points, at }) => ({ label: "", given: written, result, correct: "", points, at })),
   }));
 }
 
@@ -68,14 +68,14 @@ function itemOf(slots: ReviewSlot[], exact: Map<string, number>, slot: number, t
 }
 
 // The non-blank texts of an answer in slots that exist and can count something (an accepted answer,
-// or open), normalized, each once as first written.
+// or open), normalized, each once as first written, with its place among the answer's texts.
 function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slots: ReviewSlot[], answer: Answer) {
-  const texts = new Map<string, { slot: number; text: string; written: string }>();
-  for (const { slot, text } of review.texts(answer)) {
+  const texts = new Map<string, { slot: number; text: string; written: string; at: number }>();
+  review.texts(answer).forEach(({ slot, text }, at) => {
     const normalized = normalizeForComparison(text);
     const key = keyOf(slot, normalized);
-    if (normalized !== "" && canCount(slots[slot]) && !texts.has(key)) texts.set(key, { slot, text: normalized, written: text.trim() });
-  }
+    if (normalized !== "" && canCount(slots[slot]) && !texts.has(key)) texts.set(key, { slot, text: normalized, written: text.trim(), at });
+  });
   return [...texts.entries()];
 }
 
@@ -88,18 +88,18 @@ export function textOutcomes<Content, Answer>(
   content: Content,
   answers: Answer[],
   verdicts: Verdict[],
-): { points: number; texts: TextOutcome[] }[] {
+): { points: number; texts: (TextOutcome & { points: number })[] }[] {
   const outcomesOf = matcher(review, content, verdicts);
+  const perMatch = review.pointsPerMatch(content);
   return answers.map((answer) => {
-    const texts = outcomesOf(answer);
-    const right = texts.filter((text) => text.result === "right").length;
-    return { points: right * review.pointsPerMatch(content), texts };
+    const texts = outcomesOf(answer).map((text) => ({ ...text, points: text.result === "right" ? perMatch : 0 }));
+    return { points: texts.reduce((sum, text) => sum + text.points, 0), texts };
   });
 }
 
 // One written text's outcome, with the name of the item it counted as when right or a repeat.
-// key tells items apart, as two can share a name.
-export type TextOutcome = { slot: number; written: string; result: OutcomePart["result"]; item: string; key: string };
+// key tells items apart, as two can share a name; at is the text's place among the answer's texts.
+export type TextOutcome = { slot: number; written: string; at: number; result: OutcomePart["result"]; item: string; key: string };
 
 // For a question and its verdicts: what each text of an answer counts as, in the order written.
 function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, verdicts: Verdict[]) {
@@ -108,14 +108,14 @@ function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content:
   const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
   return (answer: Answer): TextOutcome[] => {
     const matched = new Set<string>();
-    return writtenTexts(review, slots, answer).map(([key, { slot, written }]) => {
+    return writtenTexts(review, slots, answer).map(([key, { slot, written, at }]) => {
       const target = exact.get(key) ?? judged.get(key);
-      if (target === undefined) return { slot, written, result: "pending", item: "", key: "" };
+      if (target === undefined) return { slot, written, at, result: "pending", item: "", key: "" };
       const item = itemOf(slots, exact, slot, target);
-      if (item === null) return { slot, written, result: "wrong", item: "", key: "" };
+      if (item === null) return { slot, written, at, result: "wrong", item: "", key: "" };
       const result = matched.has(item.key) ? "repeat" : "right";
       matched.add(item.key);
-      return { slot, written, result, item: item.name, key: item.key };
+      return { slot, written, at, result, item: item.name, key: item.key };
     });
   };
 }
@@ -162,7 +162,7 @@ export function sortTexts<Content, Answer>(review: TypedReview<Content, Answer>,
     for (const [key, text] of writtenTexts(review, slots, answer)) {
       const item = items.get(key);
       if (item) item.teamCount += 1;
-      else items.set(key, { ...text, teamCount: 1, option: exact.get(key) });
+      else items.set(key, { slot: text.slot, text: text.text, written: text.written, teamCount: 1, option: exact.get(key) });
     }
   }
   const sorted = [...items.values()].sort((a, b) => a.slot - b.slot || a.text.localeCompare(b.text, "sv"));

@@ -111,3 +111,28 @@
   color: var(--muted-foreground);
   opacity: 0.5;
 }
+/* A part of a team's answer lighting up on its phone when the answer is shown (D59): from the plain
+   look it was sent in to gold, with a short glow, one part after another by animation-delay. A
+   wrong multiple-choice pick lights up red the same way. Still for those who ask for less motion. */
+@keyframes result-lit {
+  0% { background-color: var(--card); color: var(--foreground); border-color: var(--border); box-shadow: 0 0 0 0 rgb(232 176 75 / 0); transform: scale(1); }
+  45% { box-shadow: 0 0 28px 6px rgb(232 176 75 / 0.65); transform: scale(1.03); }
+  100% { background-color: var(--primary); color: var(--primary-foreground); border-color: var(--primary); box-shadow: 0 0 16px 2px rgb(232 176 75 / 0.35); transform: scale(1); }
+}
+@keyframes result-missed {
+  0% { background-color: var(--card); border-color: var(--border); box-shadow: 0 0 0 0 rgb(224 114 109 / 0); }
+  45% { box-shadow: 0 0 22px 4px rgb(224 114 109 / 0.55); }
+  100% { background-color: rgb(224 114 109 / 0.18); border-color: var(--destructive); box-shadow: 0 0 12px 1px rgb(224 114 109 / 0.3); }
+}
+.result-lit {
+  animation: result-lit 700ms ease-out both;
+}
+.result-missed {
+  animation: result-missed 700ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .result-lit,
+  .result-missed {
+    animation-duration: 1ms;
+  }
+}

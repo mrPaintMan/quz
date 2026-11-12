@@ -7,11 +7,11 @@ import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { formatPoints } from "@/domain/scoring/formatPoints";
 import type { TeamColour } from "@/domain/teams/teamColours";
 import { AnswerQuestion } from "@/features/player/answering/AnswerQuestion";
+import { QuestionResult } from "@/features/player/results/QuestionResult";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
 import { timeLeftText } from "@/features/shared/timer/timeLeftText";
 import { useSecondsLeft } from "@/features/shared/timer/useSecondsLeft";
-import { AnswerFeedback } from "./AnswerFeedback";
 import { phoneScreenText } from "./phoneScreenText";
 
 type FollowGameProps = {
@@ -27,7 +27,7 @@ type FollowGameProps = {
 
 // The team's phone during the game: it follows the TV by itself, shows the answer input while a
 // question its type can be answered in the app is open on the TV, and after its answer is shown
-// what the team's own answer counted as (D58).
+// the team's own answer with what scored lit up, in place of the usual line (D58, D59).
 export function FollowGame({ team, points, screen, view, imageUrls, timer, isQuestionClosed }: FollowGameProps) {
   const secondsLeft = useSecondsLeft(timer);
   const shown = view.kind === "question" ? view.shown : null;
@@ -63,13 +63,19 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
           />
         </>
       ) : (
-        <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-          <p role="status" className="text-2xl">
-            {phoneScreenText(view)}
-          </p>
-          {clock}
-          <AnswerFeedback teamId={team._id} />
-        </div>
+        <QuestionResult
+          teamId={team._id}
+          // On the answer screen the result is all there is to see; later screens keep their line.
+          status={screen.kind === "answer" ? null : phoneScreenText(view)}
+          otherwise={
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+              <p role="status" className="text-2xl">
+                {phoneScreenText(view)}
+              </p>
+              {clock}
+            </div>
+          }
+        />
       )}
     </main>
   );

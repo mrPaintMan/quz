@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done. M3 continues with activities and manual points, then drawing, map pin and På spåret. Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). M3 continues with activities and manual points, then drawing, map pin and På spåret. Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
 
 ## Milestones
 
@@ -144,3 +144,4 @@ Agreed with the user, in this order:
 - 2026-11-11: Feedback round 3, the Granska box: every answer in three sections (Att granska on top, Bedömda, Stämde med facit read-only), and each sub-question's correct answer by its title (D56). Not tried in a browser with data.
 - 2026-11-11: Feedback round 4, faster pictures: shrunk on upload to at most 1920 px as WebP, and loaded ahead on the TV; the map's loading test uses tiny stand-in maps, so no test can time out (D57). Not tried in a browser with data.
 - 2026-11-11: Feedback round 5, phones show what scored: after the answer, the team's own answer part by part with its points, following verdicts; grading is now built from per-part outcomes, so the phones and the scores can't disagree (D58). Not tried in a browser with data.
+- 2026-11-12: The phone's result after the answer: each type's answer drawn like its input, the parts that scored lit up in gold one after another with their points, a wrong Flerval pick in red; a fourth registry entry per type (D59). Not tried in a browser with data.
