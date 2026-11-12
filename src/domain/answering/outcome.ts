@@ -12,6 +12,9 @@ export type OutcomePart = {
   correct: string;
   // What the part scored, so the phone can show it beside the part; 0 unless right.
   points: number;
+  // For ingredients and lists, the place of the text it came from in the answer's own list, as
+  // blanks and repeated texts have no part.
+  at?: number;
 };
 
 export type Outcome = { points: number; parts: OutcomePart[] };

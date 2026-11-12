@@ -1,6 +1,6 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import type { OutcomePart } from "@/domain/answering/outcome";
-import { formatDecimal } from "@/domain/text/formatDecimal";
+import { formatPoints } from "@/domain/scoring/formatPoints";
 
 // Parts light up one after another, this far apart.
 const STAGGER_MS = 150;
@@ -23,13 +23,26 @@ export function resultClass(result: OutcomePart["result"] | undefined): string {
 // Each lit part's place in the order they light up.
 export const glowDelay = (order: number): CSSProperties => ({ animationDelay: `${order * STAGGER_MS}ms` });
 
-// A lit part's own points, as a dark pill on the gold.
-export function PointsBadge({ points, className = "" }: { points: number; className?: string }) {
+// A dark pill on a lit part: its points in gold, or on a wrong Flerval pick a red note.
+export function Pill({ children, tone = "gold", className = "" }: { children: ReactNode; tone?: "gold" | "red"; className?: string }) {
   return (
-    <span className={`shrink-0 rounded-full bg-background px-2.5 py-0.5 text-sm font-bold whitespace-nowrap text-primary ${className}`}>
-      +{formatDecimal(points)} p
+    <span
+      className={`shrink-0 rounded-full bg-background px-2.5 py-0.5 text-sm font-bold whitespace-nowrap ${tone === "gold" ? "text-primary" : "text-destructive"} ${className}`}
+    >
+      {children}
     </span>
   );
+}
+
+// A lit part's own points.
+export function PointsBadge({ points, className }: { points: number; className?: string }) {
+  return <Pill className={className}>+{formatPoints(points)}</Pill>;
+}
+
+// Each part's place in the order the parts that scored light up; 0 for the others, which don't.
+export function litOrders(parts: (OutcomePart | undefined)[]): number[] {
+  let lit = 0;
+  return parts.map((part) => (part?.result === "right" ? lit++ : 0));
 }
 
 // Why a part gave nothing yet, under its text: waiting for a verdict, or already counted.

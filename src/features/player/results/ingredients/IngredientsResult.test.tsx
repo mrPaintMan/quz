@@ -10,7 +10,7 @@ describe("IngredientsResult", () => {
       <IngredientsResult
         shown={{ type: "ingredients", count: 4 }}
         answer={answer}
-        outcome={outcomeOf(part("right"), part("right"), part("repeat"))}
+        outcome={outcomeOf(part("right", 1, "", 0), part("right", 1, "", 2), part("repeat", 0, "", 3))}
         imageUrls={{}}
       />,
     );

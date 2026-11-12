@@ -4,7 +4,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { FollowGame } from "./FollowGame";
 
 vi.mock("@/features/player/results/QuestionResult", () => ({
-  QuestionResult: ({ otherwise }: { otherwise: React.ReactNode }) => <>{otherwise}</>,
+  QuestionResult: ({ otherwise }: { otherwise: React.ReactNode }) => otherwise,
 }));
 vi.mock("@/features/player/answering/AnswerQuestion", () => ({
   AnswerQuestion: ({ secondsLeft }: { secondsLeft: number | null }) => <p>{secondsLeft === 0 ? "Svarsruta, tiden ute" : "Svarsruta"}</p>,

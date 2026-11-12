@@ -65,6 +65,8 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
       ) : (
         <QuestionResult
           teamId={team._id}
+          // On the answer screen the result is all there is to see; later screens keep their line.
+          status={screen.kind === "answer" ? null : phoneScreenText(view)}
           otherwise={
             <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
               <p role="status" className="text-2xl">

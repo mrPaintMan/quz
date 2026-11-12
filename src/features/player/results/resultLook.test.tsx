@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { glowDelay, PartEnd, PointsBadge, ResultNote, resultClass } from "./resultLook";
+import { glowDelay, litOrders, PartEnd, Pill, PointsBadge, ResultNote, resultClass } from "./resultLook";
 
 describe("resultClass", () => {
   it("lights a scored part, dashes one being judged and fades one already counted", () => {
@@ -38,5 +38,19 @@ describe("ResultNote", () => {
     );
     expect(screen.getByText("Bedöms…")).toBeInTheDocument();
     expect(screen.getByText("Räknas redan")).toBeInTheDocument();
+  });
+});
+
+describe("litOrders", () => {
+  it("numbers the parts that scored in turn", () => {
+    const part = (result: "right" | "wrong") => ({ label: "", given: "", result, correct: "", points: 0 });
+    expect(litOrders([part("right"), part("wrong"), undefined, part("right")])).toEqual([0, 0, 0, 1]);
+  });
+});
+
+describe("Pill", () => {
+  it("can be red", () => {
+    render(<Pill tone="red">Ert svar · 0 p</Pill>);
+    expect(screen.getByText("Ert svar · 0 p")).toHaveClass("text-destructive");
   });
 });

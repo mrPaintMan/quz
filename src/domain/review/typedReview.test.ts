@@ -34,11 +34,11 @@ describe("textOutcomes", () => {
     ];
     const [outcome] = textOutcomes(review, content, [answer("ABBA", "Vodka", "wodka", "mjölk", "gin")], verdicts);
     expect(outcome.texts.map(({ key: _key, ...text }) => text)).toEqual([
-      { slot: 0, written: "ABBA", result: "right", item: "ABBA", points: 2 },
-      { slot: 1, written: "Vodka", result: "right", item: "Vodka", points: 2 },
-      { slot: 1, written: "wodka", result: "repeat", item: "Vodka", points: 0 },
-      { slot: 1, written: "mjölk", result: "wrong", item: "", points: 0 },
-      { slot: 1, written: "gin", result: "pending", item: "", points: 0 },
+      { slot: 0, written: "ABBA", at: 0, result: "right", item: "ABBA", points: 2 },
+      { slot: 1, written: "Vodka", at: 1, result: "right", item: "Vodka", points: 2 },
+      { slot: 1, written: "wodka", at: 2, result: "repeat", item: "Vodka", points: 0 },
+      { slot: 1, written: "mjölk", at: 3, result: "wrong", item: "", points: 0 },
+      { slot: 1, written: "gin", at: 4, result: "pending", item: "", points: 0 },
     ]);
     expect(outcome.points).toBe(4);
     // A repeat is the same item as the text it repeats.

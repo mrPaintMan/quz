@@ -1,7 +1,7 @@
 import { rowsOfAnswer } from "@/domain/questionTypes/match/matchRows";
 import { curveBetween, LINES_WIDTH, listsHeight, ROW_GAP, ROW_HEIGHT } from "@/features/player/answering/match/matchGeometry";
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
-import { glowDelay, PointsBadge } from "@/features/player/results/resultLook";
+import { glowDelay, litOrders, PointsBadge } from "@/features/player/results/resultLook";
 
 const rowClass = "relative z-10 flex items-center justify-between gap-1 rounded-2xl border-2 border-border bg-card px-3 text-base leading-tight";
 
@@ -12,8 +12,8 @@ export function MatchResult({ shown, answer, outcome }: ResultViewProps<"match">
   const rowByLeft = rowsOfAnswer(answer.rightByLeft, shown.right);
   const isRight = (left: number) => outcome.parts[left]?.result === "right";
   const litRight = new Set(rowByLeft.flatMap((row, left) => (row !== null && isRight(left) ? [row] : [])));
-  // Each lit pair's place in the order they light up, by its left row.
-  const orderOf = new Map(rowByLeft.flatMap((_row, left) => (isRight(left) ? [left] : [])).map((left, order) => [left, order]));
+  // Each pair's place in the order the pairs that scored light up, by its left row.
+  const orders = litOrders(shown.left.map((_text, left) => outcome.parts[left]));
   const height = listsHeight(Math.max(shown.left.length, shown.right.length));
   const pairCount = rowByLeft.filter((row) => row !== null).length;
 
@@ -25,7 +25,7 @@ export function MatchResult({ shown, answer, outcome }: ResultViewProps<"match">
           {shown.left.map((text, left) => (
             <div
               key={`${left}-${isRight(left)}`}
-              style={{ height: ROW_HEIGHT, ...glowDelay(orderOf.get(left) ?? 0) }}
+              style={{ height: ROW_HEIGHT, ...glowDelay(orders[left] ?? 0) }}
               className={`${rowClass} ${isRight(left) ? "result-lit" : ""}`}
             >
               <span className="line-clamp-2">{text}</span>
@@ -54,7 +54,7 @@ export function MatchResult({ shown, answer, outcome }: ResultViewProps<"match">
             return (
               <div
                 key={`${row}-${litRight.has(row)}`}
-                style={{ height: ROW_HEIGHT, ...glowDelay(orderOf.get(left) ?? 0) }}
+                style={{ height: ROW_HEIGHT, ...glowDelay(orders[left] ?? 0) }}
                 className={`${rowClass} ${litRight.has(row) ? "result-lit" : ""}`}
               >
                 <span className="line-clamp-2">{text}</span>

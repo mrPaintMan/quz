@@ -1,6 +1,6 @@
 import { optionLetter } from "@/domain/questionTypes/multipleChoice/optionLetter";
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
-import { glowDelay, PointsBadge } from "@/features/player/results/resultLook";
+import { glowDelay, Pill, PointsBadge } from "@/features/player/results/resultLook";
 
 // The options as the team saw them; its pick lights up in gold with its points when right, or in
 // red when wrong, so the team sees what it answered. The right option is the TV's to show (D59).
@@ -33,9 +33,7 @@ export function MultipleChoiceResult({ shown, answer, outcome, imageUrls }: Resu
             )}
             <span className="min-w-0 flex-1">{option.text}</span>
             {isPicked && isRight && <PointsBadge points={part.points} />}
-            {isPicked && !isRight && (
-              <span className="shrink-0 rounded-full bg-background px-2.5 py-0.5 text-sm font-bold whitespace-nowrap text-destructive">Ert svar · 0 p</span>
-            )}
+            {isPicked && !isRight && <Pill tone="red">Ert svar · 0 p</Pill>}
           </div>
         );
       })}
