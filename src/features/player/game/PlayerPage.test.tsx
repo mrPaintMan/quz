@@ -12,6 +12,7 @@ vi.mock("convex/react", () => ({
     const name = getFunctionName(query);
     if (name === getFunctionName(api.games.queries.getRunningGame)) return runningGame();
     if (name === getFunctionName(api.teams.queries.getTeam)) return args === "skip" ? undefined : savedTeam();
+    if (name === getFunctionName(api.answers.queries.getTeamFeedback)) return null;
     return [];
   },
   useMutation: () => vi.fn(),

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { pointsOf } from "@/domain/answering/outcome";
 import type { Id } from "@convex/_generated/dataModel";
 import type { ContentOf } from "@convex/questions/questionContent";
 import { multipleChoiceAnswering } from "./multipleChoiceAnswering";
@@ -42,6 +43,14 @@ describe("multipleChoiceAnswering", () => {
   });
 
   it("scores the full points for the right option and nothing otherwise", () => {
-    expect(multipleChoiceAnswering.grade(content, [answer(1), answer(0), answer(null)])).toEqual([2, 0, 0]);
+    expect(pointsOf(multipleChoiceAnswering.outcomes(content, [answer(1), answer(0), answer(null)]))).toEqual([2, 0, 0]);
+  });
+
+  it("says which option the team picked beside the right one, a picture by its letter", () => {
+    expect(multipleChoiceAnswering.outcomes(content, [answer(0), answer(1), answer(null)]).map((outcome) => outcome.parts[0])).toEqual([
+      { label: "", given: "A · Sverige", result: "wrong", correct: "B" },
+      { label: "", given: "B", result: "right", correct: "B" },
+      { label: "", given: "", result: "wrong", correct: "B" },
+    ]);
   });
 });

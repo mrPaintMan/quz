@@ -1,4 +1,5 @@
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
+import type { OutcomePart } from "@/domain/answering/outcome";
 import { isDrawnFrom } from "@/domain/ordering/isDrawnFrom";
 import { shuffleUnsolved } from "@/domain/ordering/shuffleUnsolved";
 
@@ -17,13 +18,18 @@ export const matchAnswering: AnsweringRules<"match", MatchShown, MatchRevealed> 
     const joined = rightByLeft.filter((right) => right !== null);
     return rightByLeft.length === shown.left.length && joined.length > 0 && isDrawnFrom(joined, shown.right);
   },
-  // The points per pair for each right pair; an item left unpaired scores nothing. An answer that
-  // uses a right-hand item more often than it is shown, which no phone can send, scores nothing,
-  // so a repeated text can't be collected for every left-hand item.
-  grade: ({ pairs, pointsPerPair }, answers) =>
+  // Each left-hand item with the team's pair for it; the points per pair for each right pair, and an
+  // item left unpaired scores nothing. An answer that uses a right-hand item more often than it is
+  // shown, which no phone can send, scores nothing, so a repeated text can't be collected for every
+  // left-hand item.
+  outcomes: ({ pairs, pointsPerPair }, answers) =>
     answers.map(({ rightByLeft }) => {
       const joined = rightByLeft.filter((right) => right !== null);
-      if (!isDrawnFrom(joined, pairs.map((pair) => pair.right))) return 0;
-      return pairs.filter((pair, index) => rightByLeft[index] === pair.right).length * (pointsPerPair ?? 0);
+      const isFair = isDrawnFrom(joined, pairs.map((pair) => pair.right));
+      const parts = pairs.map((pair, index): OutcomePart => {
+        const given = rightByLeft[index] ?? "";
+        return { label: pair.left, given, result: isFair && given === pair.right ? "right" : "wrong", correct: pair.right };
+      });
+      return { points: parts.filter((part) => part.result === "right").length * (pointsPerPair ?? 0), parts };
     }),
 };

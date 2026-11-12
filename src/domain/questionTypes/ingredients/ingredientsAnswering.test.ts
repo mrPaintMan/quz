@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { pointsOf } from "@/domain/answering/outcome";
 import type { ContentOf } from "@convex/questions/questionContent";
 import { ingredientsAnswering } from "./ingredientsAnswering";
 
@@ -32,19 +33,27 @@ describe("ingredientsAnswering", () => {
   });
 
   it("scores each ingredient guessed, in any order and by any accepted spelling", () => {
-    expect(ingredientsAnswering.grade(content, [guesses("grädde", "KAFFELIKÖR.", "vodka"), guesses("mjölk", "", "Vodka ")])).toEqual([3, 1]);
+    expect(pointsOf(ingredientsAnswering.outcomes(content, [guesses("grädde", "KAFFELIKÖR.", "vodka"), guesses("mjölk", "", "Vodka ")]))).toEqual([3, 1]);
   });
 
   it("counts an ingredient once, however often it is written", () => {
-    expect(ingredientsAnswering.grade(content, [guesses("vodka", "Vodka", "vodka")])).toEqual([1]);
+    expect(pointsOf(ingredientsAnswering.outcomes(content, [guesses("vodka", "Vodka", "vodka")]))).toEqual([1]);
   });
 
   it("never counts an empty field, even against a spelling of only a full stop", () => {
     const odd = { ...content, items: [{ spellings: ["."] }, { spellings: ["Vodka"] }] };
-    expect(ingredientsAnswering.grade(odd, [guesses("", "vodka")])).toEqual([1]);
+    expect(pointsOf(ingredientsAnswering.outcomes(odd, [guesses("", "vodka")]))).toEqual([1]);
   });
 
   it("doesn't count a misspelling yet", () => {
-    expect(ingredientsAnswering.grade(content, [guesses("wodka", "", "")])).toEqual([0]);
+    expect(pointsOf(ingredientsAnswering.outcomes(content, [guesses("wodka", "", "")]))).toEqual([0]);
+  });
+
+  it("says what each ingredient written counted as, a second form of one a repeat", () => {
+    expect(ingredientsAnswering.outcomes(content, [guesses("Vodka", "", "vodka.", "mjölk")])[0].parts).toEqual([
+      { label: "", given: "Vodka", result: "right", correct: "" },
+      { label: "", given: "mjölk", result: "pending", correct: "" },
+    ]);
+    expect(ingredientsAnswering.outcomes(content, [guesses("Kahlua", "kaffelikör")])[0].parts.map((part) => part.result)).toEqual(["right", "repeat"]);
   });
 });

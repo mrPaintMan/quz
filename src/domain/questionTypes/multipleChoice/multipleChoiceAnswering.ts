@@ -1,8 +1,15 @@
 import type { Id } from "@convex/_generated/dataModel";
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
+import { optionLetter } from "./optionLetter";
 
 export type MultipleChoiceShown = { type: "multipleChoice"; options: { text: string; imageId: Id<"_storage"> | null }[] };
 export type MultipleChoiceRevealed = MultipleChoiceShown & { correctIndex: number | null };
+
+// An option by its letter and text ("B · Norge"), or its letter alone for a picture.
+const optionName = (options: { text: string }[], index: number) => {
+  const text = options[index]?.text.trim() ?? "";
+  return text === "" ? optionLetter(index) : `${optionLetter(index)} · ${text}`;
+};
 
 export const multipleChoiceAnswering: AnsweringRules<"multipleChoice", MultipleChoiceShown, MultipleChoiceRevealed> = {
   show: ({ options }) => ({ type: "multipleChoice", options }),
@@ -12,6 +19,11 @@ export const multipleChoiceAnswering: AnsweringRules<"multipleChoice", MultipleC
   startingAnswer: () => null,
   isComplete: (shown, { optionIndex }) => optionIndex !== null && Number.isInteger(optionIndex) && optionIndex >= 0 && optionIndex < shown.options.length,
   // The full points for the right option, nothing for any other.
-  grade: (content, answers) =>
-    answers.map((answer) => (answer.optionIndex !== null && answer.optionIndex === content.correctIndex ? (content.points ?? 0) : 0)),
+  outcomes: ({ options, correctIndex, points }, answers) =>
+    answers.map(({ optionIndex }) => {
+      const isRight = optionIndex !== null && optionIndex === correctIndex;
+      const given = optionIndex === null ? "" : optionName(options, optionIndex);
+      const correct = correctIndex === null ? "" : optionName(options, correctIndex);
+      return { points: isRight ? (points ?? 0) : 0, parts: [{ label: "", given, result: isRight ? "right" : "wrong", correct }] };
+    }),
 };

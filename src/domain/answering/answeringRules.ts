@@ -2,6 +2,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { AnsweredType, AnswerOf } from "@convex/answers/answerContent";
 import type { ContentOf } from "@convex/questions/questionContent";
 import type { TypedReview, Verdict } from "@/domain/review/typedReview";
+import type { Outcome } from "./outcome";
 
 // A closed question's sent answers that fit it, with the verdicts on their texts.
 export type Graded<Answer> = { answers: Answer[]; verdicts: Verdict[] };
@@ -23,10 +24,10 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   // Whether an answer is filled in enough to be sent, judged against what the question shows, so
   // the phone and the server agree.
   isComplete: (shown: Shown, answer: AnswerOf<T>) => boolean;
-  // The points each of the question's locked answers scores, as graded automatically, in the
-  // order given. All answers come together, as some types rank the teams against each other.
-  // Types with typed answers also count the hosts' verdicts (D51); the others ignore them.
-  grade: (content: ContentOf<T>, answers: AnswerOf<T>[], verdicts?: Verdict[]) => number[];
+  // What each of the question's locked answers counted as, part by part, and its points, in the
+  // order given (D58). All answers come together, as some types rank the teams against each other.
+  // Types with typed answers also count the verdicts on their texts (D51); the others ignore them.
+  outcomes: (content: ContentOf<T>, answers: AnswerOf<T>[], verdicts?: Verdict[]) => Outcome[];
   // For typed answers only: the slots and texts the hosts' review list judges (D51).
   review?: TypedReview<ContentOf<T>, AnswerOf<T>>;
 };

@@ -11,6 +11,7 @@ import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDispl
 import { TeamDot } from "@/features/shared/teams/TeamDot";
 import { timeLeftText } from "@/features/shared/timer/timeLeftText";
 import { useSecondsLeft } from "@/features/shared/timer/useSecondsLeft";
+import { AnswerFeedback } from "./AnswerFeedback";
 import { phoneScreenText } from "./phoneScreenText";
 
 type FollowGameProps = {
@@ -24,8 +25,9 @@ type FollowGameProps = {
   isQuestionClosed: boolean;
 };
 
-// The team's phone during the game: it follows the TV by itself, and shows the answer input
-// while a question its type can be answered in the app is open on the TV.
+// The team's phone during the game: it follows the TV by itself, shows the answer input while a
+// question its type can be answered in the app is open on the TV, and after its answer is shown
+// what the team's own answer counted as (D58).
 export function FollowGame({ team, points, screen, view, imageUrls, timer, isQuestionClosed }: FollowGameProps) {
   const secondsLeft = useSecondsLeft(timer);
   const shown = view.kind === "question" ? view.shown : null;
@@ -66,6 +68,7 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
             {phoneScreenText(view)}
           </p>
           {clock}
+          <AnswerFeedback teamId={team._id} />
         </div>
       )}
     </main>

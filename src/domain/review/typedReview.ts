@@ -1,3 +1,4 @@
+import type { Outcome, OutcomePart } from "@/domain/answering/outcome";
 import { normalizeForComparison } from "@/domain/questionTypes/normalizeForComparison";
 
 // One group a typed text is judged in, such as a free-text field or all of an ingredients
@@ -26,6 +27,14 @@ export type TypedReview<Content, Answer> = {
   texts: (answer: Answer) => { slot: number; text: string }[];
   pointsPerMatch: (content: Content) => number;
 };
+
+// What ingredients and lists show of each text written: no label, nothing beside it (D58).
+export function itemOutcomes<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]): Outcome[] {
+  return textOutcomes(review, content, answers, verdicts).map(({ points, texts }) => ({
+    points,
+    parts: texts.map(({ written, result }) => ({ label: "", given: written, result, correct: "" })),
+  }));
+}
 
 const keyOf = (slot: number, text: string) => JSON.stringify([slot, text]);
 
@@ -70,32 +79,44 @@ function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slo
   return [...texts.entries()];
 }
 
-// Each answer's points: every distinct item its texts count as, by an exact spelling or else by a
-// verdict, scores the points per match, so two forms of one answer score once (D53). Unjudged
-// texts score nothing.
-export function gradeTyped<Content, Answer>(
+// What each text of an answer counted as, in the order written: a distinct item, by an exact
+// spelling or else by a verdict, is right and scores the points per match; another form of an item
+// already counted is a repeat and adds nothing, so two forms of one answer score once (D53); a text
+// without a verdict is pending and, like a wrong one, scores nothing (D58).
+export function textOutcomes<Content, Answer>(
   review: TypedReview<Content, Answer>,
   content: Content,
   answers: Answer[],
   verdicts: Verdict[],
-): number[] {
-  const itemsOf = matcher(review, content, verdicts);
-  return answers.map((answer) => itemsOf(answer).size * review.pointsPerMatch(content));
+): { points: number; texts: TextOutcome[] }[] {
+  const outcomesOf = matcher(review, content, verdicts);
+  return answers.map((answer) => {
+    const texts = outcomesOf(answer);
+    const right = texts.filter((text) => text.result === "right").length;
+    return { points: right * review.pointsPerMatch(content), texts };
+  });
 }
 
-// For a question and its verdicts: the distinct items an answer's texts count as, by an exact
-// spelling or else by a verdict, each keyed and with its name.
+// One written text's outcome, with the name of the item it counted as when right or a repeat.
+// key tells items apart, as two can share a name.
+export type TextOutcome = { slot: number; written: string; result: OutcomePart["result"]; item: string; key: string };
+
+// For a question and its verdicts: what each text of an answer counts as, in the order written.
 function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, verdicts: Verdict[]) {
   const slots = review.slots(content);
   const exact = exactMatches(slots);
   const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
-  return (answer: Answer) => {
-    const matched = new Map<string, string>();
-    for (const [key, { slot }] of writtenTexts(review, slots, answer)) {
-      const item = itemOf(slots, exact, slot, exact.get(key) ?? judged.get(key) ?? null);
-      if (item !== null && !matched.has(item.key)) matched.set(item.key, item.name);
-    }
-    return matched;
+  return (answer: Answer): TextOutcome[] => {
+    const matched = new Set<string>();
+    return writtenTexts(review, slots, answer).map(([key, { slot, written }]) => {
+      const target = exact.get(key) ?? judged.get(key);
+      if (target === undefined) return { slot, written, result: "pending", item: "", key: "" };
+      const item = itemOf(slots, exact, slot, target);
+      if (item === null) return { slot, written, result: "wrong", item: "", key: "" };
+      const result = matched.has(item.key) ? "repeat" : "right";
+      matched.add(item.key);
+      return { slot, written, result, item: item.name, key: item.key };
+    });
   };
 }
 
@@ -107,10 +128,11 @@ export function rightItems<Content, Answer>(
   answers: Answer[],
   verdicts: Verdict[],
 ): { name: string; teamCount: number }[] {
-  const itemsOf = matcher(review, content, verdicts);
+  const outcomesOf = matcher(review, content, verdicts);
   const items = new Map<string, { name: string; teamCount: number }>();
   for (const answer of answers) {
-    for (const [key, name] of itemsOf(answer)) {
+    for (const { item: name, result, key } of outcomesOf(answer)) {
+      if (result !== "right") continue;
       const item = items.get(key);
       if (item) item.teamCount += 1;
       else items.set(key, { name, teamCount: 1 });

@@ -1,6 +1,7 @@
 import type { AnswerOf } from "@convex/answers/answerContent";
 import type { ContentOf } from "@convex/questions/questionContent";
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
+import { formatDecimal } from "@/domain/text/formatDecimal";
 
 type NumberContent = ContentOf<"number">;
 type NumberAnswer = AnswerOf<"number">;
@@ -41,9 +42,14 @@ export const numberAnswering: AnsweringRules<"number", NumberShown, NumberReveal
   imageIds: () => [],
   startingAnswer: () => null,
   isComplete: (_shown, { value }) => value !== null && Number.isFinite(value),
-  grade: (content, answers) => {
+  // The guess beside the right number, right when it scored at all (D58).
+  outcomes: (content, answers) => {
     const { scoring } = content;
-    if (scoring.mode === "closest") return gradeByCloseness(content, scoring.pointsByRank, answers);
-    return answers.map((answer) => gradeByTiers(content, scoring.tiers, answer));
+    const points = scoring.mode === "closest" ? gradeByCloseness(content, scoring.pointsByRank, answers) : answers.map((answer) => gradeByTiers(content, scoring.tiers, answer));
+    const correct = content.answer === null ? "" : formatDecimal(content.answer);
+    return answers.map(({ value }, index) => ({
+      points: points[index],
+      parts: [{ label: "", given: value === null ? "" : formatDecimal(value), result: points[index] > 0 ? "right" : "wrong", correct }],
+    }));
   },
 };

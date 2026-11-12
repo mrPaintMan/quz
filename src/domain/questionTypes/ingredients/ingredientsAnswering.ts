@@ -3,7 +3,7 @@ import type { ContentOf } from "@convex/questions/questionContent";
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
 import { firstFilledIn } from "@/domain/questionTypes/firstFilledIn";
 import { isBlank } from "@/domain/questionTypes/isBlank";
-import { gradeTyped, type TypedReview } from "@/domain/review/typedReview";
+import { itemOutcomes, type TypedReview } from "@/domain/review/typedReview";
 
 // While asked, only how many ingredients there are; on the answer screen, each ingredient by its
 // first filled-in spelling.
@@ -27,6 +27,7 @@ export const ingredientsAnswering: AnsweringRules<"ingredients", IngredientsShow
   // The points per ingredient for each ingredient guessed, in any field and order, counted once
   // however often it is written. A guess matches an accepted spelling compared as everywhere else
   // (normalizeForComparison), or by the hosts' verdict (D51). Empty texts never match anything.
-  grade: (content, answers, verdicts = []) => gradeTyped(ingredientsReview, content, answers, verdicts),
+  // One part per text written, blanks left out; another form of a counted item is a repeat.
+  outcomes: (content, answers, verdicts = []) => itemOutcomes(ingredientsReview, content, answers, verdicts),
   review: ingredientsReview,
 };

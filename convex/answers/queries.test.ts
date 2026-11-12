@@ -52,3 +52,44 @@ describe("getAnsweredTeamIds", () => {
     await expect(t.query(api.answers.queries.getAnsweredTeamIds, { gameId, questionId })).resolves.toEqual([red]);
   });
 });
+
+describe("getTeamFeedback", () => {
+  // A game whose free-text question has been answered by two of three teams and closed.
+  async function afterQuestion(screen: "answer" | "leaderboard" | "question") {
+    const t = setupConvexTest();
+    const ids = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Julmat", kind: "questions" });
+      const content = { type: "freeText" as const, fields: [{ label: "", acceptedAnswers: ["Saffran"] }], pointsPerField: 2, fuzzy: true };
+      const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Vilken krydda?", timeLimitSeconds: null, media: null, hostNotes: "", content });
+      const shown = screen === "leaderboard" ? { kind: "leaderboard" as const, roundId } : { kind: screen, questionId };
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: shown, screenIndex: 4, closedQuestionIds: screen === "question" ? [] : [questionId] });
+      const team = (name: string, colour: "red" | "blue" | "green") => ctx.db.insert("teams", { gameId, name, colour });
+      const [red, blue, green] = [await team("Röda", "red"), await team("Blå", "blue"), await team("Gröna", "green")];
+      await ctx.db.insert("answers", { gameId, teamId: red, questionId, content: { type: "freeText", fields: ["Safran"] }, lockedAt: 1 });
+      await ctx.db.insert("answers", { gameId, teamId: blue, questionId, content: { type: "freeText", fields: ["Kanel"] }, lockedAt: 1 });
+      await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "safran", target: 0 });
+      return { red, blue, green };
+    });
+    return { t, ...ids };
+  }
+
+  it("gives the team's answer part by part with its points, from the answer screen until the next question", async () => {
+    for (const screen of ["answer", "leaderboard"] as const) {
+      const { t, red, blue } = await afterQuestion(screen);
+      await expect(t.query(api.answers.queries.getTeamFeedback, { teamId: red })).resolves.toEqual({
+        prompt: "Vilken krydda?",
+        outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran" }] },
+      });
+      const blues = await t.query(api.answers.queries.getTeamFeedback, { teamId: blue });
+      expect(blues?.outcome?.parts[0].result).toBe("pending");
+    }
+  });
+
+  it("says a team didn't answer, and gives nothing while a question shows", async () => {
+    const after = await afterQuestion("answer");
+    await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toEqual({ prompt: "Vilken krydda?", outcome: null });
+    const during = await afterQuestion("question");
+    await expect(during.t.query(api.answers.queries.getTeamFeedback, { teamId: during.red })).resolves.toBeNull();
+  });
+});
