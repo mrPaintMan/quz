@@ -5,7 +5,7 @@ import { isAnswerFor } from "@/domain/answers/isAnswerFor";
 import { outcomesOfAnswers } from "@/domain/scoring/gradeAnswers";
 import { query } from "../_generated/server";
 import { linkImages } from "../media/linkImages";
-import { verdictsOfQuestion } from "../verdicts/verdictsOfQuestion";
+import { gradedOfQuestion } from "./gradedOfQuestion";
 import { lockedAnswersOfQuestion } from "./lockedAnswersOfQuestion";
 
 // Public, for the team's own phone: its answer to the question so far, and whether it is locked.
@@ -43,20 +43,22 @@ export const getTeamFeedback = query({
     const question = questionId && (await ctx.db.get("questions", questionId));
     const answering = question && answeringOf(question.content);
     if (!game || !question || !answering || !(game.closedQuestionIds ?? []).includes(question._id)) return null;
-    const locked = await lockedAnswersOfQuestion(ctx, game._id, question._id);
-    const verdicts = reviewOf(question.content) === null ? [] : await verdictsOfQuestion(ctx, game._id, question._id);
+    const needs = { verdicts: reviewOf(question.content) !== null, teams: answering.revealToTeams !== undefined };
+    const { locked, graded } = await gradedOfQuestion(ctx, game._id, question, needs);
     const outcomes = outcomesOfAnswers(
       question.content,
       locked.map((answer) => answer.content),
-      verdicts,
+      graded.verdicts,
     );
     const index = locked.findIndex((answer) => answer.teamId === teamId);
     const own = locked[index];
     return {
       prompt: question.prompt,
       // What the question showed while asked and the team's own sent answer, so the phone can draw
-      // the answer as the team gave it (D59); never the right answer.
+      // the answer as the team gave it (D59); never the right answer itself, though what every team
+      // answered, such as their pins, comes along for the types that show it (D60).
       shown: answering.show(question.content),
+      revealed: answering.revealToTeams ? answering.revealToTeams(question.content, graded) : null,
       imageUrls: await linkImages(ctx, answering.imageIds(question.content)),
       answer: own && isAnswerFor(question.content, own.content) ? own.content : null,
       outcome: index === -1 ? null : outcomes[index],

@@ -7,7 +7,7 @@ describe("FreeTextResult", () => {
   it("shows each field under its sub-question, lit when it scored and waiting while judged", () => {
     const shown = { type: "freeText" as const, labels: ["Artist", "Låt", "År"] };
     const answer = { type: "freeText" as const, fields: ["Abbba", "Mamma mia", "1980"] };
-    render(<FreeTextResult shown={shown} answer={answer} outcome={outcomeOf(part("right"), part("wrong"), part("pending"))} imageUrls={{}} />);
+    render(<FreeTextResult shown={shown} answer={answer} outcome={outcomeOf(part("right"), part("wrong"), part("pending"))} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(screen.getByText("a) Artist")).toBeInTheDocument();
     expect(screen.getByText("Abbba").parentElement).toHaveClass("result-lit");
     expect(screen.getByText("Mamma mia").parentElement).not.toHaveClass("result-lit");
@@ -15,7 +15,7 @@ describe("FreeTextResult", () => {
   });
 
   it("calls a single field Ert svar", () => {
-    render(<FreeTextResult shown={{ type: "freeText", labels: [""] }} answer={{ type: "freeText", fields: ["Kanel"] }} outcome={outcomeOf(part("wrong"))} imageUrls={{}} />);
+    render(<FreeTextResult shown={{ type: "freeText", labels: [""] }} answer={{ type: "freeText", fields: ["Kanel"] }} outcome={outcomeOf(part("wrong"))} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(screen.getByText("Ert svar")).toBeInTheDocument();
   });
 });

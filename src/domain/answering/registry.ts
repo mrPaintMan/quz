@@ -9,6 +9,7 @@ import {
   type IngredientsShown,
 } from "@/domain/questionTypes/ingredients/ingredientsAnswering";
 import { listAnswering, MAX_LIST_ITEMS, type ListRevealed, type ListShown } from "@/domain/questionTypes/list/listAnswering";
+import { mapPinAnswering, type MapPinRevealed, type MapPinShown } from "@/domain/questionTypes/mapPin/mapPinAnswering";
 import { matchAnswering, type MatchRevealed, type MatchShown } from "@/domain/questionTypes/match/matchAnswering";
 import {
   multipleChoiceAnswering,
@@ -22,7 +23,15 @@ import type { AnsweringRules, Graded } from "./answeringRules";
 import type { Outcome } from "./outcome";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
-export type ShownQuestion = MultipleChoiceShown | FreeTextShown | NumberShown | SortShown | MatchShown | ListShown | IngredientsShown;
+export type ShownQuestion =
+  | MultipleChoiceShown
+  | FreeTextShown
+  | NumberShown
+  | SortShown
+  | MatchShown
+  | ListShown
+  | IngredientsShown
+  | MapPinShown;
 export type RevealedAnswer =
   | MultipleChoiceRevealed
   | FreeTextRevealed
@@ -30,7 +39,8 @@ export type RevealedAnswer =
   | SortRevealed
   | MatchRevealed
   | ListRevealed
-  | IngredientsRevealed;
+  | IngredientsRevealed
+  | MapPinRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -47,7 +57,7 @@ export const answeringRegistry: Registry = {
   list: listAnswering,
   ingredients: ingredientsAnswering,
   drawing: null,
-  mapPin: null,
+  mapPin: mapPinAnswering,
   paSparet: null,
 };
 
@@ -57,6 +67,8 @@ type AnyAnsweringRules = {
   show: (content: QuestionContent) => ShownQuestion;
   reveal: (content: QuestionContent, graded?: Graded<AnswerContent>) => RevealedAnswer;
   revealsAnswers?: boolean;
+  revealsTeams?: boolean;
+  revealToTeams?: (content: QuestionContent, graded: Graded<AnswerContent>) => RevealedAnswer;
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;

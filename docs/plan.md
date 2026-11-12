@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). M3 continues with activities and manual points, then drawing, map pin and På spåret. Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). M3 continues with points by hand (activities and adjustments, the base Rita needs), then Rita and På spåret, each with all four pieces (rules, phone input, TV display, phone result). Kartnål is done (D60). Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
 
 ## Milestones
 
@@ -69,7 +69,7 @@ The feedback round from the user's test night (2026-11-11) is done, and the phon
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Fritext, exact answers until the AI judge (D49); Nämn så många som möjligt, with the right items on the TV (D53)
+- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Kartnål, every team's pin on the TV and the phones (D60); Fritext, exact answers until the AI judge (D49); Nämn så många som möjligt, with the right items on the TV (D53)
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
 - [x] AI judge and review for list questions, two forms of one answer counting once (D53). When På spåret is built, replace its editor's old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) with the AI judge's switch
@@ -145,3 +145,4 @@ Agreed with the user, in this order:
 - 2026-11-11: Feedback round 4, faster pictures: shrunk on upload to at most 1920 px as WebP, and loaded ahead on the TV; the map's loading test uses tiny stand-in maps, so no test can time out (D57). Not tried in a browser with data.
 - 2026-11-11: Feedback round 5, phones show what scored: after the answer, the team's own answer part by part with its points, following verdicts; grading is now built from per-part outcomes, so the phones and the scores can't disagree (D58). Not tried in a browser with data.
 - 2026-11-12: The phone's result after the answer: each type's answer drawn like its input, the parts that scored lit up in gold one after another with their points, a wrong Flerval pick in red; a fourth registry entry per type (D59). Not tried in a browser with data.
+- 2026-11-12: Kartnål with all four pieces: answered by moving the map under the middle pin; the TV's answer shows the right place, the radius and every team's pin with its distance; the phone's result shows the team's pin glowing when it scored, the distance, and every other team's pin on a map free to move (D60). Not tried in a browser with data.

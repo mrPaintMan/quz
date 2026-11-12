@@ -80,6 +80,7 @@ describe("getTeamFeedback", () => {
       await expect(t.query(api.answers.queries.getTeamFeedback, { teamId: red })).resolves.toEqual({
         prompt: "Vilken krydda?",
         shown: { type: "freeText", labels: [""] },
+        revealed: null,
         imageUrls: {},
         answer: { type: "freeText", fields: ["Safran"] },
         outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran", points: 2 }] },
@@ -94,6 +95,7 @@ describe("getTeamFeedback", () => {
     await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toEqual({
       prompt: "Vilken krydda?",
       shown: { type: "freeText", labels: [""] },
+      revealed: null,
       imageUrls: {},
       answer: null,
       outcome: null,
