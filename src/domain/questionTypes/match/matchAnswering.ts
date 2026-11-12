@@ -28,8 +28,9 @@ export const matchAnswering: AnsweringRules<"match", MatchShown, MatchRevealed> 
       const isFair = isDrawnFrom(joined, pairs.map((pair) => pair.right));
       const parts = pairs.map((pair, index): OutcomePart => {
         const given = rightByLeft[index] ?? "";
-        return { label: pair.left, given, result: isFair && given === pair.right ? "right" : "wrong", correct: pair.right };
+        const isRight = isFair && given === pair.right;
+        return { label: pair.left, given, result: isRight ? "right" : "wrong", correct: pair.right, points: isRight ? (pointsPerPair ?? 0) : 0 };
       });
-      return { points: parts.filter((part) => part.result === "right").length * (pointsPerPair ?? 0), parts };
+      return { points: parts.reduce((sum, part) => sum + part.points, 0), parts };
     }),
 };

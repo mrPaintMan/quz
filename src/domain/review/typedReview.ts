@@ -32,7 +32,7 @@ export type TypedReview<Content, Answer> = {
 export function itemOutcomes<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]): Outcome[] {
   return textOutcomes(review, content, answers, verdicts).map(({ points, texts }) => ({
     points,
-    parts: texts.map(({ written, result }) => ({ label: "", given: written, result, correct: "" })),
+    parts: texts.map(({ written, result, points }) => ({ label: "", given: written, result, correct: "", points })),
   }));
 }
 
@@ -88,12 +88,12 @@ export function textOutcomes<Content, Answer>(
   content: Content,
   answers: Answer[],
   verdicts: Verdict[],
-): { points: number; texts: TextOutcome[] }[] {
+): { points: number; texts: (TextOutcome & { points: number })[] }[] {
   const outcomesOf = matcher(review, content, verdicts);
+  const perMatch = review.pointsPerMatch(content);
   return answers.map((answer) => {
-    const texts = outcomesOf(answer);
-    const right = texts.filter((text) => text.result === "right").length;
-    return { points: right * review.pointsPerMatch(content), texts };
+    const texts = outcomesOf(answer).map((text) => ({ ...text, points: text.result === "right" ? perMatch : 0 }));
+    return { points: texts.reduce((sum, text) => sum + text.points, 0), texts };
   });
 }
 

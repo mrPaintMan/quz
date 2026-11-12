@@ -79,7 +79,10 @@ describe("getTeamFeedback", () => {
       const { t, red, blue } = await afterQuestion(screen);
       await expect(t.query(api.answers.queries.getTeamFeedback, { teamId: red })).resolves.toEqual({
         prompt: "Vilken krydda?",
-        outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran" }] },
+        shown: { type: "freeText", labels: [""] },
+        imageUrls: {},
+        answer: { type: "freeText", fields: ["Safran"] },
+        outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran", points: 2 }] },
       });
       const blues = await t.query(api.answers.queries.getTeamFeedback, { teamId: blue });
       expect(blues?.outcome?.parts[0].result).toBe("pending");
@@ -88,7 +91,7 @@ describe("getTeamFeedback", () => {
 
   it("says a team didn't answer, and gives nothing while a question shows", async () => {
     const after = await afterQuestion("answer");
-    await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toEqual({ prompt: "Vilken krydda?", outcome: null });
+    await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toMatchObject({ answer: null, outcome: null });
     const during = await afterQuestion("question");
     await expect(during.t.query(api.answers.queries.getTeamFeedback, { teamId: during.red })).resolves.toBeNull();
   });

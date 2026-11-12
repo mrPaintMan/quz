@@ -8,8 +8,10 @@ export type OutcomePart = {
   // right and wrong as judged; pending while a text waits for a verdict; repeat for another form
   // of something already counted, which adds nothing.
   result: "right" | "wrong" | "pending" | "repeat";
-  // The right answer for the part, shown beside a wrong one; empty when there is none to show.
+  // The right answer for the part; empty when there is none to show.
   correct: string;
+  // What the part scored, so the phone can show it beside the part; 0 unless right.
+  points: number;
 };
 
 export type Outcome = { points: number; parts: OutcomePart[] };

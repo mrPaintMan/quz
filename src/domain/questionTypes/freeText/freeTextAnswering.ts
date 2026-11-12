@@ -47,7 +47,7 @@ export const freeTextAnswering: AnsweringRules<"freeText", FreeTextShown, FreeTe
       // One part per field, a blank one wrong, each beside its first accepted answer.
       parts: slots.map((slot, index) => {
         const text = texts.find((candidate) => candidate.slot === index);
-        return { label: slot.title, given: text?.written ?? "", result: text?.result ?? "wrong", correct: slot.options[0].label };
+        return { label: slot.title, given: text?.written ?? "", result: text?.result ?? "wrong", correct: slot.options[0].label, points: text?.points ?? 0 };
       }),
     }));
   },

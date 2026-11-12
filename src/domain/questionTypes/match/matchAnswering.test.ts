@@ -50,9 +50,9 @@ describe("matchAnswering", () => {
 
   it("says for each left-hand item what the team joined it to and its right pair", () => {
     expect(matchAnswering.outcomes(content, [joined("ABBA", null, "Roxette")])[0].parts).toEqual([
-      { label: "Dancing Queen", given: "ABBA", result: "right", correct: "ABBA" },
-      { label: "The Look", given: "", result: "wrong", correct: "Roxette" },
-      { label: "Waterloo", given: "Roxette", result: "wrong", correct: "ABBA" },
+      { label: "Dancing Queen", given: "ABBA", result: "right", correct: "ABBA", points: 1 },
+      { label: "The Look", given: "", result: "wrong", correct: "Roxette", points: 0 },
+      { label: "Waterloo", given: "Roxette", result: "wrong", correct: "ABBA", points: 0 },
     ]);
   });
 });

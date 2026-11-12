@@ -62,8 +62,8 @@ describe("numberAnswering", () => {
 
   it("gives the guess beside the right number, right when it scored", () => {
     expect(numberAnswering.outcomes(tiers, [guess(103.5), guess(150)]).map((outcome) => outcome.parts[0])).toEqual([
-      { label: "", given: "103,5", result: "right", correct: "100" },
-      { label: "", given: "150", result: "wrong", correct: "100" },
+      { label: "", given: "103,5", result: "right", correct: "100", points: 2 },
+      { label: "", given: "150", result: "wrong", correct: "100", points: 0 },
     ]);
   });
 });

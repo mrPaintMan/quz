@@ -28,7 +28,7 @@ describe("gradeAnswers", () => {
   it("gives an answer that no longer fits its question no parts", () => {
     expect(outcomesOfAnswers(choice, [{ type: "number", value: 1 }, pick(1)], [])).toEqual([
       { points: 0, parts: [] },
-      { points: 2, parts: [{ label: "", given: "B · B", result: "right", correct: "B · B" }] },
+      { points: 2, parts: [{ label: "", given: "B · B", result: "right", correct: "B · B", points: 2 }] },
     ]);
   });
 });

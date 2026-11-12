@@ -66,9 +66,9 @@ describe("sortAnswering", () => {
 
   it("says for each place what the team put there and what belongs there", () => {
     expect(sortAnswering.outcomes(content, [order("Titanic", "Oppenheimer", "Avatar")])[0].parts).toEqual([
-      { label: "1.", given: "Titanic", result: "right", correct: "Titanic" },
-      { label: "2.", given: "Oppenheimer", result: "wrong", correct: "Avatar" },
-      { label: "3.", given: "Avatar", result: "wrong", correct: "Oppenheimer" },
+      { label: "1.", given: "Titanic", result: "right", correct: "Titanic", points: 1 },
+      { label: "2.", given: "Oppenheimer", result: "wrong", correct: "Avatar", points: 0 },
+      { label: "3.", given: "Avatar", result: "wrong", correct: "Oppenheimer", points: 0 },
     ]);
   });
 });
