@@ -20,7 +20,7 @@ export async function deleteGame(ctx: MutationCtx, gameId: Id<"games">) {
     .take(MAX_ANSWERS_PER_GAME);
   const adjustments = await ctx.db
     .query("adjustments")
-    .withIndex("by_gameId", (q) => q.eq("gameId", gameId))
+    .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", gameId))
     .take(MAX_ADJUSTMENTS_PER_GAME);
   const verdicts = await ctx.db
     .query("verdicts")

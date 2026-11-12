@@ -59,8 +59,8 @@ describe("getScores", () => {
   it("adds the hosts' points, including points taken away", async () => {
     const { t, gameId, scores, red, green } = await withGame();
     await t.run(async (ctx) => {
-      await ctx.db.insert("adjustments", { gameId, teamId: green, questionId: null, points: 5, note: "Bonus" });
-      await ctx.db.insert("adjustments", { gameId, teamId: red, questionId: null, points: -1, note: "Fusk" });
+      await ctx.db.insert("adjustments", { gameId, teamId: green, questionId: null, points: 5 });
+      await ctx.db.insert("adjustments", { gameId, teamId: red, questionId: null, points: -1 });
     });
     expect(await scores()).toEqual(["1 Lag 3 5", "2 Lag 2 0", "3 Lag 1 -1"]);
   });

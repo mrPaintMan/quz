@@ -22,7 +22,7 @@ describe("deleteGame", () => {
         const gameId = await ctx.db.insert("games", { quizId, endedAt: 1, ...atLobby });
         const teamId = await ctx.db.insert("teams", { gameId, name: "Tomtarna", colour: "red" });
         await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "number", value: 4 }, lockedAt: 1 });
-        await ctx.db.insert("adjustments", { gameId, teamId, questionId: null, points: 2, note: "Bonus" });
+        await ctx.db.insert("adjustments", { gameId, teamId, questionId: null, points: 2 });
         await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "fyra", target: null });
         return gameId;
       };
