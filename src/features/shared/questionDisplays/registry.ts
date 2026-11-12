@@ -3,6 +3,7 @@ import type { AnsweredType } from "@convex/answers/answerContent";
 import { FreeTextAnswer, FreeTextQuestion } from "./freeText/FreeTextDisplay";
 import { IngredientsAnswer, IngredientsQuestion } from "./ingredients/IngredientsDisplay";
 import { ListAnswer, ListQuestion } from "./list/ListDisplay";
+import { MapPinAnswer, MapPinQuestion } from "./mapPin/MapPinDisplay";
 import { MatchAnswer, MatchQuestion } from "./match/MatchDisplay";
 import { MultipleChoiceAnswer, MultipleChoiceQuestion } from "./multipleChoice/MultipleChoiceDisplay";
 import { NumberAnswer, NumberQuestion } from "./number/NumberDisplay";
@@ -25,6 +26,6 @@ export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | n
   list: { Question: ListQuestion, Answer: ListAnswer },
   ingredients: { Question: IngredientsQuestion, Answer: IngredientsAnswer },
   drawing: null,
-  mapPin: null,
+  mapPin: { Question: MapPinQuestion, Answer: MapPinAnswer },
   paSparet: null,
 };

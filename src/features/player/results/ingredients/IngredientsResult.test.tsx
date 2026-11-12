@@ -11,7 +11,7 @@ describe("IngredientsResult", () => {
         shown={{ type: "ingredients", count: 4 }}
         answer={answer}
         outcome={outcomeOf(part("right", 1, "", 0), part("right", 1, "", 2), part("repeat", 0, "", 3))}
-        imageUrls={{}}
+        imageUrls={{}} revealed={null} teamId="t1"
       />,
     );
     expect(screen.getByText("4 ingredienser · ordningen spelar ingen roll")).toBeInTheDocument();

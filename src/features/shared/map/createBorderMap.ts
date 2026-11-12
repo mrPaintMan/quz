@@ -3,13 +3,20 @@ import { MAP_ZOOM } from "@/domain/questionTypes/mapPin/mapPinRules";
 import { borderDetailForZoom, type BorderDetail } from "@/features/shared/map/borderDetailForZoom";
 import type { BorderShapes } from "@/features/shared/map/loadBorderShapes";
 import { isSameView } from "@/features/shared/map/isSameView";
-import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
+import type { Coordinates, MapView } from "@convex/questions/types/mapPin/mapPinContent";
 
 type LeafletModule = typeof Leaflet;
+
+// A pin drawn on the map at a place, such as a team's answer (D60): in its colour, larger for the
+// team's own, and glowing as well when it scored; the target is a gold dot.
+export type MapMarker = { at: Coordinates; colour: string; kind: "pin" | "own" | "highlight" | "target" };
 
 export type BorderMapOptions = {
   view: MapView;
   radiusMeters: number | null;
+  // Where the radius circle stays; by default it follows the middle of the map, around the pin.
+  circleAt?: Coordinates | null;
+  markers?: MapMarker[];
   // Only moves made by the user (dragging, zooming, the keyboard) that change the view.
   onUserMove: (view: MapView) => void;
   // Fetches the borders for another detail when the map is zoomed into its range.
@@ -22,6 +29,7 @@ export type InitialBorders = { detail: BorderDetail; shapes: BorderShapes };
 export type BorderMapController = {
   setView: (view: MapView) => void;
   setRadius: (radiusMeters: number | null) => void;
+  setMarkers: (markers: MapMarker[]) => void;
   destroy: () => void;
 };
 
@@ -51,12 +59,28 @@ function addBorders(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes): L
   ];
 }
 
+// A marker's look: a pin with its tip on the place, or a gold dot for the target. Markers are HTML
+// over the canvas, so they can use the theme's colours and a glow.
+function markerIcon(L: LeafletModule, { colour, kind }: MapMarker): Leaflet.DivIcon {
+  if (kind === "target") {
+    return L.divIcon({ className: "", iconSize: [16, 16], iconAnchor: [8, 8], html: `<span style="display:block;width:16px;height:16px;border-radius:50%;background:var(--primary);border:3px solid var(--background)"></span>` });
+  }
+  const [width, height] = kind === "pin" ? [24, 31] : [34, 44];
+  const glow = kind === "highlight" ? "filter:drop-shadow(0 0 8px var(--primary))" : "filter:drop-shadow(0 1px 1px rgb(0 0 0 / 0.5))";
+  return L.divIcon({
+    className: "",
+    iconSize: [width, height],
+    iconAnchor: [width / 2, height],
+    html: `<svg width="${width}" height="${height}" viewBox="0 0 30 40" style="${glow}"><path d="M15 39C15 39 2 23 2 14a13 13 0 0 1 26 0c0 9-13 25-13 25z" fill="${colour}" stroke="var(--background)" stroke-width="2"/><circle cx="15" cy="14" r="5" fill="var(--background)"/></svg>`,
+  });
+}
+
 export function createBorderMap(
   L: LeafletModule,
   element: HTMLElement,
   // Drawn straight away, so the map never opens blank; swapped if they don't suit the zoom.
   initialBorders: InitialBorders,
-  { view, radiusMeters, onUserMove, loadShapes }: BorderMapOptions,
+  { view, radiusMeters, circleAt = null, markers = [], onUserMove, loadShapes }: BorderMapOptions,
 ): BorderMapController {
   const map = L.map(element, {
     center: [view.center.lat, view.center.lng],
@@ -85,7 +109,7 @@ export function createBorderMap(
     circle?.remove();
     circle = null;
     if (meters === null || !(meters > 0)) return;
-    circle = L.circle(map.getCenter(), {
+    circle = L.circle(circleAt ? [circleAt.lat, circleAt.lng] : map.getCenter(), {
       radius: meters,
       interactive: false,
       color: mapColors.radius,
@@ -95,6 +119,15 @@ export function createBorderMap(
     }).addTo(map);
   };
   setRadius(radiusMeters);
+
+  let markerLayers: Leaflet.Marker[] = [];
+  const setMarkers = (next: MapMarker[]) => {
+    markerLayers.forEach((marker) => marker.remove());
+    markerLayers = next.map((marker) =>
+      L.marker([marker.at.lat, marker.at.lng], { icon: markerIcon(L, marker), interactive: false, keyboard: false }).addTo(map),
+    );
+  };
+  setMarkers(markers);
 
   // The old borders stay until the new ones have loaded, so the map is never blank; a load
   // that fails keeps them, and the next zoom tries again. By the time a load finishes the map
@@ -127,7 +160,9 @@ export function createBorderMap(
     map.setView([view.center.lat, view.center.lng], view.zoom, { animate: false });
     movingByCode = false;
   };
-  map.on("move", () => circle?.setLatLng(map.getCenter()));
+  map.on("move", () => {
+    if (!circleAt) circle?.setLatLng(map.getCenter());
+  });
   // A resize keeps the centre only to the nearest pixel, kilometres when zoomed out.
   map.on("resize", () => showView(lastView));
   map.on("moveend", () => {
@@ -142,6 +177,7 @@ export function createBorderMap(
       if (!isSameView(next, lastView)) showView(next);
     },
     setRadius,
+    setMarkers,
     destroy: () => {
       removed = true;
       map.remove();

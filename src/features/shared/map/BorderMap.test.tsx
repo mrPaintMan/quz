@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { BorderMapOptions } from "./createBorderMap";
 import { BorderMap } from "./BorderMap";
 
-const controller = { setView: vi.fn(), setRadius: vi.fn(), destroy: vi.fn() };
+const controller = { setView: vi.fn(), setRadius: vi.fn(), setMarkers: vi.fn(), destroy: vi.fn() };
 const createBorderMap = vi.fn<(...args: [unknown, HTMLElement, unknown, BorderMapOptions]) => typeof controller>(() => controller);
 
 vi.mock("leaflet", () => ({ default: { leaflet: true } }));
@@ -86,4 +86,15 @@ describe("BorderMap", () => {
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(createBorderMap).not.toHaveBeenCalled();
   });
+
+  it("passes pins and a fixed circle to the map, and can leave out the middle pin", async () => {
+    const markers = [{ at: { lat: 59, lng: 18 }, colour: "#f00", kind: "pin" as const }];
+    const { container } = render(
+      <BorderMap label="Svar" view={view} onViewChange={vi.fn()} radiusMeters={1000} circleAt={{ lat: 59, lng: 18 }} markers={markers} centerPin={false} />,
+    );
+    await waitFor(() => expect(createBorderMap).toHaveBeenCalled());
+    expect(createBorderMap.mock.calls[0][3]).toMatchObject({ markers, circleAt: { lat: 59, lng: 18 } });
+    expect(container.querySelector("svg")).toBeNull();
+  });
 });
+

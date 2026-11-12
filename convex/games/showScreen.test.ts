@@ -60,4 +60,24 @@ describe("showScreen", () => {
       },
     });
   });
+
+  it("reveals a map pin's target and every team's pin with its team", async () => {
+    const t = setupConvexTest();
+    const shown = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Geografi", kind: "questions" });
+      const target = { lat: 59.33, lng: 18.07 };
+      const content = { type: "mapPin" as const, target, radiusMeters: 100_000, points: 3, initialView: { center: { lat: 62, lng: 15 }, zoom: 4 } };
+      const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Var ligger Stockholm?", timeLimitSeconds: null, media: null, hostNotes: "", content });
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "answer", questionId }, screenIndex: 4, closedQuestionIds: [questionId] });
+      const red = await ctx.db.insert("teams", { gameId, name: "Röda", colour: "red" });
+      await ctx.db.insert("answers", { gameId, teamId: red, questionId, content: { type: "mapPin", pin: { lat: 59.86, lng: 17.64 } }, lockedAt: 1 });
+      const { rounds } = await placeOfGame(ctx, (await ctx.db.get("games", gameId))!);
+      return showScreen(ctx, gameId, { kind: "answer", questionId }, rounds);
+    });
+    expect(shown.view).toMatchObject({
+      revealed: { type: "mapPin", target: { lat: 59.33, lng: 18.07 }, pins: [{ name: "Röda", colour: "red", points: 3 }] },
+    });
+  });
 });
+

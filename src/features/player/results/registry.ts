@@ -3,6 +3,7 @@ import type { AnsweredType } from "@convex/answers/answerContent";
 import { FreeTextResult } from "./freeText/FreeTextResult";
 import { IngredientsResult } from "./ingredients/IngredientsResult";
 import { ListResult } from "./list/ListResult";
+import { MapPinResult } from "./mapPin/MapPinResult";
 import { MatchResult } from "./match/MatchResult";
 import { MultipleChoiceResult } from "./multipleChoice/MultipleChoiceResult";
 import { NumberResult } from "./number/NumberResult";
@@ -21,6 +22,6 @@ export const resultViews: { [T in AnsweredType]: ComponentType<ResultViewProps<T
   list: ListResult,
   ingredients: IngredientsResult,
   drawing: null,
-  mapPin: null,
+  mapPin: MapPinResult,
   paSparet: null,
 };

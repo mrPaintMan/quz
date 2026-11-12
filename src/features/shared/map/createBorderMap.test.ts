@@ -34,6 +34,7 @@ function fakeLeaflet() {
   const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn(), bringToFront: vi.fn() };
   const layers: { remove: ReturnType<typeof vi.fn> }[] = [];
   const zoomControl = { addTo: vi.fn() };
+  const markers: { remove: ReturnType<typeof vi.fn> }[] = [];
   const L = {
     map: vi.fn((_element: HTMLElement, options: { center: [number, number]; zoom: number }) => {
       [center.lat, center.lng] = options.center;
@@ -48,8 +49,14 @@ function fakeLeaflet() {
       return layer;
     }),
     circle: vi.fn(() => circle),
+    divIcon: vi.fn((options: { html: string }) => options),
+    marker: vi.fn(() => {
+      const marker = { addTo: () => marker, remove: vi.fn() };
+      markers.push(marker);
+      return marker;
+    }),
   };
-  return { L: L as unknown as typeof Leaflet, fake: L, map, circle, layers, userMovesTo: moveTo };
+  return { L: L as unknown as typeof Leaflet, fake: L, map, circle, layers, markers, userMovesTo: moveTo };
 }
 
 function setUp(radiusMeters: number | null = null, loadShapes = vi.fn<(detail: BorderDetail) => Promise<typeof shapes>>(() => Promise.resolve(shapes))) {
@@ -191,4 +198,37 @@ describe("createBorderMap", () => {
     controller.destroy();
     expect(map.remove).toHaveBeenCalled();
   });
+
+  it("draws pins in their colours, the highlighted one larger, and replaces them when told", () => {
+    const leaflet = fakeLeaflet();
+    const options = { view: stockholm, radiusMeters: null, onUserMove: vi.fn(), loadShapes: vi.fn() };
+    const markers = [
+      { at: { lat: 59, lng: 18 }, colour: "#f00", kind: "pin" as const },
+      { at: { lat: 60, lng: 17 }, colour: "#00f", kind: "highlight" as const },
+      { at: { lat: 59.3, lng: 18.1 }, colour: "", kind: "target" as const },
+    ];
+    const controller = createBorderMap(leaflet.L, document.createElement("div"), { detail: "50m", shapes }, { ...options, markers });
+    expect(leaflet.fake.marker).toHaveBeenCalledTimes(3);
+    const icons = leaflet.fake.divIcon.mock.calls.map(([icon]) => icon as { html: string; iconSize: number[] });
+    expect(icons[0].html).toContain('fill="#f00"');
+    expect(icons[1].iconSize).toEqual([34, 44]);
+    expect(icons[2].html).toContain("border-radius:50%");
+    controller.setMarkers([]);
+    expect(leaflet.markers.every((marker) => marker.remove.mock.calls.length === 1)).toBe(true);
+  });
+
+  it("keeps a circle at its own place instead of following the middle", () => {
+    const leaflet = fakeLeaflet();
+    createBorderMap(leaflet.L, document.createElement("div"), { detail: "50m", shapes }, {
+      view: stockholm,
+      radiusMeters: 50_000,
+      circleAt: { lat: 60, lng: 15 },
+      onUserMove: vi.fn(),
+      loadShapes: vi.fn(() => Promise.resolve(shapes)),
+    });
+    expect(leaflet.fake.circle).toHaveBeenCalledWith([60, 15], expect.objectContaining({ radius: 50_000 }));
+    leaflet.userMovesTo(61, 16, 5);
+    expect(leaflet.circle.setLatLng).not.toHaveBeenCalled();
+  });
 });
+
