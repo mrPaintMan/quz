@@ -38,7 +38,7 @@ describe("listAnswering", () => {
   });
 
   it("reveals the items the teams got right, most often first, and nothing without answers", () => {
-    const graded = { answers: [listed("Malmö", "Lund"), listed("Malmö", "Gbg")], verdicts: [{ slot: 0, text: "lund", target: "Lund" }] };
+    const graded = { answers: [listed("Malmö", "Lund"), listed("Malmö", "Gbg")], verdicts: [{ slot: 0, text: "lund", target: "Lund" }], teams: [] };
     expect(listAnswering.reveal(content, graded)).toEqual({
       type: "list",
       items: [

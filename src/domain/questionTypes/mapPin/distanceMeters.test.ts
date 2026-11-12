@@ -18,6 +18,8 @@ describe("distanceMeters", () => {
 describe("formatDistance", () => {
   it("reads in metres up close and in kilometres further off", () => {
     expect(formatDistance(812)).toBe("810 m");
+    expect(formatDistance(997)).toBe("1 km");
+    expect(formatDistance(9_970)).toBe("10 km");
     expect(formatDistance(1234)).toBe("1,2 km");
     expect(formatDistance(396_892)).toBe("397 km");
     expect(formatDistance(1_234_567)).toMatch(/^1\s235 km$/);

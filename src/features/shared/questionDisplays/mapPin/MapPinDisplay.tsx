@@ -14,8 +14,8 @@ export function MapPinQuestion() {
   return null;
 }
 
-// The right place with its scoring radius in gold, every team's pin in its colour, and the teams
-// from most points and closest, each with how far off it was (D60).
+// The right place with its scoring radius in gold, every team's pin in its colour, the map zoomed to
+// show them all, and the teams from most points and closest, each with how far off it was (D60).
 export function MapPinAnswer({ revealed }: RevealedDisplayProps<"mapPin">) {
   const markers: MapMarker[] = [
     ...revealed.pins.map(({ pin, colour }) => ({ at: pin, colour: TEAM_COLOUR_HEX[colour], kind: "pin" as const })),
@@ -31,6 +31,7 @@ export function MapPinAnswer({ revealed }: RevealedDisplayProps<"mapPin">) {
         circleAt={revealed.target}
         markers={markers}
         centerPin={false}
+        fitToMarkers
         className="min-h-0 flex-1"
       />
       {revealed.pins.length > 0 && (

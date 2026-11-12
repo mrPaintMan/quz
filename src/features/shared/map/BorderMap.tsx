@@ -20,18 +20,30 @@ type BorderMapProps = {
   markers?: MapMarker[];
   // The fixed pin in the middle, for aiming; left out on a map that only shows pins.
   centerPin?: boolean;
+  // Zooms to show every marker and the circle instead of the view (D60).
+  fitToMarkers?: boolean;
   className?: string;
 };
 
 // A map with country borders only and, by default, a fixed pin in the middle: move the map to aim
 // the pin. It can also show pins at their own places, and be moved around to look at them.
-export function BorderMap({ label, view, onViewChange, radiusMeters = null, circleAt = null, markers = [], centerPin = true, className }: BorderMapProps) {
+export function BorderMap({
+  label,
+  view,
+  onViewChange,
+  radiusMeters = null,
+  circleAt = null,
+  markers = [],
+  centerPin = true,
+  fitToMarkers = false,
+  className,
+}: BorderMapProps) {
   const elementRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<BorderMapController | null>(null);
   const [failed, setFailed] = useState(false);
-  const latest = useRef({ view, radiusMeters, circleAt, markers, onViewChange });
+  const latest = useRef({ view, radiusMeters, circleAt, markers, fitToMarkers, onViewChange });
   useEffect(() => {
-    latest.current = { view, radiusMeters, circleAt, markers, onViewChange };
+    latest.current = { view, radiusMeters, circleAt, markers, fitToMarkers, onViewChange };
   });
 
   useEffect(() => {
@@ -41,12 +53,13 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, circ
     Promise.all([import("leaflet"), loadBorderShapes(detail)]).then(([leaflet, shapes]) => {
       if (cancelled || !elementRef.current) return;
       // The view may have changed while loading; the map swaps borders if the zoom now needs others.
-      const { view: startView, radiusMeters: startRadius, circleAt: startCircleAt, markers: startMarkers } = latest.current;
+      const { view: startView, radiusMeters: startRadius, circleAt: startCircleAt, markers: startMarkers, fitToMarkers: fits } = latest.current;
       controllerRef.current = createBorderMap(leaflet.default ?? leaflet, elementRef.current, { detail, shapes }, {
         view: startView,
         radiusMeters: startRadius,
         circleAt: startCircleAt,
         markers: startMarkers,
+        fitToMarkers: fits,
         onUserMove: (next) => latest.current.onViewChange(next),
         loadShapes: loadBorderShapes,
       });
@@ -67,6 +80,11 @@ export function BorderMap({ label, view, onViewChange, radiusMeters = null, circ
   useEffect(() => {
     controllerRef.current?.setRadius(radiusMeters);
   }, [radiusMeters]);
+  const circleLat = circleAt?.lat;
+  const circleLng = circleAt?.lng;
+  useEffect(() => {
+    controllerRef.current?.setCircleAt(circleLat === undefined || circleLng === undefined ? null : { lat: circleLat, lng: circleLng });
+  }, [circleLat, circleLng]);
   // Markers come as new arrays on every render; their contents decide when to redraw them.
   const markersKey = JSON.stringify(markers);
   useEffect(() => {

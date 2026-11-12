@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
 import { BorderMap } from "@/features/shared/map/BorderMap";
-import { PIN_GOLD } from "@/features/shared/map/pinColours";
 
 // The team moves the map under a fixed pin in the middle, as the hosts placed the answer (D27),
 // starting from the question's view; the pin's spot is the answer. Once locked, the answer stays
@@ -23,7 +22,7 @@ export function MapPinInput({ shown, answer, disabled, onChange }: AnswerInputPr
           if (!disabled) onChange({ type: "mapPin", pin: next.center });
         }}
         centerPin={!disabled}
-        markers={disabled ? [{ at: pin, colour: PIN_GOLD, kind: "own" }] : []}
+        markers={disabled ? [{ at: pin, colour: "var(--primary)", kind: "own" }] : []}
         className="h-[55svh] min-h-72"
       />
     </div>

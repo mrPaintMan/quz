@@ -3,7 +3,7 @@ import { setupConvexTest } from "../test.setup";
 import { gradedOfQuestion } from "./gradedOfQuestion";
 
 describe("gradedOfQuestion", () => {
-  it("gives the sent answers that fit, with their teams in the same order, and the verdicts", async () => {
+  it("gives the sent answers that fit, with their teams in the same order and the verdicts when asked for", async () => {
     const t = setupConvexTest();
     const result = await t.run(async (ctx) => {
       const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
@@ -16,8 +16,9 @@ describe("gradedOfQuestion", () => {
       await ctx.db.insert("answers", { gameId, teamId: red, questionId, content: { type: "freeText", fields: ["Safran"] }, lockedAt: 1 });
       await ctx.db.insert("answers", { gameId, teamId: blue, questionId, content: { type: "number", value: 3 }, lockedAt: 1 });
       await ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "safran", target: 0 });
-      const { locked, graded } = await gradedOfQuestion(ctx, gameId, (await ctx.db.get("questions", questionId))!);
-      return { lockedCount: locked.length, graded };
+      const { locked, graded } = await gradedOfQuestion(ctx, gameId, (await ctx.db.get("questions", questionId))!, { verdicts: true, teams: true });
+      const bare = await gradedOfQuestion(ctx, gameId, (await ctx.db.get("questions", questionId))!, { verdicts: false, teams: false });
+      return { lockedCount: locked.length, graded, bare: bare.graded };
     });
     expect(result.lockedCount).toBe(2);
     expect(result.graded).toMatchObject({
@@ -25,5 +26,7 @@ describe("gradedOfQuestion", () => {
       verdicts: [{ slot: 0, text: "safran", target: 0 }],
       teams: [{ name: "Röda", colour: "red" }],
     });
+    // Asked for neither, it reads only the answers.
+    expect(result.bare).toEqual({ answers: [{ type: "freeText", fields: ["Safran"] }], verdicts: [], teams: [] });
   });
 });

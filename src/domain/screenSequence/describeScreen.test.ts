@@ -92,7 +92,7 @@ describe("describeScreen", () => {
   it("reveals from the question's answers and verdicts for a type that shows what the teams got right", () => {
     const list: QuestionContent = { type: "list", acceptedItems: [{ spellings: ["Göteborg"] }], pointsPerItem: 1, fuzzy: true, aiAssist: false };
     const quiz = [{ _id: roundId("listor"), title: "Listor", questions: [{ _id: questionId("l"), prompt: "Nämn städer", content: list }] }];
-    const graded = { answers: [{ type: "list" as const, items: ["göteborg", "Lund"] }], verdicts: [] };
+    const graded = { answers: [{ type: "list" as const, items: ["göteborg", "Lund"] }], verdicts: [], teams: [] };
     expect(describeScreen({ kind: "answer", questionId: questionId("l") }, quiz, graded)).toMatchObject({
       revealed: { type: "list", items: [{ name: "Göteborg", teamCount: 1 }] },
     });

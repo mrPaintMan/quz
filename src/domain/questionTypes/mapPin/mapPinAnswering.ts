@@ -22,11 +22,11 @@ export const mapPinAnswering: AnsweringRules<"mapPin", MapPinShown, MapPinReveal
     radiusMeters,
     // Most points first, then the closest; teams without a pin have nothing to show.
     pins:
-      target === null || !graded?.teams
+      target === null || !graded
         ? []
         : graded.answers
             .flatMap(({ pin }, index) => {
-              const team = graded.teams?.[index];
+              const team = graded.teams[index];
               if (!pin || !team) return [];
               const scored = isWithin(pin, target, radiusMeters) ? (points ?? 0) : 0;
               return [{ teamId: team._id, name: team.name, colour: team.colour, pin, points: scored, distanceMeters: distanceMeters(pin, target) }];
@@ -34,6 +34,9 @@ export const mapPinAnswering: AnsweringRules<"mapPin", MapPinShown, MapPinReveal
             .sort((a, b) => b.points - a.points || a.distanceMeters - b.distanceMeters),
   }),
   revealsAnswers: true,
+  revealsTeams: true,
+  // The teams' pins for the phones, without the right place or its radius (D59, D60).
+  revealToTeams: (content, graded) => ({ ...mapPinAnswering.reveal(content, graded), target: null, radiusMeters: null }),
   imageIds: () => [],
   // The pin starts where the map does, so a team that sends without moving answers the middle.
   startingAnswer: ({ initialView }) => ({ type: "mapPin", pin: initialView.center }),

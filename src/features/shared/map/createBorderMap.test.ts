@@ -30,8 +30,9 @@ function fakeLeaflet() {
     setView: vi.fn(([lat, lng]: [number, number], nextZoom: number) => moveTo(lat, lng, nextZoom)),
     resize: () => handlers.resize?.(),
     remove: vi.fn(),
+    fitBounds: vi.fn((bounds: { points: [number, number][] }) => moveTo(bounds.points[0][0], bounds.points[0][1], 7)),
   };
-  const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn(), bringToFront: vi.fn() };
+  const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn(), bringToFront: vi.fn(), getBounds: () => [[60, 15]] };
   const layers: { remove: ReturnType<typeof vi.fn> }[] = [];
   const zoomControl = { addTo: vi.fn() };
   const markers: { remove: ReturnType<typeof vi.fn> }[] = [];
@@ -50,6 +51,10 @@ function fakeLeaflet() {
     }),
     circle: vi.fn(() => circle),
     divIcon: vi.fn((options: { html: string }) => options),
+    latLngBounds: vi.fn((points: [number, number][]) => {
+      const bounds = { points: [...points], extend: (more: [number, number][]) => bounds.points.push(...more) };
+      return bounds;
+    }),
     marker: vi.fn(() => {
       const marker = { addTo: () => marker, remove: vi.fn() };
       markers.push(marker);
@@ -229,6 +234,24 @@ describe("createBorderMap", () => {
     expect(leaflet.fake.circle).toHaveBeenCalledWith([60, 15], expect.objectContaining({ radius: 50_000 }));
     leaflet.userMovesTo(61, 16, 5);
     expect(leaflet.circle.setLatLng).not.toHaveBeenCalled();
+  });
+
+  it("zooms to show the markers and the circle when asked, as a move of its own", () => {
+    const leaflet = fakeLeaflet();
+    const onUserMove = vi.fn();
+    const controller = createBorderMap(leaflet.L, document.createElement("div"), { detail: "50m", shapes }, {
+      view: stockholm,
+      radiusMeters: 50_000,
+      circleAt: { lat: 60, lng: 15 },
+      markers: [{ at: { lat: 59, lng: 18 }, colour: "#f00", kind: "pin" }],
+      fitToMarkers: true,
+      onUserMove,
+      loadShapes: vi.fn(() => Promise.resolve(shapes)),
+    });
+    expect(leaflet.map.fitBounds).toHaveBeenCalledWith({ points: [[59, 18], [60, 15]], extend: expect.any(Function) }, expect.objectContaining({ padding: [24, 24] }));
+    expect(onUserMove).not.toHaveBeenCalled();
+    controller.setCircleAt({ lat: 61, lng: 14 });
+    expect(leaflet.fake.circle).toHaveBeenLastCalledWith([61, 14], expect.anything());
   });
 });
 

@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { answeringOf } from "@/domain/answering/registry";
+import { answeringOf, reviewOf } from "@/domain/answering/registry";
 import { feedbackQuestionId } from "@/domain/answers/feedbackQuestionId";
 import { isAnswerFor } from "@/domain/answers/isAnswerFor";
 import { outcomesOfAnswers } from "@/domain/scoring/gradeAnswers";
@@ -43,7 +43,8 @@ export const getTeamFeedback = query({
     const question = questionId && (await ctx.db.get("questions", questionId));
     const answering = question && answeringOf(question.content);
     if (!game || !question || !answering || !(game.closedQuestionIds ?? []).includes(question._id)) return null;
-    const { locked, graded } = await gradedOfQuestion(ctx, game._id, question);
+    const needs = { verdicts: reviewOf(question.content) !== null, teams: answering.revealToTeams !== undefined };
+    const { locked, graded } = await gradedOfQuestion(ctx, game._id, question, needs);
     const outcomes = outcomesOfAnswers(
       question.content,
       locked.map((answer) => answer.content),
@@ -54,10 +55,10 @@ export const getTeamFeedback = query({
     return {
       prompt: question.prompt,
       // What the question showed while asked and the team's own sent answer, so the phone can draw
-      // the answer as the team gave it (D59); never the right answer itself, though a reveal of
-      // what every team answered, such as their pins, comes along for the types that have one (D60).
+      // the answer as the team gave it (D59); never the right answer itself, though what every team
+      // answered, such as their pins, comes along for the types that show it (D60).
       shown: answering.show(question.content),
-      revealed: answering.revealsAnswers ? answering.reveal(question.content, graded) : null,
+      revealed: answering.revealToTeams ? answering.revealToTeams(question.content, graded) : null,
       imageUrls: await linkImages(ctx, answering.imageIds(question.content)),
       answer: own && isAnswerFor(question.content, own.content) ? own.content : null,
       outcome: index === -1 ? null : outcomes[index],

@@ -32,7 +32,7 @@ describe("MapPinQuestion", () => {
 describe("MapPinAnswer", () => {
   it("shows the right place with its radius and every team's pin, and lists the teams with how far off they were", () => {
     render(<MapPinAnswer revealed={revealed} imageUrls={{}} />);
-    expect(maps.at(-1)).toMatchObject({ circleAt: target, radiusMeters: 100_000, centerPin: false, view: revealed.initialView });
+    expect(maps.at(-1)).toMatchObject({ circleAt: target, radiusMeters: 100_000, centerPin: false, fitToMarkers: true });
     const markers = maps.at(-1)?.markers as { kind: string }[];
     expect(markers.map((marker) => marker.kind)).toEqual(["pin", "pin", "target"]);
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Blå64 km+3 p", "Röda397 km"]);

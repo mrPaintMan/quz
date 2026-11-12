@@ -17,6 +17,8 @@ export type BorderMapOptions = {
   // Where the radius circle stays; by default it follows the middle of the map, around the pin.
   circleAt?: Coordinates | null;
   markers?: MapMarker[];
+  // Zooms to show every marker and the circle, such as the TV's answer (D60), instead of the view.
+  fitToMarkers?: boolean;
   // Only moves made by the user (dragging, zooming, the keyboard) that change the view.
   onUserMove: (view: MapView) => void;
   // Fetches the borders for another detail when the map is zoomed into its range.
@@ -30,6 +32,7 @@ export type BorderMapController = {
   setView: (view: MapView) => void;
   setRadius: (radiusMeters: number | null) => void;
   setMarkers: (markers: MapMarker[]) => void;
+  setCircleAt: (at: Coordinates | null) => void;
   destroy: () => void;
 };
 
@@ -80,7 +83,7 @@ export function createBorderMap(
   element: HTMLElement,
   // Drawn straight away, so the map never opens blank; swapped if they don't suit the zoom.
   initialBorders: InitialBorders,
-  { view, radiusMeters, circleAt = null, markers = [], onUserMove, loadShapes }: BorderMapOptions,
+  { view, radiusMeters, circleAt = null, markers = [], fitToMarkers = false, onUserMove, loadShapes }: BorderMapOptions,
 ): BorderMapController {
   const map = L.map(element, {
     center: [view.center.lat, view.center.lng],
@@ -105,11 +108,14 @@ export function createBorderMap(
   let shownDetail = initialBorders.detail;
 
   let circle: Leaflet.Circle | null = null;
+  let circleCenter = circleAt;
+  let radius = radiusMeters;
   const setRadius = (meters: number | null) => {
+    radius = meters;
     circle?.remove();
     circle = null;
     if (meters === null || !(meters > 0)) return;
-    circle = L.circle(circleAt ? [circleAt.lat, circleAt.lng] : map.getCenter(), {
+    circle = L.circle(circleCenter ? [circleCenter.lat, circleCenter.lng] : map.getCenter(), {
       radius: meters,
       interactive: false,
       color: mapColors.radius,
@@ -121,13 +127,15 @@ export function createBorderMap(
   setRadius(radiusMeters);
 
   let markerLayers: Leaflet.Marker[] = [];
-  const setMarkers = (next: MapMarker[]) => {
+  let markerPlaces: Coordinates[] = [];
+  const placeMarkers = (next: MapMarker[]) => {
     markerLayers.forEach((marker) => marker.remove());
+    markerPlaces = next.map((marker) => marker.at);
     markerLayers = next.map((marker) =>
       L.marker([marker.at.lat, marker.at.lng], { icon: markerIcon(L, marker), interactive: false, keyboard: false }).addTo(map),
     );
   };
-  setMarkers(markers);
+  placeMarkers(markers);
 
   // The old borders stay until the new ones have loaded, so the map is never blank; a load
   // that fails keeps them, and the next zoom tries again. By the time a load finishes the map
@@ -161,7 +169,7 @@ export function createBorderMap(
     movingByCode = false;
   };
   map.on("move", () => {
-    if (!circleAt) circle?.setLatLng(map.getCenter());
+    if (!circleCenter) circle?.setLatLng(map.getCenter());
   });
   // A resize keeps the centre only to the nearest pixel, kilometres when zoomed out.
   map.on("resize", () => showView(lastView));
@@ -172,12 +180,35 @@ export function createBorderMap(
     onUserMove(view);
   });
 
+  // Shows every marker and the circle, as a move of our own, when the map is asked to fit them.
+  const fit = () => {
+    if (!fitToMarkers || (markerPlaces.length === 0 && !circle)) return;
+    const bounds = L.latLngBounds(markerPlaces.map(({ lat, lng }) => [lat, lng] as [number, number]));
+    if (circle) bounds.extend(circle.getBounds());
+    movingByCode = true;
+    map.fitBounds(bounds, { padding: [24, 24], maxZoom: MAP_ZOOM.max, animate: false });
+    movingByCode = false;
+    lastView = readView(map);
+  };
+  fit();
+
   return {
     setView: (next) => {
       if (!isSameView(next, lastView)) showView(next);
     },
-    setRadius,
-    setMarkers,
+    setRadius: (meters) => {
+      setRadius(meters);
+      fit();
+    },
+    setMarkers: (next) => {
+      placeMarkers(next);
+      fit();
+    },
+    setCircleAt: (at) => {
+      circleCenter = at;
+      setRadius(radius);
+      fit();
+    },
     destroy: () => {
       removed = true;
       map.remove();

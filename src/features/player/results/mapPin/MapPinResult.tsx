@@ -4,7 +4,6 @@ import { useState } from "react";
 import type { MapView } from "@convex/questions/types/mapPin/mapPinContent";
 import { BorderMap } from "@/features/shared/map/BorderMap";
 import type { MapMarker } from "@/features/shared/map/createBorderMap";
-import { PIN_GOLD } from "@/features/shared/map/pinColours";
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
 import { glowDelay, PartEnd, resultClass } from "@/features/player/results/resultLook";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
@@ -21,7 +20,7 @@ export function MapPinResult({ shown, answer, outcome, revealed, teamId }: Resul
   const ownColour = revealed?.pins.find((pin) => pin.teamId === teamId)?.colour;
   const markers: MapMarker[] = [
     ...others.map(({ pin, colour }) => ({ at: pin, colour: TEAM_COLOUR_HEX[colour], kind: "pin" as const })),
-    ...(answer.pin ? [{ at: answer.pin, colour: scored || !ownColour ? PIN_GOLD : TEAM_COLOUR_HEX[ownColour], kind: scored ? ("highlight" as const) : ("own" as const) }] : []),
+    ...(answer.pin ? [{ at: answer.pin, colour: scored || !ownColour ? "var(--primary)" : TEAM_COLOUR_HEX[ownColour], kind: scored ? ("highlight" as const) : ("own" as const) }] : []),
   ];
 
   return (

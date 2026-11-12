@@ -9,8 +9,9 @@ import type { Outcome } from "./outcome";
 export type GradedTeam = { _id: string; name: string; colour: TeamColour };
 
 // A closed question's sent answers that fit it, with the verdicts on their texts and, in the same
-// order as the answers, the teams that sent them.
-export type Graded<Answer> = { answers: Answer[]; verdicts: Verdict[]; teams?: GradedTeam[] };
+// order as the answers, the teams that sent them; teams are read only for a type that reveals them
+// (revealsTeams) and are empty otherwise.
+export type Graded<Answer> = { answers: Answer[]; verdicts: Verdict[]; teams: GradedTeam[] };
 
 // How one question type is answered in the app (D14). `Shown` is what the TV and the phones may
 // know while the question is asked, never its answer key; `Revealed` is what the answer screen
@@ -21,6 +22,11 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   // got right (revealsAnswers); the others reveal from the question alone.
   reveal: (content: ContentOf<T>, graded?: Graded<AnswerOf<T>>) => Revealed;
   revealsAnswers?: boolean;
+  // Whether the reveal shows which team sent each answer, such as the teams' pins (D60).
+  revealsTeams?: boolean;
+  // What the phones' results get of the reveal, without the right answer itself, for a type whose
+  // result shows what the other teams answered (D60).
+  revealToTeams?: (content: ContentOf<T>, graded: Graded<AnswerOf<T>>) => Revealed;
   // Pictures the question shows, such as image options, so the server can link them.
   imageIds: (content: ContentOf<T>) => Id<"_storage">[];
   // What the team's answer is before it changes anything; null for most types, where nothing is

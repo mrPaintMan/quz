@@ -45,6 +45,12 @@ describe("mapPinAnswering", () => {
     expect(revealed.pins[0]).toMatchObject({ teamId: "t2", colour: "blue", pin: uppsala });
   });
 
+  it("gives the phones the teams' pins without the right place or its radius", () => {
+    const teams = [{ _id: "t1", name: "Röda", colour: "red" as const }];
+    const forTeams = mapPinAnswering.revealToTeams?.(content, { answers: [pinned(uppsala)], verdicts: [], teams });
+    expect(forTeams).toMatchObject({ target: null, radiusMeters: null, pins: [{ name: "Röda", points: 3 }] });
+  });
+
   it("reveals no pins without the teams' answers or a target", () => {
     expect(mapPinAnswering.reveal(content).pins).toEqual([]);
     expect(mapPinAnswering.reveal({ ...content, target: null }, { answers: [pinned(uppsala)], verdicts: [], teams: [{ _id: "t1", name: "Röda", colour: "red" }] }).pins).toEqual([]);

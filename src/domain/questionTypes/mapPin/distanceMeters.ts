@@ -15,7 +15,10 @@ export function distanceMeters(from: Coordinates, to: Coordinates): number {
 
 // A distance as people say it: "800 m", "1,2 km", "12 km", rounded so it reads at a glance.
 export function formatDistance(meters: number): string {
-  if (meters < 1000) return `${Math.round(meters / 10) * 10} m`;
-  if (meters < 10_000) return `${(Math.round(meters / 100) / 10).toString().replace(".", ",")} km`;
+  // Rounded first, so 997 m reads "1 km" rather than "1000 m".
+  const tens = Math.round(meters / 10) * 10;
+  if (tens < 1000) return `${tens} m`;
+  const tenths = Math.round(meters / 100) / 10;
+  if (tenths < 10) return `${tenths.toString().replace(".", ",")} km`;
   return `${Math.round(meters / 1000).toLocaleString("sv-SE")} km`;
 }

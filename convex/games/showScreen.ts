@@ -1,5 +1,5 @@
 import { imageIdsOnScreen } from "@/domain/answering/imageIdsOnScreen";
-import { answeringOf } from "@/domain/answering/registry";
+import { answeringOf, reviewOf } from "@/domain/answering/registry";
 import { mediaOnScreen } from "@/domain/media/mediaOnScreen";
 import { describeScreen } from "@/domain/screenSequence/describeScreen";
 import type { Doc, Id } from "../_generated/dataModel";
@@ -17,8 +17,10 @@ type RoundWithQuestions = Doc<"rounds"> & { questions: Doc<"questions">[] };
 async function gradedOnScreen(ctx: QueryCtx, gameId: Id<"games">, screen: Screen, rounds: RoundWithQuestions[]) {
   if (screen.kind !== "answer") return undefined;
   const question = rounds.flatMap((round) => round.questions).find((candidate) => candidate._id === screen.questionId);
-  if (!question || !answeringOf(question.content)?.revealsAnswers) return undefined;
-  return (await gradedOfQuestion(ctx, gameId, question)).graded;
+  const answering = question && answeringOf(question.content);
+  if (!question || !answering?.revealsAnswers) return undefined;
+  const needs = { verdicts: reviewOf(question.content) !== null, teams: answering.revealsTeams === true };
+  return (await gradedOfQuestion(ctx, gameId, question, needs)).graded;
 }
 
 // Everything the TV draws for a screen: what it may say (describeScreen), its media, and links to
