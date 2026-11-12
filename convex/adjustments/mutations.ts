@@ -23,7 +23,8 @@ export const setActivityPoints = hostMutation({
     if (question.quizId !== game.quizId || question.content.type !== "activity") throw new ConvexError("Frågan är ingen aktivitet i quizet.");
     await requireTeamOf(ctx, game, teamId);
     if (points !== null && !isActivityPoints(points, question.content.maxPoints)) {
-      throw new ConvexError(`Poängen ska vara mellan 0 och ${question.content.maxPoints}.`);
+      const { maxPoints } = question.content;
+      throw new ConvexError(maxPoints === null ? "Poängen kan inte vara negativ." : `Poängen ska vara mellan 0 och ${maxPoints}.`);
     }
     const existing = (await activityPointsOf(ctx, gameId, questionId)).find((adjustment) => adjustment.teamId === teamId);
     if (points === null) {

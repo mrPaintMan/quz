@@ -29,15 +29,15 @@ export const listCorrections = hostQuery({
   },
 });
 
-// Public, for the team's own phone: its points for the activity on the TV now, once the hosts have
-// given them; null otherwise (D61).
+// Public, for the team's own phone on an activity's screen: its points for that activity once the
+// hosts have given them; null otherwise (D61). Reads only the team and the activity's points, so
+// the game's timer and playback don't rerun it.
 export const getTeamActivityPoints = query({
-  args: { teamId: v.id("teams") },
-  handler: async (ctx, { teamId }) => {
+  args: { teamId: v.id("teams"), questionId: v.id("questions") },
+  handler: async (ctx, { teamId, questionId }) => {
     const team = await ctx.db.get("teams", teamId);
-    const game = team && (await ctx.db.get("games", team.gameId));
-    if (!game || game.endedAt !== null || game.screen.kind !== "question") return null;
-    const own = (await activityPointsOf(ctx, game._id, game.screen.questionId)).find((adjustment) => adjustment.teamId === teamId);
+    if (!team) return null;
+    const own = (await activityPointsOf(ctx, team.gameId, questionId)).find((adjustment) => adjustment.teamId === teamId);
     return own?.points ?? null;
   },
 });

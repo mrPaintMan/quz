@@ -31,6 +31,13 @@ describe("setActivityPoints", () => {
     await expect(t.mutation(api.adjustments.mutations.setActivityPoints, { ...host, gameId, questionId, teamId: other.stranger, points: 1 })).rejects.toThrow("inte med");
   });
 
+  it("only refuses negative points when the activity has no most", async () => {
+    const { t, gameId, questionId, red } = await atActivity();
+    await t.run((ctx) => ctx.db.patch("questions", questionId, { content: { type: "activity", maxPoints: null } }));
+    await t.mutation(api.adjustments.mutations.setActivityPoints, { ...host, gameId, questionId, teamId: red, points: 40 });
+    await expect(t.mutation(api.adjustments.mutations.setActivityPoints, { ...host, gameId, questionId, teamId: red, points: -1 })).rejects.toThrow("kan inte vara negativ");
+  });
+
   it("is for the hosts only", async () => {
     const { t, gameId, questionId, red } = await atActivity();
     await expect(t.mutation(api.adjustments.mutations.setActivityPoints, { hostPassphrase: "fel", gameId, questionId, teamId: red, points: 1 })).rejects.toThrow();

@@ -60,18 +60,28 @@ describe("ActivityScoring", () => {
     expect(screen.getByRole("button", { name: "Plus för Tomtarna" })).toBeDisabled();
   });
 
-  it("sends typed points, clears them when emptied, and holds back points past the most", async () => {
+  it("sends typed points once the field is left or Enter is pressed, and clears them when emptied", async () => {
+    renderScoring();
+    await userEvent.type(screen.getByLabelText("Poäng för Renarna"), "3,5");
+    expect(setActivityPoints).not.toHaveBeenCalled();
+    await userEvent.keyboard("{Enter}");
+    await userEvent.clear(screen.getByLabelText("Poäng för Tomtarna"));
+    await userEvent.tab();
+    expect(sent()).toEqual([
+      [blue, 3.5],
+      [red, null],
+    ]);
+  });
+
+  it("holds back points past the most, and sends nothing when they didn't change", async () => {
     renderScoring();
     const field = screen.getByLabelText("Poäng för Renarna");
-    await userEvent.type(field, "3,5");
-    expect(sent().at(-1)).toEqual([blue, 3.5]);
-    await userEvent.clear(screen.getByLabelText("Poäng för Tomtarna"));
-    expect(sent().at(-1)).toEqual([red, null]);
-    await userEvent.clear(field);
-    setActivityPoints.mockClear();
     await userEvent.type(field, "9");
-    expect(setActivityPoints).not.toHaveBeenCalled();
+    await userEvent.tab();
     expect(field).toHaveAttribute("aria-invalid", "true");
+    await userEvent.click(screen.getByLabelText("Poäng för Tomtarna"));
+    await userEvent.tab();
+    expect(setActivityPoints).not.toHaveBeenCalled();
   });
 
   it("has no cap when the activity has no most", async () => {

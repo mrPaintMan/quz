@@ -34,16 +34,17 @@ describe("listCorrections", () => {
 });
 
 describe("getTeamActivityPoints", () => {
-  it("gives the team its points for the activity on the TV once given, and nothing before", async () => {
-    const { t, gameId, questionId, red } = await atActivity();
-    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: red })).resolves.toBeNull();
+  it("gives the team its own points for the activity once given, and nothing before", async () => {
+    const { t, gameId, questionId, red, blue } = await atActivity();
+    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: red, questionId })).resolves.toBeNull();
     await t.mutation(api.adjustments.mutations.setActivityPoints, { ...host, gameId, questionId, teamId: red, points: 4 });
-    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: red })).resolves.toBe(4);
+    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: red, questionId })).resolves.toBe(4);
+    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: blue, questionId })).resolves.toBeNull();
   });
 
-  it("gives nothing away from a question screen", async () => {
-    const { t, gameId, red } = await atActivity();
-    await t.run((ctx) => ctx.db.patch("games", gameId, { screen: { kind: "lobby" } }));
-    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: red })).resolves.toBeNull();
+  it("gives nothing for a team that is gone", async () => {
+    const { t, questionId, red } = await atActivity();
+    await t.run((ctx) => ctx.db.delete("teams", red));
+    await expect(t.query(api.adjustments.queries.getTeamActivityPoints, { teamId: red, questionId })).resolves.toBeNull();
   });
 });

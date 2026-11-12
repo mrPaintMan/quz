@@ -73,7 +73,7 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
               <p role="status" className="text-2xl">
                 {phoneScreenText(view)}
               </p>
-              {view.kind === "question" && !view.answeredInApp && <ActivityPoints teamId={team._id} />}
+              {screen.kind === "question" && view.kind === "question" && !view.answeredInApp && <ActivityPoints teamId={team._id} questionId={screen.questionId} />}
               {clock}
             </div>
           }

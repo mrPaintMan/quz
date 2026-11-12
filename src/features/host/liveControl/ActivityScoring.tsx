@@ -19,8 +19,9 @@ type Team = { _id: Id<"teams">; name: string; colour: TeamColour };
 
 const formatGiven = (points: number | null) => (points === null ? "" : formatDecimal(points));
 
-// One team's points: − and + step a whole point, and halves can be typed. An empty field clears
-// them; a number past the activity's most is kept in the field, marked, and not sent.
+// One team's points: − and + step a whole point, and halves can be typed, sent when the field is
+// left or Enter is pressed, so typing writes once. An empty field clears them; a number past the
+// activity's most is kept in the field, marked, and not sent.
 function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: number | null; maxPoints: number | null; onSet: (points: number | null) => void }) {
   const [text, setText] = useDraftText(points, formatGiven, parseDecimal);
   const typed = parseDecimal(text);
@@ -40,11 +41,14 @@ function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: nu
         className="w-16 text-center tabular-nums"
         value={text}
         aria-invalid={isInvalid}
-        onChange={(event) => {
-          setText(event.target.value);
-          const value = parseDecimal(event.target.value);
-          if (event.target.value.trim() === "") onSet(null);
-          else if (value !== null && isActivityPoints(value, maxPoints)) onSet(value);
+        onChange={(event) => setText(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") event.currentTarget.blur();
+        }}
+        onBlur={() => {
+          if (text.trim() === "") {
+            if (points !== null) onSet(null);
+          } else if (!isInvalid && typed !== points) onSet(typed);
         }}
       />
       <Button

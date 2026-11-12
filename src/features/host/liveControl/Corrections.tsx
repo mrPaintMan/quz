@@ -27,10 +27,11 @@ export function Corrections({ gameId, teams }: { gameId: Id<"games">; teams: Tea
   const run = useRunAction();
   const [chosenTeamId, setTeamId] = useState<Id<"teams"> | null>(null);
   const [text, setText] = useState("");
+  const [isAdding, setIsAdding] = useState(false);
   if (teams.length === 0) return null;
-  const teamId = chosenTeamId ?? teams[0]._id;
+  const teamId = teams.find((team) => team._id === chosenTeamId)?._id ?? teams[0]._id;
   const points = parseDecimal(text);
-  const canAdd = points !== null && isCorrection(points);
+  const canAdd = !isAdding && points !== null && isCorrection(points);
   const teamOf = (id: Id<"teams">) => teams.find((team) => team._id === id);
 
   return (
@@ -42,9 +43,14 @@ export function Corrections({ gameId, teams }: { gameId: Id<"games">; teams: Tea
         onSubmit={(event) => {
           event.preventDefault();
           if (!canAdd) return;
+          setIsAdding(true);
           run(async () => {
-            await addCorrection({ gameId, teamId, points });
-            setText("");
+            try {
+              await addCorrection({ gameId, teamId, points });
+              setText("");
+            } finally {
+              setIsAdding(false);
+            }
           });
         }}
       >

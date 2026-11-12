@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -57,6 +57,28 @@ describe("Corrections", () => {
     await userEvent.type(screen.getByLabelText("Poäng"), "0{Enter}");
     expect(screen.getByRole("button", { name: "Lägg till" })).toBeDisabled();
     expect(mutations.addCorrection).not.toHaveBeenCalled();
+  });
+
+  it("adds once while the first is on its way, however often Enter is pressed", async () => {
+    let finish = () => {};
+    mutations.addCorrection.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+    renderCorrections();
+    await userEvent.type(screen.getByLabelText("Poäng"), "2{Enter}{Enter}");
+    expect(mutations.addCorrection).toHaveBeenCalledTimes(1);
+    finish();
+    await waitFor(() => expect(screen.getByLabelText("Poäng")).toHaveValue(""));
+  });
+
+  it("goes back to the first team when the chosen one is gone", async () => {
+    const { rerender } = renderCorrections();
+    await userEvent.selectOptions(screen.getByLabelText("Lag"), "Renarna");
+    rerender(
+      <ActionErrorProvider>
+        <Corrections gameId={gameId} teams={teams.slice(0, 1)} />
+      </ActionErrorProvider>,
+    );
+    await userEvent.type(screen.getByLabelText("Poäng"), "1{Enter}");
+    expect(mutations.addCorrection).toHaveBeenCalledWith({ gameId, teamId: red, points: 1 });
   });
 
   it("lists the corrections with their sign, and takes one back", async () => {
