@@ -8,6 +8,9 @@
  * @module
  */
 
+import type * as adjustments_activityPointsOf from "../adjustments/activityPointsOf.js";
+import type * as adjustments_mutations from "../adjustments/mutations.js";
+import type * as adjustments_queries from "../adjustments/queries.js";
 import type * as adjustments_table from "../adjustments/table.js";
 import type * as aiJudge_judge from "../aiJudge/judge.js";
 import type * as aiJudge_judging from "../aiJudge/judging.js";
@@ -108,6 +111,9 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  "adjustments/activityPointsOf": typeof adjustments_activityPointsOf;
+  "adjustments/mutations": typeof adjustments_mutations;
+  "adjustments/queries": typeof adjustments_queries;
   "adjustments/table": typeof adjustments_table;
   "aiJudge/judge": typeof aiJudge_judge;
   "aiJudge/judging": typeof aiJudge_judging;

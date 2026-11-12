@@ -6,6 +6,7 @@ import { FollowGame } from "./FollowGame";
 vi.mock("@/features/player/results/QuestionResult", () => ({
   QuestionResult: ({ otherwise }: { otherwise: React.ReactNode }) => otherwise,
 }));
+vi.mock("./ActivityPoints", () => ({ ActivityPoints: () => <p>Aktivitetens poäng</p> }));
 vi.mock("@/features/player/answering/AnswerQuestion", () => ({
   AnswerQuestion: ({ secondsLeft }: { secondsLeft: number | null }) => <p>{secondsLeft === 0 ? "Svarsruta, tiden ute" : "Svarsruta"}</p>,
 }));
@@ -31,6 +32,13 @@ describe("FollowGame", () => {
   it("points at the TV for a question its type can't be answered in the app yet", () => {
     render(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} />);
     expect(screen.queryByText("Svarsruta")).not.toBeInTheDocument();
+  });
+
+  it("shows the team's points on an activity, and only there", () => {
+    const { rerender } = render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, answeredInApp: false }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    expect(screen.getByText("Aktivitetens poäng")).toBeInTheDocument();
+    rerender(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    expect(screen.queryByText("Aktivitetens poäng")).not.toBeInTheDocument();
   });
 
   it("lets the team answer a question answered in the app", () => {

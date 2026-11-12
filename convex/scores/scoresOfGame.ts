@@ -36,7 +36,7 @@ export async function scoresOfGame(ctx: QueryCtx, game: Doc<"games">) {
   const teams = await teamsOfGame(ctx, game._id);
   const adjustments = await ctx.db
     .query("adjustments")
-    .withIndex("by_gameId", (q) => q.eq("gameId", game._id))
+    .withIndex("by_gameId_and_questionId", (q) => q.eq("gameId", game._id))
     .take(MAX_ADJUSTMENTS_PER_GAME);
   const earned = [...(await pointsFromClosedQuestions(ctx, game)), ...adjustments];
   return sumScores(

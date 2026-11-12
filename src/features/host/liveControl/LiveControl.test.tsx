@@ -22,6 +22,8 @@ vi.mock("@/features/host/shared/useHostQuery", () => ({
     getFunctionName(query).endsWith("getReview") ? (args === "skip" ? undefined : review()) : nextScreen(),
 }));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
+vi.mock("./ActivityScoring", () => ({ ActivityScoring: ({ questionId }: { questionId: string }) => <p>Poäng för {questionId}</p> }));
+vi.mock("./Corrections", () => ({ Corrections: () => <p>Rätta poäng</p> }));
 vi.mock("./ReviewList", () => ({ ReviewList: ({ questionId }: { questionId: string }) => <p>Granskning av {questionId}</p> }));
 vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
 const scores = vi.fn();
@@ -183,6 +185,17 @@ describe("LiveControl", () => {
   it("lists no answers for a question not yet answered in the app", () => {
     renderControl({ view: question });
     expect(screen.queryByText("Svarat")).not.toBeInTheDocument();
+  });
+
+  it("lets the hosts give points on an activity's screen, and only there", () => {
+    renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: { ...question, answeredInApp: false } });
+    expect(screen.getByText("Poäng för q1")).toBeInTheDocument();
+    expect(screen.getByText("Rätta poäng")).toBeInTheDocument();
+  });
+
+  it("gives no activity points on a question answered in the app", () => {
+    renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: question });
+    expect(screen.queryByText("Poäng för q1")).not.toBeInTheDocument();
   });
 
   it("shows the leaderboard as it stands", () => {

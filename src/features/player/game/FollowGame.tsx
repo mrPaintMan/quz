@@ -7,6 +7,7 @@ import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { formatPoints } from "@/domain/scoring/formatPoints";
 import type { TeamColour } from "@/domain/teams/teamColours";
 import { AnswerQuestion } from "@/features/player/answering/AnswerQuestion";
+import { ActivityPoints } from "./ActivityPoints";
 import { QuestionResult } from "@/features/player/results/QuestionResult";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
@@ -72,6 +73,7 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
               <p role="status" className="text-2xl">
                 {phoneScreenText(view)}
               </p>
+              {screen.kind === "question" && view.kind === "question" && !view.answeredInApp && <ActivityPoints teamId={team._id} questionId={screen.questionId} />}
               {clock}
             </div>
           }

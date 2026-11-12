@@ -11,7 +11,9 @@ import { useAnsweredTeamIds } from "@/features/shared/answers/useAnsweredTeamIds
 import { useScores } from "@/features/shared/scores/useScores";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
+import { ActivityScoring } from "./ActivityScoring";
 import { AnswerStatusList } from "./AnswerStatusList";
+import { Corrections } from "./Corrections";
 import { EndGameButton } from "./EndGameButton";
 import { PlaybackControls } from "./PlaybackControls";
 import { QuestionNotes } from "./QuestionNotes";
@@ -93,6 +95,9 @@ export function LiveControl({ game }: { game: RunningGame }) {
           {notes?.current && notes.current.questionId !== notes.next?.questionId && (
             <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
           )}
+          {game.view.kind === "question" && !game.view.answeredInApp && questionOnScreen && (
+            <ActivityScoring gameId={gameId} questionId={questionOnScreen} teams={teams} />
+          )}
           {review && questionOnScreen && <ReviewList gameId={gameId} questionId={questionOnScreen} review={review} />}
           {waitingFor && (
             <p role="status" className="text-right text-sm text-primary">
@@ -138,6 +143,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
             </>
           )}
           {scores && <ScoreBoard scores={scores} />}
+          <Corrections gameId={gameId} teams={teams} />
         </section>
       </main>
     </div>

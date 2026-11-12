@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). M3 continues with points by hand (activities and adjustments, the base Rita needs), then Rita and På spåret, each with all four pieces (rules, phone input, TV display, phone result). Kartnål is done (D60). Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand are done (D61). M3 continues with Rita, then På spåret, each with all four pieces (rules, phone input, TV display, phone result); Rita's drawings are scored by hand like activities. Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
 
 ## Milestones
 
@@ -74,7 +74,7 @@ The feedback round from the user's test night (2026-11-11) is done, and the phon
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
 - [x] AI judge and review for list questions, two forms of one answer counting once (D53). When På spåret is built, replace its editor's old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) with the AI judge's switch
 - [x] Show each team which of its answers were judged right or wrong (D50, D58)
-- [ ] Host overrides and manual points
+- [x] Host overrides (the review list, D51) and manual points: activities and corrections (D61)
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
 
 ### Feedback round (2026-11-11), paused M3
@@ -146,3 +146,4 @@ Agreed with the user, in this order:
 - 2026-11-11: Feedback round 5, phones show what scored: after the answer, the team's own answer part by part with its points, following verdicts; grading is now built from per-part outcomes, so the phones and the scores can't disagree (D58). Not tried in a browser with data.
 - 2026-11-12: The phone's result after the answer: each type's answer drawn like its input, the parts that scored lit up in gold one after another with their points, a wrong Flerval pick in red; a fourth registry entry per type (D59). Not tried in a browser with data.
 - 2026-11-12: Kartnål with all four pieces: answered by moving the map under the middle pin; the TV's answer shows the right place, the radius and every team's pin with its distance; the phone's result shows the team's pin glowing when it scored, the distance, and every other team's pin on a map free to move (D60). Not tried in a browser with data.
+- 2026-11-12: Points by hand: the hosts give each team its points on an activity's screen with − / + or a typed number, and the phone shows them; "Rätta poäng" under the Topplista adds or takes away points at any time, no reason asked (D61). Not tried in a browser with data.
