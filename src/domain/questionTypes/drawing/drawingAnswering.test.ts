@@ -19,6 +19,11 @@ describe("drawingAnswering", () => {
     expect(drawingAnswering.reveal(content)).toEqual({ type: "drawing", drawings: [] });
   });
 
+  it("leaves out a paper that locked empty", () => {
+    const graded = { answers: [{ type: "drawing" as const, strokes: [] }], verdicts: [], teams: [team("Röda")] };
+    expect(drawingAnswering.reveal(content, graded).drawings).toEqual([]);
+  });
+
   it("can be sent once something is drawn", () => {
     expect(drawingAnswering.isComplete({ type: "drawing" }, drawing([0.1, 0.2]))).toBe(true);
     expect(drawingAnswering.isComplete({ type: "drawing" }, { type: "drawing", strokes: [] })).toBe(false);

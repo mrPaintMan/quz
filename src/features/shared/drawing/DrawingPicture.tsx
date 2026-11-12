@@ -1,6 +1,6 @@
 import type { SVGProps } from "react";
 import type { AnswerOf } from "@convex/answers/answerContent";
-import { penHex } from "./penColours";
+import { penHex, type PenColour } from "./penColours";
 
 type Stroke = AnswerOf<"drawing">["strokes"][number];
 
@@ -18,21 +18,18 @@ export function strokePath(points: number[]): string {
   return `M ${at(0)} ${rest.join(" ")}`;
 }
 
+// One stroke in its pen's ink, round at its ends and corners.
+export function StrokePath({ points, colour }: { points: number[]; colour: PenColour }) {
+  return <path d={strokePath(points)} fill="none" stroke={penHex(colour)} strokeWidth={PEN_WIDTH} strokeLinecap="round" strokeLinejoin="round" />;
+}
+
 // A team's drawing on white paper, the same on the phone and the TV at any size.
 export function DrawingPicture({ strokes, label, ...props }: { strokes: Stroke[]; label: string } & SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox={`0 0 ${CANVAS_WIDTH} ${CANVAS_HEIGHT}`} role="img" aria-label={label} {...props}>
-      <rect width={CANVAS_WIDTH} height={CANVAS_HEIGHT} fill="#ffffff" />
+      <rect width={CANVAS_WIDTH} height={CANVAS_HEIGHT} rx={8} fill="#ffffff" />
       {strokes.map((stroke, index) => (
-        <path
-          key={index}
-          d={strokePath(stroke.points)}
-          fill="none"
-          stroke={penHex(stroke.colour)}
-          strokeWidth={PEN_WIDTH}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+        <StrokePath key={index} points={stroke.points} colour={stroke.colour} />
       ))}
       {props.children}
     </svg>

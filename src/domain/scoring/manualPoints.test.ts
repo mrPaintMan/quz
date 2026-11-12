@@ -9,7 +9,7 @@ describe("roundPoints", () => {
 });
 
 describe("isHandPoints", () => {
-  it("allows 0 up to the activity's most, halves included", () => {
+  it("allows 0 up to the question's most, halves included", () => {
     expect(isHandPoints(0, 5)).toBe(true);
     expect(isHandPoints(4.5, 5)).toBe(true);
     expect(isHandPoints(5.5, 5)).toBe(false);

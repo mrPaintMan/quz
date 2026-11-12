@@ -11,7 +11,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { lockQuestion } from "../answers/lockQuestion";
 import { scheduleTimeOutLock } from "../answers/timeOut";
-import { handScoringOf } from "../adjustments/handPointsOf";
+import { handScoringOf } from "../adjustments/handScoringOf";
 import { judgingOfQuestion } from "../verdicts/judgingOfQuestion";
 import type { Screen } from "./screen";
 import { placeOfGame } from "./placeOfGame";

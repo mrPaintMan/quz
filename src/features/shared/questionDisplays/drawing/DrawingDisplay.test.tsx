@@ -21,7 +21,7 @@ describe("DrawingAnswer", () => {
   it("spreads more than four drawings over three columns", () => {
     const drawings = ["A", "B", "C", "D", "E"].map(drawing);
     render(<DrawingAnswer revealed={{ type: "drawing", drawings }} imageUrls={{}} />);
-    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" });
+    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gridTemplateRows: "repeat(2, minmax(0, 1fr))" });
   });
 
   it("says when no team drew anything", () => {

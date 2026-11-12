@@ -2,7 +2,8 @@ import { v } from "convex/values";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
 import { MAX_ADJUSTMENTS_PER_GAME } from "../games/deleteGame";
-import { handPointsOf, handScoringOf } from "./handPointsOf";
+import { handPointsOf } from "./handPointsOf";
+import { handScoringOf } from "./handScoringOf";
 
 // Host-only: the teams the hosts score by hand on a question, each with its points so far or null,
 // and the question's most points (D61, D62); null for a question the app scores.

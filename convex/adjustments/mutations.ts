@@ -5,7 +5,8 @@ import type { QueryCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { requireRunningGame } from "../games/requireRunningGame";
 import { getOrThrow } from "../shared/getOrThrow";
-import { handPointsOf, handScoringOf } from "./handPointsOf";
+import { handPointsOf } from "./handPointsOf";
+import { handScoringOf } from "./handScoringOf";
 
 async function requireTeamOf(ctx: QueryCtx, game: Doc<"games">, teamId: Id<"teams">) {
   const team = await getOrThrow(ctx, "teams", teamId);

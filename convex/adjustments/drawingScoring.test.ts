@@ -35,3 +35,11 @@ describe("scoring drawings by hand", () => {
     expect(game?.view).toMatchObject({ kind: "answer", revealed: { type: "drawing", drawings: [{ name: "Röda", colour: "red", strokes: redDrawing.strokes }] } });
   });
 });
+
+describe("a paper cleared before the time ran out", () => {
+  it("counts as no answer on the phone", async () => {
+    const { t, gameId, drawingId, blue } = await atDrawing();
+    await t.run((ctx) => ctx.db.insert("answers", { gameId, teamId: blue, questionId: drawingId, content: { type: "drawing", strokes: [] }, lockedAt: 2 }));
+    expect(await t.query(api.answers.queries.getTeamFeedback, { teamId: blue })).toMatchObject({ outcome: null });
+  });
+});

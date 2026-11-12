@@ -9,6 +9,7 @@
  */
 
 import type * as adjustments_handPointsOf from "../adjustments/handPointsOf.js";
+import type * as adjustments_handScoringOf from "../adjustments/handScoringOf.js";
 import type * as adjustments_mutations from "../adjustments/mutations.js";
 import type * as adjustments_queries from "../adjustments/queries.js";
 import type * as adjustments_table from "../adjustments/table.js";
@@ -112,6 +113,7 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   "adjustments/handPointsOf": typeof adjustments_handPointsOf;
+  "adjustments/handScoringOf": typeof adjustments_handScoringOf;
   "adjustments/mutations": typeof adjustments_mutations;
   "adjustments/queries": typeof adjustments_queries;
   "adjustments/table": typeof adjustments_table;

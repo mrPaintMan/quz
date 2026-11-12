@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { AnswerOf } from "@convex/answers/answerContent";
-import { MAX_DRAWING_POINTS } from "@/domain/questionTypes/drawing/drawingLimits";
+import { MAX_DRAWING_POINTS, MAX_STROKES } from "@/domain/questionTypes/drawing/drawingLimits";
 import { DrawingInput } from "./DrawingInput";
 
 const onChange = vi.fn();
@@ -61,6 +61,30 @@ describe("DrawingInput", () => {
     expect(screen.getByText("Pappret är fullt.")).toBeInTheDocument();
     draw([10, 10], [100, 100]);
     expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("stops drawing once the paper holds the most strokes", () => {
+    renderInput({ type: "drawing", strokes: Array.from({ length: MAX_STROKES }, () => line) });
+    expect(screen.getByText("Pappret är fullt.")).toBeInTheDocument();
+  });
+
+  it("ignores a second finger while one draws", () => {
+    renderInput(null);
+    const paper = screen.getByRole("img", { name: "Rita här" });
+    fireEvent.pointerDown(paper, { clientX: 40, clientY: 30, pointerId: 1 });
+    fireEvent.pointerDown(paper, { clientX: 400, clientY: 300, pointerId: 2 });
+    fireEvent.pointerMove(paper, { clientX: 400, clientY: 300, pointerId: 2 });
+    fireEvent.pointerUp(paper, { pointerId: 2 });
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.pointerMove(paper, { clientX: 200, clientY: 150, pointerId: 1 });
+    fireEvent.pointerUp(paper, { pointerId: 1 });
+    expect(onChange).toHaveBeenCalledWith({ type: "drawing", strokes: [{ colour: "black", points: [0.1, 0.1, 0.5, 0.5] }] });
+  });
+
+  it("keeps every point of a quick stroke, even between redraws", () => {
+    renderInput(null);
+    draw([40, 30], [80, 60], [120, 90], [160, 120]);
+    expect(onChange).toHaveBeenCalledWith({ type: "drawing", strokes: [{ colour: "black", points: [0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4] }] });
   });
 
   it("shows the drawing as sent once locked", () => {

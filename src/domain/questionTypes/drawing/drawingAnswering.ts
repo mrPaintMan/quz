@@ -13,9 +13,10 @@ export const drawingAnswering: AnsweringRules<"drawing", DrawingShown, DrawingRe
   show: () => ({ type: "drawing" }),
   reveal: (_content, graded) => ({
     type: "drawing",
+    // A paper cleared before the time ran out locks empty and shows as no drawing.
     drawings: (graded?.answers ?? []).flatMap(({ strokes }, index) => {
       const team = graded?.teams[index];
-      return team ? [{ teamId: team._id, name: team.name, colour: team.colour, strokes }] : [];
+      return team && strokes.length > 0 ? [{ teamId: team._id, name: team.name, colour: team.colour, strokes }] : [];
     }),
   }),
   revealsAnswers: true,
