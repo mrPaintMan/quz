@@ -11,6 +11,7 @@ import type { Doc, Id } from "../_generated/dataModel";
 import type { MutationCtx } from "../_generated/server";
 import { lockQuestion } from "../answers/lockQuestion";
 import { scheduleTimeOutLock } from "../answers/timeOut";
+import { handScoringOf } from "../adjustments/handScoringOf";
 import { judgingOfQuestion } from "../verdicts/judgingOfQuestion";
 import type { Screen } from "./screen";
 import { placeOfGame } from "./placeOfGame";
@@ -44,11 +45,16 @@ export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Sc
 }
 
 // Nästa waits on a question, or its answer screen, while its answers are being judged, so the
-// answer and the scores are final when they show (D55).
+// answer and the scores are final when they show (D55); on the answer screen of a question scored
+// by hand, such as a drawing, until every sent answer has its points (D62).
 async function requireJudged(ctx: MutationCtx, game: Doc<"games">, from: Screen, rounds: { questions: Doc<"questions">[] }[]) {
   if (from.kind !== "question" && from.kind !== "answer") return;
   const question = rounds.flatMap((round) => round.questions).find((candidate) => candidate._id === from.questionId);
   if (question && !(await judgingOfQuestion(ctx, game, question)).canStepOn) {
     throw new ConvexError("Alla svar behöver bedömas innan ni går vidare.");
+  }
+  const scoring = question && from.kind === "answer" ? await handScoringOf(ctx, game._id, question) : null;
+  if (scoring?.teams.some((team) => team.points === null)) {
+    throw new ConvexError("Alla svar behöver poäng innan ni går vidare.");
   }
 }

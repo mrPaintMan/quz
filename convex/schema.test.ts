@@ -34,7 +34,7 @@ const oneAnswerOfEachType: AnswerContent[] = [
   { type: "match", rightByLeft: ["Norge", null] },
   { type: "list", items: ["Oslo", "Bern"] },
   { type: "ingredients", items: ["glögg", ""] },
-  { type: "drawing", strokes: [[0.1, 0.2, 0.3, 0.4]] },
+  { type: "drawing", strokes: [{ colour: "red", points: [0.1, 0.2, 0.3, 0.4] }] },
   { type: "mapPin", pin: { lat: 67.85, lng: 20.23 } },
   { type: "paSparet", guess: "Kiruna", brakeClueIndex: 2 },
 ];

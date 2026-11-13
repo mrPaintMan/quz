@@ -1,0 +1,95 @@
+import { fireEvent, render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { AnswerOf } from "@convex/answers/answerContent";
+import { MAX_DRAWING_POINTS, MAX_STROKES } from "@/domain/questionTypes/drawing/drawingLimits";
+import { DrawingInput } from "./DrawingInput";
+
+const onChange = vi.fn();
+type Drawing = AnswerOf<"drawing">;
+const line = { colour: "black" as const, points: [0.1, 0.1, 0.2, 0.2] };
+
+const renderInput = (answer: Drawing | null, disabled = false) =>
+  render(<DrawingInput shown={{ type: "drawing" }} answer={answer} imageUrls={{}} disabled={disabled} onChange={onChange} />);
+
+// Draws through the given points on the 400 × 300 paper, in pixels.
+function draw(...points: [number, number][]) {
+  const paper = screen.getByRole("img", { name: "Rita här" });
+  const [first, ...rest] = points;
+  fireEvent.pointerDown(paper, { clientX: first[0], clientY: first[1], pointerId: 1 });
+  rest.forEach(([x, y]) => fireEvent.pointerMove(paper, { clientX: x, clientY: y, pointerId: 1 }));
+  fireEvent.pointerUp(paper, { pointerId: 1 });
+}
+
+describe("DrawingInput", () => {
+  beforeEach(() => {
+    onChange.mockReset();
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 400, height: 300 } as DOMRect);
+  });
+
+  it("adds a finished stroke in the chosen pen, as parts of the paper", async () => {
+    renderInput(null);
+    await userEvent.click(screen.getByRole("button", { name: "Röd" }));
+    expect(screen.getByRole("button", { name: "Röd" })).toHaveAttribute("aria-pressed", "true");
+    draw([40, 30], [200, 150], [200.5, 150]);
+    expect(onChange).toHaveBeenCalledWith({ type: "drawing", strokes: [{ colour: "red", points: [0.1, 0.1, 0.5, 0.5] }] });
+  });
+
+  it("keeps the strokes drawn before", () => {
+    renderInput({ type: "drawing", strokes: [line] });
+    draw([400, 300]);
+    expect(onChange).toHaveBeenCalledWith({ type: "drawing", strokes: [line, { colour: "black", points: [1, 1] }] });
+  });
+
+  it("takes back the last stroke with Ångra and clears the paper with Rensa", async () => {
+    renderInput({ type: "drawing", strokes: [line, line] });
+    await userEvent.click(screen.getByRole("button", { name: "Ångra" }));
+    expect(onChange).toHaveBeenLastCalledWith({ type: "drawing", strokes: [line] });
+    await userEvent.click(screen.getByRole("button", { name: "Rensa" }));
+    expect(onChange).toHaveBeenLastCalledWith({ type: "drawing", strokes: [] });
+  });
+
+  it("has nothing to take back on empty paper", () => {
+    renderInput(null);
+    expect(screen.getByRole("button", { name: "Ångra" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Rensa" })).toBeDisabled();
+  });
+
+  it("stops drawing once the paper is full", () => {
+    const full = { colour: "black" as const, points: Array.from({ length: MAX_DRAWING_POINTS * 2 }, () => 0.5) };
+    renderInput({ type: "drawing", strokes: [full] });
+    expect(screen.getByText("Pappret är fullt.")).toBeInTheDocument();
+    draw([10, 10], [100, 100]);
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("stops drawing once the paper holds the most strokes", () => {
+    renderInput({ type: "drawing", strokes: Array.from({ length: MAX_STROKES }, () => line) });
+    expect(screen.getByText("Pappret är fullt.")).toBeInTheDocument();
+  });
+
+  it("ignores a second finger while one draws", () => {
+    renderInput(null);
+    const paper = screen.getByRole("img", { name: "Rita här" });
+    fireEvent.pointerDown(paper, { clientX: 40, clientY: 30, pointerId: 1 });
+    fireEvent.pointerDown(paper, { clientX: 400, clientY: 300, pointerId: 2 });
+    fireEvent.pointerMove(paper, { clientX: 400, clientY: 300, pointerId: 2 });
+    fireEvent.pointerUp(paper, { pointerId: 2 });
+    expect(onChange).not.toHaveBeenCalled();
+    fireEvent.pointerMove(paper, { clientX: 200, clientY: 150, pointerId: 1 });
+    fireEvent.pointerUp(paper, { pointerId: 1 });
+    expect(onChange).toHaveBeenCalledWith({ type: "drawing", strokes: [{ colour: "black", points: [0.1, 0.1, 0.5, 0.5] }] });
+  });
+
+  it("keeps every point of a quick stroke, even between redraws", () => {
+    renderInput(null);
+    draw([40, 30], [80, 60], [120, 90], [160, 120]);
+    expect(onChange).toHaveBeenCalledWith({ type: "drawing", strokes: [{ colour: "black", points: [0.1, 0.1, 0.2, 0.2, 0.3, 0.3, 0.4, 0.4] }] });
+  });
+
+  it("shows the drawing as sent once locked", () => {
+    renderInput({ type: "drawing", strokes: [line] }, true);
+    expect(screen.getByRole("img", { name: "Er teckning" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Ångra" })).not.toBeInTheDocument();
+  });
+});

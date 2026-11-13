@@ -1,21 +1,22 @@
 "use client";
 
+import type { FunctionReturnType } from "convex/server";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { isActivityPoints } from "@/domain/scoring/manualPoints";
+import { isHandPoints } from "@/domain/scoring/manualPoints";
 import { formatPoints } from "@/domain/scoring/formatPoints";
 import type { TeamColour } from "@/domain/teams/teamColours";
 import { formatDecimal } from "@/domain/text/formatDecimal";
 import { parseDecimal } from "@/domain/text/parseDecimal";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
-import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { useDraftText } from "@/features/shared/forms/useDraftText";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
 
 type Team = { _id: Id<"teams">; name: string; colour: TeamColour };
+export type HandScoringState = NonNullable<FunctionReturnType<typeof api.adjustments.queries.getHandPoints>>;
 
 const formatGiven = (points: number | null) => (points === null ? "" : formatDecimal(points));
 
@@ -25,7 +26,7 @@ const formatGiven = (points: number | null) => (points === null ? "" : formatDec
 function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: number | null; maxPoints: number | null; onSet: (points: number | null) => void }) {
   const [text, setText] = useDraftText(points, formatGiven, parseDecimal);
   const typed = parseDecimal(text);
-  const isInvalid = text.trim() !== "" && (typed === null || !isActivityPoints(typed, maxPoints));
+  const isInvalid = text.trim() !== "" && (typed === null || !isHandPoints(typed, maxPoints));
   const now = points ?? 0;
   const atMost = (value: number) => (maxPoints === null ? value : Math.min(value, maxPoints));
   return (
@@ -64,26 +65,41 @@ function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: nu
   );
 }
 
-// On an activity's screen, the hosts give each team its points, from 0 up to the activity's most
-// (D61). They count at once and show on the team's phone; Nästa doesn't wait for them.
-export function ActivityScoring({ gameId, questionId, teams }: { gameId: Id<"games">; questionId: Id<"questions">; teams: Team[] }) {
-  const activity = useHostQuery(api.adjustments.queries.getActivityPoints, { gameId, questionId });
-  const setActivityPoints = useHostMutation(api.adjustments.mutations.setActivityPoints);
+// The hosts give each team its points by hand, from 0 up to the question's most: every team on an
+// activity's screen (D61), the teams that sent one on a drawing's answer screen (D62). They count at
+// once; the team's phone shows them.
+export function HandScoring({
+  gameId,
+  questionId,
+  title,
+  scoring,
+  teams,
+}: {
+  gameId: Id<"games">;
+  questionId: Id<"questions">;
+  title: string;
+  scoring: HandScoringState;
+  teams: Team[];
+}) {
+  const setHandPoints = useHostMutation(api.adjustments.mutations.setHandPoints);
   const run = useRunAction();
-  if (!activity || teams.length === 0) return null;
-  const pointsOf = (teamId: Id<"teams">) => activity.teams.find((given) => given.teamId === teamId)?.points ?? null;
+  const scored = scoring.teams.flatMap(({ teamId, points }) => {
+    const team = teams.find((candidate) => candidate._id === teamId);
+    return team ? [{ team, points }] : [];
+  });
   return (
     <section className="flex flex-col gap-1 rounded-xl border bg-card p-4">
-      <h3 className="font-semibold">Poäng för aktiviteten</h3>
-      {activity.maxPoints !== null && <p className="text-sm text-muted-foreground">Högst {formatPoints(activity.maxPoints)} per lag.</p>}
+      <h3 className="font-semibold">{title}</h3>
+      {scoring.maxPoints !== null && <p className="text-sm text-muted-foreground">Högst {formatPoints(scoring.maxPoints)} per lag.</p>}
+      {scored.length === 0 && <p className="text-sm text-muted-foreground">Inga svar.</p>}
       <ul className="flex flex-col">
-        {teams.map((team) => (
+        {scored.map(({ team, points }) => (
           <TeamPoints
             key={team._id}
             team={team}
-            points={pointsOf(team._id)}
-            maxPoints={activity.maxPoints}
-            onSet={(points) => run(() => setActivityPoints({ gameId, questionId, teamId: team._id, points }))}
+            points={points}
+            maxPoints={scoring.maxPoints}
+            onSet={(next) => run(() => setHandPoints({ gameId, questionId, teamId: team._id, points: next }))}
           />
         ))}
       </ul>

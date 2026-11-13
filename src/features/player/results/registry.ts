@@ -9,6 +9,7 @@ import { MultipleChoiceResult } from "./multipleChoice/MultipleChoiceResult";
 import { NumberResult } from "./number/NumberResult";
 import type { ResultViewProps } from "./ResultViewProps";
 import { SortResult } from "./sort/SortResult";
+import { DrawingResult } from "./drawing/DrawingResult";
 
 // How each type shows the team's own answer on its phone once the answer is out: drawn like its
 // input, the parts that scored lit up (D59). The fourth entry of a type's answering, beside its
@@ -21,7 +22,7 @@ export const resultViews: { [T in AnsweredType]: ComponentType<ResultViewProps<T
   match: MatchResult,
   list: ListResult,
   ingredients: IngredientsResult,
-  drawing: null,
+  drawing: DrawingResult,
   mapPin: MapPinResult,
   paSparet: null,
 };

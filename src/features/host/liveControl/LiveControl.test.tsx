@@ -17,12 +17,17 @@ const mutations = { goToNextScreen: vi.fn(), goToPreviousScreen: vi.fn() };
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("convex/react", () => ({ useQuery: () => [{ _id: "t1", name: "Tomtarna", colour: "red" }] }));
 const review = vi.fn();
+const handPoints = vi.fn();
 vi.mock("@/features/host/shared/useHostQuery", () => ({
-  useHostQuery: (query: FunctionReference<"query">, args: unknown) =>
-    getFunctionName(query).endsWith("getReview") ? (args === "skip" ? undefined : review()) : nextScreen(),
+  useHostQuery: (query: FunctionReference<"query">, args: unknown) => {
+    if (args === "skip") return undefined;
+    const name = getFunctionName(query);
+    if (name.endsWith("getReview")) return review();
+    return name.endsWith("getHandPoints") ? handPoints() : nextScreen();
+  },
 }));
 vi.mock("./TripClueLine", () => ({ TripClueLine: () => <p>Ledtrådsrad</p> }));
-vi.mock("./ActivityScoring", () => ({ ActivityScoring: ({ questionId }: { questionId: string }) => <p>Poäng för {questionId}</p> }));
+vi.mock("./HandScoring", () => ({ HandScoring: ({ questionId, title }: { questionId: string; title: string }) => <p>{`${title} ${questionId}`}</p> }));
 vi.mock("./Corrections", () => ({ Corrections: () => <p>Rätta poäng</p> }));
 vi.mock("./ReviewList", () => ({ ReviewList: ({ questionId }: { questionId: string }) => <p>Granskning av {questionId}</p> }));
 vi.mock("@/features/shared/answers/useAnsweredTeamIds", () => ({ useAnsweredTeamIds: () => ["t1"] }));
@@ -57,6 +62,7 @@ describe("LiveControl", () => {
     scores.mockReturnValue([]);
     nextScreen.mockReturnValue(rulesNext);
     review.mockReturnValue(null);
+    handPoints.mockReturnValue({ maxPoints: 5, teams: [] });
     Object.values(mutations).forEach((mutation) => mutation.mockReset().mockResolvedValue(null));
   });
 
@@ -189,13 +195,30 @@ describe("LiveControl", () => {
 
   it("lets the hosts give points on an activity's screen, and only there", () => {
     renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: { ...question, answeredInApp: false } });
-    expect(screen.getByText("Poäng för q1")).toBeInTheDocument();
+    expect(screen.getByText("Poäng för aktiviteten q1")).toBeInTheDocument();
     expect(screen.getByText("Rätta poäng")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeEnabled();
   });
 
-  it("gives no activity points on a question answered in the app", () => {
+  it("gives no points by hand on a question answered in the app", () => {
     renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: question });
-    expect(screen.queryByText("Poäng för q1")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Poäng för/)).not.toBeInTheDocument();
+  });
+
+  it("lets the hosts score the drawings on their answer screen, Nästa waiting until each has points", () => {
+    const drawingAnswer: ScreenView = { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "Rita en tomte", revealed: { type: "drawing", drawings: [] } };
+    handPoints.mockReturnValue({ maxPoints: 3, teams: [{ teamId: "t1", points: 2 }, { teamId: "t2", points: null }] });
+    renderControl({ screenNow: { kind: "answer", questionId: "q1" as Id<"questions"> }, view: drawingAnswer });
+    expect(screen.getByText("Poäng för teckningarna q1")).toBeInTheDocument();
+    expect(screen.getByText("Nästa väntar tills alla teckningar har poäng (1 kvar).")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
+  });
+
+  it("keeps Nästa disabled until the drawings' points have loaded", () => {
+    const drawingAnswer: ScreenView = { kind: "answer", roundNumber: 1, questionNumber: 2, prompt: "Rita en tomte", revealed: { type: "drawing", drawings: [] } };
+    handPoints.mockReturnValue(undefined);
+    renderControl({ screenNow: { kind: "answer", questionId: "q1" as Id<"questions"> }, view: drawingAnswer });
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
   });
 
   it("shows the leaderboard as it stands", () => {

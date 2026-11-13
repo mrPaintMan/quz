@@ -2,8 +2,11 @@ import { v } from "convex/values";
 import { answeringOf, reviewOf } from "@/domain/answering/registry";
 import { feedbackQuestionId } from "@/domain/answers/feedbackQuestionId";
 import { isAnswerFor } from "@/domain/answers/isAnswerFor";
+import { isGivenAnswer } from "@/domain/answers/isGivenAnswer";
 import { outcomesOfAnswers } from "@/domain/scoring/gradeAnswers";
+import { handOutcome } from "@/domain/scoring/handOutcome";
 import { query } from "../_generated/server";
+import { handPointsOf } from "../adjustments/handPointsOf";
 import { linkImages } from "../media/linkImages";
 import { gradedOfQuestion } from "./gradedOfQuestion";
 import { lockedAnswersOfQuestion } from "./lockedAnswersOfQuestion";
@@ -52,6 +55,14 @@ export const getTeamFeedback = query({
     );
     const index = locked.findIndex((answer) => answer.teamId === teamId);
     const own = locked[index];
+    // An answer scored by hand counts the hosts' points for it, waiting until they give them; one
+    // that locked empty, such as a cleared drawing, is no answer (D62).
+    const handOutcomeOf = async (answer: (typeof locked)[number]) => {
+      if (!isGivenAnswer(question.content, answer.content)) return null;
+      const given = (await handPointsOf(ctx, game._id, question._id)).find((adjustment) => adjustment.teamId === teamId);
+      return handOutcome(given?.points ?? null);
+    };
+    const outcome = !own ? null : answering.scoredByHand ? await handOutcomeOf(own) : outcomes[index];
     return {
       prompt: question.prompt,
       // What the question showed while asked and the team's own sent answer, so the phone can draw
@@ -61,7 +72,7 @@ export const getTeamFeedback = query({
       revealed: answering.revealToTeams ? answering.revealToTeams(question.content, graded) : null,
       imageUrls: await linkImages(ctx, answering.imageIds(question.content)),
       answer: own && isAnswerFor(question.content, own.content) ? own.content : null,
-      outcome: index === -1 ? null : outcomes[index],
+      outcome,
     };
   },
 });

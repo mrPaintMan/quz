@@ -9,7 +9,7 @@ describe("answeringOf", () => {
 
   it("gives none for an activity or a type not built yet", () => {
     expect(answeringOf({ type: "activity", maxPoints: 5 })).toBeNull();
-    expect(answeringOf({ type: "drawing", maxPoints: 5 })).toBeNull();
+    expect(answeringOf({ type: "paSparet", acceptedAnswers: [], fuzzy: false, clues: [] })).toBeNull();
   });
 });
 
@@ -22,7 +22,7 @@ describe("isAnswerComplete", () => {
   });
 
   it("counts an answer of a type not built yet as complete", () => {
-    expect(isAnswerComplete(null, { type: "drawing", strokes: [] })).toBe(true);
+    expect(isAnswerComplete(null, { type: "paSparet", guess: "", brakeClueIndex: null })).toBe(true);
   });
 });
 
@@ -44,6 +44,11 @@ describe("reviewOf", () => {
 });
 
 describe("fitsAnswerLimits", () => {
+  it("asks a type with limits of its own, such as a drawing's points", () => {
+    expect(fitsAnswerLimits({ type: "drawing", strokes: [{ colour: "red", points: [0.1, 0.2] }] })).toBe(true);
+    expect(fitsAnswerLimits({ type: "drawing", strokes: [{ colour: "red", points: [2, 0.2] }] })).toBe(false);
+  });
+
   it("caps how many typed texts an answer holds and how long each is", () => {
     const list = (count: number, text = "Oslo") => ({ type: "list" as const, items: Array.from({ length: count }, () => text) });
     expect(fitsAnswerLimits(list(MAX_TYPED_TEXTS))).toBe(true);
