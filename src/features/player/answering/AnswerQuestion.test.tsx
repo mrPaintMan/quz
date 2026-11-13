@@ -137,6 +137,26 @@ describe("AnswerQuestion", () => {
     expect(screen.queryByRole("button", { name: "Skicka svar" })).not.toBeInTheDocument();
   });
 
+  it("leaves sending a trip's guess to its emergency brake", async () => {
+    saved.mockReturnValue({ content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: null }, isLocked: false });
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={null} film={null} />);
+    expect(screen.queryByRole("button", { name: "Skicka svar" })).not.toBeInTheDocument();
+    await user().type(screen.getByRole("slider"), "{Enter}");
+    expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: null } });
+  });
+
+  it("shows a braked guess as its own input shows it, with no sent line", () => {
+    saved.mockReturnValue({ content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: 1 }, isLocked: true });
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={null} />);
+    expect(screen.getByText("på 8 poäng")).toBeInTheDocument();
+    expect(screen.queryByText("Svar skickat ✓")).not.toBeInTheDocument();
+  });
+
+  it("says when a trip's time ran out with nothing saved", () => {
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={0} />);
+    expect(screen.getByText("Inget svar sparades.")).toBeInTheDocument();
+  });
+
   it("can send the order a sort question starts from, without a draft", async () => {
     const sortShown = { type: "sort" as const, items: ["Avatar", "Titanic"], firstLabel: "Äldst", lastLabel: "Nyast" };
     render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={sortShown} imageUrls={{}} secondsLeft={null} />);

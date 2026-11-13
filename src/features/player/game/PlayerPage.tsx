@@ -6,6 +6,7 @@ import { api } from "@convex/_generated/api";
 import { JoinForm } from "@/features/player/join/JoinForm";
 import { useSavedTeamId } from "@/features/player/join/useSavedTeamId";
 import { useScores } from "@/features/shared/scores/useScores";
+import { findTripFilm } from "./findTripFilm";
 import { FollowGame } from "./FollowGame";
 import { NoGameRunning } from "./NoGameRunning";
 import type { RunningGame } from "@/features/shared/game/RunningGame";
@@ -35,6 +36,7 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
         imageUrls={game.imageUrls}
         timer={game.timer}
         isQuestionClosed={game.isQuestionClosed}
+        film={findTripFilm(game)}
       />
     );
   }

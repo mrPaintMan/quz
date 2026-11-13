@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61) and Rita (D62) are done. M3 continues with På spåret, with all four pieces (rules, phone input, TV display, phone result). Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. Next: try a whole night in dev (the cloud sessions can't reach Convex), then M4's score graph and M5's polish.
 
 ## Milestones
 
@@ -69,10 +69,10 @@ The feedback round from the user's test night (2026-11-11) is done, and the phon
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
 ### M3 · Answering and grading, all types
-- [ ] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Kartnål, every team's pin on the TV and the phones (D60); Fritext, exact answers until the AI judge (D49); Nämn så många som möjligt, with the right items on the TV (D53); Rita, drawn on the phone and scored by hand (D62)
+- [x] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Kartnål, every team's pin on the TV and the phones (D60); Fritext, exact answers until the AI judge (D49); Nämn så många som möjligt, with the right items on the TV (D53); Rita, drawn on the phone and scored by hand (D62); På spåret, sent by the emergency brake (D63)
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
-- [x] AI judge and review for list questions, two forms of one answer counting once (D53). When På spåret is built, replace its editor's old "Rätta med ungefärlig matchning" switch (fuzzy matching is gone, D50) with the AI judge's switch
+- [x] AI judge and review for list questions, two forms of one answer counting once (D53); På spåret's editor now has the AI judge's switch (D63)
 - [x] Show each team which of its answers were judged right or wrong (D50, D58)
 - [x] Host overrides (the review list, D51) and manual points: activities and corrections (D61)
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)
@@ -86,9 +86,9 @@ Agreed with the user, in this order:
 5. [x] Phones show what scored: from the answer screen until the next question, each team's own answer marked right or wrong per item, with its points; follows verdict changes (D58)
 
 ### M4 · Highlights
-- [ ] På spåret: clue reveal and emergency brake
-- [ ] Map pin answer input and reveal with radius, reusing `BorderMap` (D27)
-- [ ] Drawing answers shown on the TV
+- [x] På spåret: clue reveal and emergency brake (D40, D63)
+- [x] Map pin answer input and reveal with radius, reusing `BorderMap` (D27, D60)
+- [x] Drawing answers shown on the TV (D62)
 - [ ] Score history and score graph on the TV
 
 ### M5 · Polish and launch (late November)
@@ -148,3 +148,4 @@ Agreed with the user, in this order:
 - 2026-11-12: Kartnål with all four pieces: answered by moving the map under the middle pin; the TV's answer shows the right place, the radius and every team's pin with its distance; the phone's result shows the team's pin glowing when it scored, the distance, and every other team's pin on a map free to move (D60). Not tried in a browser with data.
 - 2026-11-12: Points by hand: the hosts give each team its points on an activity's screen with − / + or a typed number, and the phone shows them; "Rätta poäng" under the Topplista adds or takes away points at any time, no reason asked (D61). Not tried in a browser with data.
 - 2026-11-12: Rita with all four pieces: drawn on the phone with five pens, Ångra and Rensa; every team's drawing side by side on the TV's answer screen; the hosts score each by hand there and Nästa waits until all have points; the phone's result shows the drawing waiting, then lit with its points (D62). Not tried in a browser with data.
+- 2026-11-13: På spåret with all four pieces: the guess written on the phone and sent by "Dra i nödbromsen", stamped by the server with the clue showing; "2 av 6 lag har bromsat" on the TV; the destination and every team's guess with its brake points on the answer screen; the phone's result with "Bromsade vid 8 p". A guess never braked scores nothing (D63). Every type is now answered in the app. Not tried in a browser with data.

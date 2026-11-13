@@ -7,7 +7,7 @@ import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { HostHeader } from "@/features/host/shared/HostHeader";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
-import { useNow } from "@/features/host/shared/useNow";
+import { useNow } from "@/features/shared/time/useNow";
 import { RunningGameLink } from "@/features/host/liveControl/RunningGameLink";
 import { CreateQuizForm } from "./CreateQuizForm";
 import { QuizListItem } from "./QuizListItem";

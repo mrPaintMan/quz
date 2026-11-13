@@ -20,13 +20,13 @@ describe("linkScreenMedia", () => {
     const shown = await t.run(async (ctx) => {
       const posterId = await ctx.storage.store(new Blob(["still"]));
       return [
-        await linkScreenMedia(ctx, { kind: "video", screen, posterId, showsCluePoints: true }),
-        await linkScreenMedia(ctx, { kind: "video", screen, posterId: null, showsCluePoints: false }),
+        await linkScreenMedia(ctx, { kind: "video", screen, posterId, durationSeconds: 90, showsCluePoints: true }),
+        await linkScreenMedia(ctx, { kind: "video", screen, posterId: null, durationSeconds: null, showsCluePoints: false }),
       ];
     });
     expect(shown).toEqual([
-      { kind: "video", screen, posterUrl: expect.any(String), showsCluePoints: true },
-      { kind: "video", screen, posterUrl: null, showsCluePoints: false },
+      { kind: "video", screen, posterUrl: expect.any(String), durationSeconds: 90, showsCluePoints: true },
+      { kind: "video", screen, posterUrl: null, durationSeconds: null, showsCluePoints: false },
     ]);
   });
 

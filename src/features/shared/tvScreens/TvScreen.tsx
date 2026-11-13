@@ -1,4 +1,5 @@
 import type { Playback } from "@convex/games/playback";
+import { sendsWithBrake } from "@/domain/answering/registry";
 import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
@@ -62,7 +63,8 @@ export function TvScreen(props: TvScreenProps) {
           {mediaArea}
           {view.shown && <ShownQuestionDisplay shown={view.shown} imageUrls={imageUrls} />}
           {view.shown && answeredCount !== null && (
-            <p className="text-[2cqw] text-muted-foreground">{`${answeredCount} av ${teams.length} lag har svarat`}</p>
+            // A trip's guess is sent by pulling the brake (D63).
+            <p className="text-[2cqw] text-muted-foreground">{`${answeredCount} av ${teams.length} lag har ${sendsWithBrake(view.shown.type) ? "bromsat" : "svarat"}`}</p>
           )}
         </TvFrame>
       );

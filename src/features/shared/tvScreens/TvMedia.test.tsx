@@ -8,7 +8,7 @@ vi.mock("convex/react", () => ({ useMutation: () => vi.fn().mockResolvedValue("h
 
 const screenNow = { kind: "question" as const, questionId: "q1" as Id<"questions"> };
 const audio: ShownMedia = { kind: "audio", url: "https://example.com/jingle.mp3" };
-const video = { kind: "video" as const, screen: screenNow, posterUrl: "https://example.com/still.jpg", showsCluePoints: false };
+const video = { kind: "video" as const, screen: screenNow, posterUrl: "https://example.com/still.jpg", durationSeconds: null, showsCluePoints: false };
 const paused = { kind: "paused" as const, positionMs: 0 };
 
 describe("TvMedia", () => {

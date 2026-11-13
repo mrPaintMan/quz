@@ -10,7 +10,7 @@ import { RoundList } from "@/features/host/authoring/editor/rounds/RoundList";
 import { RoundPanel } from "@/features/host/authoring/editor/rounds/RoundPanel";
 import { HostHeader } from "@/features/host/shared/HostHeader";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
-import { useNow } from "@/features/host/shared/useNow";
+import { useNow } from "@/features/shared/time/useNow";
 import { QuizTitleField } from "./QuizTitleField";
 import { ReadinessSummary } from "./ReadinessSummary";
 import { resolveSelection } from "./resolveSelection";

@@ -18,9 +18,10 @@ import {
   type MultipleChoiceShown,
 } from "@/domain/questionTypes/multipleChoice/multipleChoiceAnswering";
 import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
+import { paSparetAnswering, type PaSparetRevealed, type PaSparetShown } from "@/domain/questionTypes/paSparet/paSparetAnswering";
 import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
 import type { TypedReview, Verdict } from "@/domain/review/typedReview";
-import type { AnsweringRules, Graded } from "./answeringRules";
+import type { AnsweringRules, FilmPosition, Graded } from "./answeringRules";
 import type { Outcome } from "./outcome";
 
 // What any question shows while asked, and reveals on its answer screen; one per type built.
@@ -33,7 +34,8 @@ export type ShownQuestion =
   | ListShown
   | IngredientsShown
   | MapPinShown
-  | DrawingShown;
+  | DrawingShown
+  | PaSparetShown;
 export type RevealedAnswer =
   | MultipleChoiceRevealed
   | FreeTextRevealed
@@ -43,7 +45,8 @@ export type RevealedAnswer =
   | ListRevealed
   | IngredientsRevealed
   | MapPinRevealed
-  | DrawingRevealed;
+  | DrawingRevealed
+  | PaSparetRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -61,7 +64,7 @@ export const answeringRegistry: Registry = {
   ingredients: ingredientsAnswering,
   drawing: drawingAnswering,
   mapPin: mapPinAnswering,
-  paSparet: null,
+  paSparet: paSparetAnswering,
 };
 
 // The registry's entries seen from shared code, which passes each one its own type's content and
@@ -78,6 +81,8 @@ type AnyAnsweringRules = {
   outcomes: (content: QuestionContent, answers: AnswerContent[], verdicts?: Verdict[]) => Outcome[];
   review?: TypedReview<QuestionContent, AnswerContent>;
   scoredByHand?: boolean;
+  sendsWithBrake?: boolean;
+  stamp?: (answer: AnswerContent, film: FilmPosition, isSending: boolean) => AnswerContent;
   fitsLimits?: (answer: AnswerContent) => boolean;
 };
 
@@ -92,6 +97,18 @@ export function answeringOf(content: QuestionContent): AnyAnsweringRules | null 
 // How a question's typed answers are judged by the hosts, or null for a type without typed answers.
 export function reviewOf(content: QuestionContent): TypedReview<QuestionContent, AnswerContent> | null {
   return answeringOf(content)?.review ?? null;
+}
+
+// Whether a type's answer is sent by pulling the emergency brake, for the phone's button and the
+// TV's count (D63).
+export function sendsWithBrake(type: AnsweredType): boolean {
+  return answeringOfType(type)?.sendsWithBrake === true;
+}
+
+// What the server sets on an answer from where its question's film is, such as a trip's brake
+// (D63); other answers are left as sent.
+export function stampAnswer(answer: AnswerContent, film: FilmPosition, isSending: boolean): AnswerContent {
+  return answeringOfType(answer.type)?.stamp?.(answer, film, isSending) ?? answer;
 }
 
 // The team's answer before it changes anything, such as a sort question's shuffled order.
