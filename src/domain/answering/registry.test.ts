@@ -7,9 +7,8 @@ describe("answeringOf", () => {
     expect(answeringOf(content)?.show(content)).toEqual({ type: "multipleChoice", options: [] });
   });
 
-  it("gives none for an activity or a type not built yet", () => {
+  it("gives none for an activity, which the hosts score by hand", () => {
     expect(answeringOf({ type: "activity", maxPoints: 5 })).toBeNull();
-    expect(answeringOf({ type: "paSparet", acceptedAnswers: [], fuzzy: false, clues: [] })).toBeNull();
   });
 });
 
@@ -19,10 +18,6 @@ describe("isAnswerComplete", () => {
     expect(isAnswerComplete(shown, { type: "multipleChoice", optionIndex: 0 })).toBe(true);
     expect(isAnswerComplete(shown, { type: "multipleChoice", optionIndex: null })).toBe(false);
     expect(isAnswerComplete(null, { type: "multipleChoice", optionIndex: 0 })).toBe(false);
-  });
-
-  it("counts an answer of a type not built yet as complete", () => {
-    expect(isAnswerComplete(null, { type: "paSparet", guess: "", brakeClueIndex: null })).toBe(true);
   });
 });
 

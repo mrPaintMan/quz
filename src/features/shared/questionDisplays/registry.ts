@@ -10,6 +10,7 @@ import { NumberAnswer, NumberQuestion } from "./number/NumberDisplay";
 import { SortAnswer, SortQuestion } from "./sort/SortDisplay";
 import type { RevealedDisplayProps, ShownDisplayProps } from "./QuestionDisplayProps";
 import { DrawingAnswer, DrawingQuestion } from "./drawing/DrawingDisplay";
+import { PaSparetAnswer, PaSparetQuestion } from "./paSparet/PaSparetDisplay";
 
 type DisplayRegistration<T extends AnsweredType> = {
   Question: ComponentType<ShownDisplayProps<T>>;
@@ -28,5 +29,5 @@ export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | n
   ingredients: { Question: IngredientsQuestion, Answer: IngredientsAnswer },
   drawing: { Question: DrawingQuestion, Answer: DrawingAnswer },
   mapPin: { Question: MapPinQuestion, Answer: MapPinAnswer },
-  paSparet: null,
+  paSparet: { Question: PaSparetQuestion, Answer: PaSparetAnswer },
 };

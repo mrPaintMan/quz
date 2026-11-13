@@ -4,6 +4,7 @@ import type { Id } from "../_generated/dataModel";
 import { mutation, type MutationCtx } from "../_generated/server";
 import { answerContent, type AnswerContent } from "./answerContent";
 import { requireAnswerable } from "./requireAnswerable";
+import { withBrake } from "./withBrake";
 import { lockedAnswersOfQuestion } from "./lockedAnswersOfQuestion";
 import { lockQuestion } from "./lockQuestion";
 import { teamsOfGame } from "../teams/teamsOfGame";
@@ -11,8 +12,9 @@ import { teamsOfGame } from "../teams/teamsOfGame";
 const answerArgs = { teamId: v.id("teams"), questionId: v.id("questions"), content: answerContent };
 type AnswerArgs = { teamId: Id<"teams">; questionId: Id<"questions">; content: AnswerContent };
 
-async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content }: AnswerArgs, lockedAt: number | null) {
-  const { game, question, answer } = await requireAnswerable(ctx, teamId, questionId, content);
+async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content: sent }: AnswerArgs, lockedAt: number | null) {
+  const { game, question, answer } = await requireAnswerable(ctx, teamId, questionId, sent);
+  const content = withBrake(game, question, sent, lockedAt !== null, Date.now());
   if (!fitsAnswerLimits(content)) {
     throw new ConvexError("Svaret är för långt.");
   }

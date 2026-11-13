@@ -89,6 +89,11 @@ describe("TvScreen", () => {
     expect(screen.getByText("1 av 2 lag har svarat")).toBeInTheDocument();
   });
 
+  it("counts the teams that have pulled the brake during the trip", () => {
+    renderView({ ...question, shown: { type: "paSparet" } } as ScreenView, { answeredCount: 1 });
+    expect(screen.getByText("1 av 2 lag har bromsat")).toBeInTheDocument();
+  });
+
   it("doesn't count answers to a question not yet answered in the app", () => {
     renderView(question, { answeredCount: 0 });
     expect(screen.queryByText(/lag har svarat/)).not.toBeInTheDocument();

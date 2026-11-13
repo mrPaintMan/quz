@@ -137,6 +137,21 @@ describe("AnswerQuestion", () => {
     expect(screen.queryByRole("button", { name: "Skicka svar" })).not.toBeInTheDocument();
   });
 
+  it("sends a trip's guess by pulling the emergency brake", async () => {
+    saved.mockReturnValue({ content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: null }, isLocked: false });
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={null} />);
+    expect(screen.queryByRole("button", { name: "Skicka svar" })).not.toBeInTheDocument();
+    await user().click(screen.getByRole("button", { name: "Dra i nödbromsen" }));
+    expect(mutations.sendAnswer).toHaveBeenCalledWith({ teamId, questionId, content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: null } });
+  });
+
+  it("says a trip's guess is braked once locked", () => {
+    saved.mockReturnValue({ content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: 1 }, isLocked: true });
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={null} />);
+    expect(screen.getByText("Bromsat ✓")).toBeInTheDocument();
+    expect(screen.getByText("Bromsade vid 8 p")).toBeInTheDocument();
+  });
+
   it("can send the order a sort question starts from, without a draft", async () => {
     const sortShown = { type: "sort" as const, items: ["Avatar", "Titanic"], firstLabel: "Äldst", lastLabel: "Nyast" };
     render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={sortShown} imageUrls={{}} secondsLeft={null} />);

@@ -30,6 +30,10 @@ describe("mediaOnScreen", () => {
     expect(mediaOnScreen(screen, roundsWith(video))).toEqual({ kind: "video", screen, posterId: still, showsCluePoints: false });
   });
 
+  it("shows no still on the trip's answer screen", () => {
+    expect(mediaOnScreen({ kind: "answer", questionId }, roundsWith(video, trip))).toBeNull();
+  });
+
   it("shows the clue points over the trip's film", () => {
     expect(mediaOnScreen({ kind: "question", questionId }, roundsWith(video, trip))).toMatchObject({ showsCluePoints: true });
   });

@@ -10,7 +10,8 @@ import { videoPlayedOn } from "./videoPlayedOn";
 // The media a screen shows, by its stored files. A clip plays only on its own screen; the answer
 // screen shows the picture again, and a video's still, so the answer can refer to it. A video is
 // named by the screen it plays on: the TV asks for the film only while that screen shows, and
-// the trip's film shows the clue points over it.
+// the trip's film shows the clue points over it. The trip's answer screen shows no still, as the
+// destination and every team's guess need the room (D63).
 export type ScreenMedia =
   | { kind: "image"; storageId: Id<"_storage"> }
   | { kind: "audio"; storageId: Id<"_storage"> }
@@ -38,5 +39,6 @@ export function mediaOnScreen(screen: Screen, rounds: RoundWithMedia[]): ScreenM
   if (screen.kind !== "question" && screen.kind !== "answer") return null;
   const question = findQuestionInRounds(rounds, screen.questionId);
   if (!question?.media) return null;
-  return screen.kind === "question" ? onQuestion(screen, question, question.media) : onAnswer(question.media);
+  if (screen.kind === "question") return onQuestion(screen, question, question.media);
+  return isTrip(question.content) ? null : onAnswer(question.media);
 }

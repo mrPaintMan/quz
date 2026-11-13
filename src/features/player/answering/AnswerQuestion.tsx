@@ -10,6 +10,7 @@ import { isAnswerComplete, startingAnswerOf, type ShownQuestion } from "@/domain
 import { describeActionError } from "@/features/shared/errors/describeActionError";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { answerInputs } from "./registry";
+import { sendWordingOf } from "./sendWording";
 import { useDraftSaver } from "./useDraftSaver";
 
 type AnyInput = ComponentType<{
@@ -64,6 +65,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
   const Input = answerInputs[shown.type] as unknown as AnyInput | null;
 
   if (saved === undefined || Input === null) return null;
+  const wording = sendWordingOf(shown.type);
   const isLocked = saved?.isLocked ?? false;
   // A locked answer is the one on the server; until then the latest change on this phone, or the
   // answer the question starts from, such as a sort question's shuffled order.
@@ -94,7 +96,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
       <div className="mt-auto flex flex-col gap-2.5">
         {isLocked ? (
           <p aria-live="polite" className="text-center text-lg font-semibold">
-            Svar skickat ✓
+            {wording.sent}
           </p>
         ) : hasNoAnswer ? (
           <p aria-live="polite" className="text-center text-lg font-semibold">
@@ -102,14 +104,14 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
           </p>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">Svaret låses när ni skickar det.</p>
+            <p className="text-sm text-muted-foreground">{wording.hint}</p>
             <Button
               size="lg"
-              className="min-h-14 text-lg"
+              className={`min-h-14 text-lg ${wording.isBrake ? "bg-destructive text-white hover:bg-destructive/90" : ""}`}
               disabled={isTimeOut || isSending || answer === null || !isAnswerComplete(shown, answer)}
               onClick={() => answer && send(answer)}
             >
-              Skicka svar
+              {wording.button}
             </Button>
           </>
         )}

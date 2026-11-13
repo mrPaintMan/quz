@@ -18,6 +18,7 @@ import {
   type MultipleChoiceShown,
 } from "@/domain/questionTypes/multipleChoice/multipleChoiceAnswering";
 import { numberAnswering, type NumberRevealed, type NumberShown } from "@/domain/questionTypes/number/numberAnswering";
+import { paSparetAnswering, type PaSparetRevealed, type PaSparetShown } from "@/domain/questionTypes/paSparet/paSparetAnswering";
 import { sortAnswering, type SortRevealed, type SortShown } from "@/domain/questionTypes/sort/sortAnswering";
 import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 import type { AnsweringRules, Graded } from "./answeringRules";
@@ -33,7 +34,8 @@ export type ShownQuestion =
   | ListShown
   | IngredientsShown
   | MapPinShown
-  | DrawingShown;
+  | DrawingShown
+  | PaSparetShown;
 export type RevealedAnswer =
   | MultipleChoiceRevealed
   | FreeTextRevealed
@@ -43,7 +45,8 @@ export type RevealedAnswer =
   | ListRevealed
   | IngredientsRevealed
   | MapPinRevealed
-  | DrawingRevealed;
+  | DrawingRevealed
+  | PaSparetRevealed;
 
 type Registry = {
   [T in AnsweredType]: AnsweringRules<T, Extract<ShownQuestion, { type: T }>, Extract<RevealedAnswer, { type: T }>> | null;
@@ -61,7 +64,7 @@ export const answeringRegistry: Registry = {
   ingredients: ingredientsAnswering,
   drawing: drawingAnswering,
   mapPin: mapPinAnswering,
-  paSparet: null,
+  paSparet: paSparetAnswering,
 };
 
 // The registry's entries seen from shared code, which passes each one its own type's content and
