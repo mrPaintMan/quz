@@ -52,4 +52,10 @@ describe("paSparetAnswering", () => {
     });
     expect(paSparetAnswering.reveal(trip)).toEqual({ type: "paSparet", destination: "Kiruna", guesses: [] });
   });
+
+  it("stamps a sent guess with the clue showing, and never lets a draft brake", () => {
+    expect(paSparetAnswering.stamp?.(guess("Kiruna", 4), { positionSeconds: 25, durationSeconds: 100 }, true)).toEqual(guess("Kiruna", 1));
+    expect(paSparetAnswering.stamp?.(guess("Kiruna", 4), { positionSeconds: 0, durationSeconds: 0 }, true)).toEqual(guess("Kiruna", 0));
+    expect(paSparetAnswering.stamp?.(guess("Kiruna", 4), { positionSeconds: 25, durationSeconds: 100 }, false)).toEqual(guess("Kiruna", null));
+  });
 });

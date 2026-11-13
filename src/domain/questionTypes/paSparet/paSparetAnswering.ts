@@ -6,6 +6,7 @@ import { firstFilledIn } from "@/domain/questionTypes/firstFilledIn";
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import { textOutcomes, type TypedReview } from "@/domain/review/typedReview";
 import type { TeamColour } from "@/domain/teams/teamColours";
+import { activeClueIndex } from "./activeClueIndex";
 import { PA_SPARET_CLUE_POINTS } from "./paSparetRules";
 
 type Trip = ContentOf<"paSparet">;
@@ -57,6 +58,13 @@ export const paSparetAnswering: AnsweringRules<"paSparet", PaSparetShown, PaSpar
   },
   revealsAnswers: true,
   revealsTeams: true,
+  sendsWithBrake: true,
+  // A sent guess carries the clue showing where the film is now, the first before it starts; a
+  // draft never has a brake, whatever the phone sends, so no phone picks its points (D30, D63).
+  stamp: (answer, { positionSeconds, durationSeconds }, isSending) => ({
+    ...answer,
+    brakeClueIndex: isSending ? activeClueIndex(positionSeconds, durationSeconds) : null,
+  }),
   imageIds: () => [],
   startingAnswer: () => null,
   // A guess is sent by pulling the brake, which the server stamps with the clue showing (D63).

@@ -19,4 +19,9 @@ describe("PaSparetInput", () => {
     expect(screen.getByLabelText("Ert resmål")).toBeDisabled();
     expect(screen.getByText("Bromsade vid 6 p")).toBeInTheDocument();
   });
+
+  it("says when a locked guess never braked", () => {
+    renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: null }, true);
+    expect(screen.getByText("Ni bromsade inte.")).toBeInTheDocument();
+  });
 });

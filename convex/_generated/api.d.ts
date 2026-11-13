@@ -17,6 +17,7 @@ import type * as aiJudge_judge from "../aiJudge/judge.js";
 import type * as aiJudge_judging from "../aiJudge/judging.js";
 import type * as aiJudge_table from "../aiJudge/table.js";
 import type * as answers_answerContent from "../answers/answerContent.js";
+import type * as answers_filmPosition from "../answers/filmPosition.js";
 import type * as answers_gradedOfQuestion from "../answers/gradedOfQuestion.js";
 import type * as answers_lockDraftsOfQuestion from "../answers/lockDraftsOfQuestion.js";
 import type * as answers_lockQuestion from "../answers/lockQuestion.js";
@@ -121,6 +122,7 @@ declare const fullApi: ApiFromModules<{
   "aiJudge/judging": typeof aiJudge_judging;
   "aiJudge/table": typeof aiJudge_table;
   "answers/answerContent": typeof answers_answerContent;
+  "answers/filmPosition": typeof answers_filmPosition;
   "answers/gradedOfQuestion": typeof answers_gradedOfQuestion;
   "answers/lockDraftsOfQuestion": typeof answers_lockDraftsOfQuestion;
   "answers/lockQuestion": typeof answers_lockQuestion;

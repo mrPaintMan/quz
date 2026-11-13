@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. Next: try a whole night in dev (the cloud sessions can't reach Convex), then M4's score graph and M5's polish. Try the feedback round's changes on a night in dev first: the cloud sessions can't reach Convex.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. Next: try a whole night in dev (the cloud sessions can't reach Convex), then M4's score graph and M5's polish.
 
 ## Milestones
 
@@ -72,7 +72,7 @@ The feedback round from the user's test night (2026-11-11) is done, and the phon
 - [x] Answer input, TV display and grader for each question type. Done: multiple choice, with the shared answering on the phone, TV and admin (D42); Gissa siffran (D44); Sortera (D46); Para ihop (D47); Gissa ingredienserna, exact spellings until the AI judge (D48); Kartnål, every team's pin on the TV and the phones (D60); Fritext, exact answers until the AI judge (D49); Nämn så många som möjligt, with the right items on the TV (D53); Rita, drawn on the phone and scored by hand (D62); På spåret, sent by the emergency brake (D63)
 - [x] The hosts' review list, per unique answer, for free text and ingredients (D51)
 - [x] AI judge filling in the review list, one call per question on Nästa (D50, D52; replaces fuzzy matching)
-- [x] AI judge and review for list questions, two forms of one answer counting once (D53).; På spåret's editor now has the AI judge's switch (D63)
+- [x] AI judge and review for list questions, two forms of one answer counting once (D53); På spåret's editor now has the AI judge's switch (D63)
 - [x] Show each team which of its answers were judged right or wrong (D50, D58)
 - [x] Host overrides (the review list, D51) and manual points: activities and corrections (D61)
 - [x] Leaderboard on the TV and admin, own score on phones, counting closed questions (D43)

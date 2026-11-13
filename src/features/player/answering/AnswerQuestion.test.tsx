@@ -148,7 +148,7 @@ describe("AnswerQuestion", () => {
   it("says a trip's guess is braked once locked", () => {
     saved.mockReturnValue({ content: { type: "paSparet", guess: "Kiruna", brakeClueIndex: 1 }, isLocked: true });
     render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={null} />);
-    expect(screen.getByText("Bromsat ✓")).toBeInTheDocument();
+    expect(screen.getByText("Gissningen är låst.")).toBeInTheDocument();
     expect(screen.getByText("Bromsade vid 8 p")).toBeInTheDocument();
   });
 

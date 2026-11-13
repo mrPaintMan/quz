@@ -5,6 +5,9 @@ import type { TypedReview, Verdict } from "@/domain/review/typedReview";
 import type { TeamColour } from "@/domain/teams/teamColours";
 import type { Outcome } from "./outcome";
 
+// Where the question's film is, in seconds, and its length; 0 when unknown.
+export type FilmPosition = { positionSeconds: number; durationSeconds: number };
+
 // A team as a reveal shows it, such as by its pin on the map (D60).
 export type GradedTeam = { _id: string; name: string; colour: TeamColour };
 
@@ -44,6 +47,11 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   // Whether the hosts give each answer its points by hand once it is shown, as for a drawing (D62);
   // the points are adjustments, so outcomes score nothing and the phones read the points.
   scoredByHand?: boolean;
+  // Whether the team sends its answer by pulling the emergency brake, a trip's guess (D63).
+  sendsWithBrake?: boolean;
+  // What the server sets on an answer from where the question's film is, as a trip's brake; a
+  // draft is stamped too, so a phone can't set it (D63).
+  stamp?: (answer: AnswerOf<T>, film: FilmPosition, isSending: boolean) => AnswerOf<T>;
   // How big an answer may be, for a type whose answers can grow without typed texts (D62).
   fitsLimits?: (answer: AnswerOf<T>) => boolean;
 };

@@ -7,6 +7,6 @@ describe("sendWordingOf", () => {
   });
 
   it("sends a trip's guess with the emergency brake", () => {
-    expect(sendWordingOf("paSparet")).toMatchObject({ button: "Dra i nödbromsen", sent: "Bromsat ✓", isBrake: true });
+    expect(sendWordingOf("paSparet")).toMatchObject({ button: "Dra i nödbromsen", sent: "Gissningen är låst.", isBrake: true });
   });
 });

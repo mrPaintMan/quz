@@ -1,10 +1,10 @@
 import { ConvexError, v } from "convex/values";
-import { answeringOf, fitsAnswerLimits, isAnswerComplete } from "@/domain/answering/registry";
+import { answeringOf, fitsAnswerLimits, isAnswerComplete, stampAnswer } from "@/domain/answering/registry";
 import type { Id } from "../_generated/dataModel";
 import { mutation, type MutationCtx } from "../_generated/server";
 import { answerContent, type AnswerContent } from "./answerContent";
 import { requireAnswerable } from "./requireAnswerable";
-import { withBrake } from "./withBrake";
+import { filmPosition } from "./filmPosition";
 import { lockedAnswersOfQuestion } from "./lockedAnswersOfQuestion";
 import { lockQuestion } from "./lockQuestion";
 import { teamsOfGame } from "../teams/teamsOfGame";
@@ -14,7 +14,8 @@ type AnswerArgs = { teamId: Id<"teams">; questionId: Id<"questions">; content: A
 
 async function saveAnswer(ctx: MutationCtx, { teamId, questionId, content: sent }: AnswerArgs, lockedAt: number | null) {
   const { game, question, answer } = await requireAnswerable(ctx, teamId, questionId, sent);
-  const content = withBrake(game, question, sent, lockedAt !== null, Date.now());
+  // What only the server decides, such as the clue a trip's brake counts at (D63).
+  const content = stampAnswer(sent, filmPosition(game, question, Date.now()), lockedAt !== null);
   if (!fitsAnswerLimits(content)) {
     throw new ConvexError("Svaret är för långt.");
   }
