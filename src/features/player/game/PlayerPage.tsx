@@ -3,6 +3,7 @@
 import { useQuery } from "convex/react";
 import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
+import type { FilmOnScreen } from "@/features/player/answering/AnswerInputProps";
 import { JoinForm } from "@/features/player/join/JoinForm";
 import { useSavedTeamId } from "@/features/player/join/useSavedTeamId";
 import { useScores } from "@/features/shared/scores/useScores";
@@ -10,6 +11,11 @@ import { FollowGame } from "./FollowGame";
 import { NoGameRunning } from "./NoGameRunning";
 import type { RunningGame } from "@/features/shared/game/RunningGame";
 
+
+// The trip's film while it shows, where it is and how long it is, for the phone's live points (D63).
+export function tripFilmOf(game: Pick<RunningGame, "media" | "playback">): FilmOnScreen | null {
+  return game.media?.kind === "video" && game.media.showsCluePoints ? { playback: game.playback, durationSeconds: game.media.durationSeconds } : null;
+}
 
 function Waiting() {
   return <p className="p-8 text-center text-muted-foreground">Hämtar quizet…</p>;
@@ -35,6 +41,7 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
         imageUrls={game.imageUrls}
         timer={game.timer}
         isQuestionClosed={game.isQuestionClosed}
+        film={tripFilmOf(game)}
       />
     );
   }

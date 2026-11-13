@@ -76,7 +76,7 @@ describe("TvScreen", () => {
   });
 
   it("plays a På spåret film on its film screen", async () => {
-    const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: false };
+    const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, durationSeconds: null, showsCluePoints: false };
     const { container } = renderView({ kind: "film", roundNumber: 4 }, { media: film });
     expect(container.querySelector("video")).toBeInTheDocument();
     await act(async () => {});

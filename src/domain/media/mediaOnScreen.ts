@@ -15,7 +15,8 @@ import { videoPlayedOn } from "./videoPlayedOn";
 export type ScreenMedia =
   | { kind: "image"; storageId: Id<"_storage"> }
   | { kind: "audio"; storageId: Id<"_storage"> }
-  | { kind: "video"; screen: Screen; posterId: Id<"_storage"> | null; showsCluePoints: boolean };
+  // The film's length lets the phones follow the trip's clues (D63).
+  | { kind: "video"; screen: Screen; posterId: Id<"_storage"> | null; durationSeconds: number | null; showsCluePoints: boolean };
 
 type QuestionWithMedia = { _id: Id<"questions">; media: QuestionMedia | null; content: QuestionContent };
 type RoundWithMedia = { _id: Id<"rounds">; films?: Film[]; questions: QuestionWithMedia[] };
@@ -28,13 +29,13 @@ function onAnswer(media: QuestionMedia): ScreenMedia | null {
 
 function onQuestion(screen: Screen, question: QuestionWithMedia, media: QuestionMedia): ScreenMedia {
   if (media.kind !== "video") return media;
-  return { kind: "video", screen, posterId: media.posterId, showsCluePoints: isTrip(question.content) };
+  return { kind: "video", screen, posterId: media.posterId, durationSeconds: media.durationSeconds, showsCluePoints: isTrip(question.content) };
 }
 
 export function mediaOnScreen(screen: Screen, rounds: RoundWithMedia[]): ScreenMedia | null {
   if (screen.kind === "film") {
     const film = videoPlayedOn(screen, rounds);
-    return film && { kind: "video", screen, posterId: film.posterId, showsCluePoints: false };
+    return film && { kind: "video", screen, posterId: film.posterId, durationSeconds: film.durationSeconds, showsCluePoints: false };
   }
   if (screen.kind !== "question" && screen.kind !== "answer") return null;
   const question = findQuestionInRounds(rounds, screen.questionId);

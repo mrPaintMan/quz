@@ -6,11 +6,11 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent } from "@convex/answers/answerContent";
 import { Button } from "@/components/ui/button";
-import { isAnswerComplete, startingAnswerOf, type ShownQuestion } from "@/domain/answering/registry";
+import { isAnswerComplete, sendsWithBrake, startingAnswerOf, type ShownQuestion } from "@/domain/answering/registry";
 import { describeActionError } from "@/features/shared/errors/describeActionError";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import { answerInputs } from "./registry";
-import { sendWordingOf } from "./sendWording";
+import type { FilmOnScreen } from "./AnswerInputProps";
 import { useDraftSaver } from "./useDraftSaver";
 
 type AnyInput = ComponentType<{
@@ -19,6 +19,9 @@ type AnyInput = ComponentType<{
   imageUrls: ImageUrls;
   disabled: boolean;
   onChange: (answer: AnswerContent) => void;
+  onSend: (answer: AnswerContent) => void;
+  isSending: boolean;
+  film: FilmOnScreen | null;
 }>;
 
 type AnswerQuestionProps = {
@@ -28,6 +31,8 @@ type AnswerQuestionProps = {
   imageUrls: ImageUrls;
   // The whole seconds left on the question's timer, on this phone's clock; null without a timer.
   secondsLeft: number | null;
+  // The trip's film while it shows, for its live points; null otherwise (D63).
+  film?: FilmOnScreen | null;
 };
 
 // With this little time left, a change is saved at once, as waiting for the team to pause could
@@ -38,7 +43,7 @@ const SAVE_AT_ONCE_SECONDS = 2;
 // change is kept on the server as a draft, without the team seeing it (D45). Once locked, or once
 // the time is out, the answer stays on show but can't change. Remount it for each question, keyed
 // by the question, so a draft never carries over.
-export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft }: AnswerQuestionProps) {
+export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft, film = null }: AnswerQuestionProps) {
   const isTimeOut = secondsLeft === 0;
   const saved = useQuery(api.answers.queries.getTeamAnswer, { teamId, questionId });
   const saveDraft = useMutation(api.answers.mutations.saveAnswerDraft);
@@ -65,7 +70,8 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
   const Input = answerInputs[shown.type] as unknown as AnyInput | null;
 
   if (saved === undefined || Input === null) return null;
-  const wording = sendWordingOf(shown.type);
+  // A trip's guess is sent by the emergency brake in its own input, which shows its own states (D63).
+  const sendsItself = sendsWithBrake(shown.type);
   const isLocked = saved?.isLocked ?? false;
   // A locked answer is the one on the server; until then the latest change on this phone, or the
   // answer the question starts from, such as a sort question's shuffled order.
@@ -92,11 +98,14 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
           if (secondsLeft !== null && secondsLeft <= SAVE_AT_ONCE_SECONDS) drafts.saveNow(next);
           else drafts.schedule(next);
         }}
+        onSend={(content) => void send(content)}
+        isSending={isSending}
+        film={film}
       />
       <div className="mt-auto flex flex-col gap-2.5">
-        {isLocked ? (
+        {sendsItself ? null : isLocked ? (
           <p aria-live="polite" className="text-center text-lg font-semibold">
-            {wording.sent}
+            Svar skickat ✓
           </p>
         ) : hasNoAnswer ? (
           <p aria-live="polite" className="text-center text-lg font-semibold">
@@ -104,14 +113,14 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
           </p>
         ) : (
           <>
-            <p className="text-sm text-muted-foreground">{wording.hint}</p>
+            <p className="text-sm text-muted-foreground">Svaret låses när ni skickar det.</p>
             <Button
               size="lg"
-              className={`min-h-14 text-lg ${wording.isBrake ? "bg-destructive text-white hover:bg-destructive/90" : ""}`}
+              className="min-h-14 text-lg"
               disabled={isTimeOut || isSending || answer === null || !isAnswerComplete(shown, answer)}
               onClick={() => answer && send(answer)}
             >
-              {wording.button}
+              Skicka svar
             </Button>
           </>
         )}

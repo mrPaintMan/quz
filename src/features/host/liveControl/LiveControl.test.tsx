@@ -171,13 +171,13 @@ describe("LiveControl", () => {
   });
 
   it("follows the trip's clues while its film shows", () => {
-    const tripFilm: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: true };
+    const tripFilm: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, durationSeconds: null, showsCluePoints: true };
     renderControl({ view: question, media: tripFilm, playback: { kind: "paused", positionMs: 0 } });
     expect(screen.getByText("Ledtrådsrad")).toBeInTheDocument();
   });
 
   it("follows no clues over other films", () => {
-    const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, showsCluePoints: false };
+    const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, durationSeconds: null, showsCluePoints: false };
     renderControl({ view: question, media: film, playback: { kind: "paused", positionMs: 0 } });
     expect(screen.queryByText("Ledtrådsrad")).not.toBeInTheDocument();
   });

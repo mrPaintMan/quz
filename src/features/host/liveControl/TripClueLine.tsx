@@ -8,7 +8,7 @@ import { clueProgress } from "@/domain/questionTypes/paSparet/clueProgress";
 import { PA_SPARET_CLUE_POINTS } from "@/domain/questionTypes/paSparet/paSparetRules";
 import { formatClock } from "@/domain/time/formatClock";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
-import { useNow } from "@/features/host/shared/useNow";
+import { useNow } from "@/features/shared/time/useNow";
 
 // The trip's active clue for the hosts, following the film as the TV's points do, so they know
 // where the room is without reading the TV.

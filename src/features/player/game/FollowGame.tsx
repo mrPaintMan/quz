@@ -7,6 +7,7 @@ import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { formatPoints } from "@/domain/scoring/formatPoints";
 import type { TeamColour } from "@/domain/teams/teamColours";
 import { AnswerQuestion } from "@/features/player/answering/AnswerQuestion";
+import type { FilmOnScreen } from "@/features/player/answering/AnswerInputProps";
 import { ActivityPoints } from "./ActivityPoints";
 import { QuestionResult } from "@/features/player/results/QuestionResult";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
@@ -24,12 +25,14 @@ type FollowGameProps = {
   imageUrls: ImageUrls;
   timer: Timer | null;
   isQuestionClosed: boolean;
+  // The trip's film while it shows, for the phone's live points (D63).
+  film?: FilmOnScreen | null;
 };
 
 // The team's phone during the game: it follows the TV by itself, shows the answer input while a
 // question its type can be answered in the app is open on the TV, and after its answer is shown
 // the team's own answer with what scored lit up, in place of the usual line (D58, D59).
-export function FollowGame({ team, points, screen, view, imageUrls, timer, isQuestionClosed }: FollowGameProps) {
+export function FollowGame({ team, points, screen, view, imageUrls, timer, isQuestionClosed, film = null }: FollowGameProps) {
   const secondsLeft = useSecondsLeft(timer);
   const shown = view.kind === "question" ? view.shown : null;
   const isAnswering = shown !== null && screen.kind === "question" && !isQuestionClosed;
@@ -61,6 +64,7 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
             shown={shown}
             imageUrls={imageUrls}
             secondsLeft={secondsLeft}
+            film={film}
           />
         </>
       ) : (

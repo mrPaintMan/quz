@@ -1,27 +1,53 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import type { AnswerOf } from "@convex/answers/answerContent";
 import { PaSparetInput } from "./PaSparetInput";
 
-const renderInput = (answer: { type: "paSparet"; guess: string; brakeClueIndex: number | null } | null, disabled = false, onChange = vi.fn()) =>
-  render(<PaSparetInput shown={{ type: "paSparet" }} answer={answer} imageUrls={{}} disabled={disabled} onChange={onChange} />);
+type Guess = AnswerOf<"paSparet">;
+const film = { playback: { kind: "paused" as const, positionMs: 50_000 }, durationSeconds: 100 };
+
+function renderInput(answer: Guess | null, { disabled = false, onChange = vi.fn(), onSend = vi.fn() } = {}) {
+  render(<PaSparetInput shown={{ type: "paSparet" }} answer={answer} imageUrls={{}} disabled={disabled} onChange={onChange} onSend={onSend} film={film} />);
+  return { onChange, onSend };
+}
+const pullBrake = () => fireEvent.keyDown(screen.getByRole("slider"), { key: "Enter" });
 
 describe("PaSparetInput", () => {
+  it("shows what a brake is worth now, from where the film is", () => {
+    renderInput(null);
+    expect(screen.getByText("6 poäng")).toBeInTheDocument();
+  });
+
   it("writes the guess, never with a brake of its own", async () => {
-    const onChange = vi.fn();
-    renderInput(null, false, onChange);
-    await userEvent.type(screen.getByLabelText("Ert resmål"), "K");
+    const { onChange } = renderInput(null);
+    await userEvent.type(screen.getByLabelText("Vart är vi på väg?"), "K");
     expect(onChange).toHaveBeenCalledWith({ type: "paSparet", guess: "K", brakeClueIndex: null });
   });
 
-  it("shows a braked guess with the points it braked at", () => {
-    renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: 2 }, true);
-    expect(screen.getByLabelText("Ert resmål")).toBeDisabled();
-    expect(screen.getByText("Bromsade vid 6 p")).toBeInTheDocument();
+  it("sends the guess when the brake is pulled", () => {
+    const { onSend } = renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: null });
+    pullBrake();
+    expect(onSend).toHaveBeenCalledWith({ type: "paSparet", guess: "Kiruna", brakeClueIndex: null });
+  });
+
+  it("asks for a guess before the brake can be pulled", () => {
+    const { onSend } = renderInput({ type: "paSparet", guess: "  ", brakeClueIndex: null });
+    pullBrake();
+    expect(onSend).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent("Skriv ett svar innan ni drar i nödbromsen");
+  });
+
+  it("shows the guess locked by the brake, with the points it was pulled at", () => {
+    renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: 2 }, { disabled: true });
+    expect(screen.getByText("Ni drog i nödbromsen")).toBeInTheDocument();
+    expect(screen.getByText("Kiruna")).toBeInTheDocument();
+    expect(screen.getByText("på 6 poäng")).toBeInTheDocument();
+    expect(screen.queryByRole("slider")).not.toBeInTheDocument();
   });
 
   it("says when a locked guess never braked", () => {
-    renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: null }, true);
+    renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: null }, { disabled: true });
     expect(screen.getByText("Ni bromsade inte.")).toBeInTheDocument();
   });
 });

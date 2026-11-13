@@ -27,7 +27,7 @@ describe("mediaOnScreen", () => {
 
   it("shows a question's video by its screen and still, leaving the film out", () => {
     const screen = { kind: "question" as const, questionId };
-    expect(mediaOnScreen(screen, roundsWith(video))).toEqual({ kind: "video", screen, posterId: still, showsCluePoints: false });
+    expect(mediaOnScreen(screen, roundsWith(video))).toEqual({ kind: "video", screen, posterId: still, durationSeconds: 20, showsCluePoints: false });
   });
 
   it("shows no still on the trip's answer screen", () => {
@@ -44,6 +44,7 @@ describe("mediaOnScreen", () => {
       kind: "video",
       screen,
       posterId: still,
+      durationSeconds: 20,
       showsCluePoints: false,
     });
   });
