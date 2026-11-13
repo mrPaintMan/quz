@@ -50,4 +50,15 @@ describe("PaSparetInput", () => {
     renderInput({ type: "paSparet", guess: "Kiruna", brakeClueIndex: null }, { disabled: true });
     expect(screen.getByText("Ni bromsade inte.")).toBeInTheDocument();
   });
+
+  it("leaves a time-out with nothing written to the phone's own line", () => {
+    const { container } = render(<PaSparetInput shown={{ type: "paSparet" }} answer={null} imageUrls={{}} disabled onChange={vi.fn()} />);
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("can't be pulled with nothing to send it with", () => {
+    render(<PaSparetInput shown={{ type: "paSparet" }} answer={{ type: "paSparet", guess: "Kiruna", brakeClueIndex: null }} imageUrls={{}} disabled={false} onChange={vi.fn()} />);
+    pullBrake();
+    expect(screen.getByRole("slider")).toHaveAttribute("aria-valuenow", "0");
+  });
 });

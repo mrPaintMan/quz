@@ -47,6 +47,17 @@ describe("EmergencyBrake", () => {
     expect(handle()).toHaveAttribute("aria-valuenow", "0");
   });
 
+  it("stays down while the pull is sent, and springs back if sending fails", () => {
+    const { rerender } = render(<EmergencyBrake points={8} disabled={false} onPull={() => true} />);
+    drag(145);
+    rerender(<EmergencyBrake points={8} disabled onPull={() => true} />);
+    act(() => vi.advanceTimersByTime(1000));
+    expect(handle()).toHaveAttribute("aria-valuenow", "100");
+    rerender(<EmergencyBrake points={8} disabled={false} onPull={() => true} />);
+    act(() => vi.advanceTimersByTime(1000));
+    expect(handle()).toHaveAttribute("aria-valuenow", "0");
+  });
+
   it("follows only the finger that took hold of it", () => {
     const onPull = vi.fn(() => true);
     render(<EmergencyBrake points={8} disabled={false} onPull={onPull} />);
@@ -61,6 +72,7 @@ describe("EmergencyBrake", () => {
     const onPull = vi.fn(() => true);
     render(<EmergencyBrake points={8} disabled={false} onPull={onPull} />);
     fireEvent.keyDown(handle(), { key: "Enter" });
+    fireEvent.keyDown(handle(), { key: "Enter", repeat: true });
     fireEvent.keyDown(handle(), { key: "a" });
     expect(onPull).toHaveBeenCalledOnce();
   });

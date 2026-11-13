@@ -152,6 +152,11 @@ describe("AnswerQuestion", () => {
     expect(screen.queryByText("Svar skickat ✓")).not.toBeInTheDocument();
   });
 
+  it("says when a trip's time ran out with nothing saved", () => {
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={{ type: "paSparet" }} imageUrls={{}} secondsLeft={0} />);
+    expect(screen.getByText("Inget svar sparades.")).toBeInTheDocument();
+  });
+
   it("can send the order a sort question starts from, without a draft", async () => {
     const sortShown = { type: "sort" as const, items: ["Avatar", "Titanic"], firstLabel: "Äldst", lastLabel: "Nyast" };
     render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={sortShown} imageUrls={{}} secondsLeft={null} />);

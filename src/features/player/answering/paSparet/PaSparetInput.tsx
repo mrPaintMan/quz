@@ -6,7 +6,9 @@ import { isBlank } from "@/domain/questionTypes/isBlank";
 import { brakePointsOf } from "@/domain/questionTypes/paSparet/paSparetAnswering";
 import { PA_SPARET_CLUE_POINTS } from "@/domain/questionTypes/paSparet/paSparetRules";
 import type { AnswerInputProps } from "@/features/player/answering/AnswerInputProps";
-import { CluePointsCard, useClueIndex } from "./CluePointsCard";
+import type { FilmOnScreen } from "@/features/player/answering/AnswerInputProps";
+import { CluePointsCard } from "./CluePointsCard";
+import { useClueIndex } from "./useClueIndex";
 import { EmergencyBrake } from "./EmergencyBrake";
 
 // Once the brake is pulled: the guess, locked, with the points it was pulled at.
@@ -23,26 +25,21 @@ function Pulled({ guess, points }: { guess: string; points: number }) {
   );
 }
 
-// The trip as in the wireframe (D63): what a brake is worth now, following the film; the guess,
-// free to change; and the emergency brake, pulled by dragging its handle down, which sends the
-// guess. The server decides the clue a brake counts at. A guess locked without a brake says so.
-export function PaSparetInput({ answer, disabled, film = null, onChange, onSend, isSending = false }: AnswerInputProps<"paSparet">) {
+type BrakingProps = {
+  guess: string;
+  film: FilmOnScreen | null;
+  isSending: boolean;
+  onChange: (guess: string) => void;
+  // Sends the guess; missing, the brake can't be pulled.
+  onSend: ((guess: string) => void) | undefined;
+};
+
+// Before the pull: what a brake is worth now, following the film; the guess; and the brake. Only
+// this part follows the film, so nothing ticks once the guess is locked.
+function Braking({ guess, film, isSending, onChange, onSend }: BrakingProps) {
   const id = useId();
   const index = useClueIndex(film);
   const [isMissing, setIsMissing] = useState(false);
-  const guess = answer?.guess ?? "";
-  const brakePoints = brakePointsOf(answer?.brakeClueIndex ?? null);
-
-  if (brakePoints !== null) return <Pulled guess={guess} points={brakePoints} />;
-  if (disabled) {
-    return (
-      <section className="flex flex-col gap-1.5 rounded-2xl border bg-card p-5">
-        <p className="text-sm text-muted-foreground">Ert resmål</p>
-        <p className="text-2xl font-semibold break-words">{guess}</p>
-        <p className="text-muted-foreground">Ni bromsade inte.</p>
-      </section>
-    );
-  }
   return (
     <div className="flex flex-1 flex-col gap-3.5">
       <CluePointsCard index={index} />
@@ -58,7 +55,7 @@ export function PaSparetInput({ answer, disabled, film = null, onChange, onSend,
           placeholder="Skriv destinationen"
           onChange={(event) => {
             setIsMissing(false);
-            onChange({ type: "paSparet", guess: event.target.value, brakeClueIndex: null });
+            onChange(event.target.value);
           }}
           className="min-h-13 rounded-[14px] border-2 border-primary bg-card px-4 text-xl outline-none placeholder:text-muted-foreground"
         />
@@ -72,14 +69,44 @@ export function PaSparetInput({ answer, disabled, film = null, onChange, onSend,
         points={PA_SPARET_CLUE_POINTS[index]}
         disabled={isSending}
         onPull={() => {
+          if (!onSend) return false;
           if (isBlank(guess)) {
             setIsMissing(true);
             return false;
           }
-          onSend?.({ type: "paSparet", guess, brakeClueIndex: null });
+          onSend(guess);
           return true;
         }}
       />
     </div>
+  );
+}
+
+// The trip as in the wireframe (D63): what a brake is worth now, following the film; the guess,
+// free to change; and the emergency brake, pulled by dragging its handle down, which sends the
+// guess. The server decides the clue a brake counts at. A guess locked without a brake says so;
+// with nothing written, the phone's own "Inget svar sparades." says it.
+export function PaSparetInput({ answer, disabled, film = null, onChange, onSend, isSending = false }: AnswerInputProps<"paSparet">) {
+  const guess = answer?.guess ?? "";
+  const brakePoints = brakePointsOf(answer?.brakeClueIndex ?? null);
+  if (brakePoints !== null) return <Pulled guess={guess} points={brakePoints} />;
+  if (disabled) {
+    if (isBlank(guess)) return null;
+    return (
+      <section className="flex flex-col gap-1.5 rounded-2xl border bg-card p-5">
+        <p className="text-sm text-muted-foreground">Ert resmål</p>
+        <p className="text-2xl font-semibold break-words">{guess}</p>
+        <p className="text-muted-foreground">Ni bromsade inte.</p>
+      </section>
+    );
+  }
+  return (
+    <Braking
+      guess={guess}
+      film={film}
+      isSending={isSending}
+      onChange={(next) => onChange({ type: "paSparet", guess: next, brakeClueIndex: null })}
+      onSend={onSend && ((next) => onSend({ type: "paSparet", guess: next, brakeClueIndex: null }))}
+    />
   );
 }

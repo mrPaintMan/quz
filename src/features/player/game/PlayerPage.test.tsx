@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { getFunctionName, type FunctionReference } from "convex/server";
 import { api } from "@convex/_generated/api";
-import { PlayerPage, tripFilmOf } from "./PlayerPage";
+import { PlayerPage } from "./PlayerPage";
 
 const runningGame = vi.fn();
 const savedTeam = vi.fn();
@@ -71,20 +71,5 @@ describe("PlayerPage", () => {
     window.localStorage.setItem("quz.teamId", "team1");
     render(<PlayerPage />);
     expect(screen.getByText("Hämtar quizet…")).toBeInTheDocument();
-  });
-});
-
-describe("tripFilmOf", () => {
-  const video = (showsCluePoints: boolean) => ({ kind: "video" as const, screen: { kind: "lobby" as const }, posterUrl: null, durationSeconds: 120, showsCluePoints });
-
-  it("gives the trip's film, where it is and how long it is", () => {
-    const playback = { kind: "paused" as const, positionMs: 3_000 };
-    expect(tripFilmOf({ media: video(true), playback })).toEqual({ playback, durationSeconds: 120 });
-    expect(tripFilmOf({ media: video(true), playback: null })).toEqual({ playback: null, durationSeconds: 120 });
-  });
-
-  it("gives nothing for any other media", () => {
-    expect(tripFilmOf({ media: video(false), playback: null })).toBeNull();
-    expect(tripFilmOf({ media: null, playback: null })).toBeNull();
   });
 });

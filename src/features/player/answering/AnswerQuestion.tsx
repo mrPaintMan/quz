@@ -103,15 +103,18 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
         film={film}
       />
       <div className="mt-auto flex flex-col gap-2.5">
-        {sendsItself ? null : isLocked ? (
-          <p aria-live="polite" className="text-center text-lg font-semibold">
-            Svar skickat ✓
-          </p>
+        {isLocked ? (
+          !sendsItself && (
+            <p aria-live="polite" className="text-center text-lg font-semibold">
+              Svar skickat ✓
+            </p>
+          )
         ) : hasNoAnswer ? (
           <p aria-live="polite" className="text-center text-lg font-semibold">
             Inget svar sparades.
           </p>
         ) : (
+          !sendsItself && (
           <>
             <p className="text-sm text-muted-foreground">Svaret låses när ni skickar det.</p>
             <Button
@@ -123,6 +126,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
               Skicka svar
             </Button>
           </>
+          )
         )}
         {error && !isLocked && (
           <p role="alert" className="text-sm text-destructive">

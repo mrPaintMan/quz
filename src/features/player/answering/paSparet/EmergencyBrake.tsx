@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 
 // How far down the handle travels, in px, and how much of it counts as pulled.
 const TRAVEL = 150;
@@ -59,19 +59,19 @@ export function EmergencyBrake({ points, disabled, onPull }: EmergencyBrakeProps
   // How far the handle is pulled, 0 to 1; kept in a ref too, so the spring reads it between renders.
   const [pull, setPullState] = useState(0);
   const pullNow = useRef(0);
-  const setPull = (value: number) => {
+  const setPull = useCallback((value: number) => {
     pullNow.current = value;
     setPullState(value);
-  };
+  }, []);
   const drag = useRef<{ pointerId: number; startY: number } | null>(null);
   const frame = useRef<number | null>(null);
   const isReady = pull > PULLED_AT;
 
-  const stopSpring = () => {
+  const stopSpring = useCallback(() => {
     if (frame.current !== null) cancelAnimationFrame(frame.current);
     frame.current = null;
-  };
-  const springBack = () => {
+  }, []);
+  const springBack = useCallback(() => {
     stopSpring();
     const step = () => {
       const next = pullNow.current * 0.7;
@@ -79,8 +79,12 @@ export function EmergencyBrake({ points, disabled, onPull }: EmergencyBrakeProps
       frame.current = next < 0.01 ? null : requestAnimationFrame(step);
     };
     frame.current = requestAnimationFrame(step);
-  };
-  useEffect(() => stopSpring, []);
+  }, [setPull, stopSpring]);
+  useEffect(() => stopSpring, [stopSpring]);
+  // A pull stays down while it is sent; if sending fails, the brake is free again and springs back.
+  useEffect(() => {
+    if (!disabled && pullNow.current > PULLED_AT) springBack();
+  }, [disabled, springBack]);
 
   const release = (pulledFar: boolean) => {
     if (pulledFar && onPull()) {
@@ -104,7 +108,7 @@ export function EmergencyBrake({ points, disabled, onPull }: EmergencyBrakeProps
     release(pullNow.current > PULLED_AT);
   };
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (disabled || (event.key !== "Enter" && event.key !== " ")) return;
+    if (disabled || event.repeat || (event.key !== "Enter" && event.key !== " ")) return;
     event.preventDefault();
     release(true);
   };
