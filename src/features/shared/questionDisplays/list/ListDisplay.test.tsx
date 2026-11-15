@@ -13,20 +13,33 @@ describe("ListQuestion", () => {
 
 describe("ListAnswer", () => {
   it("shows each item the teams got right with how many teams got it", () => {
-    render(<ListAnswer revealed={{ type: "list", items: [{ name: "Göteborg", teamCount: 3 }, { name: "Malmö", teamCount: 1 }] }} imageUrls={{}} />);
+    render(<ListAnswer revealed={{ type: "list", items: [{ name: "Göteborg", teamCount: 3 }, { name: "Malmö", teamCount: 1 }], others: [] }} imageUrls={{}} />);
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Göteborg3 lag", "Malmö1 lag"]);
     expect(screen.getByRole("list")).toHaveClass("grid-cols-1");
   });
 
   it("says when no one has anything right yet", () => {
-    render(<ListAnswer revealed={{ type: "list", items: [] }} imageUrls={{}} />);
+    render(<ListAnswer revealed={{ type: "list", items: [], others: [] }} imageUrls={{}} />);
     expect(screen.getByText("Inga rätta svar ännu.")).toBeInTheDocument();
   });
 
   it("uses more columns for more items, and counts those that don't fit", () => {
-    render(<ListAnswer revealed={{ type: "list", items: items(45) }} imageUrls={{}} />);
+    render(<ListAnswer revealed={{ type: "list", items: items(45), others: ["Lund"] }} imageUrls={{}} />);
     expect(screen.getByRole("list")).toHaveClass("grid-cols-4");
     expect(screen.getAllByRole("listitem")).toHaveLength(40);
-    expect(screen.getByText("och 5 till")).toBeInTheDocument();
+    // The five right items past the forty shown, and the one key item there's no room for.
+    expect(screen.getByText("och 6 till")).toBeInTheDocument();
+  });
+
+  it("shows the key's items no team gave after the right ones, dimmed and without a count", () => {
+    render(<ListAnswer revealed={{ type: "list", items: [{ name: "Göteborg", teamCount: 3 }], others: ["Lund", "Uppsala"] }} imageUrls={{}} />);
+    expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Göteborg3 lag", "Lund", "Uppsala"]);
+    expect(screen.getByText("Lund")).toHaveClass("text-muted-foreground");
+  });
+
+  it("says no one has anything right yet over the key", () => {
+    render(<ListAnswer revealed={{ type: "list", items: [], others: ["Lund"] }} imageUrls={{}} />);
+    expect(screen.getByText("Inga rätta svar ännu.")).toBeInTheDocument();
+    expect(screen.getByText("Lund")).toBeInTheDocument();
   });
 });

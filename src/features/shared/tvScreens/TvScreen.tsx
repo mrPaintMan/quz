@@ -3,7 +3,7 @@ import { sendsWithBrake } from "@/domain/answering/registry";
 import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
-import { RevealedAnswerDisplay, ShownQuestionDisplay } from "@/features/shared/questionDisplays/QuestionDisplay";
+import { answerPlacesMedia, RevealedAnswerDisplay, ShownQuestionDisplay } from "@/features/shared/questionDisplays/QuestionDisplay";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import type { TeamScore } from "@/features/shared/scores/useScores";
 import { LeaderboardScreen } from "./LeaderboardScreen";
@@ -12,7 +12,7 @@ import { RulesScreen } from "./RulesScreen";
 import type { TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
 import { TvMedia } from "./TvMedia";
-import { questionPlace } from "./questionPlace";
+import { roundLabel, screenEyebrow } from "./questionPlace";
 import { TvTimer } from "./TvTimer";
 
 type TvScreenProps = {
@@ -32,7 +32,6 @@ type TvScreenProps = {
   silent?: boolean;
 };
 
-const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
 // The screen the game is on. A question shows its type's display (such as the options) once that
 // type is built in M3, and how many teams have answered. Drawn on the TV and, smaller, in the
@@ -55,7 +54,7 @@ export function TvScreen(props: TvScreenProps) {
       return (
         // An activity's title stands centred, unless a picture or clip needs the room.
         <TvFrame
-          eyebrow={`${roundLabel(view.roundNumber)} · ${questionPlace(view)}`}
+          eyebrow={screenEyebrow(view)}
           title={view.prompt}
           corner={<TvTimer timer={timer} />}
           centered={!view.answeredInApp && !media}
@@ -68,16 +67,25 @@ export function TvScreen(props: TvScreenProps) {
           )}
         </TvFrame>
       );
-    case "answer":
+    case "answer": {
+      const placesMedia = view.revealed !== null && answerPlacesMedia(view.revealed.type);
       return (
-        <TvFrame eyebrow={`${roundLabel(view.roundNumber)} · Svar på fråga ${view.questionNumber}`} title={view.prompt}>
-          {mediaArea}
-          {view.revealed && <RevealedAnswerDisplay revealed={view.revealed} imageUrls={imageUrls} />}
+        <TvFrame eyebrow={screenEyebrow(view)} title={view.prompt}>
+          {/* A type that places the picture itself, such as beside a map, gets it there instead (D66). */}
+          {!placesMedia && mediaArea}
+          {view.revealed && (
+            <RevealedAnswerDisplay
+              revealed={view.revealed}
+              imageUrls={imageUrls}
+              media={placesMedia && media ? <TvMedia media={media} playback={playback} silent={silent} /> : undefined}
+            />
+          )}
         </TvFrame>
       );
+    }
     case "film":
       return (
-        <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film">
+        <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film" titleCentered>
           {mediaArea}
         </TvFrame>
       );

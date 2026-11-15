@@ -20,10 +20,10 @@ describe("PaSparetAnswer", () => {
       guess("Gröna", { brakePoints: null }),
     ];
     render(<PaSparetAnswer revealed={{ type: "paSparet", destination: "Kiruna", guesses }} imageUrls={{}} />);
-    expect(screen.getByText("Kiruna")).toBeInTheDocument();
+    expect(screen.getByText("Rätt svar: Kiruna")).toBeInTheDocument();
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual([
-      "RödaKiruna · bromsade vid 8 p+8 p",
-      "BlåKirunaa · bromsade vid 8 pBedöms…",
+      "RödaKiruna+8 p",
+      "BlåKirunaaBedöms…",
       "GrönaBromsade inte",
     ]);
   });

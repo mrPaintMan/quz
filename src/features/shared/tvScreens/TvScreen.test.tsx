@@ -30,8 +30,8 @@ const renderView = (view: ScreenView, { media = null, timer = null, answeredCoun
     />,
   );
 
-const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: true, shown: null };
-const answer: ScreenView = { kind: "answer", roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", revealed: null };
+const question: ScreenView = { kind: "question", isTrip: false, roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", answeredInApp: true, shown: null };
+const answer: ScreenView = { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", revealed: null };
 const image: ShownMedia = { kind: "image", url: "https://example.com/tomte.jpg" };
 
 describe("TvScreen", () => {
@@ -39,9 +39,9 @@ describe("TvScreen", () => {
     [{ kind: "lobby" }, "Julquiz 2026", "Välkomna till"],
     [{ kind: "rules", roundCount: 1, questionCount: 2, activityCount: 0 }, "Så funkar kvällen", null],
     [{ kind: "roundIntro", roundNumber: 2, title: "Julmat" }, "Julmat", "Omgång 2"],
-    [{ kind: "question", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
-    [{ kind: "question", roundNumber: 2, questionNumber: 4, prompt: "Baka ett pepparkakshus", answeredInApp: false, shown: null }, "Baka ett pepparkakshus", "Omgång 2 · Aktivitet"],
-    [{ kind: "answer", roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
+    [{ kind: "question", isTrip: false, roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
+    [{ kind: "question", isTrip: false, roundNumber: 2, questionNumber: 4, prompt: "Baka ett pepparkakshus", answeredInApp: false, shown: null }, "Baka ett pepparkakshus", "Omgång 2 · Aktivitet"],
+    [{ kind: "answer", isTrip: false, roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
     [{ kind: "film", roundNumber: 4 }, "Film", "Omgång 4"],
     [{ kind: "leaderboard", roundNumber: 1 }, "Topplista efter omgång 1", null],
     [{ kind: "finalLeaderboard" }, "Slutresultat", null],

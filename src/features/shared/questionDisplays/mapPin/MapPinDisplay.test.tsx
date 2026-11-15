@@ -36,10 +36,24 @@ describe("MapPinAnswer", () => {
     const markers = maps.at(-1)?.markers as { kind: string }[];
     expect(markers.map((marker) => marker.kind)).toEqual(["pin", "pin", "target"]);
     expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["Blå64 km+3 p", "Röda397 km"]);
+    expect(screen.getByRole("heading", { name: "Avstånd från svar" })).toBeInTheDocument();
+  });
+
+  it("puts the question's picture above the teams, beside the map", () => {
+    render(<MapPinAnswer revealed={revealed} imageUrls={{}} media={<p>Bilden</p>} />);
+    const column = screen.getByRole("heading", { name: "Avstånd från svar" }).parentElement!;
+    expect(column).toContainElement(screen.getByText("Bilden"));
+  });
+
+  it("shrinks the standings past eight teams, so all twelve fit", () => {
+    const pins = Array.from({ length: 12 }, (_, index) => ({ ...revealed.pins[1], teamId: `t${index}`, name: `Lag ${index}` }));
+    render(<MapPinAnswer revealed={{ ...revealed, pins }} imageUrls={{}} />);
+    expect(screen.getByRole("list")).toHaveClass("text-[1.3cqw]");
   });
 
   it("lists nothing when no team placed a pin", () => {
     render(<MapPinAnswer revealed={{ ...revealed, pins: [] }} imageUrls={{}} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Avstånd från svar" })).not.toBeInTheDocument();
   });
 });

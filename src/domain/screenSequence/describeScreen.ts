@@ -4,6 +4,7 @@ import type { Screen } from "@convex/games/screen";
 import type { QuestionContent } from "@convex/questions/questionContent";
 import { answeringOf, type RevealedAnswer, type ShownQuestion } from "@/domain/answering/registry";
 import type { Graded } from "@/domain/answering/answeringRules";
+import { isTrip } from "@/domain/questionTypes/paSparet/isTrip";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
 type QuestionInRound = { _id: Id<"questions">; prompt: string; content: QuestionContent };
@@ -15,8 +16,9 @@ export type ScreenView =
   | { kind: "rules"; roundCount: number; questionCount: number; activityCount: number }
   | { kind: "roundIntro"; roundNumber: number; title: string }
   // `shown` is what the TV and phones show of the question; null until its type is built (M3).
-  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; answeredInApp: boolean; shown: ShownQuestion | null }
-  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string; revealed: RevealedAnswer | null }
+  // isTrip marks På spåret's trip, which goes by "På spåret" rather than its round and number (D66).
+  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; answeredInApp: boolean; isTrip: boolean; shown: ShownQuestion | null }
+  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string; isTrip: boolean; revealed: RevealedAnswer | null }
   | { kind: "film"; roundNumber: number }
   | { kind: "leaderboard"; roundNumber: number }
   | { kind: "finalLeaderboard" };
@@ -71,12 +73,12 @@ export function describeScreen(screen: Screen, allRounds: RoundInQuiz[], graded?
       const { question, ...place } = findQuestion(rounds, screen.questionId);
       const { content } = question;
       const shown = answeringOf(content)?.show(content) ?? null;
-      return { kind: "question", ...place, prompt: question.prompt, answeredInApp: rulesFor(content).answeredInApp, shown };
+      return { kind: "question", ...place, prompt: question.prompt, answeredInApp: rulesFor(content).answeredInApp, isTrip: isTrip(content), shown };
     }
     case "answer": {
       const { question, ...place } = findQuestion(rounds, screen.questionId);
       const { content } = question;
-      return { kind: "answer", ...place, prompt: question.prompt, revealed: answeringOf(content)?.reveal(content, graded) ?? null };
+      return { kind: "answer", ...place, prompt: question.prompt, isTrip: isTrip(content), revealed: answeringOf(content)?.reveal(content, graded) ?? null };
     }
     case "film":
     case "leaderboard":

@@ -46,8 +46,16 @@ describe("listAnswering", () => {
         { name: "Göteborg", teamCount: 1 },
         { name: "Lund", teamCount: 1 },
       ],
+      others: [],
     });
-    expect(listAnswering.reveal(content)).toEqual({ type: "list", items: [] });
+    expect(listAnswering.reveal(content)).toEqual({ type: "list", items: [], others: ["Göteborg", "Malmö"] });
+  });
+
+  it("adds the key's items no team gave, in the key's order, at most twenty", () => {
+    const graded = { answers: [listed("Gbg")], verdicts: [], teams: [] };
+    expect(listAnswering.reveal(content, graded).others).toEqual(["Malmö"]);
+    const long = { ...content, acceptedItems: Array.from({ length: 25 }, (_, index) => ({ spellings: [`Stad ${index + 1}`] })) };
+    expect(listAnswering.reveal(long, { answers: [], verdicts: [], teams: [] }).others).toHaveLength(20);
   });
 
   it("says what each item listed counted as", () => {

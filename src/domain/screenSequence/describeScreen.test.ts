@@ -48,6 +48,7 @@ describe("describeScreen", () => {
       questionNumber: 1,
       prompt: "Baka ett pepparkakshus",
       answeredInApp: false,
+      isTrip: false,
       shown: null,
     });
     expect(describeScreen({ kind: "answer", questionId: questionId("q3") }, rounds)).toEqual({
@@ -55,8 +56,16 @@ describe("describeScreen", () => {
       roundNumber: 2,
       questionNumber: 1,
       prompt: "Rita en tomte",
+      isTrip: false,
       revealed: { type: "drawing", drawings: [] },
     });
+  });
+
+  it("marks the trip, so it can go by På spåret", () => {
+    const trip: QuestionContent = { type: "paSparet", acceptedAnswers: ["Kiruna"], fuzzy: true, clues: ["a", "b", "c", "d", "e"] };
+    const withTrip = [{ _id: roundId("resa"), title: "På spåret", questions: [{ _id: questionId("t1"), prompt: "Vart?", content: trip }] }];
+    expect(describeScreen({ kind: "question", questionId: questionId("t1") }, withTrip)).toMatchObject({ isTrip: true });
+    expect(describeScreen({ kind: "answer", questionId: questionId("t1") }, withTrip)).toMatchObject({ isTrip: true });
   });
 
   it("shows a built type's question without its answer, and reveals it on the answer screen", () => {

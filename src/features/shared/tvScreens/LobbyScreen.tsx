@@ -7,7 +7,7 @@ type LobbyScreenProps = { quizTitle: string; joinUrl: URL; teams: TvTeam[] };
 // Phones join by scanning the code, or by typing the address under it (D34).
 export function LobbyScreen({ quizTitle, joinUrl, teams }: LobbyScreenProps) {
   return (
-    <TvFrame eyebrow="Välkomna till" title={quizTitle}>
+    <TvFrame eyebrow="Välkomna till" title={quizTitle} titleCentered>
       <div className="flex flex-1 gap-[4cqw]">
         <section className="flex w-[32cqw] shrink-0 flex-col items-center gap-[1.6cqw] rounded-[1.6cqw] border-2 bg-card p-[2.4cqw]">
           <h2 className="text-[2.2cqw] font-semibold">Skanna för att gå med</h2>
