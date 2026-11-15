@@ -1,8 +1,9 @@
 import { v } from "convex/values";
+import { isQuestionClosed } from "@/domain/answers/isQuestionClosed";
+import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
 import { picturesOnScreen } from "@/domain/media/picturesOnScreen";
 import { screenNotes } from "@/domain/screenSequence/screenNotes";
-import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { isSameScreen } from "@/domain/screenSequence/isSameScreen";
 import { query } from "../_generated/server";
 import { hostQuery } from "../auth/hostFunctions";
@@ -36,7 +37,7 @@ export const getRunningGame = query({
       // A question the hosts have stepped on from shows no input on the phones, even when shown
       // again (D41). One merely locked, as every team has sent or the time ran out, keeps showing
       // each team its locked answer until then; the server refuses answers to it either way (D55).
-      isQuestionClosed: screen.kind === "question" && (game.closedQuestionIds ?? []).includes(screen.questionId),
+      isQuestionClosed: screen.kind === "question" && isQuestionClosed(game, screen.questionId),
       // Whether the question showing takes answers no more, so a phone stops offering it (D55).
       isQuestionLocked: screen.kind === "question" && isQuestionLocked(game, screen.questionId),
     };

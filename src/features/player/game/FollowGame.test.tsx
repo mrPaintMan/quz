@@ -8,7 +8,9 @@ vi.mock("@/features/player/results/QuestionResult", () => ({
 }));
 vi.mock("./ActivityPoints", () => ({ ActivityPoints: () => <p>Aktivitetens poäng</p> }));
 vi.mock("@/features/player/answering/AnswerQuestion", () => ({
-  AnswerQuestion: ({ secondsLeft }: { secondsLeft: number | null }) => <p>{secondsLeft === 0 ? "Svarsruta, tiden ute" : "Svarsruta"}</p>,
+  AnswerQuestion: ({ secondsLeft, isQuestionLocked }: { secondsLeft: number | null; isQuestionLocked: boolean }) => (
+    <p>{isQuestionLocked ? "Svarsruta, låst" : secondsLeft === 0 ? "Svarsruta, tiden ute" : "Svarsruta"}</p>
+  ),
 }));
 
 const team = { _id: "t1" as Id<"teams">, name: "Tomtarna", colour: "red" as const };
@@ -18,52 +20,54 @@ const shown = { type: "multipleChoice" as const, options: [{ text: "Sverige", im
 
 describe("FollowGame", () => {
   it("shows the team and what is going on", () => {
-    render(<FollowGame team={team} points={null} screen={{ kind: "lobby" }} view={{ kind: "lobby" }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    render(<FollowGame team={team} points={null} screen={{ kind: "lobby" }} view={{ kind: "lobby" }} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.getByText("Tomtarna")).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Ni är med! Vi börjar snart.");
     expect(screen.queryByRole("timer")).not.toBeInTheDocument();
   });
 
   it("shows the question's timer", () => {
-    render(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={{ kind: "paused", remainingMs: 42_000 }} isQuestionClosed={false} />);
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={{ kind: "paused", remainingMs: 42_000 }} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.getByRole("timer")).toHaveTextContent("0:42");
   });
 
   it("points at the TV for a question its type can't be answered in the app yet", () => {
-    render(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.queryByText("Svarsruta")).not.toBeInTheDocument();
   });
 
   it("shows the team's points on an activity, and only there", () => {
-    const { rerender } = render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, answeredInApp: false }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    const { rerender } = render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, answeredInApp: false }} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.getByText("Aktivitetens poäng")).toBeInTheDocument();
-    rerender(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    rerender(<FollowGame team={team} points={null} screen={questionScreen} view={question} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.queryByText("Aktivitetens poäng")).not.toBeInTheDocument();
   });
 
-  it("keeps showing a locked question's answer until the hosts step on", () => {
-    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked />);
-    expect(screen.getByText("Svarsruta")).toBeInTheDocument();
+  it("keeps showing a locked question's answer, locked and without its clock, until the hosts step on", () => {
+    const timer = { kind: "paused" as const, remainingMs: 40_000 };
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={timer} isQuestionClosed={false} isQuestionLocked />);
+    expect(screen.getByText("Svarsruta, låst")).toBeInTheDocument();
+    expect(screen.queryByRole("timer")).not.toBeInTheDocument();
   });
 
   it("lets the team answer a question answered in the app", () => {
-    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.getByText("Svarsruta")).toBeInTheDocument();
   });
 
   it("tells the answer when the time is out", () => {
     const timer = { kind: "paused" as const, remainingMs: 0 };
-    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={timer} isQuestionClosed={false} />);
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={timer} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.getByText("Svarsruta, tiden ute")).toBeInTheDocument();
   });
 
   it("takes no answer for a question the hosts have stepped on from", () => {
-    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed />);
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed isQuestionLocked />);
     expect(screen.queryByText("Svarsruta")).not.toBeInTheDocument();
   });
 
   it("shows the team's own score", () => {
-    render(<FollowGame team={team} points={12} screen={{ kind: "lobby" }} view={{ kind: "lobby" }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
+    render(<FollowGame team={team} points={12} screen={{ kind: "lobby" }} view={{ kind: "lobby" }} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked={false} />);
     expect(screen.getByText("12 p")).toBeInTheDocument();
   });
 });

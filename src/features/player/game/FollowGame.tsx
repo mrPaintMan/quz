@@ -26,7 +26,7 @@ type FollowGameProps = {
   timer: Timer | null;
   isQuestionClosed: boolean;
   // Whether the question showing takes answers no more; its input stays, locked, until Nästa (D64).
-  isQuestionLocked?: boolean;
+  isQuestionLocked: boolean;
   // The trip's film while it shows, for the phone's live points (D63).
   film?: FilmOnScreen | null;
 };
@@ -34,11 +34,12 @@ type FollowGameProps = {
 // The team's phone during the game: it follows the TV by itself, shows the answer input while a
 // question its type can be answered in the app is open on the TV, and after its answer is shown
 // the team's own answer with what scored lit up, in place of the usual line (D58, D59).
-export function FollowGame({ team, points, screen, view, imageUrls, timer, isQuestionClosed, isQuestionLocked = false, film = null }: FollowGameProps) {
+export function FollowGame({ team, points, screen, view, imageUrls, timer, isQuestionClosed, isQuestionLocked, film = null }: FollowGameProps) {
   const secondsLeft = useSecondsLeft(timer);
   const shown = view.kind === "question" ? view.shown : null;
   const isAnswering = shown !== null && screen.kind === "question" && !isQuestionClosed;
-  const clock = secondsLeft !== null && (
+  // Once the question is locked no answer can count, so its clock stops showing.
+  const clock = secondsLeft !== null && !isQuestionLocked && (
     <p role="timer" className={`font-bold text-primary tabular-nums ${isAnswering ? "text-xl" : "text-4xl"}`}>
       {timeLeftText(secondsLeft)}
     </p>
@@ -47,7 +48,7 @@ export function FollowGame({ team, points, screen, view, imageUrls, timer, isQue
   // Nothing, such as a lit answer's glow, may spill past the sides and leave the page wider than
   // the phone (D64).
   return (
-    <main className="flex min-h-svh flex-col gap-6 overflow-x-clip p-5">
+    <main className="flex min-h-svh flex-col gap-6 overflow-x-hidden p-5">
       <header className="flex items-center gap-2 font-semibold">
         <TeamDot colour={team.colour} />
         <span className="min-w-0 flex-1 truncate">{team.name}</span>

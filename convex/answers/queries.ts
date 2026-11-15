@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { answeringOf, reviewOf } from "@/domain/answering/registry";
 import { feedbackQuestionId } from "@/domain/answers/feedbackQuestionId";
 import { isAnswerFor } from "@/domain/answers/isAnswerFor";
+import { isQuestionClosed } from "@/domain/answers/isQuestionClosed";
 import { isGivenAnswer } from "@/domain/answers/isGivenAnswer";
 import { outcomesOfAnswers } from "@/domain/scoring/gradeAnswers";
 import { handOutcome } from "@/domain/scoring/handOutcome";
@@ -45,7 +46,7 @@ export const getTeamFeedback = query({
     const questionId = game && game.endedAt === null ? feedbackQuestionId(game) : null;
     const question = questionId && (await ctx.db.get("questions", questionId));
     const answering = question && answeringOf(question.content);
-    if (!game || !question || !answering || !(game.closedQuestionIds ?? []).includes(question._id)) return null;
+    if (!game || !question || !answering || !isQuestionClosed(game, question._id)) return null;
     const needs = { verdicts: reviewOf(question.content) !== null, teams: answering.revealToTeams !== undefined };
     const { locked, graded } = await gradedOfQuestion(ctx, game._id, question, needs);
     const outcomes = outcomesOfAnswers(

@@ -47,7 +47,7 @@ const SAVE_AT_ONCE_SECONDS = 2;
 // by the question, so a draft never carries over.
 export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft, film = null, isQuestionLocked = false }: AnswerQuestionProps) {
   // Out of time on this phone, or the question locked on the server: nothing more can be sent.
-  const isTimeOut = secondsLeft === 0 || isQuestionLocked;
+  const isClosedForSending = secondsLeft === 0 || isQuestionLocked;
   const saved = useQuery(api.answers.queries.getTeamAnswer, { teamId, questionId });
   const saveDraft = useMutation(api.answers.mutations.saveAnswerDraft);
   const sendAnswer = useMutation(api.answers.mutations.sendAnswer);
@@ -76,11 +76,13 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
   // A trip's guess is sent by the emergency brake in its own input, which shows its own states (D63).
   const sendsItself = sendsWithBrake(shown.type);
   const isLocked = saved?.isLocked ?? false;
+  // Locked on the server with nothing saved, the team has no answer, whatever this phone still holds;
+  // out of time on this phone only, a draft just changed may still be saved within the grace (D41).
+  const hasNoAnswer = saved === null && (isQuestionLocked || (secondsLeft === 0 && draft === null));
   // A locked answer is the one on the server; until then the latest change on this phone, or the
-  // answer the question starts from, such as a sort question's shuffled order.
-  const answer = saved?.isLocked ? saved.content : (draft ?? saved?.content ?? startingAnswerOf(shown));
-  // Out of time with nothing on the server: the team has no answer, whatever the input still shows.
-  const hasNoAnswer = isTimeOut && saved === null && draft === null;
+  // answer the question starts from, such as a sort question's shuffled order. With no answer, the
+  // input shows nothing, so a change that never reached the server doesn't look kept.
+  const answer = hasNoAnswer ? null : saved?.isLocked ? saved.content : (draft ?? saved?.content ?? startingAnswerOf(shown));
   // A draft still waiting is dropped only once the answer is sent; if sending fails, it stays the
   // fallback.
   const send = async (content: AnswerContent) => {
@@ -95,7 +97,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
         shown={shown}
         answer={answer}
         imageUrls={imageUrls}
-        disabled={isLocked || isTimeOut}
+        disabled={isLocked || isClosedForSending}
         onChange={(next) => {
           setDraft(next);
           if (secondsLeft !== null && secondsLeft <= SAVE_AT_ONCE_SECONDS) drafts.saveNow(next);
@@ -123,7 +125,7 @@ export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLe
             <Button
               size="lg"
               className="min-h-14 text-lg"
-              disabled={isTimeOut || isSending || answer === null || !isAnswerComplete(shown, answer)}
+              disabled={isClosedForSending || isSending || answer === null || !isAnswerComplete(shown, answer)}
               onClick={() => answer && send(answer)}
             >
               Skicka svar
