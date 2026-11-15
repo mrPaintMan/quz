@@ -51,13 +51,25 @@ describe("judgeText", () => {
     ).rejects.toThrow("när de är låsta");
   });
 
-  it("refuses a text no team sent, or one that matched exactly", async () => {
+  it("refuses a text no team sent", async () => {
     const { t, gameId, questionId } = await setup();
     const judge = (text: string) => t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text, target: 0 });
     await expect(judge("Agnetha")).rejects.toThrow("finns inte att granska");
-    await expect(judge("Abba")).rejects.toThrow("finns inte att granska");
     // The green team's text is only a draft.
     await expect(t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 1, text: "Mamma mia", target: 0 })).rejects.toThrow("finns inte att granska");
+  });
+
+  it("lets the hosts mark a text that matched exactly as wrong, which then counts over the match", async () => {
+    const { t, gameId, questionId } = await setup();
+    await t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text: "Abba", target: null });
+    const all = await t.query(api.verdicts.queries.getAllAnswers, { ...host, gameId, questionId });
+    const abba = all?.teams.flatMap((team) => team.texts).find((text) => text.text === "abba");
+    expect(abba).toMatchObject({ isJudged: true, target: null, result: "wrong" });
+    expect(await scoresOf(t, gameId)).toEqual(["Röda 0", "Blå 0", "Gröna 0"]);
+    // Rätt again only agrees with the match, so no verdict is kept for it.
+    await t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text: "Abba", target: 0 });
+    expect(await scoresOf(t, gameId)).toEqual(["Röda 1", "Blå 0", "Gröna 0"]);
+    expect(await t.run((ctx) => ctx.db.query("verdicts").collect())).toEqual([]);
   });
 
   it("refuses a slot, option or text that doesn't exist", async () => {

@@ -66,7 +66,7 @@ export function Corrections({ gameId, teams }: { gameId: Id<"games">; teams: Tea
             </option>
           ))}
         </select>
-        <Input aria-label="Poäng" inputMode="decimal" placeholder="2 eller -1" className="w-24" value={text} onChange={(event) => setText(event.target.value)} />
+        <Input aria-label="Poäng" inputMode="decimal" placeholder="poäng" className="w-24" value={text} onChange={(event) => setText(event.target.value)} />
         <Button type="submit" size="sm" disabled={!canAdd}>
           Lägg till
         </Button>

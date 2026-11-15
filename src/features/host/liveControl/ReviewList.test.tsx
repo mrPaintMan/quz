@@ -7,26 +7,27 @@ import { ReviewList, type Review } from "./ReviewList";
 
 const judgeText = vi.fn();
 vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () => judgeText }));
+vi.mock("./AllAnswers", () => ({ AllAnswers: ({ prompt, unjudged }: { prompt: string; unjudged: number }) => <button>{`Visa alla svar: ${prompt}, ${unjudged}`}</button> }));
 
 const gameId = "game1" as Id<"games">;
 const questionId = "q1" as Id<"questions">;
 const slot = (title: string, options: string[], answer: string | null = null) => ({ title, answer, options, isOpen: false, names: [] });
 const item = (slotIndex: number, text: string, extra = {}) => ({ slot: slotIndex, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
 
-function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Partial<Pick<Review, "exact">>) {
+function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Partial<Pick<Review, "hasExact">>) {
   render(
     <ActionErrorProvider>
       <ReviewList
         gameId={gameId}
         questionId={questionId}
-        review={{ exact: [], ...review, phase: "reviewing", unjudged: review.items.filter((candidate) => !candidate.isJudged).length }}
+        review={{ hasExact: false, ...review, phase: "reviewing", unjudged: review.items.filter((candidate) => !candidate.isJudged).length }}
+        prompt="Vilken krydda?"
+        leaderboard={[]}
       />
     </ActionErrorProvider>,
   );
 }
 
-// The rows of a section, in order.
-const rowsIn = (section: string) => within(screen.getByText(section).parentElement!).getAllByRole("listitem");
 
 describe("ReviewList", () => {
   beforeEach(() => {
@@ -38,24 +39,18 @@ describe("ReviewList", () => {
     expect(screen.getByText("Inga svar ännu.")).toBeInTheDocument();
   });
 
-  it("puts the texts to judge on top, then the judged, then the exact matches, read-only", () => {
+  it("shows only the texts no one has judged yet, and every answer behind Visa alla svar", () => {
     renderList({
       slots: [slot("", ["Saffran"])],
       items: [item(0, "safran", { isJudged: true, target: 0, byAi: true }), item(0, "gurkmeja")],
-      exact: [{ slot: 0, text: "saffran", written: "Saffran", teamCount: 3, answer: "Saffran" }],
+      hasExact: true,
       aiStatus: "done",
     });
-    const headings = screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent);
-    expect(headings).toEqual(["Att granska", "Bedömda", "Stämde med facit"]);
-    const [toJudge] = rowsIn("Att granska");
-    expect(toJudge).toHaveTextContent("gurkmeja");
-    const [judged] = rowsIn("Bedömda");
-    expect(judged).toHaveTextContent("safran");
-    expect(within(judged).getByTitle("Bedömt av AI")).toBeInTheDocument();
-    const exact = within(screen.getByText("Saffran", { selector: "span" }).closest("li")!);
-    expect(exact.getByText("3 lag")).toBeInTheDocument();
-    expect(exact.getByText("= Saffran")).toBeInTheDocument();
-    expect(exact.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByText("Att granska")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem").map((row) => row.textContent)).toEqual([expect.stringContaining("gurkmeja")]);
+    expect(screen.queryByText("safran")).not.toBeInTheDocument();
+    expect(screen.queryByText("Saffran", { selector: "span" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Visa alla svar: Vilken krydda?, 1" })).toBeInTheDocument();
   });
 
   it("gives each sub-question's correct answer by its title, and judges for every team that wrote a text", async () => {
@@ -66,31 +61,33 @@ describe("ReviewList", () => {
     });
     expect(screen.getByText("1 kvar")).toBeInTheDocument();
     expect(screen.getByText("a) Artist · facit: ABBA")).toBeInTheDocument();
-    expect(screen.getByText("b) Låt · facit: Waterloo")).toBeInTheDocument();
+    // Its only text is judged, so the sub-question has nothing to show here.
+    expect(screen.queryByText("b) Låt · facit: Waterloo")).not.toBeInTheDocument();
     expect(screen.queryByText(/c\) År/)).not.toBeInTheDocument();
     const abbba = within(screen.getByText("Abbba").closest("li")!);
     expect(abbba.getByText("2 lag")).toBeInTheDocument();
     await userEvent.click(abbba.getByRole("button", { name: "Rätt" }));
     expect(judgeText).toHaveBeenCalledWith({ gameId, questionId, slot: 0, text: "abbba", target: 0 });
-    const waterlo = within(screen.getByText("waterlo").closest("li")!);
-    expect(waterlo.getByRole("button", { name: "Rätt" })).toHaveAttribute("aria-pressed", "true");
-    await userEvent.click(waterlo.getByRole("button", { name: "Fel" }));
-    expect(judgeText).toHaveBeenLastCalledWith({ gameId, questionId, slot: 1, text: "waterlo", target: null });
+    await userEvent.click(abbba.getByRole("button", { name: "Fel" }));
+    expect(judgeText).toHaveBeenLastCalledWith({ gameId, questionId, slot: 0, text: "abbba", target: null });
   });
 
   it("asks which ingredient a text counts as", async () => {
-    renderList({ slots: [slot("", ["Vodka", "Kahlúa"])], items: [item(0, "kahlua", { isJudged: true, target: null })], aiStatus: null });
-    expect(screen.getByText("Allt granskat")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Fel" })).toHaveAttribute("aria-pressed", "true");
+    renderList({ slots: [slot("", ["Vodka", "Kahlúa"])], items: [item(0, "kahlua")], aiStatus: null });
     await userEvent.click(screen.getByRole("button", { name: "Kahlúa" }));
     expect(judgeText).toHaveBeenCalledWith({ gameId, questionId, slot: 0, text: "kahlua", target: 1 });
   });
 
-  it("says while the AI judges, and marks the verdicts it gave", () => {
-    renderList({ slots: [slot("", ["Saffran"])], items: [item(0, "safran", { isJudged: true, target: 0, byAi: true }), item(0, "gurkmeja")], aiStatus: "judging" });
+  it("says when everything is judged, and where to change a verdict", () => {
+    renderList({ slots: [slot("", ["Saffran"])], items: [item(0, "kahlua", { isJudged: true, target: null })], aiStatus: null });
+    expect(screen.getByText("Allt granskat")).toBeInTheDocument();
+    expect(screen.getByText("Ändra en bedömning under alla svar.")).toBeInTheDocument();
+    expect(screen.queryByRole("listitem")).not.toBeInTheDocument();
+  });
+
+  it("says while the AI judges", () => {
+    renderList({ slots: [slot("", ["Saffran"])], items: [item(0, "gurkmeja")], aiStatus: "judging" });
     expect(screen.getByText("AI:n bedömer svaren…")).toBeInTheDocument();
-    expect(within(screen.getByText("safran").closest("li")!).getByTitle("Bedömt av AI")).toBeInTheDocument();
-    expect(within(screen.getByText("gurkmeja").closest("li")!).queryByTitle("Bedömt av AI")).not.toBeInTheDocument();
   });
 
   it("says when the AI couldn't judge, until the hosts have judged everything", () => {
