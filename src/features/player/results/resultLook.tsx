@@ -5,12 +5,14 @@ import { formatPoints } from "@/domain/scoring/formatPoints";
 // Parts light up one after another, this far apart.
 const STAGGER_MS = 150;
 
-// How a part of the team's answer looks once shown: lit in gold when it scored, as sent otherwise;
-// dashed while waiting for a verdict, faded when another form of it already counted (D59).
+// How a part of the team's answer looks once shown: lit in gold when it scored, red when wrong
+// (D67); dashed while waiting for a verdict, faded when another form of it already counted (D59).
 export function resultClass(result: OutcomePart["result"] | undefined): string {
   switch (result) {
     case "right":
       return "result-lit";
+    case "wrong":
+      return "result-missed";
     case "pending":
       return "border-2 border-dashed border-muted-foreground";
     case "repeat":
@@ -52,7 +54,14 @@ export function ResultNote({ result }: { result: OutcomePart["result"] | undefin
   return null;
 }
 
-// What a part shows at its end: its points when it scored.
+// What a part shows at its end: its points when it scored, a red ✕ when wrong (D67).
 export function PartEnd({ part }: { part: OutcomePart | undefined }) {
-  return part?.result === "right" ? <PointsBadge points={part.points} /> : null;
+  if (part?.result === "right") return <PointsBadge points={part.points} />;
+  if (part?.result === "wrong") return <Pill tone="red">✕ 0 p</Pill>;
+  return null;
+}
+
+// The right answer beside a wrong one, as the TV shows it (D67).
+export function RightAnswer({ children }: { children: ReactNode }) {
+  return <span className="text-sm text-primary">Rätt svar: {children}</span>;
 }

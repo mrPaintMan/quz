@@ -80,7 +80,8 @@ describe("getTeamFeedback", () => {
       await expect(t.query(api.answers.queries.getTeamFeedback, { teamId: red })).resolves.toEqual({
         prompt: "Vilken krydda?",
         shown: { type: "freeText", labels: [""] },
-        revealed: null,
+        // The answer screen's reveal, so the phone can show the right answer by a wrong one (D67).
+        revealed: { type: "freeText", fields: [{ label: "", answer: "Saffran" }] },
         imageUrls: {},
         answer: { type: "freeText", fields: ["Safran"] },
         outcome: { points: 2, parts: [{ label: "", given: "Safran", result: "right", correct: "Saffran", points: 2 }] },
@@ -95,7 +96,7 @@ describe("getTeamFeedback", () => {
     await expect(after.t.query(api.answers.queries.getTeamFeedback, { teamId: after.green })).resolves.toEqual({
       prompt: "Vilken krydda?",
       shown: { type: "freeText", labels: [""] },
-      revealed: null,
+      revealed: { type: "freeText", fields: [{ label: "", answer: "Saffran" }] },
       imageUrls: {},
       answer: null,
       outcome: null,

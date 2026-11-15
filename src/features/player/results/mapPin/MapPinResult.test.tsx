@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { outcomeOf, part } from "@/features/player/results/resultTestParts.setup";
 import { MapPinResult } from "./MapPinResult";
 
-type MapProps = { view: unknown; onViewChange: (view: unknown) => void; markers: { kind: string; colour: string }[]; centerPin?: boolean };
+type MapProps = { view: unknown; onViewChange: (view: unknown) => void; markers: { kind: string; colour: string }[]; centerPin?: boolean; circleAt?: unknown; radiusMeters?: unknown };
 const maps: MapProps[] = [];
 vi.mock("@/features/shared/map/BorderMap", () => ({
   BorderMap: (props: MapProps) => {
@@ -27,12 +27,14 @@ const revealed = {
 const latest = () => maps[maps.length - 1];
 
 describe("MapPinResult", () => {
-  it("shows the team's pin glowing with its points and distance among the other teams' pins, on a map free to move", () => {
+  it("shows the TV's map: the right place with its radius, every pin, the team's own in its colour, free to move", () => {
     render(
       <MapPinResult shown={shown} answer={{ type: "mapPin", pin: own }} outcome={outcomeOf(part("right", 3, "64 km från rätt plats"))} imageUrls={{}} revealed={revealed} teamId="t1" />,
     );
-    expect(latest()).toMatchObject({ view: { center: own, zoom: 4 }, centerPin: false });
-    expect(latest().markers.map((marker) => marker.kind)).toEqual(["pin", "highlight"]);
+    expect(latest()).toMatchObject({ view: { center: own, zoom: 4 }, centerPin: false, circleAt: revealed.target, radiusMeters: 100_000 });
+    expect(latest().markers.map((marker) => marker.kind)).toEqual(["pin", "own", "target"]);
+    // The team's own pin keeps its colour though it scored (D67).
+    expect(latest().markers[1].colour).toBe("#e0645f");
     expect(screen.getByText("Er nål").parentElement).toHaveClass("result-lit");
     expect(screen.getByText("64 km från rätt plats")).toBeInTheDocument();
     expect(screen.getByText("+3 p")).toBeInTheDocument();
@@ -45,6 +47,6 @@ describe("MapPinResult", () => {
     render(<MapPinResult shown={shown} answer={{ type: "mapPin", pin: own }} outcome={outcomeOf(part("wrong", 0, "64 km från rätt plats"))} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(latest().markers).toEqual([expect.objectContaining({ kind: "own" })]);
     expect(screen.queryByText("Dra i kartan för att se de andra lagens nålar")).not.toBeInTheDocument();
-    expect(screen.getByText("Er nål").parentElement).not.toHaveClass("result-lit");
+    expect(screen.getByText("Er nål").parentElement).toHaveClass("result-missed");
   });
 });

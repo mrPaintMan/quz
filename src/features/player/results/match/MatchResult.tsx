@@ -6,11 +6,12 @@ import { glowDelay, litOrders, PointsBadge } from "@/features/player/results/res
 const rowClass = "relative z-10 flex items-center justify-between gap-1 rounded-2xl border-2 border-border bg-card px-3 text-base leading-tight";
 
 // The team's pairs with the lines between them, laid out as when it drew them (D47); a pair that
-// scored lights up, both items and its line, with its points by the left item, and the other
-// lines turn grey (D59).
+// scored lights up, both items and its line, with its points by the left item (D59); a wrong pair
+// turns red, line and left item, with the right partner under it (D67).
 export function MatchResult({ shown, answer, outcome }: ResultViewProps<"match">) {
   const rowByLeft = rowsOfAnswer(answer.rightByLeft, shown.right);
   const isRight = (left: number) => outcome.parts[left]?.result === "right";
+  const isWrong = (left: number) => outcome.parts[left]?.result === "wrong";
   const litRight = new Set(rowByLeft.flatMap((row, left) => (row !== null && isRight(left) ? [row] : [])));
   // Each pair's place in the order the pairs that scored light up, by its left row.
   const orders = litOrders(shown.left.map((_text, left) => outcome.parts[left]));
@@ -24,11 +25,14 @@ export function MatchResult({ shown, answer, outcome }: ResultViewProps<"match">
         <div className="flex flex-col" style={{ gap: ROW_GAP }}>
           {shown.left.map((text, left) => (
             <div
-              key={`${left}-${isRight(left)}`}
+              key={`${left}-${outcome.parts[left]?.result}`}
               style={{ height: ROW_HEIGHT, ...glowDelay(orders[left] ?? 0) }}
-              className={`${rowClass} ${isRight(left) ? "result-lit" : ""}`}
+              className={`${rowClass} ${isRight(left) ? "result-lit" : isWrong(left) ? "result-missed" : ""}`}
             >
-              <span className="line-clamp-2">{text}</span>
+              <span className="flex min-w-0 flex-col">
+                <span className="line-clamp-2">{text}</span>
+                {isWrong(left) && outcome.parts[left].correct !== "" && <span className="truncate text-xs text-primary">rätt: {outcome.parts[left].correct}</span>}
+              </span>
               {isRight(left) && <PointsBadge points={outcome.parts[left].points} className="px-1.5 text-xs" />}
             </div>
           ))}
@@ -40,8 +44,8 @@ export function MatchResult({ shown, answer, outcome }: ResultViewProps<"match">
                 key={left}
                 d={curveBetween(left, row)}
                 fill="none"
-                stroke={isRight(left) ? "var(--primary)" : "var(--muted-foreground)"}
-                strokeOpacity={isRight(left) ? 1 : 0.5}
+                stroke={isRight(left) ? "var(--primary)" : isWrong(left) ? "var(--destructive)" : "var(--muted-foreground)"}
+                strokeOpacity={isRight(left) || isWrong(left) ? 1 : 0.5}
                 strokeWidth={isRight(left) ? 4 : 2.5}
                 strokeLinecap="round"
               />

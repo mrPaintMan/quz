@@ -21,4 +21,19 @@ describe("IngredientsResult", () => {
     expect(screen.getByText("Räknas redan")).toBeInTheDocument();
     expect(screen.getAllByText("+1 p")).toHaveLength(2);
   });
+
+  it("lists the ingredients the team missed", () => {
+    const right = { ...part("right", 1, "vodka", 0), correct: "Vodka" };
+    render(
+      <IngredientsResult
+        shown={{ type: "ingredients", count: 2 }}
+        answer={{ type: "ingredients", items: ["vodka", "mjölk"] }}
+        outcome={outcomeOf(right, part("wrong", 0, "mjölk", 1))}
+        imageUrls={{}}
+        revealed={{ type: "ingredients", items: ["Vodka", "Kahlúa", "Grädde"] }}
+        teamId="t1"
+      />,
+    );
+    expect(screen.getByText("Rätt svar: Kahlúa, Grädde")).toBeInTheDocument();
+  });
 });

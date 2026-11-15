@@ -1,8 +1,10 @@
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
-import { glowDelay, PartEnd, resultClass } from "@/features/player/results/resultLook";
+import { formatNumber } from "@/domain/text/formatNumber";
+import { glowDelay, PartEnd, resultClass, RightAnswer } from "@/features/player/results/resultLook";
 
-// The team's guess in the field it was typed in, lit with its points when it scored (D59).
-export function NumberResult({ outcome }: ResultViewProps<"number">) {
+// The team's guess in the field it was typed in, lit with its points when it scored, red with the
+// right number under it when not (D59, D67).
+export function NumberResult({ outcome, revealed }: ResultViewProps<"number">) {
   const part = outcome.parts[0];
   return (
     <div className="flex flex-col gap-2">
@@ -10,13 +12,12 @@ export function NumberResult({ outcome }: ResultViewProps<"number">) {
       <div
         key={part?.result}
         style={glowDelay(0)}
-        className={`relative flex h-16 items-center justify-center rounded-md border bg-card text-3xl font-semibold tabular-nums ${resultClass(part?.result)}`}
+        className={`flex min-h-16 flex-wrap items-center justify-center gap-x-3 gap-y-1 rounded-md border bg-card px-3 py-2 text-3xl font-semibold tabular-nums ${resultClass(part?.result)}`}
       >
         {part?.given}
-        <span className="absolute right-3">
-          <PartEnd part={part} />
-        </span>
+        <PartEnd part={part} />
       </div>
+      {part?.result === "wrong" && revealed?.answer != null && <RightAnswer>{formatNumber(revealed.answer)}</RightAnswer>}
     </div>
   );
 }

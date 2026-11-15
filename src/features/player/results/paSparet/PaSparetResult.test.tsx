@@ -32,4 +32,18 @@ describe("PaSparetResult", () => {
     expect(screen.getByText("Ni bromsade inte.")).toBeInTheDocument();
     expect(screen.queryByText(/\+/)).not.toBeInTheDocument();
   });
+
+  it("gives the destination under a wrong guess", () => {
+    render(
+      <PaSparetResult
+        shown={{ type: "paSparet" }}
+        answer={{ type: "paSparet", guess: "Luleå", brakeClueIndex: 0 }}
+        outcome={{ points: 0, parts: [{ label: "", given: "Luleå", result: "wrong", correct: "", points: 0 }] }}
+        imageUrls={{}}
+        revealed={{ type: "paSparet", destination: "Kiruna", guesses: [] }}
+        teamId="t1"
+      />,
+    );
+    expect(screen.getByText("Rätt svar: Kiruna")).toBeInTheDocument();
+  });
 });

@@ -20,9 +20,11 @@ describe("DrawingResult", () => {
     expect(container.firstChild).toHaveClass("result-lit");
   });
 
-  it("shows it as sent when it scored nothing", () => {
+  it("shows it plain with 0 p when it scored nothing, as a drawing isn't wrong", () => {
     const { container } = renderResult(0);
     expect(screen.queryByText("Bedöms…")).not.toBeInTheDocument();
     expect(container.firstChild).not.toHaveClass("result-lit");
+    expect(container.firstChild).not.toHaveClass("result-missed");
+    expect(screen.getByText("0 p")).toBeInTheDocument();
   });
 });

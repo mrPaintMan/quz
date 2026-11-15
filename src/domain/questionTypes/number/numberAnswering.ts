@@ -1,7 +1,7 @@
 import type { AnswerOf } from "@convex/answers/answerContent";
 import type { ContentOf } from "@convex/questions/questionContent";
 import type { AnsweringRules } from "@/domain/answering/answeringRules";
-import { formatDecimal } from "@/domain/text/formatDecimal";
+import { formatNumber } from "@/domain/text/formatNumber";
 
 type NumberContent = ContentOf<"number">;
 type NumberAnswer = AnswerOf<"number">;
@@ -46,10 +46,10 @@ export const numberAnswering: AnsweringRules<"number", NumberShown, NumberReveal
   outcomes: (content, answers) => {
     const { scoring } = content;
     const points = scoring.mode === "closest" ? gradeByCloseness(content, scoring.pointsByRank, answers) : answers.map((answer) => gradeByTiers(content, scoring.tiers, answer));
-    const correct = content.answer === null ? "" : formatDecimal(content.answer);
+    const correct = content.answer === null ? "" : formatNumber(content.answer);
     return answers.map(({ value }, index) => ({
       points: points[index],
-      parts: [{ label: "", given: value === null ? "" : formatDecimal(value), result: points[index] > 0 ? "right" : "wrong", correct, points: points[index] }],
+      parts: [{ label: "", given: value === null ? "" : formatNumber(value), result: points[index] > 0 ? "right" : "wrong", correct, points: points[index] }],
     }));
   },
 };

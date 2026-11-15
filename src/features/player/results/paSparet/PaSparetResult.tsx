@@ -1,11 +1,12 @@
 import { brakePointsOf } from "@/domain/questionTypes/paSparet/paSparetAnswering";
 import { formatPoints } from "@/domain/scoring/formatPoints";
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
-import { glowDelay, PartEnd, ResultNote, resultClass } from "@/features/player/results/resultLook";
+import { glowDelay, PartEnd, ResultNote, resultClass, RightAnswer } from "@/features/player/results/resultLook";
 
 // The team's guess as it wrote it, with the points it braked at: lit with them when right, as sent
-// when wrong, waiting while it is judged; a guess never braked scores nothing (D63).
-export function PaSparetResult({ answer, outcome }: ResultViewProps<"paSparet">) {
+// when wrong, with the destination under it, waiting while it is judged; a guess never braked
+// scores nothing (D63, D67).
+export function PaSparetResult({ answer, outcome, revealed }: ResultViewProps<"paSparet">) {
   const part = outcome.parts[0];
   const brakePoints = brakePointsOf(answer.brakeClueIndex);
   return (
@@ -18,6 +19,7 @@ export function PaSparetResult({ answer, outcome }: ResultViewProps<"paSparet">)
         </span>
         <PartEnd part={part} />
       </div>
+      {part?.result === "wrong" && revealed && revealed.destination !== "" && <RightAnswer>{revealed.destination}</RightAnswer>}
       <p className="text-muted-foreground">{brakePoints === null ? "Ni bromsade inte." : `Bromsade vid ${formatPoints(brakePoints)}`}</p>
     </div>
   );
