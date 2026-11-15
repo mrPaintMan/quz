@@ -19,8 +19,7 @@ const slotHeading = (slot: Slot) => (slot.answer ? `${slot.title} · facit: ${sl
 function ToJudge({ slots, items, onJudge }: { slots: Slot[]; items: Review["items"]; onJudge: (item: Review["items"][number], target: Target) => void }) {
   if (items.length === 0) return null;
   return (
-    <div className="flex flex-col gap-1">
-      <h4 className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Att granska</h4>
+    <div className="mt-1 flex flex-col gap-1">
       {slots.map((slot, slotIndex) => {
         const inSlot = items.filter((item) => item.slot === slotIndex);
         if (inSlot.length === 0) return null;

@@ -28,8 +28,6 @@ function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Parti
   );
 }
 
-// The rows of a section, in order.
-const rowsIn = (section: string) => within(screen.getByText(section).parentElement!).getAllByRole("listitem");
 
 describe("ReviewList", () => {
   beforeEach(() => {
@@ -48,8 +46,8 @@ describe("ReviewList", () => {
       hasExact: true,
       aiStatus: "done",
     });
-    expect(screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent)).toEqual(["Att granska"]);
-    expect(rowsIn("Att granska").map((row) => row.textContent)).toEqual([expect.stringContaining("gurkmeja")]);
+    expect(screen.queryByText("Att granska")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("listitem").map((row) => row.textContent)).toEqual([expect.stringContaining("gurkmeja")]);
     expect(screen.queryByText("safran")).not.toBeInTheDocument();
     expect(screen.queryByText("Saffran", { selector: "span" })).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Visa alla svar: Vilken krydda?, 1" })).toBeInTheDocument();
