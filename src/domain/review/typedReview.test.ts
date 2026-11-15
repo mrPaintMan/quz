@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { answerBreakdowns, givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { exactOptionOf, givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -34,11 +34,11 @@ describe("textOutcomes", () => {
     ];
     const [outcome] = textOutcomes(review, content, [answer("ABBA", "Vodka", "wodka", "mjölk", "gin")], verdicts);
     expect(outcome.texts.map(({ key: _key, ...text }) => text)).toEqual([
-      { slot: 0, written: "ABBA", at: 0, result: "right", item: "ABBA", points: 2 },
-      { slot: 1, written: "Vodka", at: 1, result: "right", item: "Vodka", points: 2 },
-      { slot: 1, written: "wodka", at: 2, result: "repeat", item: "Vodka", points: 0 },
-      { slot: 1, written: "mjölk", at: 3, result: "wrong", item: "", points: 0 },
-      { slot: 1, written: "gin", at: 4, result: "pending", item: "", points: 0 },
+      { slot: 0, text: "abba", written: "ABBA", at: 0, result: "right", item: "ABBA", points: 2, target: 0, byAi: false },
+      { slot: 1, text: "vodka", written: "Vodka", at: 1, result: "right", item: "Vodka", points: 2, target: 0, byAi: false },
+      { slot: 1, text: "wodka", written: "wodka", at: 2, result: "repeat", item: "Vodka", points: 0, target: 0, byAi: false },
+      { slot: 1, text: "mjölk", written: "mjölk", at: 3, result: "wrong", item: "", points: 0, target: null, byAi: false },
+      { slot: 1, text: "gin", written: "gin", at: 4, result: "pending", item: "", points: 0, target: undefined, byAi: false },
     ]);
     expect(outcome.points).toBe(4);
     // A repeat is the same item as the text it repeats.
@@ -53,22 +53,11 @@ describe("a verdict on an exact match", () => {
   });
 });
 
-describe("answerBreakdowns", () => {
-  it("gives each answer's texts in the order written, with what each counts as, its result and the points", () => {
-    const verdicts = [
-      { slot: 1, text: "wodka", target: 0, byAi: true },
-      { slot: 1, text: "mjölk", target: null },
-    ];
-    const [breakdown] = answerBreakdowns(review, content, [answer("ABBA", "wodka", "mjölk", "gin")], verdicts);
-    expect(breakdown).toEqual({
-      points: 4,
-      texts: [
-        { slot: 0, text: "abba", written: "ABBA", target: 0, byAi: false, result: "right" },
-        { slot: 1, text: "wodka", written: "wodka", target: 0, byAi: true, result: "right" },
-        { slot: 1, text: "mjölk", written: "mjölk", target: null, byAi: false, result: "wrong" },
-        { slot: 1, text: "gin", written: "gin", target: undefined, byAi: false, result: "pending" },
-      ],
-    });
+describe("exactOptionOf", () => {
+  it("gives the option a text matches exactly in its slot, compared as everywhere else", () => {
+    const slots = review.slots(content);
+    expect(exactOptionOf(slots, 1, " kaffelikör ")).toBe(1);
+    expect(exactOptionOf(slots, 1, "ABBA")).toBeUndefined();
   });
 });
 

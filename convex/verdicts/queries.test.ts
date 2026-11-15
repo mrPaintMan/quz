@@ -12,7 +12,7 @@ describe("getReview", () => {
     ]);
     expect(review?.aiStatus).toBeNull();
     // The red team's "Abba" matched exactly.
-    expect(review?.exact).toEqual([{ slot: 0, text: "abba", written: "Abba", teamCount: 1, answer: "ABBA" }]);
+    expect(review?.hasExact).toBe(true);
     expect(review?.items).toEqual([
       { slot: 0, text: "abbba", written: "Abbba", teamCount: 1, isJudged: false, target: null, byAi: false },
       { slot: 1, text: "waterlo", written: "Waterlo", teamCount: 2, isJudged: false, target: null, byAi: false },
@@ -56,7 +56,7 @@ describe("getAllAnswers", () => {
     await t.run((ctx) => ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "abbba", target: 0, byAi: true }));
     const all = await t.query(api.verdicts.queries.getAllAnswers, { ...host, gameId, questionId });
     expect(all?.slots.map((slot) => slot.title)).toEqual(["a) Artist", "b) Låt"]);
-    expect(all?.teams.map(({ name, hasAnswered, points, texts }) => ({ name, hasAnswered, points, texts: texts.map((text) => [text.written, text.isJudged, text.target, text.byAi, text.result]) }))).toEqual([
+    expect(all?.teams.map(({ name, hasAnswered, points, texts }) => ({ name, hasAnswered, points, texts: texts.map((text: { written: string; isJudged: boolean; target: unknown; byAi: boolean; result: string }) => [text.written, text.isJudged, text.target, text.byAi, text.result]) }))).toEqual([
       {
         name: "Röda",
         hasAnswered: true,

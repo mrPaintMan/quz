@@ -66,6 +66,10 @@ describe("judgeText", () => {
     const abba = all?.teams.flatMap((team) => team.texts).find((text) => text.text === "abba");
     expect(abba).toMatchObject({ isJudged: true, target: null, result: "wrong" });
     expect(await scoresOf(t, gameId)).toEqual(["Röda 0", "Blå 0", "Gröna 0"]);
+    // Rätt again only agrees with the match, so no verdict is kept for it.
+    await t.mutation(api.verdicts.mutations.judgeText, { ...host, gameId, questionId, slot: 0, text: "Abba", target: 0 });
+    expect(await scoresOf(t, gameId)).toEqual(["Röda 1", "Blå 0", "Gröna 0"]);
+    expect(await t.run((ctx) => ctx.db.query("verdicts").collect())).toEqual([]);
   });
 
   it("refuses a slot, option or text that doesn't exist", async () => {

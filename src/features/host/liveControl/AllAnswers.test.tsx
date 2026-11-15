@@ -93,13 +93,37 @@ describe("AllAnswers", () => {
     expect(block("Tomtarna").queryByText(/Gäller även/)).not.toBeInTheDocument();
   });
 
-  it("puts a sub-question's title before each text", async () => {
+  it("puts a sub-question's title before each text, and gives each sub-question's answer on top", async () => {
     all.mockReturnValue({ slots: [slot("a) Artist", ["ABBA"]), slot("b) Låt", ["Waterloo"])], teams: [team("t1", "Tomtarna", [text("ABBA"), text("Waterlo", { slot: 1 })])] });
     renderAll();
     await open();
     expect(block("Tomtarna").getByText("a) Artist ·")).toBeInTheDocument();
     expect(block("Tomtarna").getByText("b) Låt ·")).toBeInTheDocument();
-    expect(screen.queryByText(/Facit:/)).not.toBeInTheDocument();
+    expect(screen.getByText(/^Facit: a\) Artist ABBA · b\) Låt Waterloo · /)).toBeInTheDocument();
+  });
+
+  it("says when a text is another form of one already counted", async () => {
+    all.mockReturnValue({ slots: [slot("", ["Vodka"])], teams: [team("t1", "Tomtarna", [text("Vodka"), text("Wodka", { result: "repeat" })], 1)] });
+    renderAll();
+    await open();
+    expect(within(block("Tomtarna").getByText("Wodka").closest("li")!).getByText("Räknas redan")).toBeInTheDocument();
+  });
+
+  it("keeps the blocks in the order they opened in while the hosts judge", async () => {
+    const { rerender } = render(
+      <ActionErrorProvider>
+        <AllAnswers gameId={gameId} questionId={questionId} prompt="Vilken krydda?" unjudged={1} leaderboard={["t1", "t3", "t5", "t4", "t2"]} />
+      </ActionErrorProvider>,
+    );
+    await open();
+    const before = screen.getAllByRole("region").map((region) => region.getAttribute("aria-label"));
+    all.mockReturnValue({ ...saffron, teams: saffron.teams.map((each) => ({ ...each, texts: each.texts.map((one) => ({ ...one, isJudged: true })) })) });
+    rerender(
+      <ActionErrorProvider>
+        <AllAnswers gameId={gameId} questionId={questionId} prompt="Vilken krydda?" unjudged={0} leaderboard={["t2", "t1", "t3", "t5", "t4"]} />
+      </ActionErrorProvider>,
+    );
+    expect(screen.getAllByRole("region").map((region) => region.getAttribute("aria-label"))).toEqual(before);
   });
 
   it("says while the answers load, and closes", async () => {

@@ -14,13 +14,13 @@ const questionId = "q1" as Id<"questions">;
 const slot = (title: string, options: string[], answer: string | null = null) => ({ title, answer, options, isOpen: false, names: [] });
 const item = (slotIndex: number, text: string, extra = {}) => ({ slot: slotIndex, text, written: text, teamCount: 1, isJudged: false, target: null, byAi: false, ...extra });
 
-function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Partial<Pick<Review, "exact">>) {
+function renderList(review: Pick<Review, "slots" | "items" | "aiStatus"> & Partial<Pick<Review, "hasExact">>) {
   render(
     <ActionErrorProvider>
       <ReviewList
         gameId={gameId}
         questionId={questionId}
-        review={{ exact: [], ...review, phase: "reviewing", unjudged: review.items.filter((candidate) => !candidate.isJudged).length }}
+        review={{ hasExact: false, ...review, phase: "reviewing", unjudged: review.items.filter((candidate) => !candidate.isJudged).length }}
         prompt="Vilken krydda?"
         leaderboard={[]}
       />
@@ -45,7 +45,7 @@ describe("ReviewList", () => {
     renderList({
       slots: [slot("", ["Saffran"])],
       items: [item(0, "safran", { isJudged: true, target: 0, byAi: true }), item(0, "gurkmeja")],
-      exact: [{ slot: 0, text: "saffran", written: "Saffran", teamCount: 3, answer: "Saffran" }],
+      hasExact: true,
       aiStatus: "done",
     });
     expect(screen.getAllByRole("heading", { level: 4 }).map((heading) => heading.textContent)).toEqual(["Att granska"]);

@@ -12,7 +12,6 @@ import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
-import { AiMark } from "./AiMark";
 import { VerdictChoices } from "./VerdictChoices";
 
 type AllAnswersState = NonNullable<FunctionReturnType<typeof api.verdicts.queries.getAllAnswers>>;
@@ -20,7 +19,8 @@ type TeamAnswers = AllAnswersState["teams"][number];
 
 const isPending = (team: TeamAnswers) => team.texts.some((text) => !text.isJudged);
 
-// Teams with a text still waiting for a verdict first, then the rest as the leaderboard ranks them.
+// Teams with a text still waiting for a verdict first, then the rest as the leaderboard ranks them;
+// worked out once as the window opens, so no block moves under a host's finger while judging.
 export function orderTeams(teams: TeamAnswers[], leaderboard: string[]): TeamAnswers[] {
   const place = (teamId: string) => {
     const index = leaderboard.indexOf(teamId);
@@ -56,7 +56,13 @@ function TeamBlock({ team, teams, all, onJudge }: { team: TeamAnswers; teams: Te
               <span className="min-w-28 flex-1 break-words">
                 {all.slots.length > 1 && slot.title !== "" && <span className="text-muted-foreground">{slot.title} · </span>}
                 {text.written}
-                {text.byAi && <AiMark />}
+                {text.byAi && (
+                  <span title="Bedömt av AI" className="ml-2 rounded bg-secondary px-1.5 py-0.5 align-middle text-xs font-normal text-muted-foreground">
+                    AI
+                  </span>
+                )}
+                {/* Another form of an item the team already has scores nothing (D53). */}
+                {text.result === "repeat" && <span className="block text-xs text-muted-foreground">Räknas redan</span>}
               </span>
               <VerdictChoices slot={slot} item={text} onChoose={(target) => onJudge(text.slot, text.text, target)} />
               {others.length > 0 && <p className="w-full text-xs text-muted-foreground">Gäller även {others.join(", ")}</p>}
@@ -66,6 +72,20 @@ function TeamBlock({ team, teams, all, onJudge }: { team: TeamAnswers; teams: Te
       </ul>
     </section>
   );
+}
+
+// A team's place in the order fixed as the window opened; one not in it goes last.
+function rank(order: string[] | null, teamId: string): number {
+  const index = order?.indexOf(teamId) ?? -1;
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
+// The accepted answers to compare with: one question's, or each sub-question's by its title.
+function keyLine(slots: AllAnswersState["slots"]): string {
+  const keyed = slots.filter((slot) => slot.options.length > 0);
+  if (keyed.length === 0) return "";
+  const answers = keyed.map((slot) => (slots.length > 1 && slot.title !== "" ? `${slot.title} ${slot.options.join(", ")}` : slot.options.join(", ")));
+  return `Facit: ${answers.join(" · ")} · `;
 }
 
 type AllAnswersProps = {
@@ -85,11 +105,21 @@ export function AllAnswers({ gameId, questionId, prompt, unjudged, leaderboard }
   const all = useHostQuery(api.verdicts.queries.getAllAnswers, isOpen ? { gameId, questionId } : "skip");
   const judge = useHostMutation(api.verdicts.mutations.judgeText);
   const run = useRunAction();
+  const [order, setOrder] = useState<string[] | null>(null);
   const answered = all?.teams.filter((team) => team.hasAnswered).length ?? 0;
-  const key = all?.slots.length === 1 && all.slots[0].options.length > 0 ? `Facit: ${all.slots[0].options.join(", ")} · ` : "";
+  const key = all ? keyLine(all.slots) : "";
+  // The order is fixed when the answers first load; a team that joins later goes last.
+  if (all && order === null) setOrder(orderTeams(all.teams, leaderboard).map((team) => team.teamId));
+  const shown = all ? [...all.teams].sort((a, b) => rank(order, a.teamId) - rank(order, b.teamId)) : [];
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        setIsOpen(open);
+        if (!open) setOrder(null);
+      }}
+    >
       <Button variant="outline" onClick={() => setIsOpen(true)}>
         Visa alla svar
       </Button>
@@ -110,7 +140,7 @@ export function AllAnswers({ gameId, questionId, prompt, unjudged, leaderboard }
         <div className="grid gap-3 overflow-y-auto p-6 sm:grid-cols-2">
           {all === undefined && <p className="text-muted-foreground">Hämtar svaren…</p>}
           {all &&
-            orderTeams(all.teams, leaderboard).map((team) => (
+            shown.map((team) => (
               <TeamBlock
                 key={team.teamId}
                 team={team}

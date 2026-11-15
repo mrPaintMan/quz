@@ -99,23 +99,38 @@ export function textOutcomes<Content, Answer>(
 
 // One written text's outcome, with the name of the item it counted as when right or a repeat.
 // key tells items apart, as two can share a name; at is the text's place among the answer's texts.
-export type TextOutcome = { slot: number; written: string; at: number; result: OutcomePart["result"]; item: string; key: string };
+// text is the normalized text a verdict is keyed by, and target what it counts as now, by its
+// verdict or else an exact spelling (undefined while unjudged); byAi when the AI gave that verdict.
+export type TextOutcome = {
+  slot: number;
+  text: string;
+  written: string;
+  at: number;
+  result: OutcomePart["result"];
+  item: string;
+  key: string;
+  target: Target | undefined;
+  byAi: boolean;
+};
 
 // For a question and its verdicts: what each text of an answer counts as, in the order written.
 function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, verdicts: Verdict[]) {
   const slots = review.slots(content);
   const exact = exactMatches(slots);
-  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict.target]));
+  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict]));
   return (answer: Answer): TextOutcome[] => {
     const matched = new Set<string>();
-    return writtenTexts(review, slots, answer).map(([key, { slot, written, at }]) => {
-      const target = judged.has(key) ? judged.get(key) : exact.get(key);
-      if (target === undefined) return { slot, written, at, result: "pending", item: "", key: "" };
+    return writtenTexts(review, slots, answer).map(([key, { slot, text, written, at }]) => {
+      const verdict = judged.get(key);
+      const target = verdict ? verdict.target : exact.get(key);
+      const byAi = verdict?.byAi ?? false;
+      const base = { slot, text, written, at, target, byAi };
+      if (target === undefined) return { ...base, result: "pending", item: "", key: "" };
       const item = itemOf(slots, exact, slot, target);
-      if (item === null) return { slot, written, at, result: "wrong", item: "", key: "" };
+      if (item === null) return { ...base, result: "wrong", item: "", key: "" };
       const result = matched.has(item.key) ? "repeat" : "right";
       matched.add(item.key);
-      return { slot, written, at, result, item: item.name, key: item.key };
+      return { ...base, result, item: item.name, key: item.key };
     });
   };
 }
@@ -139,41 +154,6 @@ export function rightItems<Content, Answer>(
     }
   }
   return [...items.values()].sort((a, b) => b.teamCount - a.teamCount || a.name.localeCompare(b.name, "sv"));
-}
-
-// One text a team wrote, as the hosts' window of every answer shows it (D65): its slot and
-// normalized text, to judge it by; how it was written; what it counts as now, by its verdict or else
-// an exact spelling (undefined while unjudged); whether the AI gave that verdict; and what it scored.
-export type TeamText = {
-  slot: number;
-  text: string;
-  written: string;
-  target: Target | undefined;
-  byAi: boolean;
-  result: OutcomePart["result"];
-};
-
-// Each answer's texts in the order written, with what each counts as and its result, and the
-// answer's points, for the hosts to see and change team by team (D65).
-export function answerBreakdowns<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]) {
-  const slots = review.slots(content);
-  const exact = exactMatches(slots);
-  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict]));
-  const outcomes = textOutcomes(review, content, answers, verdicts);
-  return answers.map((answer, index) => {
-    const texts: TeamText[] = writtenTexts(review, slots, answer).map(([key, { slot, text, written }], at) => {
-      const verdict = judged.get(key);
-      return {
-        slot,
-        text,
-        written,
-        target: verdict ? verdict.target : exact.get(key),
-        byAi: verdict?.byAi ?? false,
-        result: outcomes[index].texts[at].result,
-      };
-    });
-    return { points: outcomes[index].points, texts };
-  });
 }
 
 // Each text to review with the verdict on it so far: judged or not, the option it counts as (null
@@ -222,4 +202,10 @@ export function givenNames(verdicts: Verdict[]): { slot: number; name: string }[
     if (!names.has(key)) names.set(key, { slot, name: target.trim() });
   }
   return [...names.values()].sort((a, b) => a.slot - b.slot || a.name.localeCompare(b.name, "sv"));
+}
+
+// The option a text matches exactly in its slot, if any, so a verdict that only agrees with the
+// match needn't be stored (D65).
+export function exactOptionOf(slots: ReviewSlot[], slot: number, text: string): number | undefined {
+  return exactMatches(slots).get(keyOf(slot, normalizeForComparison(text)));
 }

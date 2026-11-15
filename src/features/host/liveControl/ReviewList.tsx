@@ -1,7 +1,6 @@
 "use client";
 
 import type { FunctionReturnType } from "convex/server";
-import type { ReactNode } from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import type { Target } from "@/domain/review/typedReview";
@@ -16,22 +15,12 @@ type Slot = Review["slots"][number];
 // A slot's heading: a sub-question's title, with its correct answer to compare with (D56).
 const slotHeading = (slot: Slot) => (slot.answer ? `${slot.title} · facit: ${slot.answer}` : slot.title);
 
-// One of the box's sections, its rows grouped under their sub-question.
-function ReviewSection<Item extends { slot: number; text: string }>({
-  title,
-  slots,
-  items,
-  row,
-}: {
-  title: string;
-  slots: Slot[];
-  items: Item[];
-  row: (item: Item, slot: Slot) => ReactNode;
-}) {
+// The texts no one has judged yet, grouped under their sub-question.
+function ToJudge({ slots, items, onJudge }: { slots: Slot[]; items: Review["items"]; onJudge: (item: Review["items"][number], target: Target) => void }) {
   if (items.length === 0) return null;
   return (
     <div className="flex flex-col gap-1">
-      <h4 className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{title}</h4>
+      <h4 className="mt-2 text-xs font-semibold tracking-wide text-muted-foreground uppercase">Att granska</h4>
       {slots.map((slot, slotIndex) => {
         const inSlot = items.filter((item) => item.slot === slotIndex);
         if (inSlot.length === 0) return null;
@@ -41,7 +30,9 @@ function ReviewSection<Item extends { slot: number; text: string }>({
             <ul className="flex flex-col">
               {inSlot.map((item) => (
                 <li key={item.text} className="flex flex-wrap items-center gap-2 border-t py-2 first:border-t-0">
-                  {row(item, slot)}
+                  <span className="min-w-32 flex-1 font-medium break-words">{item.written}</span>
+                  <span className="text-sm text-muted-foreground">{item.teamCount} lag</span>
+                  <VerdictChoices slot={slot} item={item} onChoose={(target) => onJudge(item, target)} />
                 </li>
               ))}
             </ul>
@@ -73,7 +64,7 @@ export function ReviewList({
   const judge = useHostMutation(api.verdicts.mutations.judgeText);
   const run = useRunAction();
   const left = review.unjudged;
-  const hasAnswers = review.items.length > 0 || review.exact.length > 0;
+  const hasAnswers = review.items.length > 0 || review.hasExact;
 
   return (
     <section className="flex flex-col gap-1 rounded-xl border bg-card p-4">
@@ -84,17 +75,10 @@ export function ReviewList({
       {review.aiStatus === "judging" && <p className="text-sm text-primary">AI:n bedömer svaren…</p>}
       {review.aiStatus === "failed" && left > 0 && <p className="text-sm text-destructive">AI:n kunde inte bedöma svaren. Granska dem själva.</p>}
       {!hasAnswers && <p className="text-sm text-muted-foreground">Inga svar ännu.</p>}
-      <ReviewSection
-        title="Att granska"
+      <ToJudge
         slots={review.slots}
         items={review.items.filter((item) => !item.isJudged)}
-        row={(item, slot) => (
-          <>
-            <span className="min-w-32 flex-1 font-medium break-words">{item.written}</span>
-            <span className="text-sm text-muted-foreground">{item.teamCount} lag</span>
-            <VerdictChoices slot={slot} item={item} onChoose={(target: Target) => run(() => judge({ gameId, questionId, slot: item.slot, text: item.text, target }))} />
-          </>
-        )}
+        onJudge={(item, target) => run(() => judge({ gameId, questionId, slot: item.slot, text: item.text, target }))}
       />
       {hasAnswers && (
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">

@@ -4,7 +4,7 @@ import type { QuestionContent } from "../questions/questionContent";
 import { reviewOf } from "@/domain/answering/registry";
 import { isAnswerFor } from "@/domain/answers/isAnswerFor";
 import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
-import { answerBreakdowns, givenNames, type TypedReview, type Verdict } from "@/domain/review/typedReview";
+import { givenNames, textOutcomes, type TypedReview, type Verdict } from "@/domain/review/typedReview";
 import { lockedAnswersOfQuestion } from "../answers/lockedAnswersOfQuestion";
 import { hostQuery } from "../auth/hostFunctions";
 import { teamsOfGame } from "../teams/teamsOfGame";
@@ -28,7 +28,7 @@ function slotsForHosts(review: TypedReview<QuestionContent, AnswerContent>, cont
 
 // Host-only, as it shows what the teams wrote: the typed texts of a locked question, each once with
 // how many teams wrote it: those no accepted spelling matched with the verdict so far (D51), and
-// those one matched exactly (D56). Also how the AI judge is getting on (D52) and the question's
+// whether any matched exactly, as those are shown only in the window of every answer (D65). Also how the AI judge is getting on (D52) and the question's
 // judging phase, which Nästa waits on (D55). null for a question without typed answers, one still
 // open, or one that is gone.
 export const getReview = hostQuery({
@@ -42,7 +42,7 @@ export const getReview = hostQuery({
     return {
       slots: slotsForHosts(review, question.content, verdicts),
       items,
-      exact,
+      hasExact: exact.length > 0,
       unjudged,
       aiStatus,
       phase,
@@ -67,7 +67,7 @@ export const getAllAnswers = hostQuery({
       verdictsOfQuestion(ctx, gameId, questionId),
     ]);
     const fitting = locked.filter((answer) => isAnswerFor(question.content, answer.content));
-    const breakdowns = answerBreakdowns(
+    const outcomes = textOutcomes(
       review,
       question.content,
       fitting.map((answer) => answer.content),
@@ -77,15 +77,18 @@ export const getAllAnswers = hostQuery({
       slots: slotsForHosts(review, question.content, verdicts),
       teams: teams.map(({ _id, name, colour }) => {
         const index = fitting.findIndex((answer) => answer.teamId === _id);
-        const breakdown = index === -1 ? null : breakdowns[index];
-        return {
-          teamId: _id,
-          name,
-          colour,
-          hasAnswered: breakdown !== null,
-          points: breakdown?.points ?? 0,
-          texts: (breakdown?.texts ?? []).map(({ target, ...text }) => ({ ...text, isJudged: target !== undefined, target: target ?? null })),
-        };
+        const outcome = index === -1 ? null : outcomes[index];
+        const texts = (outcome?.texts ?? []).map(({ slot, text, written, result, target, byAi }) => ({
+          slot,
+          text,
+          written,
+          result,
+          byAi,
+          isJudged: target !== undefined,
+          target: target ?? null,
+        }));
+        // A team whose answer holds nothing that can count, such as only blank fields, didn't answer.
+        return { teamId: _id, name, colour, hasAnswered: texts.length > 0, points: outcome?.points ?? 0, texts };
       }),
     };
   },
