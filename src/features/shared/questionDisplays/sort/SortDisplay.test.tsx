@@ -20,11 +20,17 @@ describe("SortQuestion and SortAnswer", () => {
   it("puts more than five items in two columns, read down the first", () => {
     const items = ["A", "B", "C", "D", "E", "F"];
     render(<SortQuestion shown={{ type: "sort", items, ...labels }} imageUrls={{}} />);
-    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gridTemplateRows: "repeat(3, auto)" });
+    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gridTemplateRows: "repeat(3, minmax(0, 1fr))" });
   });
 
   it("keeps five or fewer in one column", () => {
     render(<SortQuestion shown={{ type: "sort", items: ["A", "B"], ...labels }} imageUrls={{}} />);
     expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(1, minmax(0, 1fr))" });
+  });
+
+  it("puts more than ten items in three columns", () => {
+    const items = Array.from({ length: 12 }, (_, index) => `Händelse ${index + 1}`);
+    render(<SortQuestion shown={{ type: "sort", items, ...labels }} imageUrls={{}} />);
+    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gridTemplateRows: "repeat(4, minmax(0, 1fr))" });
   });
 });
