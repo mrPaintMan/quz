@@ -13,14 +13,14 @@ function textSizeFor(count: number): string {
   return "text-[1.5cqw]";
 }
 
-// The items numbered top to bottom, between the question's two labels. A long list takes the room
+// The items numbered top to bottom. The TV leaves out the two end labels, which the phones show;
+// a question's description can say which way the order runs (D64). A long list takes the room
 // left under the title and its rows share it evenly, so it never runs under what comes below.
-function OrderedItems({ items, firstLabel, lastLabel }: Omit<SortShown, "type">) {
+function OrderedItems({ items }: Pick<SortShown, "items">) {
   const columns = items.length > TWO_COLUMNS ? 3 : items.length > ONE_COLUMN ? 2 : 1;
   const rows = Math.ceil(items.length / columns);
   return (
     <div className={`flex min-h-0 flex-col gap-[0.8cqw] ${columns > 1 ? "flex-1" : ""}`}>
-      <p className="text-[1.8cqw] text-muted-foreground">{firstLabel}</p>
       <ol
         className={`grid grid-flow-col gap-x-[2cqw] gap-y-[0.8cqw] ${columns > 1 ? "min-h-0 flex-1" : ""}`}
         style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`, gridTemplateRows: `repeat(${rows}, ${columns > 1 ? "minmax(0, 1fr)" : "auto"})` }}
@@ -35,7 +35,6 @@ function OrderedItems({ items, firstLabel, lastLabel }: Omit<SortShown, "type">)
           </li>
         ))}
       </ol>
-      <p className="text-[1.8cqw] text-muted-foreground">{lastLabel}</p>
     </div>
   );
 }
