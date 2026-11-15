@@ -157,6 +157,20 @@ describe("AnswerQuestion", () => {
     expect(screen.getByText("Inget svar sparades.")).toBeInTheDocument();
   });
 
+  it("offers nothing to send once the question is locked, as every other team has sent", () => {
+    render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={shown} imageUrls={{}} secondsLeft={null} isQuestionLocked />);
+    expect(screen.getByText("Inget svar sparades.")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Skicka svar" })).not.toBeInTheDocument();
+  });
+
+  it("shows no answer once locked with nothing saved, though the team had started typing", async () => {
+    const { rerender } = render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={shown} imageUrls={{}} secondsLeft={null} />);
+    await user().click(screen.getByRole("button", { name: "B Norge" }));
+    rerender(<AnswerQuestion teamId={teamId} questionId={questionId} shown={shown} imageUrls={{}} secondsLeft={null} isQuestionLocked />);
+    expect(screen.getByText("Inget svar sparades.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "B Norge" })).not.toHaveAttribute("aria-pressed", "true");
+  });
+
   it("can send the order a sort question starts from, without a draft", async () => {
     const sortShown = { type: "sort" as const, items: ["Avatar", "Titanic"], firstLabel: "Äldst", lastLabel: "Nyast" };
     render(<AnswerQuestion teamId={teamId} questionId={questionId} shown={sortShown} imageUrls={{}} secondsLeft={null} />);

@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { isQuestionClosed } from "@/domain/answers/isQuestionClosed";
 import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { tripOnScreen } from "@/domain/questionTypes/paSparet/tripOnScreen";
 import { picturesOnScreen } from "@/domain/media/picturesOnScreen";
@@ -33,9 +34,12 @@ export const getRunningGame = query({
       ...(await showScreen(ctx, game._id, screen, rounds)),
       timer: isStoredScreen ? (game.timer ?? null) : null,
       playback: isStoredScreen ? (game.playback ?? null) : null,
-      // A question stepped on from, or locked when every team had sent or the time ran out, takes
-      // no more answers, even when shown again (D41, D55).
-      isQuestionClosed: screen.kind === "question" && isQuestionLocked(game, screen.questionId),
+      // A question the hosts have stepped on from shows no input on the phones, even when shown
+      // again (D41). One merely locked, as every team has sent or the time ran out, keeps showing
+      // each team its locked answer until then; the server refuses answers to it either way (D55).
+      isQuestionClosed: screen.kind === "question" && isQuestionClosed(game, screen.questionId),
+      // Whether the question showing takes answers no more, so a phone stops offering it (D55).
+      isQuestionLocked: screen.kind === "question" && isQuestionLocked(game, screen.questionId),
     };
   },
 });

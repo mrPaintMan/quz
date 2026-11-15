@@ -29,6 +29,7 @@ describe("getRunningGame", () => {
       timer: null,
       playback: null,
       isQuestionClosed: false,
+      isQuestionLocked: false,
     });
   });
 
@@ -93,6 +94,14 @@ describe("getRunningGame's media, timer and clip", () => {
     const screen = { kind: "question" as const, questionId };
     await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen, screenIndex: 3, closedQuestionIds: [questionId] }));
     expect((await t.query(api.games.queries.getRunningGame, {}))?.isQuestionClosed).toBe(true);
+  });
+
+  it("keeps a question that is only locked open on the phones, so each team still sees its answer", async () => {
+    const t = setupConvexTest();
+    const { quizId, questionId } = await insertQuizWithQuestion(t);
+    const screen = { kind: "question" as const, questionId };
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen, screenIndex: 3, lockedQuestionIds: [questionId] }));
+    expect(await t.query(api.games.queries.getRunningGame, {})).toMatchObject({ isQuestionClosed: false, isQuestionLocked: true });
   });
 
   it("leaves out the timer and clip of a question deleted during the game", async () => {

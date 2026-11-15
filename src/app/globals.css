@@ -115,9 +115,11 @@
    look it was sent in to gold, with a short glow, one part after another by animation-delay. A
    wrong multiple-choice pick lights up red the same way. Still for those who ask for less motion. */
 @keyframes result-lit {
-  0% { background-color: var(--card); color: var(--foreground); border-color: var(--border); box-shadow: 0 0 0 0 rgb(232 176 75 / 0); transform: scale(1); }
-  45% { box-shadow: 0 0 28px 6px rgb(232 176 75 / 0.65); transform: scale(1.03); }
-  100% { background-color: var(--primary); color: var(--primary-foreground); border-color: var(--primary); box-shadow: 0 0 16px 2px rgb(232 176 75 / 0.35); transform: scale(1); }
+  /* No scaling: an animated transform with a wide glow could leave the glow painted on iPhones
+     after its box was gone (D64). */
+  0% { background-color: var(--card); color: var(--foreground); border-color: var(--border); box-shadow: 0 0 0 0 rgb(232 176 75 / 0); }
+  45% { box-shadow: 0 0 20px 4px rgb(232 176 75 / 0.6); }
+  100% { background-color: var(--primary); color: var(--primary-foreground); border-color: var(--primary); box-shadow: 0 0 12px 1px rgb(232 176 75 / 0.35); }
 }
 @keyframes result-missed {
   0% { background-color: var(--card); border-color: var(--border); box-shadow: 0 0 0 0 rgb(224 114 109 / 0); }

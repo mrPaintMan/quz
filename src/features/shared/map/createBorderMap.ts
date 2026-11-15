@@ -101,6 +101,9 @@ export function createBorderMap(
     renderer: L.canvas(),
     attributionControl: false,
     zoomControl: false,
+    // The map stops where the finger lets go, so a team's last move counts at once rather than
+    // after a glide, which could end after the time is out (D64).
+    inertia: false,
   });
   element.style.background = mapColors.sea;
   L.control.zoom({ position: "topright", zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }).addTo(map);

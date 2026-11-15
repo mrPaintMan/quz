@@ -64,7 +64,7 @@ export function TvScreen(props: TvScreenProps) {
           {view.shown && <ShownQuestionDisplay shown={view.shown} imageUrls={imageUrls} />}
           {view.shown && answeredCount !== null && (
             // A trip's guess is sent by pulling the brake (D63).
-            <p className="text-[2cqw] text-muted-foreground">{`${answeredCount} av ${teams.length} lag har ${sendsWithBrake(view.shown.type) ? "bromsat" : "svarat"}`}</p>
+            <p className="mt-auto shrink-0 text-[2cqw] text-muted-foreground">{`${answeredCount} av ${teams.length} lag har ${sendsWithBrake(view.shown.type) ? "bromsat" : "svarat"}`}</p>
           )}
         </TvFrame>
       );

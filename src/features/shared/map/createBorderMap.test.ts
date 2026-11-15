@@ -78,7 +78,7 @@ const settle = () => new Promise((resolve) => setTimeout(resolve));
 describe("createBorderMap", () => {
   it("opens at the given view with land, borders and Swedish zoom buttons", () => {
     const { fake, element } = setUp();
-    expect(fake.map).toHaveBeenCalledWith(element, expect.objectContaining({ center: [59.33, 18.07], zoom: 5 }));
+    expect(fake.map).toHaveBeenCalledWith(element, expect.objectContaining({ center: [59.33, 18.07], zoom: 5, inertia: false }));
     expect(fake.geoJSON).toHaveBeenCalledTimes(2);
     expect(fake.control.zoom).toHaveBeenCalledWith(expect.objectContaining({ zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }));
     expect(element.style.background).not.toBe("");

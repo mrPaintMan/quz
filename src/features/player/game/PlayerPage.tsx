@@ -36,6 +36,7 @@ function TeamInGame({ game, teamId, saveTeamId }: { game: RunningGame; teamId: s
         imageUrls={game.imageUrls}
         timer={game.timer}
         isQuestionClosed={game.isQuestionClosed}
+        isQuestionLocked={game.isQuestionLocked}
         film={findTripFilm(game)}
       />
     );

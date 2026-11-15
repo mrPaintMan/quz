@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. Next: try a whole night in dev (the cloud sessions can't reach Convex), then M4's score graph and M5's polish.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. The second test night (2026-11-15) gave a new feedback round, done in this order, one PR each: bugs (D64), the admin view, the TV screens, the phones' results, descriptions on every question and Rita judged before its answer screen, Swedish provinces and US states on the map, and På spåret's films as attachments to ordinary questions. Then M4's score graph and M5's polish.
 
 ## Milestones
 
@@ -149,3 +149,4 @@ Agreed with the user, in this order:
 - 2026-11-12: Points by hand: the hosts give each team its points on an activity's screen with − / + or a typed number, and the phone shows them; "Rätta poäng" under the Topplista adds or takes away points at any time, no reason asked (D61). Not tried in a browser with data.
 - 2026-11-12: Rita with all four pieces: drawn on the phone with five pens, Ångra and Rensa; every team's drawing side by side on the TV's answer screen; the hosts score each by hand there and Nästa waits until all have points; the phone's result shows the drawing waiting, then lit with its points (D62). Not tried in a browser with data.
 - 2026-11-13: På spåret with all four pieces: the guess written on the phone and sent by "Dra i nödbromsen", stamped by the server with the clue showing; "2 av 6 lag har bromsat" on the TV; the destination and every team's guess with its brake points on the answer screen; the phone's result with "Bromsade vid 8 p". A guess never braked scores nothing (D63). Every type is now answered in the app. Not tried in a browser with data.
+- 2026-11-15: Feedback round 2, bugs: phones keep a locked answer on show until Nästa; no stray glow from lit answers; the TV's timer level with the title; long Sortera lists in two columns, clear of the answer count; the map stops where the finger lets go (D64). Not tried in a browser with data.
