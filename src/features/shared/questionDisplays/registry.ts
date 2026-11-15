@@ -15,6 +15,9 @@ import { PaSparetAnswer, PaSparetQuestion } from "./paSparet/PaSparetDisplay";
 type DisplayRegistration<T extends AnsweredType> = {
   Question: ComponentType<ShownDisplayProps<T>>;
   Answer: ComponentType<RevealedDisplayProps<T>>;
+  // Whether the answer places the question's picture itself, such as beside a map (D66); otherwise
+  // the TV shows it above the answer.
+  placesMedia?: boolean;
 };
 
 // How each type shows on the TV, during its question and on its answer screen (D14). null until
@@ -28,6 +31,6 @@ export const questionDisplays: { [T in AnsweredType]: DisplayRegistration<T> | n
   list: { Question: ListQuestion, Answer: ListAnswer },
   ingredients: { Question: IngredientsQuestion, Answer: IngredientsAnswer },
   drawing: { Question: DrawingQuestion, Answer: DrawingAnswer },
-  mapPin: { Question: MapPinQuestion, Answer: MapPinAnswer },
+  mapPin: { Question: MapPinQuestion, Answer: MapPinAnswer, placesMedia: true },
   paSparet: { Question: PaSparetQuestion, Answer: PaSparetAnswer },
 };

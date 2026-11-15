@@ -15,7 +15,7 @@ export function RulesScreen({ roundCount, questionCount, activityCount }: RulesS
     { count: activityCount, label: activityCount === 1 ? "aktivitet" : "aktiviteter" },
   ];
   return (
-    <TvFrame title="Så funkar kvällen">
+    <TvFrame title="Så funkar kvällen" titleCentered>
       <div className="flex flex-1 gap-[4cqw]">
         <ul className="flex flex-1 flex-col gap-[1.4cqw]">
           {RULES.map((rule) => (

@@ -10,10 +10,10 @@ const ONE_COLUMN_MAX = 6;
 // whose answer is out (D41).
 // While the scores load the list is left out, rather than claiming no team has joined.
 export function LeaderboardScreen({ title, scores }: { title: string; scores: TeamScore[] | undefined }) {
-  if (scores === undefined) return <TvFrame title={title} />;
+  if (scores === undefined) return <TvFrame title={title} titleCentered />;
   const columns = scores.length > ONE_COLUMN_MAX ? "grid-cols-2" : "grid-cols-1";
   return (
-    <TvFrame title={title}>
+    <TvFrame title={title} titleCentered>
       {scores.length === 0 ? (
         <p className="text-[2cqw] text-muted-foreground">Inga lag har anmält sig.</p>
       ) : (

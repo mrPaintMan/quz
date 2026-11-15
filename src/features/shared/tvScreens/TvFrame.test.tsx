@@ -20,6 +20,11 @@ describe("TvFrame", () => {
     expect(screen.getByText("0:42").parentElement).not.toContainElement(screen.getByText("Omgång 1 · Fråga 3"));
   });
 
+  it("can centre the title over the content, for screens that aren't questions", () => {
+    render(<TvFrame eyebrow="Omgång 1" title="Topplista" titleCentered />);
+    expect(screen.getByRole("heading", { name: "Topplista" }).closest("header")).toHaveClass("text-center");
+  });
+
   it("shows the corner beside the title", () => {
     render(<TvFrame title="Julmat" corner={<p>0:42</p>} />);
     expect(screen.getByText("0:42")).toBeInTheDocument();
