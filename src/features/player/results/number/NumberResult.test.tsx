@@ -18,7 +18,7 @@ describe("NumberResult", () => {
   });
 
   it("gives the right number under a wrong guess", () => {
-    render(<NumberResult shown={{ type: "number" }} answer={{ type: "number", value: 3 }} outcome={outcomeOf(part("wrong", 0, "3"))} imageUrls={{}} revealed={{ type: "number", answer: 4.5 }} teamId="t1" />);
+    render(<NumberResult shown={{ type: "number" }} answer={{ type: "number", value: 3 }} outcome={outcomeOf({ ...part("wrong", 0, "3"), correct: "4,5" })} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(screen.getByText("Rätt svar: 4,5")).toBeInTheDocument();
     expect(screen.getByText("✕ 0 p")).toBeInTheDocument();
   });

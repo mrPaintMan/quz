@@ -11,7 +11,9 @@ export function IngredientsResult({ shown, answer, outcome, revealed }: ResultVi
   const parts = partsOfTexts(items.length, outcome.parts);
   const orders = litOrders(parts);
   const counted = new Set(outcome.parts.filter((part) => part.result === "right" || part.result === "repeat").map((part) => part.correct));
-  const missed = (revealed?.items ?? []).filter((item) => !counted.has(item));
+  // Only once every ingredient is judged, so one still waiting isn't listed as missed.
+  const isJudged = !outcome.parts.some((part) => part.result === "pending");
+  const missed = isJudged ? (revealed?.items ?? []).filter((item) => !counted.has(item)) : [];
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-muted-foreground">{shown.count} ingredienser · ordningen spelar ingen roll</p>

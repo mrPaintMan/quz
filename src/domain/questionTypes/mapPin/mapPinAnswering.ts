@@ -35,6 +35,7 @@ export const mapPinAnswering: AnsweringRules<"mapPin", MapPinShown, MapPinReveal
   }),
   revealsAnswers: true,
   revealsTeams: true,
+  resultUsesReveal: true,
   imageIds: () => [],
   // The pin starts where the map does, so a team that sends without moving answers the middle.
   startingAnswer: ({ initialView }) => ({ type: "mapPin", pin: initialView.center }),

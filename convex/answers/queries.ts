@@ -47,7 +47,7 @@ export const getTeamFeedback = query({
     const question = questionId && (await ctx.db.get("questions", questionId));
     const answering = question && answeringOf(question.content);
     if (!game || !question || !answering || !isQuestionClosed(game, question._id)) return null;
-    const needs = { verdicts: reviewOf(question.content) !== null, teams: answering.revealsTeams === true };
+    const needs = { verdicts: reviewOf(question.content) !== null, teams: answering.resultUsesReveal === true && answering.revealsTeams === true };
     const { locked, graded } = await gradedOfQuestion(ctx, game._id, question, needs);
     const outcomes = outcomesOfAnswers(
       question.content,
@@ -67,10 +67,11 @@ export const getTeamFeedback = query({
     return {
       prompt: question.prompt,
       // What the question showed while asked and the team's own sent answer, so the phone can draw
-      // the answer as the team gave it (D59), and the answer screen's reveal, so it can show the right
-      // answer beside a wrong one, as the TV does (D67).
+      // the answer as the team gave it (D59), and for the types whose result needs it the answer
+      // screen's reveal, such as Kartnål's right place (D67); the others' outcome parts carry the
+      // right answer.
       shown: answering.show(question.content),
-      revealed: answering.reveal(question.content, graded),
+      revealed: answering.resultUsesReveal ? answering.reveal(question.content, graded) : null,
       imageUrls: await linkImages(ctx, answering.imageIds(question.content)),
       answer: own && isAnswerFor(question.content, own.content) ? own.content : null,
       outcome,

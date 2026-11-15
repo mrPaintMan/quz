@@ -14,6 +14,7 @@ const optionName = (options: { text: string }[], index: number) => {
 export const multipleChoiceAnswering: AnsweringRules<"multipleChoice", MultipleChoiceShown, MultipleChoiceRevealed> = {
   show: ({ options }) => ({ type: "multipleChoice", options }),
   reveal: ({ options, correctIndex }) => ({ type: "multipleChoice", options, correctIndex }),
+  resultUsesReveal: true,
   imageIds: ({ options }) => options.flatMap((option) => (option.imageId === null ? [] : [option.imageId])),
   // One of the options shown, so a stray number from a phone never counts as an answer.
   startingAnswer: () => null,

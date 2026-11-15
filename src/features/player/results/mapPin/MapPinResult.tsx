@@ -34,6 +34,7 @@ export function MapPinResult({ shown, answer, outcome, revealed, teamId }: Resul
         radiusMeters={revealed?.radiusMeters ?? null}
         circleAt={revealed?.target ?? null}
         centerPin={false}
+        fitToMarkers
         className="h-[45svh] min-h-64"
       />
       <div key={part?.result} style={glowDelay(0)} className={`flex items-center gap-3 rounded-2xl border bg-card px-4 py-3 text-lg ${resultClass(part?.result)}`}>

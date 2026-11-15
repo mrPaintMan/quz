@@ -76,7 +76,7 @@ export const paSparetAnswering: AnsweringRules<"paSparet", PaSparetShown, PaSpar
       const answer = answers[index];
       const result = texts[0]?.result ?? "wrong";
       const points = result === "right" ? (brakePointsOf(answer.brakeClueIndex) ?? 0) : 0;
-      return { points, parts: [{ label: "", given: answer.guess.trim(), result, correct: "", points }] };
+      return { points, parts: [{ label: "", given: answer.guess.trim(), result, correct: firstFilledIn(content.acceptedAnswers), points }] };
     }),
   review: tripReview,
 };

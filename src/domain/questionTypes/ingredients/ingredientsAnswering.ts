@@ -20,6 +20,7 @@ const ingredientsReview: TypedReview<ContentOf<"ingredients">, AnswerOf<"ingredi
 export const ingredientsAnswering: AnsweringRules<"ingredients", IngredientsShown, IngredientsRevealed> = {
   show: ({ items }) => ({ type: "ingredients", count: items.length }),
   reveal: ({ items }) => ({ type: "ingredients", items: items.map((item) => firstFilledIn(item.spellings)) }),
+  resultUsesReveal: true,
   imageIds: () => [],
   startingAnswer: () => null,
   // One text per field; empty rows are fine as long as one is filled in.

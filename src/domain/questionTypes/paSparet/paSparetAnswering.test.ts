@@ -25,7 +25,7 @@ describe("paSparetAnswering", () => {
   it("scores a right guess the points it braked at, a wrong or unbraked one nothing", () => {
     const outcomes = paSparetAnswering.outcomes(trip, [guess(" kiruna ", 1), guess("Luleå", 0), guess("Kiruna", null)]);
     expect(outcomes.map((outcome) => outcome.points)).toEqual([8, 0, 0]);
-    expect(outcomes[0].parts).toEqual([{ label: "", given: "kiruna", result: "right", correct: "", points: 8 }]);
+    expect(outcomes[0].parts).toEqual([{ label: "", given: "kiruna", result: "right", correct: "Kiruna", points: 8 }]);
     expect(outcomes[2].parts[0].result).toBe("wrong");
   });
 

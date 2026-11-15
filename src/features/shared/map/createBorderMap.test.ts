@@ -204,12 +204,12 @@ describe("createBorderMap", () => {
     expect(map.remove).toHaveBeenCalled();
   });
 
-  it("draws pins in their colours, the highlighted one larger, and replaces them when told", () => {
+  it("draws pins in their colours, the team's own larger, and replaces them when told", () => {
     const leaflet = fakeLeaflet();
     const options = { view: stockholm, radiusMeters: null, onUserMove: vi.fn(), loadShapes: vi.fn() };
     const markers = [
       { at: { lat: 59, lng: 18 }, colour: "#f00", kind: "pin" as const },
-      { at: { lat: 60, lng: 17 }, colour: "#00f", kind: "highlight" as const },
+      { at: { lat: 60, lng: 17 }, colour: "#00f", kind: "own" as const },
       { at: { lat: 59.3, lng: 18.1 }, colour: "", kind: "target" as const },
     ];
     const controller = createBorderMap(leaflet.L, document.createElement("div"), { detail: "50m", shapes }, { ...options, markers });
