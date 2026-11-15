@@ -36,12 +36,14 @@ export function MapPinAnswer({ revealed, media }: RevealedDisplayProps<"mapPin">
         className="min-h-0 flex-1"
       />
       {(media || revealed.pins.length > 0) && (
-        <div className="flex w-[26cqw] shrink-0 flex-col gap-[1cqw]">
-          {media && <div className="flex max-h-[45%] min-h-0 items-start justify-center">{media}</div>}
+        <div className="flex min-h-0 w-[26cqw] shrink-0 flex-col gap-[1cqw] overflow-hidden">
+          {/* A fixed area, so a tall picture can't push the standings off the screen. */}
+          {media && <div className="flex h-[14cqw] shrink-0 items-start justify-center overflow-hidden">{media}</div>}
           {revealed.pins.length > 0 && (
             <>
               <h2 className="text-[1.6cqw] text-muted-foreground">Avstånd från svar</h2>
-              <ol className="flex flex-col gap-[0.6cqw] text-[1.7cqw]">
+              {/* Past eight teams the rows shrink, so all twelve fit beside the map. */}
+              <ol className={`flex flex-col ${revealed.pins.length > 8 ? "gap-[0.3cqw] text-[1.3cqw]" : "gap-[0.6cqw] text-[1.7cqw]"}`}>
                 {revealed.pins.map((pin) => (
                   <li key={pin.teamId} className="flex items-center gap-[0.8cqw]">
                     <TeamDot colour={pin.colour} className="size-[1.4cqw]" />

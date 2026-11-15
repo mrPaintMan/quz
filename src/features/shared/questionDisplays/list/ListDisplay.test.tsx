@@ -27,7 +27,8 @@ describe("ListAnswer", () => {
     render(<ListAnswer revealed={{ type: "list", items: items(45), others: ["Lund"] }} imageUrls={{}} />);
     expect(screen.getByRole("list")).toHaveClass("grid-cols-4");
     expect(screen.getAllByRole("listitem")).toHaveLength(40);
-    expect(screen.getByText("och 5 till")).toBeInTheDocument();
+    // The five right items past the forty shown, and the one key item there's no room for.
+    expect(screen.getByText("och 6 till")).toBeInTheDocument();
   });
 
   it("shows the key's items no team gave after the right ones, dimmed and without a count", () => {
@@ -36,9 +37,9 @@ describe("ListAnswer", () => {
     expect(screen.getByText("Lund")).toHaveClass("text-muted-foreground");
   });
 
-  it("shows the key alone before anyone has anything right", () => {
+  it("says no one has anything right yet over the key", () => {
     render(<ListAnswer revealed={{ type: "list", items: [], others: ["Lund"] }} imageUrls={{}} />);
-    expect(screen.queryByText("Inga rätta svar ännu.")).not.toBeInTheDocument();
+    expect(screen.getByText("Inga rätta svar ännu.")).toBeInTheDocument();
     expect(screen.getByText("Lund")).toBeInTheDocument();
   });
 });

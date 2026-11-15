@@ -45,6 +45,12 @@ describe("MapPinAnswer", () => {
     expect(column).toContainElement(screen.getByText("Bilden"));
   });
 
+  it("shrinks the standings past eight teams, so all twelve fit", () => {
+    const pins = Array.from({ length: 12 }, (_, index) => ({ ...revealed.pins[1], teamId: `t${index}`, name: `Lag ${index}` }));
+    render(<MapPinAnswer revealed={{ ...revealed, pins }} imageUrls={{}} />);
+    expect(screen.getByRole("list")).toHaveClass("text-[1.3cqw]");
+  });
+
   it("lists nothing when no team placed a pin", () => {
     render(<MapPinAnswer revealed={{ ...revealed, pins: [] }} imageUrls={{}} />);
     expect(screen.queryByRole("list")).not.toBeInTheDocument();

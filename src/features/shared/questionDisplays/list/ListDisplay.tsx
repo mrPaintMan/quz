@@ -19,9 +19,11 @@ export function ListAnswer({ revealed }: RevealedDisplayProps<"list">) {
   const shown = items.slice(0, MAX_SHOWN);
   const shownOthers = others.slice(0, Math.max(MAX_SHOWN - shown.length, 0));
   const count = shown.length + shownOthers.length;
+  const hidden = items.length + others.length - count;
   const columns = count > 24 ? "grid-cols-4" : count > 12 ? "grid-cols-3" : count > 6 ? "grid-cols-2" : "grid-cols-1";
   return (
     <div className="flex flex-col gap-[0.8cqw]">
+      {items.length === 0 && <p className="text-[2cqw] text-muted-foreground">Inga rätta svar ännu.</p>}
       <ul className={`grid gap-[0.6cqw] ${columns}`}>
         {shown.map((item, index) => (
           <li key={index} className="flex items-baseline justify-between gap-[1cqw] rounded-[0.8cqw] bg-primary/15 px-[1.2cqw] py-[0.5cqw] text-[1.8cqw]">
@@ -35,7 +37,7 @@ export function ListAnswer({ revealed }: RevealedDisplayProps<"list">) {
           </li>
         ))}
       </ul>
-      {items.length > MAX_SHOWN && <p className="text-[1.6cqw] text-muted-foreground">och {items.length - MAX_SHOWN} till</p>}
+      {hidden > 0 && <p className="text-[1.6cqw] text-muted-foreground">och {hidden} till</p>}
     </div>
   );
 }

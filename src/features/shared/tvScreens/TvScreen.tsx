@@ -12,7 +12,7 @@ import { RulesScreen } from "./RulesScreen";
 import type { TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
 import { TvMedia } from "./TvMedia";
-import { screenEyebrow } from "./questionPlace";
+import { roundLabel, screenEyebrow } from "./questionPlace";
 import { TvTimer } from "./TvTimer";
 
 type TvScreenProps = {
@@ -32,7 +32,6 @@ type TvScreenProps = {
   silent?: boolean;
 };
 
-const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
 // The screen the game is on. A question shows its type's display (such as the options) once that
 // type is built in M3, and how many teams have answered. Drawn on the TV and, smaller, in the
@@ -68,20 +67,22 @@ export function TvScreen(props: TvScreenProps) {
           )}
         </TvFrame>
       );
-    case "answer":
+    case "answer": {
+      const placesMedia = view.revealed !== null && answerPlacesMedia(view.revealed.type);
       return (
         <TvFrame eyebrow={screenEyebrow(view)} title={view.prompt}>
           {/* A type that places the picture itself, such as beside a map, gets it there instead (D66). */}
-          {!(view.revealed && answerPlacesMedia(view.revealed.type)) && mediaArea}
+          {!placesMedia && mediaArea}
           {view.revealed && (
             <RevealedAnswerDisplay
               revealed={view.revealed}
               imageUrls={imageUrls}
-              media={media && answerPlacesMedia(view.revealed.type) ? <TvMedia media={media} playback={playback} silent={silent} /> : undefined}
+              media={placesMedia && media ? <TvMedia media={media} playback={playback} silent={silent} /> : undefined}
             />
           )}
         </TvFrame>
       );
+    }
     case "film":
       return (
         <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film" titleCentered>
