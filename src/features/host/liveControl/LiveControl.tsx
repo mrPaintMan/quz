@@ -98,25 +98,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
               {...screenProps}
             />
           </TvPreview>
-          <p role="status" className="text-lg font-semibold">
-            {screenLabel(game.view)}
-          </p>
-          {game.media?.kind === "video" && game.media.showsCluePoints && game.playback && (
-            <TripClueLine gameId={gameId} playback={game.playback} />
-          )}
-          {game.view.kind === "question" && game.view.shown && answeredTeamIds && (
-            <AnswerStatusList teams={teams} answeredTeamIds={answeredTeamIds} />
-          )}
-          {notes?.current?.scoring && <ScoringRules {...notes.current.scoring} />}
-          {/* The next screen's notes cover the same question while it moves to its answer; a new
-              question's notes start folded. */}
-          {notes?.current && notes.current.questionId !== notes.next?.questionId && (
-            <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
-          )}
-          {handTitle && handScoring && questionOnScreen && (
-            <HandScoring gameId={gameId} questionId={questionOnScreen} title={handTitle} scoring={handScoring} teams={teams} />
-          )}
-          {review && questionOnScreen && <ReviewList gameId={gameId} questionId={questionOnScreen} review={review} />}
+          {/* The controls stay right under the TV, so Nästa never needs a scroll (D65). */}
           {waitingFor && (
             <p role="status" className="text-right text-sm text-primary">
               {waitingFor}
@@ -138,6 +120,33 @@ export function LiveControl({ game }: { game: RunningGame }) {
               )}
             </div>
           </div>
+          <p role="status" className="text-lg font-semibold">
+            {screenLabel(game.view)}
+          </p>
+          {game.media?.kind === "video" && game.media.showsCluePoints && game.playback && (
+            <TripClueLine gameId={gameId} playback={game.playback} />
+          )}
+          {game.view.kind === "question" && game.view.shown && answeredTeamIds && (
+            <AnswerStatusList teams={teams} answeredTeamIds={answeredTeamIds} />
+          )}
+          {notes?.current?.scoring && <ScoringRules {...notes.current.scoring} />}
+          {/* The next screen's notes cover the same question while it moves to its answer; a new
+              question's notes start folded. */}
+          {notes?.current && notes.current.questionId !== notes.next?.questionId && (
+            <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
+          )}
+          {handTitle && handScoring && questionOnScreen && (
+            <HandScoring gameId={gameId} questionId={questionOnScreen} title={handTitle} scoring={handScoring} teams={teams} />
+          )}
+          {review && questionOnScreen && (game.view.kind === "question" || game.view.kind === "answer") && (
+            <ReviewList
+              gameId={gameId}
+              questionId={questionOnScreen}
+              review={review}
+              prompt={game.view.prompt}
+              leaderboard={(scores ?? []).map((score) => score._id)}
+            />
+          )}
         </section>
         <section className="flex flex-col gap-3">
           <h2 className="text-sm text-muted-foreground">Nästa på TV:n</h2>

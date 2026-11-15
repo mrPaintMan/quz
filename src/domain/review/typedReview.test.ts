@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { answerBreakdowns, givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -43,6 +43,32 @@ describe("textOutcomes", () => {
     expect(outcome.points).toBe(4);
     // A repeat is the same item as the text it repeats.
     expect(outcome.texts[2].key).toBe(outcome.texts[1].key);
+  });
+});
+
+describe("a verdict on an exact match", () => {
+  it("counts over the match, so the hosts can mark an accepted spelling wrong", () => {
+    expect(gradeTyped(review, content, [answer("ABBA")], [{ slot: 0, text: "abba", target: null }])).toEqual([0]);
+    expect(gradeTyped(review, content, [answer("ABBA")], [{ slot: 0, text: "abba", target: 0 }])).toEqual([2]);
+  });
+});
+
+describe("answerBreakdowns", () => {
+  it("gives each answer's texts in the order written, with what each counts as, its result and the points", () => {
+    const verdicts = [
+      { slot: 1, text: "wodka", target: 0, byAi: true },
+      { slot: 1, text: "mjölk", target: null },
+    ];
+    const [breakdown] = answerBreakdowns(review, content, [answer("ABBA", "wodka", "mjölk", "gin")], verdicts);
+    expect(breakdown).toEqual({
+      points: 4,
+      texts: [
+        { slot: 0, text: "abba", written: "ABBA", target: 0, byAi: false, result: "right" },
+        { slot: 1, text: "wodka", written: "wodka", target: 0, byAi: true, result: "right" },
+        { slot: 1, text: "mjölk", written: "mjölk", target: null, byAi: false, result: "wrong" },
+        { slot: 1, text: "gin", written: "gin", target: undefined, byAi: false, result: "pending" },
+      ],
+    });
   });
 });
 

@@ -20,15 +20,16 @@ export const judgeText = hostMutation({
   handler: async (ctx, { gameId, questionId, slot, text, target }) => {
     const game = await requireRunningGame(ctx, gameId);
     const question = await getOrThrow(ctx, "questions", questionId);
-    const { isLocked, review, items } = await judgingOfQuestion(ctx, game, question);
+    const { isLocked, review, items, exact } = await judgingOfQuestion(ctx, game, question);
     if (!isLocked) {
       throw new ConvexError("Svaren kan granskas när de är låsta.");
     }
     const normalized = normalizeForComparison(text);
-    // Only texts a team sent are judged, which also bounds how many verdicts a question gets.
+    // Only texts a team sent are judged, which also bounds how many verdicts a question gets; one an
+    // accepted spelling matched can be judged too, and the verdict then counts over the match (D65).
     const reviewSlot = review?.slots(question.content)[slot];
     const options = reviewSlot?.options ?? [];
-    const isSent = items.some((item) => item.slot === slot && item.text === normalized);
+    const isSent = [...items, ...exact].some((item) => item.slot === slot && item.text === normalized);
     const isOption =
       target === null ||
       (typeof target === "number" && Number.isInteger(target) && target >= 0 && target < options.length) ||

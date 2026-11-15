@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { api } from "../_generated/api";
+import { host } from "../test.setup";
 import { reviewIn, setup, setupList } from "./reviewGame.setup";
 
 describe("getReview", () => {
@@ -48,3 +49,41 @@ describe("getReview", () => {
     await expect(t.query(api.verdicts.queries.getReview, { hostPassphrase: "fel", gameId, questionId })).rejects.toThrow();
   });
 });
+
+describe("getAllAnswers", () => {
+  it("gives every team its texts in the order written, with what each counts as and the team's points", async () => {
+    const { t, gameId, questionId } = await setup();
+    await t.run((ctx) => ctx.db.insert("verdicts", { gameId, questionId, slot: 0, text: "abbba", target: 0, byAi: true }));
+    const all = await t.query(api.verdicts.queries.getAllAnswers, { ...host, gameId, questionId });
+    expect(all?.slots.map((slot) => slot.title)).toEqual(["a) Artist", "b) Låt"]);
+    expect(all?.teams.map(({ name, hasAnswered, points, texts }) => ({ name, hasAnswered, points, texts: texts.map((text) => [text.written, text.isJudged, text.target, text.byAi, text.result]) }))).toEqual([
+      {
+        name: "Röda",
+        hasAnswered: true,
+        points: 1,
+        texts: [
+          ["Abba", true, 0, false, "right"],
+          ["Waterlo", false, null, false, "pending"],
+        ],
+      },
+      {
+        name: "Blå",
+        hasAnswered: true,
+        points: 1,
+        texts: [
+          ["Abbba", true, 0, true, "right"],
+          ["waterlo.", false, null, false, "pending"],
+        ],
+      },
+      // The green team's answer is only a draft.
+      { name: "Gröna", hasAnswered: false, points: 0, texts: [] },
+    ]);
+  });
+
+  it("is null while the question is open, and for anyone without the passphrase it refuses", async () => {
+    const open = await setup({ closed: false });
+    await expect(open.t.query(api.verdicts.queries.getAllAnswers, { ...host, gameId: open.gameId, questionId: open.questionId })).resolves.toBeNull();
+    await expect(open.t.query(api.verdicts.queries.getAllAnswers, { hostPassphrase: "fel", gameId: open.gameId, questionId: open.questionId })).rejects.toThrow();
+  });
+});
+

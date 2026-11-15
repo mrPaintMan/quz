@@ -79,8 +79,8 @@ function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slo
   return [...texts.entries()];
 }
 
-// What each text of an answer counted as, in the order written: a distinct item, by an exact
-// spelling or else by a verdict, is right and scores the points per match; another form of an item
+// What each text of an answer counted as, in the order written: a distinct item, by the hosts' or
+// the AI's verdict or else by an exact spelling (a verdict overrides even an exact match, D65), is right and scores the points per match; another form of an item
 // already counted is a repeat and adds nothing, so two forms of one answer score once (D53); a text
 // without a verdict is pending and, like a wrong one, scores nothing (D58).
 export function textOutcomes<Content, Answer>(
@@ -109,7 +109,7 @@ function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content:
   return (answer: Answer): TextOutcome[] => {
     const matched = new Set<string>();
     return writtenTexts(review, slots, answer).map(([key, { slot, written, at }]) => {
-      const target = exact.get(key) ?? judged.get(key);
+      const target = judged.has(key) ? judged.get(key) : exact.get(key);
       if (target === undefined) return { slot, written, at, result: "pending", item: "", key: "" };
       const item = itemOf(slots, exact, slot, target);
       if (item === null) return { slot, written, at, result: "wrong", item: "", key: "" };
@@ -139,6 +139,41 @@ export function rightItems<Content, Answer>(
     }
   }
   return [...items.values()].sort((a, b) => b.teamCount - a.teamCount || a.name.localeCompare(b.name, "sv"));
+}
+
+// One text a team wrote, as the hosts' window of every answer shows it (D65): its slot and
+// normalized text, to judge it by; how it was written; what it counts as now, by its verdict or else
+// an exact spelling (undefined while unjudged); whether the AI gave that verdict; and what it scored.
+export type TeamText = {
+  slot: number;
+  text: string;
+  written: string;
+  target: Target | undefined;
+  byAi: boolean;
+  result: OutcomePart["result"];
+};
+
+// Each answer's texts in the order written, with what each counts as and its result, and the
+// answer's points, for the hosts to see and change team by team (D65).
+export function answerBreakdowns<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]) {
+  const slots = review.slots(content);
+  const exact = exactMatches(slots);
+  const judged = new Map(verdicts.map((verdict) => [keyOf(verdict.slot, verdict.text), verdict]));
+  const outcomes = textOutcomes(review, content, answers, verdicts);
+  return answers.map((answer, index) => {
+    const texts: TeamText[] = writtenTexts(review, slots, answer).map(([key, { slot, text, written }], at) => {
+      const verdict = judged.get(key);
+      return {
+        slot,
+        text,
+        written,
+        target: verdict ? verdict.target : exact.get(key),
+        byAi: verdict?.byAi ?? false,
+        result: outcomes[index].texts[at].result,
+      };
+    });
+    return { points: outcomes[index].points, texts };
+  });
 }
 
 // Each text to review with the verdict on it so far: judged or not, the option it counts as (null
