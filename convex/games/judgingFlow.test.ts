@@ -67,7 +67,7 @@ describe("the judging flow", () => {
     await send(blue, "Saffran");
     const late = await t.run((ctx) => ctx.db.insert("teams", { gameId, name: "Gröna", colour: "green" }));
     await expect(send(late, "Safran")).rejects.toThrow("tar inte emot svar");
-    expect((await t.query(api.games.queries.getRunningGame, {}))?.isQuestionClosed).toBe(true);
+    expect(await t.query(api.games.queries.getRunningGame, {})).toMatchObject({ isQuestionClosed: false, isQuestionLocked: true });
   });
 });
 

@@ -41,6 +41,11 @@ describe("FollowGame", () => {
     expect(screen.queryByText("Aktivitetens poäng")).not.toBeInTheDocument();
   });
 
+  it("keeps showing a locked question's answer until the hosts step on", () => {
+    render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed={false} isQuestionLocked />);
+    expect(screen.getByText("Svarsruta")).toBeInTheDocument();
+  });
+
   it("lets the team answer a question answered in the app", () => {
     render(<FollowGame team={team} points={null} screen={questionScreen} view={{ ...question, shown }} imageUrls={{}} timer={null} isQuestionClosed={false} />);
     expect(screen.getByText("Svarsruta")).toBeInTheDocument();

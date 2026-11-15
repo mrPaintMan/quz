@@ -27,6 +27,7 @@ describe("startGame", () => {
       timer: null,
       playback: null,
       isQuestionClosed: false,
+      isQuestionLocked: false,
     });
   });
 

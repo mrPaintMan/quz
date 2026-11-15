@@ -33,6 +33,8 @@ type AnswerQuestionProps = {
   secondsLeft: number | null;
   // The trip's film while it shows, for its live points; null otherwise (D63).
   film?: FilmOnScreen | null;
+  // Whether the question takes answers no more, as every team has sent or the time ran out (D55).
+  isQuestionLocked?: boolean;
 };
 
 // With this little time left, a change is saved at once, as waiting for the team to pause could
@@ -43,8 +45,9 @@ const SAVE_AT_ONCE_SECONDS = 2;
 // change is kept on the server as a draft, without the team seeing it (D45). Once locked, or once
 // the time is out, the answer stays on show but can't change. Remount it for each question, keyed
 // by the question, so a draft never carries over.
-export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft, film = null }: AnswerQuestionProps) {
-  const isTimeOut = secondsLeft === 0;
+export function AnswerQuestion({ teamId, questionId, shown, imageUrls, secondsLeft, film = null, isQuestionLocked = false }: AnswerQuestionProps) {
+  // Out of time on this phone, or the question locked on the server: nothing more can be sent.
+  const isTimeOut = secondsLeft === 0 || isQuestionLocked;
   const saved = useQuery(api.answers.queries.getTeamAnswer, { teamId, questionId });
   const saveDraft = useMutation(api.answers.mutations.saveAnswerDraft);
   const sendAnswer = useMutation(api.answers.mutations.sendAnswer);

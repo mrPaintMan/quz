@@ -16,4 +16,15 @@ describe("SortQuestion and SortAnswer", () => {
     render(<SortAnswer revealed={{ type: "sort", items: ["Titanic", "Avatar"], ...labels }} imageUrls={{}} />);
     expect(screen.getAllByRole("listitem").map((row) => row.textContent)).toEqual(["1Titanic", "2Avatar"]);
   });
+
+  it("puts more than five items in two columns, read down the first", () => {
+    const items = ["A", "B", "C", "D", "E", "F"];
+    render(<SortQuestion shown={{ type: "sort", items, ...labels }} imageUrls={{}} />);
+    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gridTemplateRows: "repeat(3, auto)" });
+  });
+
+  it("keeps five or fewer in one column", () => {
+    render(<SortQuestion shown={{ type: "sort", items: ["A", "B"], ...labels }} imageUrls={{}} />);
+    expect(screen.getByRole("list")).toHaveStyle({ gridTemplateColumns: "repeat(1, minmax(0, 1fr))" });
+  });
 });

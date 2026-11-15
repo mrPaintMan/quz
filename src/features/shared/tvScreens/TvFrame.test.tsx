@@ -14,6 +14,12 @@ describe("TvFrame", () => {
     expect(screen.getByText("Innehåll")).toBeInTheDocument();
   });
 
+  it("puts the corner level with the title, not with the line above it", () => {
+    render(<TvFrame eyebrow="Omgång 1 · Fråga 3" title="Julmat" corner={<p>0:42</p>} />);
+    expect(screen.getByText("0:42").parentElement).toContainElement(screen.getByRole("heading", { name: "Julmat" }));
+    expect(screen.getByText("0:42").parentElement).not.toContainElement(screen.getByText("Omgång 1 · Fråga 3"));
+  });
+
   it("shows the corner beside the title", () => {
     render(<TvFrame title="Julmat" corner={<p>0:42</p>} />);
     expect(screen.getByText("0:42")).toBeInTheDocument();

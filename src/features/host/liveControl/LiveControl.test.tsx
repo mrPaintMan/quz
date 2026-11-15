@@ -47,7 +47,7 @@ const question: ScreenView = { kind: "question", roundNumber: 1, questionNumber:
 type GameState = { screenNow?: Screen; view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
 
 function renderControl({ screenNow = { kind: "lobby" }, view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false };
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false, isQuestionLocked: false };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>
