@@ -47,6 +47,6 @@ describe("MapPinResult", () => {
     render(<MapPinResult shown={shown} answer={{ type: "mapPin", pin: own }} outcome={outcomeOf(part("wrong", 0, "64 km från rätt plats"))} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(latest().markers).toEqual([expect.objectContaining({ kind: "own" })]);
     expect(screen.queryByText("Dra i kartan för att se de andra lagens nålar")).not.toBeInTheDocument();
-    expect(screen.getByText("Er nål").parentElement).toHaveClass("result-missed");
+    expect(screen.getByRole("img", { name: "Fel" })).toBeInTheDocument();
   });
 });

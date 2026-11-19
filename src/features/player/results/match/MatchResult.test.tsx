@@ -18,14 +18,14 @@ describe("MatchResult", () => {
     expect(lines[0]).toHaveAttribute("stroke", "var(--primary)");
   });
 
-  it("reddens a wrong pair's line and left item, with the right partner under it", () => {
+  it("marks a wrong pair's left item with ✕ and the right partner under it, its line grey", () => {
     const shown = { type: "match" as const, left: ["Waterloo"], right: ["Kent"] };
     const wrong = { ...part("wrong"), correct: "ABBA" };
     const { container } = render(
       <MatchResult shown={shown} answer={{ type: "match", rightByLeft: ["Kent"] }} outcome={outcomeOf(wrong)} imageUrls={{}} revealed={null} teamId="t1" />,
     );
-    expect(container.querySelector("path")).toHaveAttribute("stroke", "var(--destructive)");
-    expect(screen.getByText("Waterloo").closest(".result-missed")).not.toBeNull();
+    expect(container.querySelector("path")).toHaveAttribute("stroke", "var(--muted-foreground)");
+    expect(screen.getByRole("img", { name: "Fel" })).toBeInTheDocument();
     expect(screen.getByText("rätt: ABBA")).toBeInTheDocument();
   });
 });

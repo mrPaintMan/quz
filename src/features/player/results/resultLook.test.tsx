@@ -3,11 +3,11 @@ import { describe, expect, it } from "vitest";
 import { glowDelay, litOrders, PartEnd, Pill, PointsBadge, resultClass, ResultNote, RightAnswer } from "./resultLook";
 
 describe("resultClass", () => {
-  it("lights a scored part, reddens a wrong one, dashes one being judged and fades one already counted", () => {
+  it("lights a scored part, leaves a wrong one as sent, dashes one being judged and fades one already counted", () => {
     expect(resultClass("right")).toBe("result-lit");
     expect(resultClass("pending")).toContain("border-dashed");
     expect(resultClass("repeat")).toBe("opacity-45");
-    expect(resultClass("wrong")).toBe("result-missed");
+    expect(resultClass("wrong")).toBe("");
     expect(resultClass(undefined)).toBe("");
   });
 });
@@ -23,7 +23,7 @@ describe("PointsBadge and PartEnd", () => {
     render(<PointsBadge points={0.5} />);
     expect(screen.getByText("+0,5 p")).toBeInTheDocument();
     render(<PartEnd part={{ label: "", given: "x", result: "wrong", correct: "", points: 0 }} />);
-    expect(screen.getByText("✕ 0 p")).toHaveClass("text-destructive");
+    expect(screen.getByRole("img", { name: "Fel" })).toHaveClass("text-destructive");
     const { container } = render(<PartEnd part={{ label: "", given: "x", result: "pending", correct: "", points: 0 }} />);
     expect(container).toBeEmptyDOMElement();
   });
@@ -56,8 +56,8 @@ describe("litOrders", () => {
 });
 
 describe("Pill", () => {
-  it("can be red", () => {
-    render(<Pill tone="red">Ert svar · 0 p</Pill>);
-    expect(screen.getByText("Ert svar · 0 p")).toHaveClass("text-destructive");
+  it("is gold on dark", () => {
+    render(<Pill>+1 p</Pill>);
+    expect(screen.getByText("+1 p")).toHaveClass("text-primary");
   });
 });

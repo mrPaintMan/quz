@@ -14,10 +14,9 @@ describe("MultipleChoiceResult", () => {
     expect(screen.getByLabelText("A Sverige")).not.toHaveClass("result-lit");
   });
 
-  it("lights a wrong pick in red, and outlines the right option in gold", () => {
+  it("marks a wrong pick with ✕, and outlines the right option in gold", () => {
     render(<MultipleChoiceResult shown={shown} answer={picked(1)} outcome={outcomeOf(part("wrong"))} imageUrls={{}} revealed={{ ...shown, correctIndex: 2 }} teamId="t1" />);
-    expect(screen.getByLabelText("B Norge ert svar")).toHaveClass("result-missed");
-    expect(screen.getByText("✕ Ert svar · 0 p")).toBeInTheDocument();
+    expect(within(screen.getByLabelText("B Norge ert svar")).getByRole("img", { name: "Fel" })).toBeInTheDocument();
     expect(screen.getByLabelText("C Danmark")).toHaveClass("border-primary");
     expect(within(screen.getByLabelText("C Danmark")).getByText("Rätt svar")).toBeInTheDocument();
     expect(document.querySelector(".result-lit")).toBeNull();
