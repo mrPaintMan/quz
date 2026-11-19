@@ -1,9 +1,9 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { glowDelay, litOrders, PartEnd, Pill, PointsBadge, ResultNote, resultClass } from "./resultLook";
+import { glowDelay, litOrders, PartEnd, Pill, PointsBadge, resultClass, ResultNote, RightAnswer } from "./resultLook";
 
 describe("resultClass", () => {
-  it("lights a scored part, dashes one being judged and fades one already counted", () => {
+  it("lights a scored part, leaves a wrong one as sent, dashes one being judged and fades one already counted", () => {
     expect(resultClass("right")).toBe("result-lit");
     expect(resultClass("pending")).toContain("border-dashed");
     expect(resultClass("repeat")).toBe("opacity-45");
@@ -19,11 +19,18 @@ describe("glowDelay", () => {
 });
 
 describe("PointsBadge and PartEnd", () => {
-  it("shows a scored part's points, and nothing for one that didn't score", () => {
+  it("shows a scored part's points, a red ✕ on a wrong one, and nothing while one waits", () => {
     render(<PointsBadge points={0.5} />);
     expect(screen.getByText("+0,5 p")).toBeInTheDocument();
-    const { container } = render(<PartEnd part={{ label: "", given: "x", result: "wrong", correct: "", points: 0 }} />);
+    render(<PartEnd part={{ label: "", given: "x", result: "wrong", correct: "", points: 0 }} />);
+    expect(screen.getByRole("img", { name: "Fel" })).toHaveClass("text-destructive");
+    const { container } = render(<PartEnd part={{ label: "", given: "x", result: "pending", correct: "", points: 0 }} />);
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("gives the right answer", () => {
+    render(<RightAnswer>Saffran</RightAnswer>);
+    expect(screen.getByText("Rätt svar: Saffran")).toBeInTheDocument();
   });
 });
 
@@ -49,8 +56,8 @@ describe("litOrders", () => {
 });
 
 describe("Pill", () => {
-  it("can be red", () => {
-    render(<Pill tone="red">Ert svar · 0 p</Pill>);
-    expect(screen.getByText("Ert svar · 0 p")).toHaveClass("text-destructive");
+  it("is gold on dark", () => {
+    render(<Pill>+1 p</Pill>);
+    expect(screen.getByText("+1 p")).toHaveClass("text-primary");
   });
 });

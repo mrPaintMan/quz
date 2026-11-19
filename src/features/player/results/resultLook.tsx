@@ -5,8 +5,9 @@ import { formatPoints } from "@/domain/scoring/formatPoints";
 // Parts light up one after another, this far apart.
 const STAGGER_MS = 150;
 
-// How a part of the team's answer looks once shown: lit in gold when it scored, as sent otherwise;
-// dashed while waiting for a verdict, faded when another form of it already counted (D59).
+// How a part of the team's answer looks once shown: lit in gold when it scored, as sent when wrong,
+// where a red ✕ at its end is the only sign (PartEnd, D67); dashed while waiting for a verdict, faded
+// when another form of it already counted (D59).
 export function resultClass(result: OutcomePart["result"] | undefined): string {
   switch (result) {
     case "right":
@@ -23,15 +24,9 @@ export function resultClass(result: OutcomePart["result"] | undefined): string {
 // Each lit part's place in the order they light up.
 export const glowDelay = (order: number): CSSProperties => ({ animationDelay: `${order * STAGGER_MS}ms` });
 
-// A dark pill on a lit part: its points in gold, or on a wrong Flerval pick a red note.
-export function Pill({ children, tone = "gold", className = "" }: { children: ReactNode; tone?: "gold" | "red"; className?: string }) {
-  return (
-    <span
-      className={`shrink-0 rounded-full bg-background px-2.5 py-0.5 text-sm font-bold whitespace-nowrap ${tone === "gold" ? "text-primary" : "text-destructive"} ${className}`}
-    >
-      {children}
-    </span>
-  );
+// A dark pill on a lit part, with its points in gold.
+export function Pill({ children, className = "" }: { children: ReactNode; className?: string }) {
+  return <span className={`shrink-0 rounded-full bg-background px-2.5 py-0.5 text-sm font-bold whitespace-nowrap text-primary ${className}`}>{children}</span>;
 }
 
 // A lit part's own points.
@@ -52,7 +47,23 @@ export function ResultNote({ result }: { result: OutcomePart["result"] | undefin
   return null;
 }
 
-// What a part shows at its end: its points when it scored.
+// What a part shows at its end: its points when it scored, a red ✕ when wrong (D67).
 export function PartEnd({ part }: { part: OutcomePart | undefined }) {
-  return part?.result === "right" ? <PointsBadge points={part.points} /> : null;
+  if (part?.result === "right") return <PointsBadge points={part.points} />;
+  if (part?.result === "wrong") return <WrongMark />;
+  return null;
+}
+
+// A plain red ✕, a little larger than the answer's text, the only mark of a wrong part (D67).
+export function WrongMark({ className = "" }: { className?: string }) {
+  return (
+    <span role="img" aria-label="Fel" className={`shrink-0 text-2xl leading-none font-bold text-destructive ${className}`}>
+      ✕
+    </span>
+  );
+}
+
+// The right answer beside a wrong one, as the TV shows it (D67).
+export function RightAnswer({ children }: { children: ReactNode }) {
+  return <span className="text-sm text-primary">Rätt svar: {children}</span>;
 }

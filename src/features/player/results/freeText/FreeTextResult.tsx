@@ -1,9 +1,10 @@
 import { fieldTitle } from "@/domain/questionTypes/freeText/fieldTitle";
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
-import { glowDelay, litOrders, PartEnd, ResultNote, resultClass } from "@/features/player/results/resultLook";
+import { glowDelay, litOrders, PartEnd, ResultNote, resultClass, RightAnswer } from "@/features/player/results/resultLook";
 
 // One field per sub-question under its title, as the team filled them in; each that scored lights
-// up with its points, and one waiting for a verdict says so (D59).
+// up with its points, one waiting for a verdict says so, and a wrong one is red with the right
+// answer under it (D59, D67).
 export function FreeTextResult({ shown, answer, outcome }: ResultViewProps<"freeText">) {
   const { labels } = shown;
   const orders = litOrders(labels.map((_label, index) => outcome.parts[index]));
@@ -25,6 +26,7 @@ export function FreeTextResult({ shown, answer, outcome }: ResultViewProps<"free
               </span>
               <PartEnd part={part} />
             </div>
+            {part?.result === "wrong" && part.correct !== "" && <RightAnswer>{part.correct}</RightAnswer>}
           </div>
         );
       })}

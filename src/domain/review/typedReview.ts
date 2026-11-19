@@ -28,11 +28,12 @@ export type TypedReview<Content, Answer> = {
   pointsPerMatch: (content: Content) => number;
 };
 
-// What ingredients and lists show of each text written: no label, nothing beside it (D58).
+// What ingredients and lists show of each text written: no label; correct is the item it counted
+// as, when right or a repeat, so the phone can tell which items the team missed (D58, D67).
 export function itemOutcomes<Content, Answer>(review: TypedReview<Content, Answer>, content: Content, answers: Answer[], verdicts: Verdict[]): Outcome[] {
   return textOutcomes(review, content, answers, verdicts).map(({ points, texts }) => ({
     points,
-    parts: texts.map(({ written, result, points, at }) => ({ label: "", given: written, result, correct: "", points, at })),
+    parts: texts.map(({ written, result, points, at, item }) => ({ label: "", given: written, result, correct: item, points, at })),
   }));
 }
 

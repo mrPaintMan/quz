@@ -15,8 +15,9 @@ import { EmergencyBrake } from "./EmergencyBrake";
 function Pulled({ guess, points }: { guess: string; points: number }) {
   return (
     <div className="flex flex-col gap-3.5">
-      <section className="flex flex-col gap-1.5 rounded-2xl border-2 border-destructive bg-destructive/15 p-5">
-        <p className="text-sm text-destructive">Ni drog i nödbromsen</p>
+      {/* Neutral, not red: right or wrong is the answer screen's to tell (D67). */}
+      <section className="flex flex-col gap-1.5 rounded-2xl border-2 border-primary bg-card p-5">
+        <p className="text-sm text-muted-foreground">Ni drog i nödbromsen</p>
         <p className="text-3xl font-bold break-words">{guess}</p>
         <p className="text-lg font-semibold text-primary">på {points} poäng</p>
       </section>

@@ -27,9 +27,9 @@ export type AnsweringRules<T extends AnsweredType, Shown, Revealed> = {
   revealsAnswers?: boolean;
   // Whether the reveal shows which team sent each answer, such as the teams' pins (D60).
   revealsTeams?: boolean;
-  // What the phones' results get of the reveal, without the right answer itself, for a type whose
-  // result shows what the other teams answered (D60).
-  revealToTeams?: (content: ContentOf<T>, graded: Graded<AnswerOf<T>>) => Revealed;
+  // Whether the phone's result needs the answer screen's reveal, such as Flerval's right option or
+  // Kartnål's right place; the others show the right answer from their outcome parts (D67).
+  resultUsesReveal?: boolean;
   // Pictures the question shows, such as image options, so the server can link them.
   imageIds: (content: ContentOf<T>) => Id<"_storage">[];
   // What the team's answer is before it changes anything; null for most types, where nothing is

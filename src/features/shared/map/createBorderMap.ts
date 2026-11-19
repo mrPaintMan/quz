@@ -9,7 +9,7 @@ type LeafletModule = typeof Leaflet;
 
 // A pin drawn on the map at a place, such as a team's answer (D60): in its colour, larger for the
 // team's own, and glowing as well when it scored; the target is a gold dot.
-export type MapMarker = { at: Coordinates; colour: string; kind: "pin" | "own" | "highlight" | "target" };
+export type MapMarker = { at: Coordinates; colour: string; kind: "pin" | "own" | "target" };
 
 export type BorderMapOptions = {
   view: MapView;
@@ -69,7 +69,7 @@ function markerIcon(L: LeafletModule, { colour, kind }: MapMarker): Leaflet.DivI
     return L.divIcon({ className: "", iconSize: [16, 16], iconAnchor: [8, 8], html: `<span style="display:block;width:16px;height:16px;border-radius:50%;background:var(--primary);border:3px solid var(--background)"></span>` });
   }
   const [width, height] = kind === "pin" ? [24, 31] : [34, 44];
-  const glow = kind === "highlight" ? "filter:drop-shadow(0 0 8px var(--primary))" : "filter:drop-shadow(0 1px 1px rgb(0 0 0 / 0.5))";
+  const glow = "filter:drop-shadow(0 1px 1px rgb(0 0 0 / 0.5))";
   return L.divIcon({
     className: "",
     iconSize: [width, height],

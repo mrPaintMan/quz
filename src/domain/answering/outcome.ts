@@ -8,7 +8,8 @@ export type OutcomePart = {
   // right and wrong as judged; pending while a text waits for a verdict; repeat for another form
   // of something already counted, which adds nothing.
   result: "right" | "wrong" | "pending" | "repeat";
-  // The right answer for the part; empty when there is none to show.
+  // The right answer for the part, shown beside a wrong one (D67); for ingredients and lists instead
+  // the item a right or repeated text counted as, empty when wrong; empty when there is none.
   correct: string;
   // What the part scored, so the phone can show it beside the part; 0 unless right.
   points: number;

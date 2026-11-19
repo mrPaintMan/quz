@@ -4,12 +4,13 @@ import { outcomeOf, part } from "@/features/player/results/resultTestParts.setup
 import { ListResult } from "./ListResult";
 
 describe("ListResult", () => {
-  it("shows the team's list newest first, each answer that scored lit with its points", () => {
+  it("shows the team's list newest first, each answer that scored lit with its points and a wrong one marked ✕", () => {
     const answer = { type: "list" as const, items: ["Göteborg", "Oslo", "Lund"] };
     render(<ListResult shown={{ type: "list" }} answer={answer} outcome={outcomeOf(part("right", 0.5, "", 0), part("wrong", 0, "", 1), part("pending", 0, "", 2))} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(screen.getByText("3 svar")).toBeInTheDocument();
     const rows = screen.getAllByRole("listitem");
-    expect(rows.map((row) => row.textContent)).toEqual(["LundBedöms…", "Oslo", "Göteborg+0,5 p"]);
+    expect(rows.map((row) => row.textContent)).toEqual(["LundBedöms…", "Oslo✕", "Göteborg+0,5 p"]);
     expect(rows[2]).toHaveClass("result-lit");
+    expect(rows[1]).not.toHaveClass("result-missed");
   });
 });

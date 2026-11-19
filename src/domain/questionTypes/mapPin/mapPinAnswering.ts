@@ -35,8 +35,7 @@ export const mapPinAnswering: AnsweringRules<"mapPin", MapPinShown, MapPinReveal
   }),
   revealsAnswers: true,
   revealsTeams: true,
-  // The teams' pins for the phones, without the right place or its radius (D59, D60).
-  revealToTeams: (content, graded) => ({ ...mapPinAnswering.reveal(content, graded), target: null, radiusMeters: null }),
+  resultUsesReveal: true,
   imageIds: () => [],
   // The pin starts where the map does, so a team that sends without moving answers the middle.
   startingAnswer: ({ initialView }) => ({ type: "mapPin", pin: initialView.center }),

@@ -80,6 +80,7 @@ describe("getTeamFeedback", () => {
       await expect(t.query(api.answers.queries.getTeamFeedback, { teamId: red })).resolves.toEqual({
         prompt: "Vilken krydda?",
         shown: { type: "freeText", labels: [""] },
+        // Fritext's parts carry the right answer, so its result needs no reveal (D67).
         revealed: null,
         imageUrls: {},
         answer: { type: "freeText", fields: ["Safran"] },
@@ -121,6 +122,25 @@ describe("getTeamFeedback", () => {
     const feedback = await t.query(api.answers.queries.getTeamFeedback, { teamId });
     expect(feedback).toMatchObject({ answer: null, outcome: { points: 0, parts: [] } });
     expect(Object.values(feedback?.imageUrls ?? {})).toEqual([expect.any(String)]);
+  });
+});
+
+describe("getTeamFeedback's reveal", () => {
+  it("gives the reveal to a type whose result needs it, such as Flerval's right option", async () => {
+    const t = setupConvexTest();
+    const red = await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz", year: 2026, updatedAt: 0 });
+      const roundId = await ctx.db.insert("rounds", { quizId, position: 0, title: "Länder", kind: "questions" });
+      const options = [{ text: "Sverige", imageId: null }, { text: "Norge", imageId: null }];
+      const content = { type: "multipleChoice" as const, options, correctIndex: 1, points: 1 };
+      const questionId = await ctx.db.insert("questions", { quizId, roundId, position: 0, prompt: "Vilket land?", timeLimitSeconds: null, media: null, hostNotes: "", content });
+      const gameId = await ctx.db.insert("games", { quizId, endedAt: null, screen: { kind: "answer", questionId }, screenIndex: 4, closedQuestionIds: [questionId] });
+      const teamId = await ctx.db.insert("teams", { gameId, name: "Röda", colour: "red" });
+      await ctx.db.insert("answers", { gameId, teamId, questionId, content: { type: "multipleChoice", optionIndex: 0 }, lockedAt: 1 });
+      return teamId;
+    });
+    const feedback = await t.query(api.answers.queries.getTeamFeedback, { teamId: red });
+    expect(feedback?.revealed).toMatchObject({ type: "multipleChoice", correctIndex: 1 });
   });
 });
 

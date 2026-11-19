@@ -51,7 +51,7 @@ describe("ingredientsAnswering", () => {
 
   it("says what each ingredient written counted as, a second form of one a repeat", () => {
     expect(ingredientsAnswering.outcomes(content, [guesses("Vodka", "", "vodka.", "mjölk")])[0].parts).toEqual([
-      { label: "", given: "Vodka", result: "right", correct: "", points: 1, at: 0 },
+      { label: "", given: "Vodka", result: "right", correct: "Vodka", points: 1, at: 0 },
       { label: "", given: "mjölk", result: "pending", correct: "", points: 0, at: 3 },
     ]);
     expect(ingredientsAnswering.outcomes(content, [guesses("Kahlua", "kaffelikör")])[0].parts.map((part) => part.result)).toEqual(["right", "repeat"]);

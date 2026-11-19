@@ -27,9 +27,25 @@ describe("PaSparetResult", () => {
     expect(screen.getByText("Bedöms…")).toBeInTheDocument();
   });
 
-  it("says when the team never pulled the brake", () => {
-    renderResult(null, "wrong");
+  it("says when the team never pulled the brake, plain, neither red nor corrected", () => {
+    const { container } = renderResult(null, "wrong");
     expect(screen.getByText("Ni bromsade inte.")).toBeInTheDocument();
     expect(screen.queryByText(/\+/)).not.toBeInTheDocument();
+    expect(container.querySelector(".result-missed")).toBeNull();
+    expect(screen.queryByText(/Rätt svar/)).not.toBeInTheDocument();
+  });
+
+  it("gives the destination under a wrong guess", () => {
+    render(
+      <PaSparetResult
+        shown={{ type: "paSparet" }}
+        answer={{ type: "paSparet", guess: "Luleå", brakeClueIndex: 0 }}
+        outcome={{ points: 0, parts: [{ label: "", given: "Luleå", result: "wrong", correct: "Kiruna", points: 0 }] }}
+        imageUrls={{}}
+        revealed={null}
+        teamId="t1"
+      />,
+    );
+    expect(screen.getByText("Rätt svar: Kiruna")).toBeInTheDocument();
   });
 });

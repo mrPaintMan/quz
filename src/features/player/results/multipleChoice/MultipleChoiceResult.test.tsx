@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 import { outcomeOf, part } from "@/features/player/results/resultTestParts.setup";
 import { MultipleChoiceResult } from "./MultipleChoiceResult";
@@ -14,10 +14,11 @@ describe("MultipleChoiceResult", () => {
     expect(screen.getByLabelText("A Sverige")).not.toHaveClass("result-lit");
   });
 
-  it("lights a wrong pick in red, without showing the right option", () => {
-    render(<MultipleChoiceResult shown={shown} answer={picked(1)} outcome={outcomeOf(part("wrong"))} imageUrls={{}} revealed={null} teamId="t1" />);
-    expect(screen.getByLabelText("B Norge ert svar")).toHaveClass("result-missed");
-    expect(screen.getByText("Ert svar · 0 p")).toBeInTheDocument();
+  it("marks a wrong pick with ✕, and outlines the right option in gold", () => {
+    render(<MultipleChoiceResult shown={shown} answer={picked(1)} outcome={outcomeOf(part("wrong"))} imageUrls={{}} revealed={{ ...shown, correctIndex: 2 }} teamId="t1" />);
+    expect(within(screen.getByLabelText("B Norge ert svar")).getByRole("img", { name: "Fel" })).toBeInTheDocument();
+    expect(screen.getByLabelText("C Danmark")).toHaveClass("border-primary");
+    expect(within(screen.getByLabelText("C Danmark")).getByText("Rätt svar")).toBeInTheDocument();
     expect(document.querySelector(".result-lit")).toBeNull();
   });
 });

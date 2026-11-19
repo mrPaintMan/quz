@@ -16,4 +16,10 @@ describe("NumberResult", () => {
     render(<NumberResult {...props} outcome={outcomeOf(part("wrong", 0, "8"))} />);
     expect(screen.getByText("8")).not.toHaveClass("result-lit");
   });
+
+  it("gives the right number under a wrong guess", () => {
+    render(<NumberResult shown={{ type: "number" }} answer={{ type: "number", value: 3 }} outcome={outcomeOf({ ...part("wrong", 0, "3"), correct: "4,5" })} imageUrls={{}} revealed={null} teamId="t1" />);
+    expect(screen.getByText("Rätt svar: 4,5")).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Fel" })).toBeInTheDocument();
+  });
 });

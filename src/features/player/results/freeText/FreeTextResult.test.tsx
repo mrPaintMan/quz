@@ -18,4 +18,10 @@ describe("FreeTextResult", () => {
     render(<FreeTextResult shown={{ type: "freeText", labels: [""] }} answer={{ type: "freeText", fields: ["Kanel"] }} outcome={outcomeOf(part("wrong"))} imageUrls={{}} revealed={null} teamId="t1" />);
     expect(screen.getByText("Ert svar")).toBeInTheDocument();
   });
+
+  it("gives the right answer under a wrong field", () => {
+    const wrong = { ...part("wrong", 0, "Kanel"), correct: "Saffran" };
+    render(<FreeTextResult shown={{ type: "freeText", labels: [""] }} answer={{ type: "freeText", fields: ["Kanel"] }} outcome={outcomeOf(wrong)} imageUrls={{}} revealed={null} teamId="t1" />);
+    expect(screen.getByText("Rätt svar: Saffran")).toBeInTheDocument();
+  });
 });

@@ -1,14 +1,19 @@
 import { isBlank } from "@/domain/questionTypes/isBlank";
 import type { ResultViewProps } from "@/features/player/results/ResultViewProps";
-import { glowDelay, litOrders, PartEnd, ResultNote, resultClass } from "@/features/player/results/resultLook";
+import { glowDelay, litOrders, PartEnd, ResultNote, resultClass, RightAnswer } from "@/features/player/results/resultLook";
 import { partsOfTexts } from "@/features/player/results/textParts";
 
 // The numbered fields as the team filled them in; each ingredient that scored lights up with its
-// points, and another form of one already counted fades with why (D59).
-export function IngredientsResult({ shown, answer, outcome }: ResultViewProps<"ingredients">) {
+// points, another form of one already counted fades with why (D59), a wrong one is red, and the
+// ingredients the team missed are listed under (D67).
+export function IngredientsResult({ shown, answer, outcome, revealed }: ResultViewProps<"ingredients">) {
   const items = Array.from({ length: shown.count }, (_, index) => answer.items[index] ?? "");
   const parts = partsOfTexts(items.length, outcome.parts);
   const orders = litOrders(parts);
+  const counted = new Set(outcome.parts.filter((part) => part.result === "right" || part.result === "repeat").map((part) => part.correct));
+  // Only once every ingredient is judged, so one still waiting isn't listed as missed.
+  const isJudged = !outcome.parts.some((part) => part.result === "pending");
+  const missed = isJudged ? (revealed?.items ?? []).filter((item) => !counted.has(item)) : [];
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm text-muted-foreground">{shown.count} ingredienser · ordningen spelar ingen roll</p>
@@ -38,6 +43,7 @@ export function IngredientsResult({ shown, answer, outcome }: ResultViewProps<"i
           );
         })}
       </ol>
+      {missed.length > 0 && <RightAnswer>{missed.join(", ")}</RightAnswer>}
     </div>
   );
 }

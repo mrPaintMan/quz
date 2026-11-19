@@ -74,7 +74,7 @@ type AnyAnsweringRules = {
   reveal: (content: QuestionContent, graded?: Graded<AnswerContent>) => RevealedAnswer;
   revealsAnswers?: boolean;
   revealsTeams?: boolean;
-  revealToTeams?: (content: QuestionContent, graded: Graded<AnswerContent>) => RevealedAnswer;
+  resultUsesReveal?: boolean;
   imageIds: (content: QuestionContent) => Id<"_storage">[];
   startingAnswer: (shown: ShownQuestion) => AnswerContent | null;
   isComplete: (shown: ShownQuestion, answer: AnswerContent) => boolean;
