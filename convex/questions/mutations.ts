@@ -67,6 +67,7 @@ export const updateQuestion = hostMutation({
   args: {
     questionId: v.id("questions"),
     prompt: v.optional(v.string()),
+    description: v.optional(v.string()),
     timeLimitSeconds: v.optional(numberOrNull),
     hostNotes: v.optional(v.string()),
     content: v.optional(questionContent),

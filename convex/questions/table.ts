@@ -30,6 +30,9 @@ export const questionsTable = defineTable({
   roundId: v.id("rounds"),
   position: v.number(),
   prompt: v.string(),
+  // A short text shown smaller under the prompt on the TV, also in the hosts' previews (D68);
+  // left out or empty for none, so earlier questions need no migration.
+  description: v.optional(v.string()),
   timeLimitSeconds: numberOrNull,
   media: v.union(questionMedia, v.null()),
   hostNotes: v.string(),

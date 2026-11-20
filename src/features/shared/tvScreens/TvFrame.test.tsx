@@ -25,6 +25,18 @@ describe("TvFrame", () => {
     expect(screen.getByRole("heading", { name: "Topplista" }).closest("header")).toHaveClass("text-center");
   });
 
+  it("shows a description under the title, smaller and dimmed, and nothing when it's empty", () => {
+    const { rerender } = render(<TvFrame title="Sortera händelserna" description="Från tidigast till senast" />);
+    expect(screen.getByText("Från tidigast till senast")).toHaveClass("text-muted-foreground");
+    rerender(<TvFrame title="Sortera händelserna" description="" />);
+    expect(screen.queryByText("Från tidigast till senast")).not.toBeInTheDocument();
+  });
+
+  it("centres a description under a centred title", () => {
+    render(<TvFrame title="Baka ett pepparkakshus" description="Ni har tio minuter" centered />);
+    expect(screen.getByText("Ni har tio minuter").closest("header")).toHaveClass("items-center");
+  });
+
   it("shows the corner beside the title", () => {
     render(<TvFrame title="Julmat" corner={<p>0:42</p>} />);
     expect(screen.getByText("0:42")).toBeInTheDocument();

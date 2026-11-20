@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { atActivity, atDrawing } from "./handPoints.setup";
+import { atActivity, atDrawing, redDrawing } from "./handPoints.setup";
 import { handScoringOf } from "./handScoringOf";
 
 describe("handScoringOf", () => {
   it("scores every team on an activity, with its most points", async () => {
     const { t, gameId, questionId, red, blue } = await atActivity();
     const scoring = await t.run(async (ctx) => handScoringOf(ctx, gameId, (await ctx.db.get("questions", questionId))!));
-    expect(scoring).toEqual({ maxPoints: 5, teams: [{ teamId: red, points: null }, { teamId: blue, points: null }] });
+    expect(scoring).toEqual({ maxPoints: 5, teams: [{ teamId: red, points: null, strokes: null }, { teamId: blue, points: null, strokes: null }] });
   });
 
   it("scores only the teams that drew something, leaving out a paper that locked empty", async () => {
@@ -15,7 +15,7 @@ describe("handScoringOf", () => {
       await ctx.db.insert("answers", { gameId, teamId: blue, questionId: drawingId, content: { type: "drawing", strokes: [] }, lockedAt: 2 });
       return handScoringOf(ctx, gameId, (await ctx.db.get("questions", drawingId))!);
     });
-    expect(scoring).toEqual({ maxPoints: 3, teams: [{ teamId: red, points: null }] });
+    expect(scoring).toEqual({ maxPoints: 3, teams: [{ teamId: red, points: null, strokes: redDrawing.strokes }] });
   });
 
   it("gives nothing for a question the app scores", async () => {

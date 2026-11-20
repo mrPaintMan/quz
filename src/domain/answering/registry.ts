@@ -105,6 +105,11 @@ export function sendsWithBrake(type: AnsweredType): boolean {
   return answeringOfType(type)?.sendsWithBrake === true;
 }
 
+// Whether a type's answers get their points from the hosts by hand, a drawing (D62).
+export function scoresByHand(type: AnsweredType): boolean {
+  return answeringOfType(type)?.scoredByHand === true;
+}
+
 // What the server sets on an answer from where its question's film is, such as a trip's brake
 // (D63); other answers are left as sent.
 export function stampAnswer(answer: AnswerContent, film: FilmPosition, isSending: boolean): AnswerContent {
