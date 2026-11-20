@@ -177,7 +177,7 @@ describe("createBorderMap", () => {
     expect(circle.bringToFront).toHaveBeenCalled();
   });
 
-  it("keeps the radius on top of borders swapped in while zoomed far out", async () => {
+  it("keeps the radius on top of borders swapped in while zoomed far out, without region lines", async () => {
     const leaflet = fakeLeaflet();
     createBorderMap(leaflet.L, document.createElement("div"), { detail: "10m", shapes }, {
       view: { ...stockholm, zoom: 2 },
@@ -185,9 +185,16 @@ describe("createBorderMap", () => {
       onUserMove: vi.fn(),
       loadShapes: () => Promise.resolve(shapes),
     });
+    const order: string[] = [];
+    leaflet.fake.geoJSON.mockImplementation(() => {
+      const layer: FakeLayer = { onMap: false, addTo: () => (order.push("layer"), (layer.onMap = true), layer), remove: vi.fn(), bringToFront: vi.fn() };
+      leaflet.layers.push(layer);
+      return layer;
+    });
+    leaflet.circle.bringToFront.mockImplementation(() => order.push("radius"));
     await settle();
     expect(leaflet.layers[4].onMap).toBe(false);
-    expect(leaflet.circle.bringToFront).toHaveBeenCalled();
+    expect(order).toEqual(["layer", "layer", "radius"]);
   });
 
   it("loads the right borders straight away when the ones given don't suit the starting zoom", () => {

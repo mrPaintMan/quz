@@ -102,4 +102,16 @@ describe("loadBorderShapes after a failed load", () => {
     await retry.catch(() => undefined);
     vi.doUnmock("@/features/shared/map/data/countries-10m-light.json");
   });
+
+  it("draws the countries without region lines when those can't be loaded", async () => {
+    vi.resetModules();
+    vi.doMock("@/features/shared/map/data/regions.json", () => {
+      throw new Error("offline");
+    });
+    const { loadBorderShapes: load } = await import("./loadBorderShapes");
+    const shapes = await load("50m");
+    expect(shapes.land.features).toHaveLength(2);
+    expect(shapes.regions.coordinates).toEqual([]);
+    vi.doUnmock("@/features/shared/map/data/regions.json");
+  });
 });

@@ -25,7 +25,7 @@ type BorderMapProps = {
   className?: string;
 };
 
-// A map with country borders only and, by default, a fixed pin in the middle: move the map to aim
+// A map with country borders, and the lines between landskap and US states from zoom 4 (D69), and, by default, a fixed pin in the middle: move the map to aim
 // the pin. It can also show pins at their own places, and be moved around to look at them.
 export function BorderMap({
   label,

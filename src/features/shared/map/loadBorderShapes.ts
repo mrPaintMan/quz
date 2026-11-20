@@ -55,9 +55,14 @@ export function toRegionLines(topology: RegionsTopology): MultiLineString {
   return unwrapGeometry(mesh(topology, topology.objects.regions)) as MultiLineString;
 }
 
-// About 14 kB compressed, shared by both details.
+const noLines: MultiLineString = { type: "MultiLineString", coordinates: [] };
+
+// About 14 kB compressed, shared by both details. They are extra, so a map whose region lines
+// can't be loaded is drawn without them rather than not at all.
 const loadRegionLines = () =>
-  loadOnce("regions", () => import("@/features/shared/map/data/regions.json").then((module) => toRegionLines(module.default as unknown as RegionsTopology)));
+  loadOnce("regions", () => import("@/features/shared/map/data/regions.json").then((module) => toRegionLines(module.default as unknown as RegionsTopology))).catch(
+    () => noLines,
+  );
 
 // Natural Earth (public domain): about 240 kB at 1:50m and 340 kB for the lighter 1:10m,
 // compressed, so each is loaded only when a map needs it and then kept for every later map.
