@@ -36,7 +36,15 @@ describe("FilmField", () => {
     const onChange = vi.fn().mockResolvedValue(undefined);
     render(<FilmField title="Filmen" video={video} onChange={onChange} />);
     expect(screen.getByText("Längd 1:00")).toBeInTheDocument();
+    expect(screen.queryByText(/1080p/)).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole("button", { name: "Ta bort film" }));
     expect(onChange).toHaveBeenCalledWith(null);
+  });
+
+  it("shows a film as a row with a small still when compact, without its own title", () => {
+    render(<FilmField title="Film 1" compact video={video} onChange={vi.fn()} />);
+    expect(screen.getByRole("region", { name: "Film 1" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Film 1" })).not.toBeInTheDocument();
+    expect(screen.getByText("Längd 1:00")).toBeInTheDocument();
   });
 });

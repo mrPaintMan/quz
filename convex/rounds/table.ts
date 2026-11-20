@@ -15,7 +15,7 @@ export const roundsTable = defineTable({
   position: v.number(),
   title: v.string(),
   kind: roundKind,
-  // A På spåret round's films, in order; at most three questions in all are asked after them.
+  // A På spåret round's films, in order, each with any number of questions asked after it (D70).
   // Left out for question rounds, and for På spåret rounds made before D33 (no films yet).
   films: v.optional(v.array(film)),
 }).index("by_quizId_and_position", ["quizId", "position"]);

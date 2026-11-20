@@ -9,11 +9,16 @@ import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
 
-type VideoPreviewProps = { media: VideoMedia; alt: string };
+type VideoPreviewProps = {
+  media: VideoMedia;
+  alt: string;
+  // A small still beside the length and the play button, instead of a large still above them.
+  compact?: boolean;
+};
 
 // Shows the film's still and length, and asks for a link to the film itself only when the
 // host presses play, so opening a question never downloads it (D30, D32).
-export function VideoPreview({ media, alt }: VideoPreviewProps) {
+export function VideoPreview({ media, alt, compact = false }: VideoPreviewProps) {
   const [filmUrl, setFilmUrl] = useState<string | null>(null);
   const [unplayable, setUnplayable] = useState(false);
   const getFilmUrl = useHostMutation(api.media.mutations.getFilmUrl);
@@ -29,7 +34,7 @@ export function VideoPreview({ media, alt }: VideoPreviewProps) {
     return <video controls autoPlay src={filmUrl} onError={showError} className="max-h-64 w-full rounded-lg" aria-label={alt} />;
   }
   return (
-    <div className="flex flex-col gap-2">
+    <div className={compact ? "flex flex-wrap items-center gap-3" : "flex flex-col gap-2"}>
       {unplayable && (
         <p role="alert" className="text-sm text-destructive">
           Filmen kunde inte spelas. Försök igen; hjälper det inte, ladda upp den igen.
@@ -37,7 +42,7 @@ export function VideoPreview({ media, alt }: VideoPreviewProps) {
       )}
       {stillUrl ? (
         // eslint-disable-next-line @next/next/no-img-element -- Convex storage URLs are signed and change; next/image would need a remote pattern per deployment.
-        <img src={stillUrl} alt={`Stillbild ur ${alt.toLowerCase()}`} className="max-h-64 rounded-lg object-contain" />
+        <img src={stillUrl} alt={`Stillbild ur ${alt.toLowerCase()}`} className={compact ? "h-12 rounded-md object-contain" : "max-h-64 rounded-lg object-contain"} />
       ) : (
         // No still was made, or it is gone; while its URL is on its way (undefined) show nothing.
         (media.posterId === null || stillUrl === null) && <p className="text-sm text-muted-foreground">Ingen stillbild. Ladda upp filmen igen för att få en.</p>

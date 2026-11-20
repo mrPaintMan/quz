@@ -52,15 +52,14 @@ describe("addFilmQuestion", () => {
     ]);
   });
 
-  it("refuses a fourth question after the films", async () => {
-    const { t, roundId } = await setupPaSparet();
+  it("takes any number of films and questions after them (D70)", async () => {
+    const { t, roundId, order } = await setupPaSparet();
     const { filmId } = await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId, type: "freeText" });
-    await t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId, filmId, type: "freeText" });
-    await t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId, filmId, type: "freeText" });
-    await expect(t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId, filmId, type: "freeText" })).rejects.toThrow(
-      "högst 3 frågor",
-    );
-    await expect(t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId, type: "freeText" })).rejects.toThrow("högst 3 frågor");
+    for (let added = 0; added < 3; added++) {
+      await t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId, filmId, type: "freeText" });
+    }
+    await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId, type: "freeText" });
+    expect((await order()).filter(([, filmId]) => filmId !== "trip")).toHaveLength(5);
   });
 
   it("refuses a film that is gone", async () => {
