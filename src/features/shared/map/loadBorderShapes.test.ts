@@ -1,11 +1,21 @@
 import type { GeometryCollection, Topology } from "topojson-specification";
 import { describe, expect, it, vi } from "vitest";
-import { loadBorderShapes, toBorderShapes } from "./loadBorderShapes";
+import { loadBorderShapes, toBorderShapes, toRegionLines } from "./loadBorderShapes";
 
 // Tiny maps in place of the real world atlas, which takes seconds to load: tests stay fast, and
 // the finer one has an extra country so the two can be told apart (D57).
 vi.mock("world-atlas/countries-50m.json", () => ({ default: worldOf(2) }));
-vi.mock("world-atlas/countries-10m.json", () => ({ default: worldOf(3) }));
+vi.mock("@/features/shared/map/data/countries-10m-light.json", () => ({ default: worldOf(3) }));
+vi.mock("@/features/shared/map/data/regions.json", () => ({ default: oneRegionLine }));
+
+const noRegions = { type: "MultiLineString" as const, coordinates: [] };
+
+// One line between two regions, as the regions file stores it.
+const oneRegionLine: Topology<{ regions: GeometryCollection }> = {
+  type: "Topology",
+  arcs: [[[15, 60], [16, 61]]],
+  objects: { regions: { type: "GeometryCollection", geometries: [{ type: "LineString", arcs: [0] }] } },
+};
 
 // A row of square countries side by side.
 function worldOf(count: number): Topology<{ countries: GeometryCollection }> {
@@ -44,11 +54,17 @@ const twoCountries: Topology<{ countries: GeometryCollection }> = {
 
 describe("toBorderShapes", () => {
   it("gives one land shape per country", () => {
-    expect(toBorderShapes(twoCountries).land.features).toHaveLength(2);
+    expect(toBorderShapes(twoCountries, noRegions).land.features).toHaveLength(2);
   });
 
   it("draws only the borders between countries, not the coast", () => {
-    expect(toBorderShapes(twoCountries).borders.coordinates).toEqual([[[1, 1], [1, 0]]]);
+    expect(toBorderShapes(twoCountries, noRegions).borders.coordinates).toEqual([[[1, 1], [1, 0]]]);
+  });
+});
+
+describe("toRegionLines", () => {
+  it("draws every line in the regions file", () => {
+    expect(toRegionLines(oneRegionLine).coordinates).toEqual([[[15, 60], [16, 61]]]);
   });
 });
 
@@ -64,12 +80,18 @@ describe("loadBorderShapes", () => {
     expect(fine).not.toBe(coarse);
     expect(fine.land.features).toHaveLength(3);
   });
+
+  it("gives both details the same region lines, loaded once", async () => {
+    const [coarse, fine] = await Promise.all([loadBorderShapes("50m"), loadBorderShapes("10m")]);
+    expect(fine.regions).toBe(coarse.regions);
+    expect(coarse.regions.coordinates).toHaveLength(1);
+  });
 });
 
 describe("loadBorderShapes after a failed load", () => {
   it("tries again on the next call", async () => {
     vi.resetModules();
-    vi.doMock("world-atlas/countries-10m.json", () => {
+    vi.doMock("@/features/shared/map/data/countries-10m-light.json", () => {
       throw new Error("offline");
     });
     const { loadBorderShapes: load } = await import("./loadBorderShapes");
@@ -78,6 +100,6 @@ describe("loadBorderShapes after a failed load", () => {
     const retry = load("10m");
     expect(retry).not.toBe(failed);
     await retry.catch(() => undefined);
-    vi.doUnmock("world-atlas/countries-10m.json");
+    vi.doUnmock("@/features/shared/map/data/countries-10m-light.json");
   });
 });

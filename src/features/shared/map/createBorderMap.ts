@@ -1,6 +1,6 @@
 import type * as Leaflet from "leaflet";
 import { MAP_ZOOM } from "@/domain/questionTypes/mapPin/mapPinRules";
-import { borderDetailForZoom, type BorderDetail } from "@/features/shared/map/borderDetailForZoom";
+import { borderDetailForZoom, showsRegions, type BorderDetail } from "@/features/shared/map/borderDetailForZoom";
 import type { BorderShapes } from "@/features/shared/map/loadBorderShapes";
 import { isSameView } from "@/features/shared/map/isSameView";
 import type { Coordinates, MapView } from "@convex/questions/types/mapPin/mapPinContent";
@@ -54,12 +54,21 @@ function readView(map: Leaflet.Map): MapView {
   return { center: { lat: roundCoordinate(center.lat), lng: roundCoordinate(center.lng) }, zoom: map.getZoom() };
 }
 
-function addBorders(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes): Leaflet.Layer[] {
+// The land and the borders between countries are always on the map; the lines between regions
+// are added only when zoomed in far enough (D69), and are thinner and fainter than a border.
+type BorderLayers = { land: Leaflet.GeoJSON; borders: Leaflet.GeoJSON; regions: Leaflet.GeoJSON };
+
+function createBorderLayers(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes): BorderLayers {
   const lines = { color: mapColors.line, weight: 0.8, opacity: 1 };
-  return [
-    L.geoJSON(shapes.land, { interactive: false, style: { ...lines, fillColor: mapColors.land, fillOpacity: 1 } }).addTo(map),
-    L.geoJSON(shapes.borders, { interactive: false, style: lines }).addTo(map),
-  ];
+  return {
+    land: L.geoJSON(shapes.land, { interactive: false, style: { ...lines, fillColor: mapColors.land, fillOpacity: 1 } }).addTo(map),
+    regions: L.geoJSON(shapes.regions, { interactive: false, style: { ...lines, weight: 0.6, opacity: 0.6 } }),
+    borders: L.geoJSON(shapes.borders, { interactive: false, style: lines }).addTo(map),
+  };
+}
+
+function removeBorderLayers({ land, borders, regions }: BorderLayers) {
+  [land, borders, regions].forEach((layer) => layer.remove());
 }
 
 // A marker's look: a pin with its tip on the place, or a gold dot for the target. Markers are HTML
@@ -107,7 +116,7 @@ export function createBorderMap(
   });
   element.style.background = mapColors.sea;
   L.control.zoom({ position: "topright", zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }).addTo(map);
-  let borderLayers = addBorders(L, map, initialBorders.shapes);
+  let borderLayers = createBorderLayers(L, map, initialBorders.shapes);
   let shownDetail = initialBorders.detail;
 
   let circle: Leaflet.Circle | null = null;
@@ -149,14 +158,32 @@ export function createBorderMap(
     if (wanted === shownDetail) return;
     loadShapes(wanted).then((next) => {
       if (removed || wanted !== borderDetailForZoom(map.getZoom()) || wanted === shownDetail) return;
-      borderLayers.forEach((layer) => layer.remove());
-      borderLayers = addBorders(L, map, next);
+      removeBorderLayers(borderLayers);
+      borderLayers = createBorderLayers(L, map, next);
       shownDetail = wanted;
-      // The canvas paints in the order layers were added; keep the radius above the land.
+      showRegionsForZoom();
       circle?.bringToFront();
     }, () => undefined);
   };
-  map.on("zoomend", showDetailForZoom);
+  // The canvas paints in the order layers were added: region lines go under the borders between
+  // countries, and the radius stays above them all.
+  const showRegionsForZoom = () => {
+    const { regions, borders } = borderLayers;
+    const wanted = showsRegions(map.getZoom());
+    if (wanted === map.hasLayer(regions)) return;
+    if (!wanted) {
+      regions.remove();
+      return;
+    }
+    regions.addTo(map);
+    borders.bringToFront();
+    circle?.bringToFront();
+  };
+  map.on("zoomend", () => {
+    showRegionsForZoom();
+    showDetailForZoom();
+  });
+  showRegionsForZoom();
   showDetailForZoom();
 
   // Leaflet also fires "moveend" for our own moves and when the page is resized; only a

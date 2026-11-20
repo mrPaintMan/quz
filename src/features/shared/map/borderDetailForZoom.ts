@@ -6,3 +6,9 @@ export type BorderDetail = "50m" | "10m";
 export function borderDetailForZoom(zoom: number): BorderDetail {
   return zoom < 6 ? "50m" : "10m";
 }
+
+// The lines between Sweden's landskap and the US states show from about where Sweden fills a
+// phone (D69); further out they would only clutter the map.
+export function showsRegions(zoom: number): boolean {
+  return zoom >= 4;
+}
