@@ -41,7 +41,7 @@ describe("FilmField", () => {
     expect(onChange).toHaveBeenCalledWith(null);
   });
 
-  it("shows a film as a row with a small still when compact, without its own title", () => {
+  it("drops its own title when compact, keeping the film's length", () => {
     render(<FilmField title="Film 1" compact video={video} onChange={vi.fn()} />);
     expect(screen.getByRole("region", { name: "Film 1" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Film 1" })).not.toBeInTheDocument();

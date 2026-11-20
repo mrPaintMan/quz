@@ -39,7 +39,7 @@ export function FilmCard({ roundId, film, filmNumber, questions, selectedQuestio
           <h3 className="font-semibold">Film {filmNumber}</h3>
           <span className="ml-auto text-sm text-muted-foreground">{count}</span>
         </div>
-        <FilmField title="Filmen" compact video={film.video} onChange={(video) => setFilmVideo({ roundId, filmId: film.id, video })} />
+        <FilmField title={`Filmen till film ${filmNumber}`} compact video={film.video} onChange={(video) => setFilmVideo({ roundId, filmId: film.id, video })} />
       </div>
       <div className="ml-4 flex flex-col gap-2 border-l-2 border-primary pl-3">
         <ol className="flex flex-col gap-2" aria-label={`Frågor efter film ${filmNumber}`}>

@@ -7,7 +7,7 @@ import type { MutationCtx } from "../_generated/server";
 import { hostMutation } from "../auth/hostFunctions";
 import { insertQuestion } from "../questions/insertQuestion";
 import type { QuestionType } from "../questions/questionContent";
-import { questionsOfRound } from "../questions/questionsOfRound";
+import { questionsOfRound, requireRoomForQuestion } from "../questions/questionsOfRound";
 import { questionType } from "../questions/questionType";
 import { requireFilmQuestionType } from "../questions/requireFilmQuestionType";
 import { saveQuestionOrder } from "../questions/saveQuestionOrder";
@@ -37,10 +37,11 @@ async function saveFilms(ctx: MutationCtx, round: Doc<"rounds">, films: Film[]):
   await touchQuiz(ctx, round.quizId);
 }
 
-// Adds a question after a film, keeping the round's order; a round has no cap on them (D70).
+// Adds a question after a film, keeping the round's order; only the round's own limit applies (D70).
 async function addQuestionAfter(ctx: MutationCtx, round: Doc<"rounds">, films: Film[], filmId: string, type: QuestionType) {
   requireFilmQuestionType(type);
   const questions = await questionsOfRound(ctx, round._id);
+  requireRoomForQuestion(questions);
   const questionId = await insertQuestion(ctx, round, questions.length, type, filmId);
   const added = await getOrThrow(ctx, "questions", questionId);
   await saveQuestionOrder(ctx, round._id, orderPaSparetQuestions([...questions, added], films));

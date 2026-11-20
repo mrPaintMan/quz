@@ -59,7 +59,31 @@ describe("addFilmQuestion", () => {
       await t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId, filmId, type: "freeText" });
     }
     await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId, type: "freeText" });
-    expect((await order()).filter(([, filmId]) => filmId !== "trip")).toHaveLength(5);
+    expect((await order()).filter(([, owner]) => owner !== "trip")).toHaveLength(5);
+  });
+
+  it("stops at the 100 questions every round may hold", async () => {
+    const { t, quizId, roundId } = await setupPaSparet();
+    const { filmId } = await t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId, type: "freeText" });
+    await t.run(async (ctx) => {
+      for (let position = 2; position < 100; position++) {
+        await ctx.db.insert("questions", {
+          quizId,
+          roundId,
+          position,
+          prompt: "",
+          timeLimitSeconds: null,
+          media: null,
+          hostNotes: "",
+          content: { type: "activity", maxPoints: 1 },
+          filmId,
+        });
+      }
+    });
+    await expect(t.mutation(api.rounds.filmMutations.addFilmQuestion, { ...host, roundId, filmId, type: "freeText" })).rejects.toThrow(
+      "högst 100 frågor",
+    );
+    await expect(t.mutation(api.rounds.filmMutations.addFilm, { ...host, roundId, type: "freeText" })).rejects.toThrow("högst 100 frågor");
   });
 
   it("refuses a film that is gone", async () => {

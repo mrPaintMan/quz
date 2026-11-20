@@ -11,7 +11,7 @@ import { getOrThrow } from "../shared/getOrThrow";
 import { insertQuestion } from "./insertQuestion";
 import { numberOrNull } from "./numberOrNull";
 import { questionContent, type QuestionType } from "./questionContent";
-import { MAX_QUESTIONS_PER_ROUND, questionsOfRound } from "./questionsOfRound";
+import { questionsOfRound, requireRoomForQuestion } from "./questionsOfRound";
 import { questionType } from "./questionType";
 import { requireFilmQuestionType } from "./requireFilmQuestionType";
 import { saveQuestionOrder } from "./saveQuestionOrder";
@@ -30,9 +30,7 @@ async function requireRoomIn(ctx: QueryCtx, round: Doc<"rounds">): Promise<Doc<"
     throw new ConvexError(FIXED_LIST);
   }
   const questions = await questionsOfRound(ctx, round._id);
-  if (questions.length >= MAX_QUESTIONS_PER_ROUND) {
-    throw new ConvexError(`En omgång kan ha högst ${MAX_QUESTIONS_PER_ROUND} frågor.`);
-  }
+  requireRoomForQuestion(questions);
   return questions;
 }
 
