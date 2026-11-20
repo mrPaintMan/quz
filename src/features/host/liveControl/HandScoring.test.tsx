@@ -21,8 +21,8 @@ const teams = [
 const scoringOf = (maxPoints: number | null, redPoints: number | null = 2.5): HandScoringState => ({
   maxPoints,
   teams: [
-    { teamId: red, points: redPoints },
-    { teamId: blue, points: null },
+    { teamId: red, points: redPoints, strokes: null },
+    { teamId: blue, points: null, strokes: null },
   ],
 });
 
@@ -97,11 +97,16 @@ describe("HandScoring", () => {
   });
 
   it("lists only the teams it scores, and says when there are none", () => {
-    const { unmount } = renderScoring({ maxPoints: 5, teams: [{ teamId: blue, points: null }] });
+    const { unmount } = renderScoring({ maxPoints: 5, teams: [{ teamId: blue, points: null, strokes: null }] });
     expect(screen.queryByLabelText("Poäng för Tomtarna")).not.toBeInTheDocument();
     expect(screen.getByLabelText("Poäng för Renarna")).toBeInTheDocument();
     unmount();
     renderScoring({ maxPoints: 5, teams: [] });
     expect(screen.getByText("Inga svar.")).toBeInTheDocument();
+  });
+
+  it("shows each team's drawing in its row, to score by", () => {
+    renderScoring({ maxPoints: 3, teams: [{ teamId: red, points: null, strokes: [{ colour: "red", points: [0.1, 0.2, 0.3, 0.4] }] }] });
+    expect(screen.getByRole("img", { name: "Tomtarnas teckning" })).toBeInTheDocument();
   });
 });

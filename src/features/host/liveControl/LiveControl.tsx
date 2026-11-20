@@ -46,11 +46,11 @@ function handScoredTitle(view: RunningGame["view"], isLocked: boolean): string |
 // A question whose answers the hosts score by hand, a drawing, while it shows (D68).
 const isDrawingOnScreen = (view: RunningGame["view"]) => view.kind === "question" && view.shown !== null && scoresByHand(view.shown.type);
 
-// Why Nästa waits on a drawing's screen: for its answers to lock, then for the hosts' points (D68);
-// null when it doesn't.
+// Why Nästa waits on a drawing's screen once its answers are locked: for the hosts' points (D68);
+// null when it doesn't. Before the lock, Nästa locks the drawings and stays (moveScreen).
 function nextWaitsForPoints(view: RunningGame["view"], isLocked: boolean, scoring: HandScoringState | null | undefined): string | null {
   if (!isDrawingOnScreen(view)) return null;
-  if (!isLocked) return "Nästa väntar tills tiden är ute eller alla lag har skickat.";
+  if (!isLocked) return null;
   const left = (scoring?.teams ?? []).filter((team) => team.points === null).length;
   return left === 0 ? null : `Nästa väntar tills alla teckningar har poäng (${left} kvar).`;
 }
@@ -140,6 +140,9 @@ export function LiveControl({ game }: { game: RunningGame }) {
               question's notes start folded. */}
           {notes?.current && notes.current.questionId !== notes.next?.questionId && (
             <QuestionNotes key={notes.current.questionId} notes={notes.current.notes} folded />
+          )}
+          {isDrawingOnScreen(game.view) && !game.isQuestionLocked && (
+            <p className="text-sm text-muted-foreground">Nästa låser teckningarna så att de kan få poäng, om tiden inte redan är ute.</p>
           )}
           {handTitle && handScoring && questionOnScreen && (
             <HandScoring gameId={gameId} questionId={questionOnScreen} title={handTitle} scoring={handScoring} teams={teams} />

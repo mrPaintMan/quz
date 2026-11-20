@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { api } from "../_generated/api";
 import { host } from "../test.setup";
-import { atActivity, atDrawing } from "./handPoints.setup";
+import { atActivity, atDrawing, redDrawing } from "./handPoints.setup";
 
 describe("getHandPoints", () => {
   it("gives an activity's most points and every team's points so far", async () => {
@@ -10,8 +10,8 @@ describe("getHandPoints", () => {
     await expect(t.query(api.adjustments.queries.getHandPoints, { ...host, gameId, questionId })).resolves.toEqual({
       maxPoints: 5,
       teams: [
-        { teamId: red, points: 4 },
-        { teamId: blue, points: null },
+        { teamId: red, points: 4, strokes: null },
+        { teamId: blue, points: null, strokes: null },
       ],
     });
   });
@@ -28,7 +28,7 @@ describe("getHandPoints", () => {
 describe("getHandPoints on a drawing", () => {
   it("gives only the teams that sent a drawing", async () => {
     const { t, gameId, drawingId, red } = await atDrawing();
-    await expect(t.query(api.adjustments.queries.getHandPoints, { ...host, gameId, questionId: drawingId })).resolves.toEqual({ maxPoints: 3, teams: [{ teamId: red, points: null }] });
+    await expect(t.query(api.adjustments.queries.getHandPoints, { ...host, gameId, questionId: drawingId })).resolves.toEqual({ maxPoints: 3, teams: [{ teamId: red, points: null, strokes: redDrawing.strokes }] });
   });
 });
 

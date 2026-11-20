@@ -207,11 +207,11 @@ describe("LiveControl", () => {
     expect(screen.queryByText(/Poäng för/)).not.toBeInTheDocument();
   });
 
-  it("waits on a drawing's screen until its answers lock, without points to give yet", () => {
+  it("offers Nästa to lock a drawing still open, with no points to give yet", () => {
     renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: drawingQuestion });
-    expect(screen.getByText("Nästa väntar tills tiden är ute eller alla lag har skickat.")).toBeInTheDocument();
+    expect(screen.getByText("Nästa låser teckningarna så att de kan få poäng, om tiden inte redan är ute.")).toBeInTheDocument();
     expect(screen.queryByText(/Poäng för teckningarna/)).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeEnabled();
   });
 
   it("lets the hosts score the drawings on their own screen once locked, Nästa waiting until each has points", () => {

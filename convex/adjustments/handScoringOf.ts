@@ -13,16 +13,22 @@ import { handPointsOf } from "./handPointsOf";
 export async function handScoringOf(ctx: QueryCtx, gameId: Id<"games">, question: Doc<"questions">) {
   const { content } = question;
   if (!isScoredByHand(content)) return null;
-  const [given, teamIds] = await Promise.all([
+  const [given, scored] = await Promise.all([
     handPointsOf(ctx, gameId, question._id),
     content.type === "activity"
-      ? teamsOfGame(ctx, gameId).then((teams) => teams.map((team) => team._id))
+      ? teamsOfGame(ctx, gameId).then((teams) => teams.map((team) => ({ teamId: team._id, answer: null })))
       : lockedAnswersOfQuestion(ctx, gameId, question._id).then((answers) =>
-          answers.filter((answer) => isGivenAnswer(content, answer.content)).map((answer) => answer.teamId),
+          answers.filter((answer) => isGivenAnswer(content, answer.content)).map((answer) => ({ teamId: answer.teamId, answer: answer.content })),
         ),
   ]);
   return {
     maxPoints: rulesFor(content).maxPoints(content),
-    teams: teamIds.map((teamId) => ({ teamId, points: given.find((adjustment) => adjustment.teamId === teamId)?.points ?? null })),
+    // Each team with its points so far and, for a drawing, the drawing itself, for the hosts to
+    // score by it (D68).
+    teams: scored.map(({ teamId, answer }) => ({
+      teamId,
+      points: given.find((adjustment) => adjustment.teamId === teamId)?.points ?? null,
+      strokes: answer?.type === "drawing" ? answer.strokes : null,
+    })),
   };
 }

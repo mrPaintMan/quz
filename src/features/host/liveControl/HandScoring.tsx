@@ -13,9 +13,11 @@ import { parseDecimal } from "@/domain/text/parseDecimal";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
 import { useHostMutation } from "@/features/host/shared/useHostMutation";
 import { useDraftText } from "@/features/shared/forms/useDraftText";
+import { DrawingPicture } from "@/features/shared/drawing/DrawingPicture";
 import { TeamDot } from "@/features/shared/teams/TeamDot";
 
 type Team = { _id: Id<"teams">; name: string; colour: TeamColour };
+type Strokes = HandScoringState["teams"][number]["strokes"] & {};
 export type HandScoringState = NonNullable<FunctionReturnType<typeof api.adjustments.queries.getHandPoints>>;
 
 const formatGiven = (points: number | null) => (points === null ? "" : formatDecimal(points));
@@ -23,7 +25,9 @@ const formatGiven = (points: number | null) => (points === null ? "" : formatDec
 // One team's points: − and + step a whole point, and halves can be typed, sent when the field is
 // left or Enter is pressed, so typing writes once. An empty field clears them; a number past the
 // activity's most is kept in the field, marked, and not sent.
-function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: number | null; maxPoints: number | null; onSet: (points: number | null) => void }) {
+type TeamPointsProps = { team: Team; points: number | null; strokes: Strokes | null; maxPoints: number | null; onSet: (points: number | null) => void };
+
+function TeamPoints({ team, points, strokes, maxPoints, onSet }: TeamPointsProps) {
   const [text, setText] = useDraftText(points, formatGiven, parseDecimal);
   const typed = parseDecimal(text);
   const isInvalid = text.trim() !== "" && (typed === null || !isHandPoints(typed, maxPoints));
@@ -31,6 +35,8 @@ function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: nu
   const atMost = (value: number) => (maxPoints === null ? value : Math.min(value, maxPoints));
   return (
     <li className="flex items-center gap-2 border-t py-1.5 first:border-t-0">
+      {/* A drawing is scored by looking at it, so it shows in its team's row (D68). */}
+      {strokes && <DrawingPicture strokes={strokes} label={`${team.name}s teckning`} className="w-32 shrink-0 rounded-md" />}
       <TeamDot colour={team.colour} />
       <span className="min-w-0 flex-1 truncate">{team.name}</span>
       <Button size="sm" variant="outline" aria-label={`Minus för ${team.name}`} disabled={now <= 0} onClick={() => onSet(Math.max(now - 1, 0))}>
@@ -66,8 +72,8 @@ function TeamPoints({ team, points, maxPoints, onSet }: { team: Team; points: nu
 }
 
 // The hosts give each team its points by hand, from 0 up to the question's most: every team on an
-// activity's screen (D61), the teams that sent one on a drawing's answer screen (D62). They count at
-// once; the team's phone shows them.
+// activity's screen (D61), the teams that sent one, with their drawings, on a drawing's own screen
+// once locked (D68). They count at once; the team's phone shows them.
 export function HandScoring({
   gameId,
   questionId,
@@ -83,9 +89,9 @@ export function HandScoring({
 }) {
   const setHandPoints = useHostMutation(api.adjustments.mutations.setHandPoints);
   const run = useRunAction();
-  const scored = scoring.teams.flatMap(({ teamId, points }) => {
+  const scored = scoring.teams.flatMap(({ teamId, points, strokes }) => {
     const team = teams.find((candidate) => candidate._id === teamId);
-    return team ? [{ team, points }] : [];
+    return team ? [{ team, points, strokes }] : [];
   });
   return (
     <section className="flex flex-col gap-1 rounded-xl border bg-card p-4">
@@ -93,11 +99,12 @@ export function HandScoring({
       {scoring.maxPoints !== null && <p className="text-sm text-muted-foreground">Högst {formatPoints(scoring.maxPoints)} per lag.</p>}
       {scored.length === 0 && <p className="text-sm text-muted-foreground">Inga svar.</p>}
       <ul className="flex flex-col">
-        {scored.map(({ team, points }) => (
+        {scored.map(({ team, points, strokes }) => (
           <TeamPoints
             key={team._id}
             team={team}
             points={points}
+            strokes={strokes}
             maxPoints={scoring.maxPoints}
             onSet={(next) => run(() => setHandPoints({ gameId, questionId, teamId: team._id, points: next }))}
           />

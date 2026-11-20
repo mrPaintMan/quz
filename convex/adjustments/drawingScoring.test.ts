@@ -4,14 +4,17 @@ import { host } from "../test.setup";
 import { atDrawing, redDrawing } from "./handPoints.setup";
 
 describe("scoring drawings by hand", () => {
-  it("makes Nästa wait on the drawing's own screen until it is locked and every drawing sent has points", async () => {
+  it("locks an open drawing on Nästa and stays, then waits until every drawing sent has points", async () => {
     const { t, gameId, drawingId, red } = await atDrawing();
     const onQuestion = () => t.run((ctx) => ctx.db.patch("games", gameId, { screen: { kind: "question", questionId: drawingId }, closedQuestionIds: [] }));
     const next = () => t.mutation(api.games.mutations.goToNextScreen, { ...host, gameId, from: { kind: "question", questionId: drawingId } });
     await onQuestion();
     await t.run((ctx) => ctx.db.patch("games", gameId, { lockedQuestionIds: [] }));
-    await expect(next()).rejects.toThrow("när tiden är ute eller alla lag har skickat");
-    await t.run((ctx) => ctx.db.patch("games", gameId, { lockedQuestionIds: [drawingId] }));
+    await next();
+    const locked = await t.run((ctx) => ctx.db.get("games", gameId));
+    expect(locked?.screen).toEqual({ kind: "question", questionId: drawingId });
+    expect(locked?.lockedQuestionIds).toContain(drawingId);
+    expect(locked?.timer).toBeUndefined();
     await expect(next()).rejects.toThrow("Alla svar behöver poäng");
     await t.mutation(api.adjustments.mutations.setHandPoints, { ...host, gameId, questionId: drawingId, teamId: red, points: 0 });
     await next();

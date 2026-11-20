@@ -28,6 +28,7 @@ export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Sc
   const game = await requireRunningGame(ctx, gameId);
   const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
   if (!isSameScreen(sequence[screenIndex], from)) return;
+  if (step === 1 && (await lockForScoring(ctx, game, from, rounds))) return;
   if (step === 1) await requireJudged(ctx, game, from, rounds);
   const closingId = questionClosedByStep(from, step);
   if (closingId !== null) await lockQuestion(ctx, gameId, closingId);
@@ -45,20 +46,31 @@ export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Sc
   await scheduleTimeOutLock(ctx, { _id: gameId, screen, timer });
 }
 
+// The question on screen, if the step is from a question or its answer.
+const questionOf = (from: Screen, rounds: { questions: Doc<"questions">[] }[]) =>
+  from.kind === "question" || from.kind === "answer" ? rounds.flatMap((round) => round.questions).find((candidate) => candidate._id === from.questionId) : undefined;
+
+// A question whose answers the hosts score by hand, a drawing, is scored on its own screen before
+// its answer (D68). Nästa on one still open locks it and stays, stopping its clock, so the hosts can
+// score at once; this also keeps a drawing that lost its timer during the game from holding the
+// night up. true when it did so.
+async function lockForScoring(ctx: MutationCtx, game: Doc<"games">, from: Screen, rounds: { questions: Doc<"questions">[] }[]) {
+  const question = questionOf(from, rounds);
+  if (!question || from.kind !== "question" || answeringOf(question.content)?.scoredByHand !== true || isQuestionLocked(game, question._id)) return false;
+  await lockQuestion(ctx, game._id, question._id);
+  await ctx.db.patch("games", game._id, { timer: undefined });
+  return true;
+}
+
 // Nästa waits on a question, or its answer screen, while its answers are being judged, so the
-// answer and the scores are final when they show (D55). A question whose answers the hosts score by
-// hand, a drawing, is scored on its own screen before its answer: Nästa waits there until its
-// answers are locked and every one sent has its points (D68).
+// answer and the scores are final when they show (D55); on a drawing's screen, once locked, until
+// every drawing sent has its points (D68). The wording names drawings, the only type scored by hand.
 async function requireJudged(ctx: MutationCtx, game: Doc<"games">, from: Screen, rounds: { questions: Doc<"questions">[] }[]) {
-  if (from.kind !== "question" && from.kind !== "answer") return;
-  const question = rounds.flatMap((round) => round.questions).find((candidate) => candidate._id === from.questionId);
+  const question = questionOf(from, rounds);
   if (question && !(await judgingOfQuestion(ctx, game, question)).canStepOn) {
     throw new ConvexError("Alla svar behöver bedömas innan ni går vidare.");
   }
   if (!question || from.kind !== "question" || answeringOf(question.content)?.scoredByHand !== true) return;
-  if (!isQuestionLocked(game, question._id)) {
-    throw new ConvexError("Teckningarna får poäng när tiden är ute eller alla lag har skickat.");
-  }
   const scoring = await handScoringOf(ctx, game._id, question);
   if (scoring?.teams.some((team) => team.points === null)) {
     throw new ConvexError("Alla svar behöver poäng innan ni går vidare.");
