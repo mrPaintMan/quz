@@ -54,21 +54,23 @@ function readView(map: Leaflet.Map): MapView {
   return { center: { lat: roundCoordinate(center.lat), lng: roundCoordinate(center.lng) }, zoom: map.getZoom() };
 }
 
-// The land and the borders between countries are always on the map; the lines between regions
-// are added only when zoomed in far enough (D69), and are thinner and fainter than a border.
-type BorderLayers = { land: Leaflet.GeoJSON; borders: Leaflet.GeoJSON; regions: Leaflet.GeoJSON };
+// The land, the lakes and the borders between countries are always on the map; the lines between
+// regions are added only when zoomed in far enough (D69), and are thinner and fainter than a
+// border. The lakes are water over the lines that run into them, so those end at the shore (D71).
+type BorderLayers = { land: Leaflet.GeoJSON; regions: Leaflet.GeoJSON; lakes: Leaflet.GeoJSON; borders: Leaflet.GeoJSON };
 
 function createBorderLayers(L: LeafletModule, map: Leaflet.Map, shapes: BorderShapes): BorderLayers {
   const lines = { color: mapColors.line, weight: 0.8, opacity: 1 };
   return {
     land: L.geoJSON(shapes.land, { interactive: false, style: { ...lines, fillColor: mapColors.land, fillOpacity: 1 } }).addTo(map),
     regions: L.geoJSON(shapes.regions, { interactive: false, style: { ...lines, weight: 0.6, opacity: 0.6 } }),
+    lakes: L.geoJSON(shapes.lakes, { interactive: false, style: { ...lines, fillColor: mapColors.sea, fillOpacity: 1 } }).addTo(map),
     borders: L.geoJSON(shapes.borders, { interactive: false, style: lines }).addTo(map),
   };
 }
 
-function removeBorderLayers({ land, borders, regions }: BorderLayers) {
-  [land, borders, regions].forEach((layer) => layer.remove());
+function removeBorderLayers({ land, regions, lakes, borders }: BorderLayers) {
+  [land, regions, lakes, borders].forEach((layer) => layer.remove());
 }
 
 // A marker's look: a pin with its tip on the place, or a gold dot for the target. Markers are HTML
@@ -165,10 +167,10 @@ export function createBorderMap(
       circle?.bringToFront();
     }, () => undefined);
   };
-  // The canvas paints in the order layers were added: region lines go under the borders between
-  // countries, and the radius stays above them all.
+  // The canvas paints in the order layers were added: region lines go under the lakes and the
+  // borders between countries, and the radius stays above them all.
   const showRegionsForZoom = () => {
-    const { regions, borders } = borderLayers;
+    const { regions, lakes, borders } = borderLayers;
     const wanted = showsRegions(map.getZoom());
     if (wanted === map.hasLayer(regions)) return;
     if (!wanted) {
@@ -176,6 +178,7 @@ export function createBorderMap(
       return;
     }
     regions.addTo(map);
+    lakes.bringToFront();
     borders.bringToFront();
     circle?.bringToFront();
   };
