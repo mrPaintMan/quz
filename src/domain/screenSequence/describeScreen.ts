@@ -7,7 +7,7 @@ import type { Graded } from "@/domain/answering/answeringRules";
 import { isTrip } from "@/domain/questionTypes/paSparet/isTrip";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
-type QuestionInRound = { _id: Id<"questions">; prompt: string; content: QuestionContent };
+type QuestionInRound = { _id: Id<"questions">; prompt: string; description?: string; content: QuestionContent };
 type RoundInQuiz = { _id: Id<"rounds">; title: string; questions: QuestionInRound[] };
 
 // What the TV and phones may know about a screen: never an answer before its answer screen.
@@ -17,11 +17,15 @@ export type ScreenView =
   | { kind: "roundIntro"; roundNumber: number; title: string }
   // `shown` is what the TV and phones show of the question; null until its type is built (M3).
   // isTrip marks På spåret's trip, which goes by "På spåret" rather than its round and number (D66).
-  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; answeredInApp: boolean; isTrip: boolean; shown: ShownQuestion | null }
-  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string; isTrip: boolean; revealed: RevealedAnswer | null }
+  // description is the question's own short text under its prompt, empty for none (D68).
+  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; description: string; answeredInApp: boolean; isTrip: boolean; shown: ShownQuestion | null }
+  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string; description: string; isTrip: boolean; revealed: RevealedAnswer | null }
   | { kind: "film"; roundNumber: number }
   | { kind: "leaderboard"; roundNumber: number }
   | { kind: "finalLeaderboard" };
+
+// A question's description as shown, trimmed; empty for none.
+const descriptionOf = (question: QuestionInRound) => question.description?.trim() ?? "";
 
 function describeRules(rounds: RoundInQuiz[]): ScreenView {
   const questions = rounds.flatMap((round) => round.questions);
@@ -73,12 +77,12 @@ export function describeScreen(screen: Screen, allRounds: RoundInQuiz[], graded?
       const { question, ...place } = findQuestion(rounds, screen.questionId);
       const { content } = question;
       const shown = answeringOf(content)?.show(content) ?? null;
-      return { kind: "question", ...place, prompt: question.prompt, answeredInApp: rulesFor(content).answeredInApp, isTrip: isTrip(content), shown };
+      return { kind: "question", ...place, prompt: question.prompt, description: descriptionOf(question), answeredInApp: rulesFor(content).answeredInApp, isTrip: isTrip(content), shown };
     }
     case "answer": {
       const { question, ...place } = findQuestion(rounds, screen.questionId);
       const { content } = question;
-      return { kind: "answer", ...place, prompt: question.prompt, isTrip: isTrip(content), revealed: answeringOf(content)?.reveal(content, graded) ?? null };
+      return { kind: "answer", ...place, prompt: question.prompt, description: descriptionOf(question), isTrip: isTrip(content), revealed: answeringOf(content)?.reveal(content, graded) ?? null };
     }
     case "film":
     case "leaderboard":

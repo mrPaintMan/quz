@@ -25,7 +25,7 @@ import { QuestionTypeSelect } from "./QuestionTypeSelect";
 // moveQuestion clamps the index, so this places a moved question last in its new round.
 const AT_END_OF_ROUND = Number.MAX_SAFE_INTEGER;
 
-type Draft = Pick<Doc<"questions">, "prompt" | "timeLimitSeconds" | "hostNotes" | "content">;
+type Draft = Pick<Doc<"questions">, "prompt" | "timeLimitSeconds" | "hostNotes" | "content"> & { description: string };
 
 function ContentEditor<T extends QuestionType>({
   content,
@@ -51,6 +51,7 @@ type QuestionEditorProps = {
 export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: QuestionEditorProps) {
   const [draft, setDraft] = useState<Draft>(() => ({
     prompt: question.prompt,
+    description: question.description ?? "",
     timeLimitSeconds: question.timeLimitSeconds,
     hostNotes: question.hostNotes,
     content: question.content,
@@ -83,6 +84,15 @@ export function QuestionEditor({ question, round, rounds, onDeleted, onMoved }: 
           className="text-base"
           value={draft.prompt}
           onChange={(event) => edit({ prompt: event.target.value })}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="question-description">Beskrivning (valfri, visas mindre under frågan på TV:n)</Label>
+        <Textarea
+          id="question-description"
+          rows={2}
+          value={draft.description}
+          onChange={(event) => edit({ description: event.target.value })}
         />
       </div>
       <ContentEditor content={draft.content} onChange={(content) => edit({ content })} />

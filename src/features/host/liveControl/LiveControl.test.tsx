@@ -42,12 +42,14 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({
 const gameId = "game1" as Id<"games">;
 const reviewItem = (isJudged: boolean) => ({ slot: 0, text: "x", written: "x", teamCount: 1, isJudged, target: null, byAi: false });
 const rulesNext = { view: { kind: "rules", roundCount: 1, questionCount: 1, activityCount: 0 }, media: null, notes: { current: null, next: null } };
-const question: ScreenView = { kind: "question", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", answeredInApp: true, shown: null };
+const drawingQuestion: ScreenView = { kind: "question", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Rita en tomte", description: "", answeredInApp: true, shown: { type: "drawing" } };
+const question: ScreenView = { kind: "question", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", description: "", answeredInApp: true, shown: null };
 
-type GameState = { screenNow?: Screen; view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
+type GameState = {
+  isLocked?: boolean; screenNow?: Screen; view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
 
-function renderControl({ screenNow = { kind: "lobby" }, view = { kind: "lobby" }, media = null, timer = null, playback = null }: GameState = {}) {
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false, isQuestionLocked: false };
+function renderControl({ screenNow = { kind: "lobby" }, view = { kind: "lobby" }, media = null, timer = null, playback = null, isLocked = false }: GameState = {}) {
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false, isQuestionLocked: isLocked };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>
@@ -75,7 +77,7 @@ describe("LiveControl", () => {
   it("shows the review list once a question's answers lock, on its question or answer screen", () => {
     const questionId = "q1" as Id<"questions">;
     review.mockReturnValue({ slots: [], items: [], unjudged: 0, aiStatus: null, phase: "settled" });
-    renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", revealed: null } });
+    renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Vilken krydda?", description: "", revealed: null } });
     expect(screen.getByText("Granskning av q1")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nästa" })).toBeEnabled();
   });
@@ -97,7 +99,7 @@ describe("LiveControl", () => {
   it("says how many texts are left to judge before Nästa", () => {
     const questionId = "q1" as Id<"questions">;
     review.mockReturnValue({ slots: [], items: [reviewItem(false), reviewItem(false), reviewItem(true)], unjudged: 2, aiStatus: "done", phase: "reviewing" });
-    renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "?", revealed: null } });
+    renderControl({ screenNow: { kind: "answer", questionId }, view: { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "?", description: "", revealed: null } });
     expect(screen.getByText("Nästa väntar tills alla svar är bedömda (2 kvar).")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
   });
@@ -205,20 +207,32 @@ describe("LiveControl", () => {
     expect(screen.queryByText(/Poäng för/)).not.toBeInTheDocument();
   });
 
-  it("lets the hosts score the drawings on their answer screen, Nästa waiting until each has points", () => {
-    const drawingAnswer: ScreenView = { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Rita en tomte", revealed: { type: "drawing", drawings: [] } };
+  it("waits on a drawing's screen until its answers lock, without points to give yet", () => {
+    renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: drawingQuestion });
+    expect(screen.getByText("Nästa väntar tills tiden är ute eller alla lag har skickat.")).toBeInTheDocument();
+    expect(screen.queryByText(/Poäng för teckningarna/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
+  });
+
+  it("lets the hosts score the drawings on their own screen once locked, Nästa waiting until each has points", () => {
     handPoints.mockReturnValue({ maxPoints: 3, teams: [{ teamId: "t1", points: 2 }, { teamId: "t2", points: null }] });
-    renderControl({ screenNow: { kind: "answer", questionId: "q1" as Id<"questions"> }, view: drawingAnswer });
+    renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: drawingQuestion, isLocked: true });
     expect(screen.getByText("Poäng för teckningarna q1")).toBeInTheDocument();
     expect(screen.getByText("Nästa väntar tills alla teckningar har poäng (1 kvar).")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
   });
 
   it("keeps Nästa disabled until the drawings' points have loaded", () => {
-    const drawingAnswer: ScreenView = { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Rita en tomte", revealed: { type: "drawing", drawings: [] } };
     handPoints.mockReturnValue(undefined);
-    renderControl({ screenNow: { kind: "answer", questionId: "q1" as Id<"questions"> }, view: drawingAnswer });
+    renderControl({ screenNow: { kind: "question", questionId: "q1" as Id<"questions"> }, view: drawingQuestion, isLocked: true });
     expect(screen.getByRole("button", { name: "Nästa" })).toBeDisabled();
+  });
+
+  it("doesn't wait on a drawing's answer screen, as its points are given before", () => {
+    const drawingAnswer: ScreenView = { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 2, prompt: "Rita en tomte", description: "", revealed: { type: "drawing", drawings: [] } };
+    renderControl({ screenNow: { kind: "answer", questionId: "q1" as Id<"questions"> }, view: drawingAnswer });
+    expect(screen.queryByText(/Poäng för teckningarna/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Nästa" })).toBeEnabled();
   });
 
   it("shows the leaderboard as it stands", () => {

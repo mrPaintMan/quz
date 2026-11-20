@@ -56,6 +56,7 @@ export function TvScreen(props: TvScreenProps) {
         <TvFrame
           eyebrow={screenEyebrow(view)}
           title={view.prompt}
+          description={view.description}
           corner={<TvTimer timer={timer} />}
           centered={!view.answeredInApp && !media}
         >
@@ -70,7 +71,7 @@ export function TvScreen(props: TvScreenProps) {
     case "answer": {
       const placesMedia = view.revealed !== null && answerPlacesMedia(view.revealed.type);
       return (
-        <TvFrame eyebrow={screenEyebrow(view)} title={view.prompt}>
+        <TvFrame eyebrow={screenEyebrow(view)} title={view.prompt} description={view.description}>
           {/* A type that places the picture itself, such as beside a map, gets it there instead (D66). */}
           {!placesMedia && mediaArea}
           {view.revealed && (

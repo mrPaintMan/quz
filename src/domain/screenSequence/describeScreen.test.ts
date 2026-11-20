@@ -48,6 +48,7 @@ describe("describeScreen", () => {
       questionNumber: 1,
       prompt: "Baka ett pepparkakshus",
       answeredInApp: false,
+      description: "",
       isTrip: false,
       shown: null,
     });
@@ -56,9 +57,16 @@ describe("describeScreen", () => {
       roundNumber: 2,
       questionNumber: 1,
       prompt: "Rita en tomte",
+      description: "",
       isTrip: false,
       revealed: { type: "drawing", drawings: [] },
     });
+  });
+
+  it("gives a question's description, trimmed, or nothing", () => {
+    const described = [{ _id: roundId("r"), title: "R", questions: [{ _id: questionId("d1"), prompt: "Sortera", description: "  Från tidigast till senast ", content: drawing }] }];
+    expect(describeScreen({ kind: "question", questionId: questionId("d1") }, described)).toMatchObject({ description: "Från tidigast till senast" });
+    expect(describeScreen({ kind: "answer", questionId: questionId("d1") }, described)).toMatchObject({ description: "Från tidigast till senast" });
   });
 
   it("marks the trip, so it can go by På spåret", () => {

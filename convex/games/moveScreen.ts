@@ -1,4 +1,5 @@
 import { closeQuestion } from "@/domain/answers/closeQuestion";
+import { answeringOf } from "@/domain/answering/registry";
 import { isQuestionLocked } from "@/domain/answers/isQuestionLocked";
 import { questionClosedByStep } from "@/domain/answers/questionClosedByStep";
 import { mediaOnScreen } from "@/domain/media/mediaOnScreen";
@@ -45,15 +46,20 @@ export async function moveScreen(ctx: MutationCtx, gameId: Id<"games">, from: Sc
 }
 
 // Nästa waits on a question, or its answer screen, while its answers are being judged, so the
-// answer and the scores are final when they show (D55); on the answer screen of a question scored
-// by hand, such as a drawing, until every sent answer has its points (D62).
+// answer and the scores are final when they show (D55). A question whose answers the hosts score by
+// hand, a drawing, is scored on its own screen before its answer: Nästa waits there until its
+// answers are locked and every one sent has its points (D68).
 async function requireJudged(ctx: MutationCtx, game: Doc<"games">, from: Screen, rounds: { questions: Doc<"questions">[] }[]) {
   if (from.kind !== "question" && from.kind !== "answer") return;
   const question = rounds.flatMap((round) => round.questions).find((candidate) => candidate._id === from.questionId);
   if (question && !(await judgingOfQuestion(ctx, game, question)).canStepOn) {
     throw new ConvexError("Alla svar behöver bedömas innan ni går vidare.");
   }
-  const scoring = question && from.kind === "answer" ? await handScoringOf(ctx, game._id, question) : null;
+  if (!question || from.kind !== "question" || answeringOf(question.content)?.scoredByHand !== true) return;
+  if (!isQuestionLocked(game, question._id)) {
+    throw new ConvexError("Teckningarna får poäng när tiden är ute eller alla lag har skickat.");
+  }
+  const scoring = await handScoringOf(ctx, game._id, question);
   if (scoring?.teams.some((team) => team.points === null)) {
     throw new ConvexError("Alla svar behöver poäng innan ni går vidare.");
   }

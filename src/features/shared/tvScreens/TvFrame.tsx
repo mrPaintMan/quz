@@ -4,10 +4,19 @@ import type { ReactNode } from "react";
 // from the sofa on any TV. `eyebrow` is the small line above the title, such as the round, and
 // `corner` sits on the right, level with the title's first line, such as the timer. `centered` makes the title a large
 // heading in the middle, for a round's intro and an activity. `titleCentered` centres the title at
-// the top over the content below, for the screens that aren't questions (D66).
-type TvFrameProps = { eyebrow?: string; title: string; corner?: ReactNode; centered?: boolean; titleCentered?: boolean; children?: ReactNode };
+// the top over the content below, for the screens that aren't questions (D66). `description` is a
+// question's short text, much smaller and dimmed under its title (D68).
+type TvFrameProps = {
+  eyebrow?: string;
+  title: string;
+  description?: string;
+  corner?: ReactNode;
+  centered?: boolean;
+  titleCentered?: boolean;
+  children?: ReactNode;
+};
 
-export function TvFrame({ eyebrow, title, corner, centered = false, titleCentered = false, children }: TvFrameProps) {
+export function TvFrame({ eyebrow, title, description = "", corner, centered = false, titleCentered = false, children }: TvFrameProps) {
   if (centered) {
     return (
       <div className="relative flex min-h-0 flex-1 flex-col items-center justify-center gap-[3cqw] px-[5cqw] py-[3cqw] text-center">
@@ -15,6 +24,7 @@ export function TvFrame({ eyebrow, title, corner, centered = false, titleCentere
         <header className="flex flex-col items-center gap-[1cqw]">
           {eyebrow && <p className="text-[2.2cqw] text-muted-foreground">{eyebrow}</p>}
           <h1 className="text-[7cqw] leading-tight font-bold tracking-tight text-balance">{title}</h1>
+          {description !== "" && <p className="max-w-[70cqw] text-[2.4cqw] whitespace-pre-line text-muted-foreground">{description}</p>}
         </header>
         {children}
       </div>
@@ -28,6 +38,7 @@ export function TvFrame({ eyebrow, title, corner, centered = false, titleCentere
           <h1 className="text-[5cqw] leading-none font-bold tracking-tight">{title}</h1>
           {corner}
         </div>
+        {description !== "" && <p className="mt-[0.5cqw] max-w-[80cqw] text-[2cqw] whitespace-pre-line text-muted-foreground">{description}</p>}
       </header>
       {children}
     </div>

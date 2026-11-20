@@ -15,7 +15,7 @@ vi.mock("@/features/player/answering/AnswerQuestion", () => ({
 
 const team = { _id: "t1" as Id<"teams">, name: "Tomtarna", colour: "red" as const };
 const questionScreen = { kind: "question" as const, questionId: "q1" as Id<"questions"> };
-const question = { kind: "question" as const, isTrip: false, roundNumber: 1, questionNumber: 1, prompt: "Vilket land?", answeredInApp: true, shown: null };
+const question = { kind: "question" as const, isTrip: false, roundNumber: 1, questionNumber: 1, prompt: "Vilket land?", description: "", answeredInApp: true, shown: null };
 const shown = { type: "multipleChoice" as const, options: [{ text: "Sverige", imageId: null }] };
 
 describe("FollowGame", () => {

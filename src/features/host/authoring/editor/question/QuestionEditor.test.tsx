@@ -65,6 +65,7 @@ describe("QuestionEditor", () => {
     await userEvent.type(screen.getByLabelText("Fråga som visas på TV:n"), "Pepparkakshus");
     await userEvent.type(screen.getByLabelText("Tidsgräns i sekunder (tomt = ingen)"), "60");
     await userEvent.type(screen.getByLabelText("Anteckningar för domarna (visas inte på TV:n)"), "Bäst vinner");
+    await userEvent.type(screen.getByLabelText("Beskrivning (valfri, visas mindre under frågan på TV:n)"), "Med glasyr");
     await userEvent.type(screen.getByLabelText("Maxpoäng"), "0");
     await vi.waitFor(() =>
       expect(calls.at(-1)).toEqual({
@@ -72,6 +73,7 @@ describe("QuestionEditor", () => {
         args: {
           questionId: "q1",
           prompt: "Pepparkakshus",
+          description: "Med glasyr",
           timeLimitSeconds: 60,
           hostNotes: "Bäst vinner",
           content: { type: "activity", maxPoints: 10 },

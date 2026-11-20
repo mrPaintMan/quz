@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import { scoresByHand } from "@/domain/answering/registry";
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { useRunAction } from "@/features/host/shared/ActionErrorProvider";
@@ -35,17 +36,22 @@ function nextWaitsFor(review: Review | null | undefined): string | null {
 }
 
 // What the hosts score by hand on the screen showing now, and its heading: an activity while it
-// shows (D61), a drawing on its answer screen (D62); null otherwise.
-function handScoredTitle(view: RunningGame["view"]): string | null {
+// shows (D61), a drawing on its own screen once its answers are locked (D68); null otherwise.
+function handScoredTitle(view: RunningGame["view"], isLocked: boolean): string | null {
   if (view.kind === "question" && !view.answeredInApp) return "Poäng för aktiviteten";
-  if (view.kind === "answer" && view.revealed?.type === "drawing") return "Poäng för teckningarna";
+  if (isDrawingOnScreen(view) && isLocked) return "Poäng för teckningarna";
   return null;
 }
 
-// Why Nästa waits for the hosts' own points, on a drawing's answer screen (D62); null when it doesn't.
-function nextWaitsForPoints(view: RunningGame["view"], scoring: HandScoringState | null | undefined): string | null {
-  if (view.kind !== "answer" || !scoring) return null;
-  const left = scoring.teams.filter((team) => team.points === null).length;
+// A question whose answers the hosts score by hand, a drawing, while it shows (D68).
+const isDrawingOnScreen = (view: RunningGame["view"]) => view.kind === "question" && view.shown !== null && scoresByHand(view.shown.type);
+
+// Why Nästa waits on a drawing's screen: for its answers to lock, then for the hosts' points (D68);
+// null when it doesn't.
+function nextWaitsForPoints(view: RunningGame["view"], isLocked: boolean, scoring: HandScoringState | null | undefined): string | null {
+  if (!isDrawingOnScreen(view)) return null;
+  if (!isLocked) return "Nästa väntar tills tiden är ute eller alla lag har skickat.";
+  const left = (scoring?.teams ?? []).filter((team) => team.points === null).length;
   return left === 0 ? null : `Nästa väntar tills alla teckningar har poäng (${left} kvar).`;
 }
 
@@ -63,9 +69,9 @@ export function LiveControl({ game }: { game: RunningGame }) {
   const review = useHostQuery(api.verdicts.queries.getReview, questionOnScreen ? { gameId: game._id, questionId: questionOnScreen } : "skip");
   const run = useRunAction();
   const gameId = game._id;
-  const handTitle = handScoredTitle(game.view);
+  const handTitle = handScoredTitle(game.view, game.isQuestionLocked);
   const handScoring = useHostQuery(api.adjustments.queries.getHandPoints, handTitle && questionOnScreen ? { gameId: game._id, questionId: questionOnScreen } : "skip");
-  const waitingFor = nextWaitsFor(review) ?? nextWaitsForPoints(game.view, handScoring);
+  const waitingFor = nextWaitsFor(review) ?? nextWaitsForPoints(game.view, game.isQuestionLocked, handScoring);
   // Until the question's judging state, and any points by hand, have loaded, Nästa can't tell
   // whether it must wait.
   const isLoadingJudging = questionOnScreen !== null && (review === undefined || (handTitle !== null && handScoring === undefined));
