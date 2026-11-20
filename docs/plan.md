@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. The second test night (2026-11-15) gave a new feedback round, done in this order, one PR each: bugs (D64), the admin view, the TV screens, the phones' results, descriptions on every question and Rita judged before its answer screen, Swedish provinces and US states on the map, and På spåret's films as attachments to ordinary questions. Then M4's score graph and M5's polish.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. The second test night (2026-11-15) gave a new feedback round, done in this order, one PR each: bugs (D64), the admin view, the TV screens, the phones' results, descriptions on every question and Rita judged before its answer screen, Swedish provinces and US states on the map (D69), and På spåret's films as attachments to ordinary questions. Then M4's score graph and M5's polish.
 
 ## Milestones
 
@@ -154,3 +154,4 @@ Agreed with the user, in this order:
 - 2026-11-15: Feedback round 2, the TV screens: titles of screens that aren't questions centred; the trip goes by "På spåret" and its answer reads "Rätt svar: Kiruna" without brake points; Kartnål's map takes the height with the picture above "Avstånd från svar"; a list's answer adds up to 20 key items no team gave (D66). Not tried in a browser with data.
 - 2026-11-15: Feedback round 2, the phones' results: a wrong part red with ✕ and the right answer beside it on every type; Kartnål's phone shows the TV's map with the team's pin in its colour; Gissa siffran groups its digits; the trip's brake card neutral (D67). Not tried in a browser with data.
 - 2026-11-20: Feedback round 2, descriptions on every question (smaller and dimmed under the title on the TV and the hosts' previews) and Rita scored on its own screen once locked, Nästa waiting there (D68). Not tried in a browser with data.
+- 2026-11-20: Feedback round 2, the map: lines between Sweden's landskap and the US states from zoom 4, and a lighter 1:10m map from zoom 6, about a third of the download and 4–5× faster to unpack and redraw, keeping islands down to about 3 km² (D69). Checked with screenshots of the real data; not tried in a browser with game data.

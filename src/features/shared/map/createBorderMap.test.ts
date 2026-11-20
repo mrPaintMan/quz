@@ -6,8 +6,11 @@ import { createBorderMap } from "./createBorderMap";
 const shapes = {
   land: { type: "FeatureCollection" as const, features: [] },
   borders: { type: "MultiLineString" as const, coordinates: [] },
+  regions: { type: "MultiLineString" as const, coordinates: [] },
 };
 const stockholm = { center: { lat: 59.33, lng: 18.07 }, zoom: 5 };
+
+type FakeLayer = { onMap: boolean; addTo: () => FakeLayer; remove: ReturnType<typeof vi.fn>; bringToFront: ReturnType<typeof vi.fn> };
 
 // Just enough of Leaflet to drive the map: moving it fires "move" and "moveend", and
 // "zoomend" when the zoom changed, synchronously as Leaflet does without animation.
@@ -31,9 +34,11 @@ function fakeLeaflet() {
     resize: () => handlers.resize?.(),
     remove: vi.fn(),
     fitBounds: vi.fn((bounds: { points: [number, number][] }) => moveTo(bounds.points[0][0], bounds.points[0][1], 7)),
+    hasLayer: (layer: FakeLayer) => layer.onMap,
   };
   const circle = { addTo: () => circle, setLatLng: vi.fn(), remove: vi.fn(), bringToFront: vi.fn(), getBounds: () => [[60, 15]] };
-  const layers: { remove: ReturnType<typeof vi.fn> }[] = [];
+  // Made in the order land, region lines, borders, for each set of shapes.
+  const layers: FakeLayer[] = [];
   const zoomControl = { addTo: vi.fn() };
   const markers: { remove: ReturnType<typeof vi.fn> }[] = [];
   const L = {
@@ -45,7 +50,12 @@ function fakeLeaflet() {
     canvas: vi.fn(),
     control: { zoom: vi.fn(() => zoomControl) },
     geoJSON: vi.fn(() => {
-      const layer = { addTo: () => layer, remove: vi.fn() };
+      const layer: FakeLayer = {
+        onMap: false,
+        addTo: () => ((layer.onMap = true), layer),
+        remove: vi.fn(() => (layer.onMap = false)),
+        bringToFront: vi.fn(),
+      };
       layers.push(layer);
       return layer;
     }),
@@ -76,10 +86,11 @@ function setUp(radiusMeters: number | null = null, loadShapes = vi.fn<(detail: B
 const settle = () => new Promise((resolve) => setTimeout(resolve));
 
 describe("createBorderMap", () => {
-  it("opens at the given view with land, borders and Swedish zoom buttons", () => {
-    const { fake, element } = setUp();
+  it("opens at the given view with land, borders, region lines and Swedish zoom buttons", () => {
+    const { fake, element, layers } = setUp();
     expect(fake.map).toHaveBeenCalledWith(element, expect.objectContaining({ center: [59.33, 18.07], zoom: 5, inertia: false }));
-    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
+    expect(layers.every((layer) => layer.onMap)).toBe(true);
     expect(fake.control.zoom).toHaveBeenCalledWith(expect.objectContaining({ zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }));
     expect(element.style.background).not.toBe("");
   });
@@ -147,10 +158,43 @@ describe("createBorderMap", () => {
     userMovesTo(59.33, 18.07, 6);
     expect(loadShapes).toHaveBeenCalledWith("10m");
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
-    expect(layers[0].remove).toHaveBeenCalled();
-    expect(layers[1].remove).toHaveBeenCalled();
+    expect(fake.geoJSON).toHaveBeenCalledTimes(6);
+    expect(layers.slice(0, 3).map((layer) => layer.onMap)).toEqual([false, false, false]);
+    expect(layers.slice(3).map((layer) => layer.onMap)).toEqual([true, true, true]);
     expect(circle.bringToFront).toHaveBeenCalled();
+  });
+
+  it("shows the lines between regions only from zoom 4, under the borders and the radius", () => {
+    const { layers, circle, userMovesTo } = setUp(50_000);
+    const [, regions, borders] = layers;
+    userMovesTo(59.33, 18.07, 3.75);
+    expect(regions.onMap).toBe(false);
+    expect(borders.onMap).toBe(true);
+    circle.bringToFront.mockClear();
+    userMovesTo(59.33, 18.07, 4);
+    expect(regions.onMap).toBe(true);
+    expect(borders.bringToFront).toHaveBeenCalled();
+    expect(circle.bringToFront).toHaveBeenCalled();
+  });
+
+  it("keeps the radius on top of borders swapped in while zoomed far out, without region lines", async () => {
+    const leaflet = fakeLeaflet();
+    createBorderMap(leaflet.L, document.createElement("div"), { detail: "10m", shapes }, {
+      view: { ...stockholm, zoom: 2 },
+      radiusMeters: 50_000,
+      onUserMove: vi.fn(),
+      loadShapes: () => Promise.resolve(shapes),
+    });
+    const order: string[] = [];
+    leaflet.fake.geoJSON.mockImplementation(() => {
+      const layer: FakeLayer = { onMap: false, addTo: () => (order.push("layer"), (layer.onMap = true), layer), remove: vi.fn(), bringToFront: vi.fn() };
+      leaflet.layers.push(layer);
+      return layer;
+    });
+    leaflet.circle.bringToFront.mockImplementation(() => order.push("radius"));
+    await settle();
+    expect(leaflet.layers[4].onMap).toBe(false);
+    expect(order).toEqual(["layer", "layer", "radius"]);
   });
 
   it("loads the right borders straight away when the ones given don't suit the starting zoom", () => {
@@ -174,7 +218,7 @@ describe("createBorderMap", () => {
     userMovesTo(59.33, 18.07, 5);
     finish();
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
   });
 
   it("keeps the old borders when the finer ones can't be loaded, and tries again on the next zoom", async () => {
@@ -182,12 +226,12 @@ describe("createBorderMap", () => {
     const { fake, layers, userMovesTo } = setUp(null, loadShapes);
     userMovesTo(59.33, 18.07, 10);
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
     expect(layers[0].remove).not.toHaveBeenCalled();
     userMovesTo(59.33, 18.07, 11);
     await settle();
     expect(loadShapes).toHaveBeenCalledTimes(2);
-    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(6);
   });
 
   it("draws nothing that arrives after the map was removed", async () => {
@@ -195,7 +239,7 @@ describe("createBorderMap", () => {
     userMovesTo(59.33, 18.07, 8);
     controller.destroy();
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(2);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
   });
 
   it("removes the map when destroyed", () => {

@@ -21,6 +21,7 @@ const coverageExceptions = [
   "src/app/**/layout.tsx",
   "src/app/ConvexClientProvider.tsx",
   "src/app/**/page.tsx",
+  "scripts/**",
 ];
 
 export default defineConfig({
