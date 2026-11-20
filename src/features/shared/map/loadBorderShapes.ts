@@ -9,10 +9,15 @@ export type BorderShapes = {
   borders: MultiLineString;
   // The lines between Sweden's landskap and between the US states (D69).
   regions: MultiLineString;
+  // Vänern and Vättern, drawn as water over the landskap lines that run into them (D71).
+  lakes: FeatureCollection;
 };
 
+// What the regions file holds, shared by both details.
+export type RegionShapes = Pick<BorderShapes, "regions" | "lakes">;
+
 type CountriesTopology = Topology<{ countries: GeometryCollection }>;
-type RegionsTopology = Topology<{ regions: GeometryCollection }>;
+type RegionsTopology = Topology<{ regions: GeometryCollection; lakes: GeometryCollection }>;
 
 // Each scale is its own chunk, fetched the first time a map zooms into its range. The finer one
 // is a lighter copy of Natural Earth's 1:10m, built by scripts/buildMapData.mjs (D69).
@@ -36,7 +41,7 @@ function loadOnce<T>(key: string, load: () => Promise<T>): Promise<T> {
   return loading;
 }
 
-export function toBorderShapes(topology: CountriesTopology, regions: MultiLineString): BorderShapes {
+export function toBorderShapes(topology: CountriesTopology, { regions, lakes }: RegionShapes): BorderShapes {
   const countries = topology.objects.countries;
   const land = feature(topology, countries) as FeatureCollection;
   return {
@@ -47,27 +52,31 @@ export function toBorderShapes(topology: CountriesTopology, regions: MultiLineSt
     // Only lines shared by two countries; coastlines come from the land outline.
     borders: unwrapGeometry(mesh(topology, countries, (a, b) => a !== b)) as MultiLineString,
     regions,
+    lakes,
   };
 }
 
-// The file holds only the lines between regions, so every line is drawn.
-export function toRegionLines(topology: RegionsTopology): MultiLineString {
-  return unwrapGeometry(mesh(topology, topology.objects.regions)) as MultiLineString;
+// The file holds only the lines between regions, so every line is drawn; the lakes are shapes.
+export function toRegionShapes(topology: RegionsTopology): RegionShapes {
+  return {
+    regions: unwrapGeometry(mesh(topology, topology.objects.regions)) as MultiLineString,
+    lakes: feature(topology, topology.objects.lakes) as FeatureCollection,
+  };
 }
 
-const noLines: MultiLineString = { type: "MultiLineString", coordinates: [] };
+const noRegions: RegionShapes = { regions: { type: "MultiLineString", coordinates: [] }, lakes: { type: "FeatureCollection", features: [] } };
 
-// About 14 kB compressed, shared by both details. They are extra, so a map whose region lines
-// can't be loaded is drawn without them rather than not at all.
-const loadRegionLines = () =>
-  loadOnce("regions", () => import("@/features/shared/map/data/regions.json").then((module) => toRegionLines(module.default as unknown as RegionsTopology))).catch(
-    () => noLines,
+// About 15 kB compressed, shared by both details. They are extra, so a map whose regions can't be
+// loaded is drawn without them rather than not at all.
+const loadRegionShapes = () =>
+  loadOnce("regions", () => import("@/features/shared/map/data/regions.json").then((module) => toRegionShapes(module.default as unknown as RegionsTopology))).catch(
+    () => noRegions,
   );
 
 // Natural Earth (public domain): about 240 kB at 1:50m and 340 kB for the lighter 1:10m,
 // compressed, so each is loaded only when a map needs it and then kept for every later map.
 export function loadBorderShapes(detail: BorderDetail): Promise<BorderShapes> {
   return loadOnce(detail, () =>
-    Promise.all([topologies[detail](), loadRegionLines()]).then(([module, regions]) => toBorderShapes(module.default as CountriesTopology, regions)),
+    Promise.all([topologies[detail](), loadRegionShapes()]).then(([module, regions]) => toBorderShapes(module.default as CountriesTopology, regions)),
   );
 }

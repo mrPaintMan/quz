@@ -1,20 +1,26 @@
 import type { GeometryCollection, Topology } from "topojson-specification";
 import { describe, expect, it, vi } from "vitest";
-import { loadBorderShapes, toBorderShapes, toRegionLines } from "./loadBorderShapes";
+import { loadBorderShapes, toBorderShapes, toRegionShapes } from "./loadBorderShapes";
 
 // Tiny maps in place of the real world atlas, which takes seconds to load: tests stay fast, and
 // the finer one has an extra country so the two can be told apart (D57).
 vi.mock("world-atlas/countries-50m.json", () => ({ default: worldOf(2) }));
 vi.mock("@/features/shared/map/data/countries-10m-light.json", () => ({ default: worldOf(3) }));
-vi.mock("@/features/shared/map/data/regions.json", () => ({ default: oneRegionLine }));
+vi.mock("@/features/shared/map/data/regions.json", () => ({ default: oneRegionAndLake }));
 
-const noRegions = { type: "MultiLineString" as const, coordinates: [] };
+const noRegions = { regions: { type: "MultiLineString" as const, coordinates: [] }, lakes: { type: "FeatureCollection" as const, features: [] } };
 
-// One line between two regions, as the regions file stores it.
-const oneRegionLine: Topology<{ regions: GeometryCollection }> = {
+// One line between two regions and one lake, as the regions file stores them.
+const oneRegionAndLake: Topology<{ regions: GeometryCollection; lakes: GeometryCollection }> = {
   type: "Topology",
-  arcs: [[[15, 60], [16, 61]]],
-  objects: { regions: { type: "GeometryCollection", geometries: [{ type: "LineString", arcs: [0] }] } },
+  arcs: [
+    [[15, 60], [16, 61]],
+    [[14, 58], [15, 58], [15, 59], [14, 58]],
+  ],
+  objects: {
+    regions: { type: "GeometryCollection", geometries: [{ type: "LineString", arcs: [0] }] },
+    lakes: { type: "GeometryCollection", geometries: [{ type: "Polygon", arcs: [[1]] }] },
+  },
 };
 
 // A row of square countries side by side.
@@ -62,9 +68,11 @@ describe("toBorderShapes", () => {
   });
 });
 
-describe("toRegionLines", () => {
-  it("draws every line in the regions file", () => {
-    expect(toRegionLines(oneRegionLine).coordinates).toEqual([[[15, 60], [16, 61]]]);
+describe("toRegionShapes", () => {
+  it("draws every line in the regions file, and its lakes as shapes", () => {
+    const { regions, lakes } = toRegionShapes(oneRegionAndLake);
+    expect(regions.coordinates).toEqual([[[15, 60], [16, 61]]]);
+    expect(lakes.features).toHaveLength(1);
   });
 });
 
@@ -85,6 +93,7 @@ describe("loadBorderShapes", () => {
     const [coarse, fine] = await Promise.all([loadBorderShapes("50m"), loadBorderShapes("10m")]);
     expect(fine.regions).toBe(coarse.regions);
     expect(coarse.regions.coordinates).toHaveLength(1);
+    expect(fine.lakes).toBe(coarse.lakes);
   });
 });
 
@@ -112,6 +121,7 @@ describe("loadBorderShapes after a failed load", () => {
     const shapes = await load("50m");
     expect(shapes.land.features).toHaveLength(2);
     expect(shapes.regions.coordinates).toEqual([]);
+    expect(shapes.lakes.features).toEqual([]);
     vi.doUnmock("@/features/shared/map/data/regions.json");
   });
 });

@@ -7,6 +7,7 @@ const shapes = {
   land: { type: "FeatureCollection" as const, features: [] },
   borders: { type: "MultiLineString" as const, coordinates: [] },
   regions: { type: "MultiLineString" as const, coordinates: [] },
+  lakes: { type: "FeatureCollection" as const, features: [] },
 };
 const stockholm = { center: { lat: 59.33, lng: 18.07 }, zoom: 5 };
 
@@ -89,7 +90,7 @@ describe("createBorderMap", () => {
   it("opens at the given view with land, borders, region lines and Swedish zoom buttons", () => {
     const { fake, element, layers } = setUp();
     expect(fake.map).toHaveBeenCalledWith(element, expect.objectContaining({ center: [59.33, 18.07], zoom: 5, inertia: false }));
-    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
     expect(layers.every((layer) => layer.onMap)).toBe(true);
     expect(fake.control.zoom).toHaveBeenCalledWith(expect.objectContaining({ zoomInTitle: "Zooma in", zoomOutTitle: "Zooma ut" }));
     expect(element.style.background).not.toBe("");
@@ -158,23 +159,26 @@ describe("createBorderMap", () => {
     userMovesTo(59.33, 18.07, 6);
     expect(loadShapes).toHaveBeenCalledWith("10m");
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(6);
-    expect(layers.slice(0, 3).map((layer) => layer.onMap)).toEqual([false, false, false]);
-    expect(layers.slice(3).map((layer) => layer.onMap)).toEqual([true, true, true]);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(8);
+    expect(layers.slice(0, 4).map((layer) => layer.onMap)).toEqual([false, false, false, false]);
+    expect(layers.slice(4).map((layer) => layer.onMap)).toEqual([true, true, true, true]);
     expect(circle.bringToFront).toHaveBeenCalled();
   });
 
-  it("shows the lines between regions only from zoom 4, under the borders and the radius", () => {
+  it("shows the lines between regions only from zoom 4, under the lakes, the borders and the radius", () => {
     const { layers, circle, userMovesTo } = setUp(50_000);
-    const [, regions, borders] = layers;
+    const [, regions, lakes, borders] = layers;
     userMovesTo(59.33, 18.07, 3.75);
     expect(regions.onMap).toBe(false);
+    expect(lakes.onMap).toBe(true);
     expect(borders.onMap).toBe(true);
-    circle.bringToFront.mockClear();
+    const order: string[] = [];
+    lakes.bringToFront.mockImplementation(() => order.push("lakes"));
+    borders.bringToFront.mockImplementation(() => order.push("borders"));
+    circle.bringToFront.mockImplementation(() => order.push("radius"));
     userMovesTo(59.33, 18.07, 4);
     expect(regions.onMap).toBe(true);
-    expect(borders.bringToFront).toHaveBeenCalled();
-    expect(circle.bringToFront).toHaveBeenCalled();
+    expect(order).toEqual(["lakes", "borders", "radius"]);
   });
 
   it("keeps the radius on top of borders swapped in while zoomed far out, without region lines", async () => {
@@ -193,8 +197,8 @@ describe("createBorderMap", () => {
     });
     leaflet.circle.bringToFront.mockImplementation(() => order.push("radius"));
     await settle();
-    expect(leaflet.layers[4].onMap).toBe(false);
-    expect(order).toEqual(["layer", "layer", "radius"]);
+    expect(leaflet.layers[5].onMap).toBe(false);
+    expect(order).toEqual(["layer", "layer", "layer", "radius"]);
   });
 
   it("loads the right borders straight away when the ones given don't suit the starting zoom", () => {
@@ -218,7 +222,7 @@ describe("createBorderMap", () => {
     userMovesTo(59.33, 18.07, 5);
     finish();
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
   });
 
   it("keeps the old borders when the finer ones can't be loaded, and tries again on the next zoom", async () => {
@@ -226,12 +230,12 @@ describe("createBorderMap", () => {
     const { fake, layers, userMovesTo } = setUp(null, loadShapes);
     userMovesTo(59.33, 18.07, 10);
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
     expect(layers[0].remove).not.toHaveBeenCalled();
     userMovesTo(59.33, 18.07, 11);
     await settle();
     expect(loadShapes).toHaveBeenCalledTimes(2);
-    expect(fake.geoJSON).toHaveBeenCalledTimes(6);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(8);
   });
 
   it("draws nothing that arrives after the map was removed", async () => {
@@ -239,7 +243,7 @@ describe("createBorderMap", () => {
     userMovesTo(59.33, 18.07, 8);
     controller.destroy();
     await settle();
-    expect(fake.geoJSON).toHaveBeenCalledTimes(3);
+    expect(fake.geoJSON).toHaveBeenCalledTimes(4);
   });
 
   it("removes the map when destroyed", () => {
