@@ -1,4 +1,4 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Doc, Id } from "@convex/_generated/dataModel";
@@ -30,14 +30,13 @@ const question = {
   filmId: "f1",
 } as Doc<"questions">;
 
-function renderCard(canAddQuestion = true, onSelectQuestion = vi.fn()) {
+function renderCard(onSelectQuestion = vi.fn()) {
   render(
     <FilmCard
       roundId={"r1" as Id<"rounds">}
       film={{ id: "f1", video: null }}
       filmNumber={2}
       questions={[{ question, number: 3 }]}
-      canAddQuestion={canAddQuestion}
       selectedQuestionId={null}
       onSelectQuestion={onSelectQuestion}
     />,
@@ -64,9 +63,11 @@ describe("FilmCard", () => {
     expect(onSelectQuestion).toHaveBeenCalledWith("new-question");
   });
 
-  it("offers no new question when the round is full", () => {
-    renderCard(false);
-    expect(screen.queryByRole("button", { name: "Lägg till fråga" })).not.toBeInTheDocument();
+  it("hangs its questions under the film, saying how many there are", () => {
+    renderCard();
+    const film = screen.getByRole("region", { name: "Film 2" });
+    expect(within(film).getByText("1 fråga")).toBeInTheDocument();
+    expect(within(screen.getByRole("list", { name: "Frågor efter film 2" })).getByText(/F3/)).toBeInTheDocument();
   });
 
   it("deletes the film after confirmation", async () => {

@@ -11,20 +11,26 @@ type FilmFieldProps = {
   title: string;
   video: VideoMedia | null;
   onChange: (video: VideoMedia | null) => Promise<unknown>;
+  // A smaller field under a heading of its own, such as a På spåret film's (D70): no title, and the
+  // film as a row with a small still.
+  compact?: boolean;
 };
 
 // A required film, such as the trip's or one the round's questions are asked after (D30, D33).
-export function FilmField({ title, video, onChange }: FilmFieldProps) {
+export function FilmField({ title, video, onChange, compact = false }: FilmFieldProps) {
   const uploadVideo = useUploadVideo();
   const run = useRunAction();
   return (
-    <section className="flex flex-col gap-2 rounded-lg border border-dashed p-3">
-      <h3 className="text-sm font-medium">{title}</h3>
-      <p className="text-sm text-muted-foreground">
-        Exportera som MP4 i 1080p, 30 bilder per sekund, runt 5 Mbit/s (cirka 75 MB för 2 minuter), så att den laddas
-        snabbt på TV:n.
-      </p>
-      {video && <VideoPreview media={video} alt={title} />}
+    <section aria-label={title} className={`flex flex-col gap-2 rounded-lg p-3 ${compact ? "bg-background" : "border border-dashed"}`}>
+      {!compact && <h3 className="text-sm font-medium">{title}</h3>}
+      {/* Only needed until the film is uploaded. */}
+      {!video && (
+        <p className="text-sm text-muted-foreground">
+          Exportera som MP4 i 1080p, 30 bilder per sekund, runt 5 Mbit/s (cirka 75 MB för 2 minuter), så att den laddas
+          snabbt på TV:n.
+        </p>
+      )}
+      {video && <VideoPreview media={video} alt={title} compact={compact} />}
       <div className="flex flex-wrap gap-2">
         <FileButton
           accept="video/*"

@@ -65,12 +65,11 @@ describe("PaSparetQuestions", () => {
     expect(onSelectQuestion).toHaveBeenCalledWith("new-question");
   });
 
-  it("stops offering films and questions once three questions follow the films", () => {
-    const questions = [question("t", "Resan"), question("q1", "A", "a"), question("q2", "B", "a"), question("q3", "C", "a")];
+  it("keeps offering films and questions however many follow the films (D70)", () => {
+    const questions = [question("t", "Resan"), question("q1", "A", "a"), question("q2", "B", "a"), question("q3", "C", "a"), question("q4", "D", "a")];
     render(<PaSparetQuestions round={round(questions, ["a"])} selectedQuestionId={null} onSelectQuestion={vi.fn()} />);
-    expect(screen.queryByRole("button", { name: "Lägg till film" })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "Lägg till fråga" })).not.toBeInTheDocument();
-    expect(screen.getByText("Omgången har 3 frågor till sina filmer, det högsta antalet.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lägg till film" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Lägg till fråga" })).toBeInTheDocument();
   });
 
   it("marks a film's question as not ready until the film is uploaded", () => {

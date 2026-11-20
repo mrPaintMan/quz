@@ -31,6 +31,13 @@ describe("VideoPreview", () => {
     expect(getFilmUrl).not.toHaveBeenCalled();
   });
 
+  it("shows a small still in a row with the length and play when compact", () => {
+    const { container } = render(<VideoPreview media={media("still")} alt="Filmen" compact />);
+    expect(screen.getByRole("img", { name: "Stillbild ur filmen" })).toHaveClass("h-12");
+    expect(container.firstElementChild).toHaveClass("flex-wrap", "items-center");
+    expect(screen.getByRole("button", { name: "Spela upp" })).toBeInTheDocument();
+  });
+
   it("asks for a link to the film and plays it when asked to", async () => {
     render(<VideoPreview media={media("still")} alt="Filmen" />);
     await userEvent.click(screen.getByRole("button", { name: "Spela upp" }));
