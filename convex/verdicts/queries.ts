@@ -78,11 +78,12 @@ export const getAllAnswers = hostQuery({
       teams: teams.map(({ _id, name, colour }) => {
         const index = fitting.findIndex((answer) => answer.teamId === _id);
         const outcome = index === -1 ? null : outcomes[index];
-        const texts = (outcome?.texts ?? []).map(({ slot, text, written, result, target, byAi }) => ({
+        const texts = (outcome?.texts ?? []).map(({ slot, text, written, result, target, isExact, byAi }) => ({
           slot,
           text,
           written,
           result,
+          isExact,
           byAi,
           isJudged: target !== undefined,
           target: target ?? null,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { exactOptionOf, givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
+import { givenNames, rightItems, sortTexts, textOutcomes, textsToReview, withVerdicts, type TypedReview } from "./typedReview";
 
 // Two slots: a field with one option, and a pool of two options in any order.
 type Content = { points: number };
@@ -34,11 +34,11 @@ describe("textOutcomes", () => {
     ];
     const [outcome] = textOutcomes(review, content, [answer("ABBA", "Vodka", "wodka", "mjölk", "gin")], verdicts);
     expect(outcome.texts.map(({ key: _key, ...text }) => text)).toEqual([
-      { slot: 0, text: "abba", written: "ABBA", at: 0, result: "right", item: "ABBA", points: 2, target: 0, byAi: false },
-      { slot: 1, text: "vodka", written: "Vodka", at: 1, result: "right", item: "Vodka", points: 2, target: 0, byAi: false },
-      { slot: 1, text: "wodka", written: "wodka", at: 2, result: "repeat", item: "Vodka", points: 0, target: 0, byAi: false },
-      { slot: 1, text: "mjölk", written: "mjölk", at: 3, result: "wrong", item: "", points: 0, target: null, byAi: false },
-      { slot: 1, text: "gin", written: "gin", at: 4, result: "pending", item: "", points: 0, target: undefined, byAi: false },
+      { slot: 0, text: "abba", written: "ABBA", at: 0, result: "right", item: "ABBA", points: 2, target: 0, isExact: true, byAi: false },
+      { slot: 1, text: "vodka", written: "Vodka", at: 1, result: "right", item: "Vodka", points: 2, target: 0, isExact: true, byAi: false },
+      { slot: 1, text: "wodka", written: "wodka", at: 2, result: "repeat", item: "Vodka", points: 0, target: 0, isExact: false, byAi: false },
+      { slot: 1, text: "mjölk", written: "mjölk", at: 3, result: "wrong", item: "", points: 0, target: null, isExact: false, byAi: false },
+      { slot: 1, text: "gin", written: "gin", at: 4, result: "pending", item: "", points: 0, target: undefined, isExact: false, byAi: false },
     ]);
     expect(outcome.points).toBe(4);
     // A repeat is the same item as the text it repeats.
@@ -46,18 +46,11 @@ describe("textOutcomes", () => {
   });
 });
 
-describe("a verdict on an exact match", () => {
-  it("counts over the match, so the hosts can mark an accepted spelling wrong", () => {
-    expect(gradeTyped(review, content, [answer("ABBA")], [{ slot: 0, text: "abba", target: null }])).toEqual([0]);
-    expect(gradeTyped(review, content, [answer("ABBA")], [{ slot: 0, text: "abba", target: 0 }])).toEqual([2]);
-  });
-});
-
-describe("exactOptionOf", () => {
-  it("gives the option a text matches exactly in its slot, compared as everywhere else", () => {
-    const slots = review.slots(content);
-    expect(exactOptionOf(slots, 1, " kaffelikör ")).toBe(1);
-    expect(exactOptionOf(slots, 1, "ABBA")).toBeUndefined();
+describe("an exact match", () => {
+  it("always counts, whatever an older verdict on it said (D72)", () => {
+    expect(gradeTyped(review, content, [answer("ABBA")], [{ slot: 0, text: "abba", target: null, byAi: true }])).toEqual([2]);
+    const [outcome] = textOutcomes(review, content, [answer("ABBA")], [{ slot: 0, text: "abba", target: null, byAi: true }]);
+    expect(outcome.texts[0]).toMatchObject({ isExact: true, byAi: false, target: 0 });
   });
 });
 

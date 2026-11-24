@@ -21,13 +21,13 @@ vi.mock("@/features/host/shared/useHostMutation", () => ({ useHostMutation: () =
 const gameId = "game1" as Id<"games">;
 const questionId = "q1" as Id<"questions">;
 const slot = (title: string, options: string[]) => ({ title, answer: null, options, isOpen: false, names: [] });
-const text = (written: string, extra = {}) => ({ slot: 0, text: written.toLowerCase(), written, isJudged: true, target: 0, byAi: false, result: "right", ...extra });
+const text = (written: string, extra = {}) => ({ slot: 0, text: written.toLowerCase(), written, isJudged: true, target: 0, isExact: false, byAi: false, result: "right", ...extra });
 const team = (teamId: string, name: string, texts: ReturnType<typeof text>[], points = 0) => ({ teamId, name, colour: "red", hasAnswered: texts.length > 0, points, texts });
 
 const saffron = {
   slots: [slot("", ["Saffran"])],
   teams: [
-    team("t1", "Tomtarna", [text("Saffran")], 1),
+    team("t1", "Tomtarna", [text("Saffran", { isExact: true })], 1),
     team("t2", "Renarna", [text("Safrann", { isJudged: false, target: null, result: "pending" })]),
     team("t3", "Glöggarna", [text("Kanel", { target: null, byAi: true, result: "wrong" })]),
     team("t4", "Pepparkakorna", [text("Safrann", { isJudged: false, target: null, result: "pending" })]),
@@ -75,15 +75,26 @@ describe("AllAnswers", () => {
     expect(block("Knäckarna").getByText("Svarade inte.")).toBeInTheDocument();
   });
 
-  it("offers Rätt and Fel on every text, an exact match's included, and marks the AI's verdicts", async () => {
+  it("shows a text the key spells as Rätt, with nothing to judge (D72)", async () => {
+    all.mockReturnValue({ ...saffron, teams: [...saffron.teams, team("t6", "Glöggkokarna", [text("Saffran", { isExact: true })], 1)] });
     renderAll();
     await open();
-    expect(block("Tomtarna").getByRole("button", { name: "Rätt" })).toHaveAttribute("aria-pressed", "true");
+    expect(block("Tomtarna").getByText("Rätt")).toBeInTheDocument();
+    expect(block("Tomtarna").queryByRole("button")).not.toBeInTheDocument();
+    expect(block("Tomtarna").queryByText(/Gäller även/)).not.toBeInTheDocument();
+  });
+
+  it("offers Rätt and Fel on the AI's verdicts, marked, the hosts' own and the texts that wait", async () => {
+    all.mockReturnValue({ ...saffron, teams: [...saffron.teams, team("t6", "Glöggkokarna", [text("Saffron")], 1)] });
+    renderAll();
+    await open();
     expect(block("Glöggarna").getByRole("button", { name: "Fel" })).toHaveAttribute("aria-pressed", "true");
     expect(block("Glöggarna").getByTitle("Bedömt av AI")).toBeInTheDocument();
-    expect(block("Tomtarna").queryByTitle("Bedömt av AI")).not.toBeInTheDocument();
-    await userEvent.click(block("Tomtarna").getByRole("button", { name: "Fel" }));
-    expect(judgeText).toHaveBeenCalledWith({ gameId, questionId, slot: 0, text: "saffran", target: null });
+    expect(block("Glöggkokarna").getByRole("button", { name: "Rätt" })).toHaveAttribute("aria-pressed", "true");
+    expect(block("Glöggkokarna").queryByTitle("Bedömt av AI")).not.toBeInTheDocument();
+    expect(block("Renarna").getByRole("button", { name: "Fel" })).toHaveAttribute("aria-pressed", "false");
+    await userEvent.click(block("Glöggarna").getByRole("button", { name: "Rätt" }));
+    expect(judgeText).toHaveBeenCalledWith({ gameId, questionId, slot: 0, text: "kanel", target: 0 });
   });
 
   it("says which other teams a verdict also counts for", async () => {
