@@ -120,6 +120,15 @@ describe("AllAnswers", () => {
     expect(within(block("Tomtarna").getByText("Wodka").closest("li")!).getByText("Räknas redan")).toBeInTheDocument();
   });
 
+  it("gives an exact spelling of an item already counted no Rätt, as it scores nothing", async () => {
+    all.mockReturnValue({ slots: [slot("", ["Vodka"])], teams: [team("t1", "Tomtarna", [text("Vodka", { isExact: true }), text("Wodka", { isExact: true, result: "repeat" })], 1)] });
+    renderAll();
+    await open();
+    const wodka = within(block("Tomtarna").getByText("Wodka").closest("li")!);
+    expect(wodka.getByText("Räknas redan")).toBeInTheDocument();
+    expect(wodka.queryByText("Rätt")).not.toBeInTheDocument();
+  });
+
   it("keeps the blocks in the order they opened in while the hosts judge", async () => {
     const { rerender } = render(
       <ActionErrorProvider>

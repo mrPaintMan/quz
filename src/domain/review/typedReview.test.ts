@@ -182,8 +182,10 @@ describe("givenNames", () => {
       { slot: 1, text: "lund", target: "Lund" },
       { slot: 0, text: "gbg", target: 0 },
       { slot: 0, text: "oslo", target: null },
+      // Older than D72: a verdict on a text the key spells counts for nothing.
+      { slot: 1, text: "vodka", target: "Fjällbrännvin" },
     ];
-    expect(givenNames(verdicts)).toEqual([
+    expect(givenNames(review.slots(content), verdicts)).toEqual([
       { slot: 0, name: "Lund" },
       { slot: 0, name: "Malmö" },
       { slot: 1, name: "Lund" },

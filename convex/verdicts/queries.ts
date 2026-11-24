@@ -15,12 +15,14 @@ import { verdictsOfQuestion } from "./verdictsOfQuestion";
 // answers by label, whether it is open, and the names already given to right items outside an open
 // slot's key (D53).
 function slotsForHosts(review: TypedReview<QuestionContent, AnswerContent>, content: QuestionContent, verdicts: Verdict[]) {
-  return review.slots(content).map(({ title, options, isOpen, answer }, slot) => ({
+  const slots = review.slots(content);
+  const names = givenNames(slots, verdicts);
+  return slots.map(({ title, options, isOpen, answer }, slot) => ({
     title,
     answer: answer ?? null,
     options: options.map((option) => option.label),
     isOpen: isOpen === true,
-    names: givenNames(verdicts)
+    names: names
       .filter((given) => given.slot === slot)
       .map((given) => given.name),
   }));

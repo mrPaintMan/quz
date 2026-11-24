@@ -200,10 +200,12 @@ export function textsToReview<Content, Answer>(review: TypedReview<Content, Answ
 
 // The names verdicts gave right items outside an open slot's key, once each as first given (two
 // forms of a name are one item), alphabetically, for the AI judge and the hosts' "Samma som" (D53).
-export function givenNames(verdicts: Verdict[]): { slot: number; name: string }[] {
+// A verdict on a text the key spells counts for nothing (D72), so its name isn't given.
+export function givenNames(slots: ReviewSlot[], verdicts: Verdict[]): { slot: number; name: string }[] {
+  const exact = exactMatches(slots);
   const names = new Map<string, { slot: number; name: string }>();
-  for (const { slot, target } of verdicts) {
-    if (typeof target !== "string") continue;
+  for (const { slot, text, target } of verdicts) {
+    if (typeof target !== "string" || exact.has(keyOf(slot, text))) continue;
     const key = keyOf(slot, normalizeForComparison(target));
     if (!names.has(key)) names.set(key, { slot, name: target.trim() });
   }

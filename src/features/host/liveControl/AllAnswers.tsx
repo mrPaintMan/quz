@@ -67,10 +67,13 @@ function TeamBlock({ team, teams, all, onJudge }: { team: TeamAnswers; teams: Te
               </span>
               {/* A text the key spells always counts, so it has nothing to judge (D72). */}
               {text.isExact ? (
-                <span className="flex items-center gap-1 px-1 text-sm font-semibold text-primary">
-                  <Check aria-hidden className="size-4" />
-                  Rätt
-                </span>
+                // Another spelling of an item already counted scores nothing; "Räknas redan" says so.
+                text.result === "right" && (
+                  <span className="flex items-center gap-1 px-1 text-sm font-semibold text-primary">
+                    <Check aria-hidden className="size-4" />
+                    Rätt
+                  </span>
+                )
               ) : (
                 <>
                   <VerdictChoices slot={slot} item={text} onChoose={(target) => onJudge(text.slot, text.text, target)} />
