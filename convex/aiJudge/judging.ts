@@ -49,7 +49,7 @@ export const prepareJudging = internalQuery({
       .map(({ slot, text, written, teamCount }) => ({ slot, text, written, teamCount }));
     if (items.length === 0) return null;
     const slots = review.slots(question.content);
-    return { message: judgeMessage(question.prompt, slots, items, givenNames(verdicts).map(({ slot, name }) => ({ field: slot, name }))), slots, items };
+    return { message: judgeMessage(question.prompt, slots, items, givenNames(slots, verdicts).map(({ slot, name }) => ({ field: slot, name }))), slots, items };
   },
 });
 

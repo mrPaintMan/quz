@@ -80,8 +80,8 @@ function writtenTexts<Content, Answer>(review: TypedReview<Content, Answer>, slo
   return [...texts.entries()];
 }
 
-// What each text of an answer counted as, in the order written: a distinct item, by the hosts' or
-// the AI's verdict or else by an exact spelling (a verdict overrides even an exact match, D65), is right and scores the points per match; another form of an item
+// What each text of an answer counted as, in the order written: a distinct item, by an exact
+// spelling, which always counts (D72), or else by the hosts' or the AI's verdict, is right and scores the points per match; another form of an item
 // already counted is a repeat and adds nothing, so two forms of one answer score once (D53); a text
 // without a verdict is pending and, like a wrong one, scores nothing (D58).
 export function textOutcomes<Content, Answer>(
@@ -100,8 +100,9 @@ export function textOutcomes<Content, Answer>(
 
 // One written text's outcome, with the name of the item it counted as when right or a repeat.
 // key tells items apart, as two can share a name; at is the text's place among the answer's texts.
-// text is the normalized text a verdict is keyed by, and target what it counts as now, by its
-// verdict or else an exact spelling (undefined while unjudged); byAi when the AI gave that verdict.
+// text is the normalized text a verdict is keyed by, and target what it counts as now, by an exact
+// spelling or else its verdict (undefined while unjudged); isExact when a spelling of the key
+// matched it, and byAi when the AI gave its verdict.
 export type TextOutcome = {
   slot: number;
   text: string;
@@ -111,6 +112,7 @@ export type TextOutcome = {
   item: string;
   key: string;
   target: Target | undefined;
+  isExact: boolean;
   byAi: boolean;
 };
 
@@ -122,10 +124,13 @@ function matcher<Content, Answer>(review: TypedReview<Content, Answer>, content:
   return (answer: Answer): TextOutcome[] => {
     const matched = new Set<string>();
     return writtenTexts(review, slots, answer).map(([key, { slot, text, written, at }]) => {
-      const verdict = judged.get(key);
-      const target = verdict ? verdict.target : exact.get(key);
+      // An exact spelling counts whatever an older verdict on it said (D72).
+      const exactOption = exact.get(key);
+      const isExact = exactOption !== undefined;
+      const verdict = isExact ? undefined : judged.get(key);
+      const target = isExact ? exactOption : verdict?.target;
       const byAi = verdict?.byAi ?? false;
-      const base = { slot, text, written, at, target, byAi };
+      const base = { slot, text, written, at, target, isExact, byAi };
       if (target === undefined) return { ...base, result: "pending", item: "", key: "" };
       const item = itemOf(slots, exact, slot, target);
       if (item === null) return { ...base, result: "wrong", item: "", key: "" };
@@ -195,18 +200,14 @@ export function textsToReview<Content, Answer>(review: TypedReview<Content, Answ
 
 // The names verdicts gave right items outside an open slot's key, once each as first given (two
 // forms of a name are one item), alphabetically, for the AI judge and the hosts' "Samma som" (D53).
-export function givenNames(verdicts: Verdict[]): { slot: number; name: string }[] {
+// A verdict on a text the key spells counts for nothing (D72), so its name isn't given.
+export function givenNames(slots: ReviewSlot[], verdicts: Verdict[]): { slot: number; name: string }[] {
+  const exact = exactMatches(slots);
   const names = new Map<string, { slot: number; name: string }>();
-  for (const { slot, target } of verdicts) {
-    if (typeof target !== "string") continue;
+  for (const { slot, text, target } of verdicts) {
+    if (typeof target !== "string" || exact.has(keyOf(slot, text))) continue;
     const key = keyOf(slot, normalizeForComparison(target));
     if (!names.has(key)) names.set(key, { slot, name: target.trim() });
   }
   return [...names.values()].sort((a, b) => a.slot - b.slot || a.name.localeCompare(b.name, "sv"));
-}
-
-// The option a text matches exactly in its slot, if any, so a verdict that only agrees with the
-// match needn't be stored (D65).
-export function exactOptionOf(slots: ReviewSlot[], slot: number, text: string): number | undefined {
-  return exactMatches(slots).get(keyOf(slot, normalizeForComparison(text)));
 }

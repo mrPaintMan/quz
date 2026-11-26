@@ -1,6 +1,7 @@
 "use client";
 
 import type { FunctionReturnType } from "convex/server";
+import { Check } from "lucide-react";
 import { useState } from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -64,8 +65,21 @@ function TeamBlock({ team, teams, all, onJudge }: { team: TeamAnswers; teams: Te
                 {/* Another form of an item the team already has scores nothing (D53). */}
                 {text.result === "repeat" && <span className="block text-xs text-muted-foreground">Räknas redan</span>}
               </span>
-              <VerdictChoices slot={slot} item={text} onChoose={(target) => onJudge(text.slot, text.text, target)} />
-              {others.length > 0 && <p className="w-full text-xs text-muted-foreground">Gäller även {others.join(", ")}</p>}
+              {/* A text the key spells always counts, so it has nothing to judge (D72). */}
+              {text.isExact ? (
+                // Another spelling of an item already counted scores nothing; "Räknas redan" says so.
+                text.result === "right" && (
+                  <span className="flex items-center gap-1 px-1 text-sm font-semibold text-primary">
+                    <Check aria-hidden className="size-4" />
+                    Rätt
+                  </span>
+                )
+              ) : (
+                <>
+                  <VerdictChoices slot={slot} item={text} onChoose={(target) => onJudge(text.slot, text.text, target)} />
+                  {others.length > 0 && <p className="w-full text-xs text-muted-foreground">Gäller även {others.join(", ")}</p>}
+                </>
+              )}
             </li>
           );
         })}
@@ -97,9 +111,10 @@ type AllAnswersProps = {
   leaderboard: string[];
 };
 
-// Every team's answers to a typed question, to see who got what and to change any verdict, the
-// AI's or an exact match's included (D65): a block per team with Rätt / Fel on every text, the AI's
-// verdicts marked, and "Bedöms…" while a text waits. Read only while open.
+// Every team's answers to a typed question, to see who got what and to change a verdict, the AI's
+// included (D65): a block per team with Rätt / Fel on every judged or waiting text, a fixed "Rätt" on
+// one the key spells (D72), the AI's verdicts marked, and "Bedöms…" while a text waits. Read only
+// while open.
 export function AllAnswers({ gameId, questionId, prompt, unjudged, leaderboard }: AllAnswersProps) {
   const [isOpen, setIsOpen] = useState(false);
   const all = useHostQuery(api.verdicts.queries.getAllAnswers, isOpen ? { gameId, questionId } : "skip");
