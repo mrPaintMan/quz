@@ -65,6 +65,7 @@ The feedback round from the user's test night (2026-11-11) is done, and the phon
 - [x] Admin: live control with the TV now and next drawn small, Nästa and Föregående; question timer with pause and +15 s on the TV, phones and admin (D38)
 - [x] Admin: media playback: question pictures on the TV with the question and its answer; sound and video played on the TV with Spela and Pausa in the admin (D39)
 - [x] På spåret: film position kept on the server, the trip's points over its film on the TV, admin shows the active clue and time to the next (D39, D40). Loading the film ahead is left out until the dry run shows a need
+- [x] The TV downloads the next screen's film ahead, so På spåret films and clips play at once (D73)
 - [x] På spåret films: TV plays each film on its own screen, then its questions (D40); phones answer them in M3
 - [x] Draft saving and locking, including on timer end, with a 2 s grace; Nästa closes a question for good (D41)
 
@@ -158,3 +159,4 @@ Agreed with the user, in this order:
 - 2026-11-20: Feedback round 2, På spåret: no cap on films or the questions after them; in the editor each film is a card in the questions' colour with its questions along a gold line under it, an uploaded film a compact row (D70). Feedback round 2 is done. Not tried in a browser with data.
 - 2026-11-20: Vänern and Vättern drawn as water, and the landskap lines that ran into them continued to their shores (D71). Checked with screenshots of the real data; not tried in a browser with game data.
 - 2026-11-24: An answer the key spells always counts: "Visa alla svar" shows it as a fixed "✓ Rätt", and only verdicts (the AI's and the hosts') can be changed (D72). Not tried in a browser with data.
+- 2026-11-28: The TV downloads the next screen's film while the screen before it shows and plays the copy at once, streaming as before if it isn't ready (D73). Tried on dev in the browser: the trip and a film played from their copies, and a reload streamed.

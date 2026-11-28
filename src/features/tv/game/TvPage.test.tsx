@@ -7,7 +7,9 @@ import { TvPage } from "./TvPage";
 const runningGame = vi.fn();
 const teams = vi.fn();
 const scores = vi.fn();
+const getNextFilmUrl = vi.fn(async () => null);
 vi.mock("convex/react", () => ({
+  useMutation: () => getNextFilmUrl,
   // The generated api hands out a new reference on each access, so compare by name.
   useQuery: (query: FunctionReference<"query">, args?: unknown) => {
     if (args === "skip") return undefined;

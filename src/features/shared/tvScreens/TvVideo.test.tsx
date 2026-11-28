@@ -1,6 +1,8 @@
 import { act, fireEvent, render, screen as page } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Id } from "@convex/_generated/dataModel";
+import { screenKey } from "@/domain/screenSequence/isSameScreen";
+import { PreloadedFilms } from "./preloadedFilms";
 import { TvVideo } from "./TvVideo";
 
 const getFilmUrl = vi.fn();
@@ -33,6 +35,30 @@ describe("TvVideo", () => {
     expect(getFilmUrl).toHaveBeenCalledWith({ screen });
     expect(video).toHaveAttribute("src", "https://films.example.com/tomte.mp4");
     expect(video).toHaveAttribute("poster", "https://example.com/still.jpg");
+  });
+
+  it("plays the copy the TV downloaded ahead, without asking for the film", async () => {
+    const copies = new Map([[screenKey(screen), "blob:tomte"]]);
+    const { container } = await act(async () =>
+      render(
+        <PreloadedFilms value={copies}>
+          <TvVideo screen={screen} posterUrl={null} playback={paused} showsCluePoints={false} />
+        </PreloadedFilms>,
+      ),
+    );
+    expect(getFilmUrl).not.toHaveBeenCalled();
+    expect(container.querySelector("video")).toHaveAttribute("src", "blob:tomte");
+  });
+
+  it("keeps streaming when the copy finishes after the screen showed", async () => {
+    const tree = (copies: Map<string, string>) => (
+      <PreloadedFilms value={copies}>
+        <TvVideo screen={screen} posterUrl={null} playback={paused} showsCluePoints={false} />
+      </PreloadedFilms>
+    );
+    const { container, rerender } = await act(async () => render(tree(new Map())));
+    await act(async () => rerender(tree(new Map([[screenKey(screen), "blob:tomte"]]))));
+    expect(container.querySelector("video")).toHaveAttribute("src", "https://films.example.com/tomte.mp4");
   });
 
   it("asks only once while game updates hand out equal screens", async () => {
