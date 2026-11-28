@@ -70,7 +70,11 @@ function bed({ width, height, margin, radius, seed }) {
       points.push([cx + radius * Math.cos(theta), cy + radius * Math.sin(theta), -Math.sin(theta), Math.cos(theta)]);
     }
   }
-  points.sort(() => next() - 0.5);
+  // Shuffled so no edge is drawn wholly over another; Fisher–Yates, so a rebuild is the same.
+  for (let i = points.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [points[i], points[j]] = [points[j], points[i]];
+  }
   let svg = "";
   for (const [px, py, tx, ty] of points) {
     let [nx, ny] = [ty, -tx];

@@ -16,6 +16,19 @@ describe("ChristmasLights", () => {
     expect(new Set(delays).size).toBe(8);
   });
 
+  it("gives each string its own glow, so two on one page don't share ids", () => {
+    const { container } = render(
+      <>
+        <ChristmasLights bulbs={4} />
+        <ChristmasLights bulbs={4} />
+      </>,
+    );
+    const ids = [...container.querySelectorAll("radialGradient")].map((gradient) => gradient.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    const glow = container.querySelectorAll("svg")[1].querySelector("circle")!.getAttribute("fill")!;
+    expect(container.querySelectorAll("svg")[1].querySelector(`radialGradient[id="${glow.slice(5, -1)}"]`)).not.toBeNull();
+  });
+
   it("keeps a single loop for a short string", () => {
     const { container } = render(<ChristmasLights bulbs={2} />);
     expect(container.querySelectorAll("path")).toHaveLength(1);

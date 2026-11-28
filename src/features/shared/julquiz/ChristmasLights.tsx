@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 // A string of coloured bulbs hanging in loops along the top of a screen (D75). Each bulb glows and
 // dims slowly on its own beat (`julquiz-bulb` in globals.css). Drawn in code rather than as an
 // image, as it is only a few shapes and stays sharp at any size; the glow is a soft gradient
@@ -17,6 +19,8 @@ function onLoop(x0: number, x1: number, t: number) {
 }
 
 export function ChristmasLights({ bulbs }: { bulbs: number }) {
+  // Each string its own gradient ids, as the hosts' page shows two TVs' strings at once.
+  const glowId = `julquiz-glow-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
   const loops = Math.max(1, Math.round(bulbs / BULBS_PER_LOOP));
   const width = bulbs * SPACING;
   const loopWidth = width / loops;
@@ -25,7 +29,7 @@ export function ChristmasLights({ bulbs }: { bulbs: number }) {
     <svg viewBox={`0 0 ${width} ${HEIGHT}`} className="block w-full" aria-hidden>
       <defs>
         {COLOURS.map((colour, index) => (
-          <radialGradient key={colour} id={`julquiz-glow-${index}`}>
+          <radialGradient key={colour} id={`${glowId}-${index}`}>
             <stop offset="0" stopColor={colour} stopOpacity="0.55" />
             <stop offset="1" stopColor={colour} stopOpacity="0" />
           </radialGradient>
@@ -46,7 +50,7 @@ export function ChristmasLights({ bulbs }: { bulbs: number }) {
           <g key={index} transform={`translate(${x.toFixed(1)} ${y.toFixed(1)})`}>
             <rect x="-3.5" y="0" width="7" height="6" rx="1.5" fill="#3b3340" />
             <g className="julquiz-bulb" style={{ animationDelay: `${delay.toFixed(1)}s` }}>
-              <circle cy="15" r="20" fill={`url(#julquiz-glow-${colourIndex})`} />
+              <circle cy="15" r="20" fill={`url(#${glowId}-${colourIndex})`} />
               <ellipse cy="15" rx="7" ry="11" fill={COLOURS[colourIndex]} />
               <ellipse cx="-2" cy="11" rx="2" ry="4" fill="#fff" opacity="0.45" />
             </g>

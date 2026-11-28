@@ -19,7 +19,7 @@ export function LeaderboardScreen({ title, scores, isChristmas = false }: { titl
       {scores.length === 0 ? (
         <p className="text-[2cqw] text-muted-foreground">Inga lag har anmält sig.</p>
       ) : (
-        <div className={isChristmas ? `relative mx-auto rounded-[1.6cqw] bg-background p-[1.6cqw] ${columns === "grid-cols-1" ? "w-[62cqw]" : "w-full"}` : "contents"}>
+        <div className={isChristmas ? `relative mx-auto rounded-[1.6cqw] bg-background p-[1.6cqw] ${columns === "grid-cols-1" ? "w-[62cqw]" : "w-[82cqw]"}` : "contents"}>
           {isChristmas && <PineBed />}
           <ol className={`grid grid-flow-col gap-x-[4cqw] gap-y-[1cqw] ${columns}`} style={{ gridTemplateRows: `repeat(${Math.min(scores.length, ONE_COLUMN_MAX)}, auto)` }}>
             {scores.map((team) => (
