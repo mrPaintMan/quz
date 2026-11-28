@@ -30,6 +30,15 @@ describe("updateQuiz", () => {
     expect(tree?.quiz).toMatchObject({ title: "Julquiz", year: 2027 });
   });
 
+  it("makes a quiz a Julquiz, and back (D75)", async () => {
+    const t = setupConvexTest();
+    const quizId = await t.mutation(api.quizzes.mutations.createQuiz, { ...host, title: "Julquiz", year: 2026 });
+    await t.mutation(api.quizzes.mutations.updateQuiz, { ...host, quizId, isChristmas: true });
+    expect((await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId }))?.quiz).toMatchObject({ title: "Julquiz", isChristmas: true });
+    await t.mutation(api.quizzes.mutations.updateQuiz, { ...host, quizId, isChristmas: false });
+    expect((await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId }))?.quiz.isChristmas).toBe(false);
+  });
+
   it("refuses a quiz that does not exist", async () => {
     const { t, quizId } = await setupQuizWithQuestion();
     await t.mutation(api.quizzes.mutations.deleteQuiz, { ...host, quizId });
@@ -51,6 +60,13 @@ describe("copyQuiz", () => {
 
     const original = await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId });
     expect(original?.rounds[0].questions[0].quizId).toBe(quizId);
+  });
+
+  it("keeps a Julquiz a Julquiz", async () => {
+    const { t, quizId } = await setupQuizWithQuestion();
+    await t.mutation(api.quizzes.mutations.updateQuiz, { ...host, quizId, isChristmas: true });
+    const copyId = await t.mutation(api.quizzes.mutations.copyQuiz, { ...host, quizId, title: "Julquiz 2027", year: 2027 });
+    expect((await t.query(api.quizzes.queries.getQuizTree, { ...host, quizId: copyId }))?.quiz.isChristmas).toBe(true);
   });
 });
 

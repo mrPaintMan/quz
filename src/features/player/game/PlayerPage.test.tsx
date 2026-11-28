@@ -49,6 +49,15 @@ describe("PlayerPage", () => {
   it("lets a new phone join", () => {
     render(<PlayerPage />);
     expect(screen.getByRole("button", { name: "Gå med" })).toBeInTheDocument();
+    expect(screen.queryByTestId("julquiz-decor")).not.toBeInTheDocument();
+  });
+
+  it("dresses the phone for Christmas on a Julquiz (D75)", () => {
+    runningGame.mockReturnValue({ ...game, isChristmas: true });
+    const { container } = render(<PlayerPage />);
+    expect(screen.getByTestId("julquiz-decor")).toBeInTheDocument();
+    expect(container.querySelector("[data-julquiz-phone]")).not.toBeNull();
+    expect(screen.getByRole("button", { name: "Gå med" })).toBeInTheDocument();
   });
 
   it("follows the game as the team saved on the phone", () => {

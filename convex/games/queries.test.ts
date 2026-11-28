@@ -22,6 +22,7 @@ describe("getRunningGame", () => {
       _id: gameId,
       quizId,
       quizTitle: "Julquiz 2026",
+      isChristmas: false,
       screen: { kind: "lobby" },
       view: { kind: "lobby" },
       media: null,
@@ -31,6 +32,15 @@ describe("getRunningGame", () => {
       isQuestionClosed: false,
       isQuestionLocked: false,
     });
+  });
+
+  it("says whether the running quiz is a Julquiz", async () => {
+    const t = setupConvexTest();
+    await t.run(async (ctx) => {
+      const quizId = await ctx.db.insert("quizzes", { title: "Julquiz 2026", year: 2026, updatedAt: 0, isChristmas: true });
+      await ctx.db.insert("games", { quizId, endedAt: null, ...atLobby });
+    });
+    expect((await t.query(api.games.queries.getRunningGame, {}))?.isChristmas).toBe(true);
   });
 
   it("describes the screen without its answer key", async () => {

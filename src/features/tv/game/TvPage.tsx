@@ -55,6 +55,7 @@ function RunningGameScreen({ game, teams, joinUrl }: { game: RunningGame; teams:
       <TvScreen
         view={game.view}
         quizTitle={game.quizTitle}
+        isChristmas={game.isChristmas}
         joinUrl={joinUrl}
         teams={teams}
         scores={scores}

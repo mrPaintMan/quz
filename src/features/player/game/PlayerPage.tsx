@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
 import { JoinForm } from "@/features/player/join/JoinForm";
 import { useSavedTeamId } from "@/features/player/join/useSavedTeamId";
+import { PhoneDecor } from "@/features/shared/julquiz/PhoneDecor";
 import { useScores } from "@/features/shared/scores/useScores";
 import { findTripFilm } from "./findTripFilm";
 import { FollowGame } from "./FollowGame";
@@ -57,5 +58,14 @@ export function PlayerPage() {
   if (game === null) {
     return <NoGameRunning message={teamId === null ? "Inget quiz pågår just nu." : "Quizet är slut. Tack för i kväll!"} />;
   }
-  return <TeamInGame game={game} teamId={teamId} saveTeamId={saveTeamId} />;
+  const page = <TeamInGame game={game} teamId={teamId} saveTeamId={saveTeamId} />;
+  if (!game.isChristmas) return page;
+  // A Julquiz dresses the phone for Christmas too (D75); the data attributes give its titles their
+  // Christmas font and its page room for the lights at the top.
+  return (
+    <div data-julquiz="" data-julquiz-phone="" className="contents">
+      <PhoneDecor />
+      {page}
+    </div>
+  );
 }

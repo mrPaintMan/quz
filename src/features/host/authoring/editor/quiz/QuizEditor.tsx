@@ -11,6 +11,7 @@ import { RoundPanel } from "@/features/host/authoring/editor/rounds/RoundPanel";
 import { HostHeader } from "@/features/host/shared/HostHeader";
 import { useHostQuery } from "@/features/host/shared/useHostQuery";
 import { useNow } from "@/features/shared/time/useNow";
+import { JulquizSwitch } from "./JulquizSwitch";
 import { QuizTitleField } from "./QuizTitleField";
 import { ReadinessSummary } from "./ReadinessSummary";
 import { resolveSelection } from "./resolveSelection";
@@ -58,6 +59,7 @@ export function QuizEditor({ quizId }: { quizId: Id<"quizzes"> }) {
           ← Dina quiz
         </Link>
         <QuizTitleField key={tree.quiz._id} quiz={tree.quiz} />
+        <JulquizSwitch quiz={tree.quiz} />
         <span className="text-xs text-muted-foreground">{formatSavedAgo(tree.quiz.updatedAt, now)}</span>
       </HostHeader>
       <div className="flex flex-1 flex-wrap">

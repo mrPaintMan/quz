@@ -129,3 +129,38 @@
     animation-duration: 1ms;
   }
 }
+
+/* The Julquiz look (D75). Titles in a serif under a Julquiz's decorations. */
+[data-julquiz] h1 {
+  font-family: var(--font-julquiz-title), Georgia, serif;
+  letter-spacing: 0;
+}
+/* A Julquiz phone keeps its page clear of the lights along the top. */
+[data-julquiz-phone] main {
+  padding-top: 4rem;
+}
+/* The lights glow and dim slowly, each on its own beat, for the mood rather than the eye; still
+   for those who ask for less motion. */
+@keyframes julquiz-twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+.julquiz-bulb {
+  animation: julquiz-twinkle 9s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .julquiz-bulb {
+    animation: none;
+  }
+}
+/* A box lying on a bed of pine: the pine image stretched around the box by its border, reaching
+   out past each edge. Image pixels are a 1920-wide TV; 200 of them are the slice, 140 the reach. */
+.julquiz-pine-bed {
+  position: absolute;
+  z-index: -10;
+  inset: -7.3cqw;
+  border-style: solid;
+  border-width: 10.4cqw;
+  border-image: url("/julquiz/pine-bed.webp") 200 round;
+  pointer-events: none;
+}

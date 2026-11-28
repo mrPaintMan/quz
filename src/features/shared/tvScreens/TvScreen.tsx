@@ -4,6 +4,7 @@ import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
 import { answerPlacesMedia, RevealedAnswerDisplay, ShownQuestionDisplay } from "@/features/shared/questionDisplays/QuestionDisplay";
+import { TvDecor } from "@/features/shared/julquiz/TvDecor";
 import type { ImageUrls } from "@/features/shared/questionDisplays/QuestionDisplayProps";
 import type { TeamScore } from "@/features/shared/scores/useScores";
 import { LeaderboardScreen } from "./LeaderboardScreen";
@@ -30,14 +31,44 @@ type TvScreenProps = {
   playback: Playback | null;
   // Draws the screen without playing its clip, for the hosts' small copies of the TV.
   silent?: boolean;
+  // A Julquiz's screens are dressed for Christmas (D75).
+  isChristmas?: boolean;
 };
+
+// Where a Julquiz screen's pine goes: a bed under its main box, drawn by the screen itself, or the
+// lower corners of a screen without one; a film keeps its whole screen.
+function pineOf(view: ScreenView): "bed" | "corners" | "none" {
+  switch (view.kind) {
+    case "lobby":
+    case "leaderboard":
+    case "finalLeaderboard":
+      return "bed";
+    case "film":
+      return "none";
+    default:
+      return "corners";
+  }
+}
+
+// The screen, with a Julquiz's decorations behind it. The wrapper stacks the decorations under the
+// screen's content, and its data attribute gives the titles their Christmas font; it keeps the
+// screen clear of the lights along the top and the pine along the bottom.
+export function TvScreen(props: TvScreenProps) {
+  const isChristmas = props.isChristmas === true;
+  return (
+    <div className={`relative isolate flex min-h-0 flex-1 flex-col ${isChristmas ? "pt-[3cqw] pb-[1.5cqw]" : ""}`} data-julquiz={isChristmas ? "" : undefined}>
+      {isChristmas && <TvDecor corners={pineOf(props.view) === "corners"} />}
+      <ScreenContent {...props} isChristmas={isChristmas} />
+    </div>
+  );
+}
 
 
 // The screen the game is on. A question shows its type's display (such as the options) once that
 // type is built in M3, and how many teams have answered. Drawn on the TV and, smaller, in the
 // hosts' live control.
-export function TvScreen(props: TvScreenProps) {
-  const { view, quizTitle, joinUrl, teams, scores, media, imageUrls, answeredCount, timer, playback, silent = false } = props;
+function ScreenContent(props: TvScreenProps & { isChristmas: boolean }) {
+  const { view, quizTitle, joinUrl, teams, scores, media, imageUrls, answeredCount, timer, playback, silent = false, isChristmas } = props;
   const mediaArea = media && (
     <div className="flex min-h-0 flex-1 items-center justify-center">
       <TvMedia media={media} playback={playback} silent={silent} />
@@ -45,7 +76,7 @@ export function TvScreen(props: TvScreenProps) {
   );
   switch (view.kind) {
     case "lobby":
-      return <LobbyScreen quizTitle={quizTitle} joinUrl={joinUrl} teams={teams} />;
+      return <LobbyScreen quizTitle={quizTitle} joinUrl={joinUrl} teams={teams} isChristmas={isChristmas} />;
     case "rules":
       return <RulesScreen {...view} />;
     case "roundIntro":
@@ -92,8 +123,8 @@ export function TvScreen(props: TvScreenProps) {
         </TvFrame>
       );
     case "leaderboard":
-      return <LeaderboardScreen title={`Topplista efter omgång ${view.roundNumber}`} scores={scores} />;
+      return <LeaderboardScreen title={`Topplista efter omgång ${view.roundNumber}`} scores={scores} isChristmas={isChristmas} />;
     case "finalLeaderboard":
-      return <LeaderboardScreen title="Slutresultat" scores={scores} />;
+      return <LeaderboardScreen title="Slutresultat" scores={scores} isChristmas={isChristmas} />;
   }
 }
