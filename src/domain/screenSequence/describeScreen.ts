@@ -2,13 +2,15 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { AnswerContent } from "@convex/answers/answerContent";
 import type { Screen } from "@convex/games/screen";
 import type { QuestionContent } from "@convex/questions/questionContent";
+import type { Film } from "@convex/rounds/table";
 import { answeringOf, type RevealedAnswer, type ShownQuestion } from "@/domain/answering/registry";
 import type { Graded } from "@/domain/answering/answeringRules";
 import { isTrip } from "@/domain/questionTypes/paSparet/isTrip";
+import { filmsOf } from "@/domain/rounds/filmOf";
 import { rulesFor } from "@/domain/questionTypes/registry";
 
-type QuestionInRound = { _id: Id<"questions">; prompt: string; description?: string; content: QuestionContent };
-type RoundInQuiz = { _id: Id<"rounds">; title: string; questions: QuestionInRound[] };
+type QuestionInRound = { _id: Id<"questions">; prompt: string; description?: string; filmId?: string; content: QuestionContent };
+type RoundInQuiz = { _id: Id<"rounds">; title: string; films?: Film[]; questions: QuestionInRound[] };
 
 // What the TV and phones may know about a screen: never an answer before its answer screen.
 export type ScreenView =
@@ -18,9 +20,11 @@ export type ScreenView =
   // `shown` is what the TV and phones show of the question; null until its type is built (M3).
   // isTrip marks På spåret's trip, which goes by "På spåret" rather than its round and number (D66).
   // description is the question's own short text under its prompt, empty for none (D68).
-  | { kind: "question"; roundNumber: number; questionNumber: number; prompt: string; description: string; answeredInApp: boolean; isTrip: boolean; shown: ShownQuestion | null }
-  | { kind: "answer"; roundNumber: number; questionNumber: number; prompt: string; description: string; isTrip: boolean; revealed: RevealedAnswer | null }
-  | { kind: "film"; roundNumber: number }
+  // filmNumber is the place in its round of the film a question is asked after, whose questions
+  // are then numbered from 1 (D74); null for a question that doesn't follow a film.
+  | { kind: "question"; roundNumber: number; filmNumber: number | null; questionNumber: number; prompt: string; description: string; answeredInApp: boolean; isTrip: boolean; shown: ShownQuestion | null }
+  | { kind: "answer"; roundNumber: number; filmNumber: number | null; questionNumber: number; prompt: string; description: string; isTrip: boolean; revealed: RevealedAnswer | null }
+  | { kind: "film"; roundNumber: number; filmNumber: number }
   | { kind: "leaderboard"; roundNumber: number }
   | { kind: "finalLeaderboard" };
 
@@ -37,15 +41,22 @@ function describeRules(rounds: RoundInQuiz[]): ScreenView {
   };
 }
 
+// A film's place among its round's films, from 1.
+const filmNumberOf = (round: RoundInQuiz, filmId: string) => filmsOf(round).findIndex((film) => film.id === filmId) + 1;
+
 // A question's place: its round's number and its number among the round's questions answered in
 // the app, as activities go by "Aktivitet" and take no number of their own (D54); an activity
-// carries the number of the questions before it, unused.
+// carries the number of the questions before it, unused. A question asked after a film is
+// numbered among that film's questions instead, with the film's number (D74).
 function findQuestion(rounds: RoundInQuiz[], questionId: Id<"questions">) {
   for (const [roundIndex, round] of rounds.entries()) {
     const questionIndex = round.questions.findIndex((question) => question._id === questionId);
     if (questionIndex !== -1) {
-      const questionNumber = round.questions.slice(0, questionIndex + 1).filter((question) => rulesFor(question.content).answeredInApp).length;
-      return { roundNumber: roundIndex + 1, questionNumber, question: round.questions[questionIndex] };
+      const question = round.questions[questionIndex];
+      const { filmId } = question;
+      const counted = round.questions.slice(0, questionIndex + 1).filter((candidate) => candidate.filmId === filmId && rulesFor(candidate.content).answeredInApp);
+      const filmNumber = filmId === undefined ? null : filmNumberOf(round, filmId);
+      return { roundNumber: roundIndex + 1, filmNumber, questionNumber: counted.length, question };
     }
   }
   throw new Error(`Question ${questionId} is not in the quiz.`);
@@ -84,8 +95,11 @@ export function describeScreen(screen: Screen, allRounds: RoundInQuiz[], graded?
       const { content } = question;
       return { kind: "answer", ...place, prompt: question.prompt, description: descriptionOf(question), isTrip: isTrip(content), revealed: answeringOf(content)?.reveal(content, graded) ?? null };
     }
-    case "film":
+    case "film": {
+      const { roundNumber, round } = findRound(rounds, screen.roundId);
+      return { kind: "film", roundNumber, filmNumber: filmNumberOf(round, screen.filmId) };
+    }
     case "leaderboard":
-      return { kind: screen.kind, roundNumber: findRound(rounds, screen.roundId).roundNumber };
+      return { kind: "leaderboard", roundNumber: findRound(rounds, screen.roundId).roundNumber };
   }
 }

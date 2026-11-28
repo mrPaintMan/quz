@@ -9,13 +9,17 @@ export function questionPlace({ answeredInApp, questionNumber }: { answeredInApp
 // A round as the TV and the live control name it.
 export const roundLabel = (roundNumber: number) => `Omgång ${roundNumber}`;
 
+// A På spåret film before its questions, as the TV and the live control name it (D74).
+export const filmLabel = (filmNumber: number) => `Frågefilm ${filmNumber}`;
+
 type QuestionView = Extract<ScreenView, { kind: "question" }>;
 type AnswerView = Extract<ScreenView, { kind: "answer" }>;
 
 // The small line over a question or answer screen's title: its round and place, or "På spåret" for
-// the trip, which has a round of its own (D66).
-export function screenEyebrow(view: Pick<QuestionView, "kind" | "roundNumber" | "questionNumber" | "answeredInApp" | "isTrip"> | Pick<AnswerView, "kind" | "roundNumber" | "questionNumber" | "isTrip">): string {
+// the trip, which has a round of its own (D66). A question after a film goes by the film instead,
+// such as "Frågefilm 1 · Fråga 2" (D74).
+export function screenEyebrow(view: Pick<QuestionView, "kind" | "roundNumber" | "filmNumber" | "questionNumber" | "answeredInApp" | "isTrip"> | Pick<AnswerView, "kind" | "roundNumber" | "filmNumber" | "questionNumber" | "isTrip">): string {
   if (view.isTrip) return "På spåret";
   const place = view.kind === "answer" ? `Svar på fråga ${view.questionNumber}` : questionPlace(view);
-  return `${roundLabel(view.roundNumber)} · ${place}`;
+  return `${view.filmNumber === null ? roundLabel(view.roundNumber) : filmLabel(view.filmNumber)} · ${place}`;
 }

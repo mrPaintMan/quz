@@ -12,7 +12,7 @@ import { RulesScreen } from "./RulesScreen";
 import type { TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
 import { TvMedia } from "./TvMedia";
-import { roundLabel, screenEyebrow } from "./questionPlace";
+import { filmLabel, roundLabel, screenEyebrow } from "./questionPlace";
 import { TvTimer } from "./TvTimer";
 
 type TvScreenProps = {
@@ -86,7 +86,8 @@ export function TvScreen(props: TvScreenProps) {
     }
     case "film":
       return (
-        <TvFrame eyebrow={roundLabel(view.roundNumber)} title="Film" titleCentered>
+        // No heading of its own, so the film has the room; only its small line (D74).
+        <TvFrame eyebrow={filmLabel(view.filmNumber)} titleCentered>
           {mediaArea}
         </TvFrame>
       );

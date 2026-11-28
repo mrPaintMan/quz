@@ -30,8 +30,8 @@ const renderView = (view: ScreenView, { media = null, timer = null, answeredCoun
     />,
   );
 
-const question: ScreenView = { kind: "question", isTrip: false, roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", description: "", answeredInApp: true, shown: null };
-const answer: ScreenView = { kind: "answer", isTrip: false, roundNumber: 1, questionNumber: 1, prompt: "Vem är det?", description: "", revealed: null };
+const question: ScreenView = { kind: "question", isTrip: false, roundNumber: 1, filmNumber: null, questionNumber: 1, prompt: "Vem är det?", description: "", answeredInApp: true, shown: null };
+const answer: ScreenView = { kind: "answer", isTrip: false, roundNumber: 1, filmNumber: null, questionNumber: 1, prompt: "Vem är det?", description: "", revealed: null };
 const image: ShownMedia = { kind: "image", url: "https://example.com/tomte.jpg" };
 
 describe("TvScreen", () => {
@@ -39,10 +39,11 @@ describe("TvScreen", () => {
     [{ kind: "lobby" }, "Julquiz 2026", "Välkomna till"],
     [{ kind: "rules", roundCount: 1, questionCount: 2, activityCount: 0 }, "Så funkar kvällen", null],
     [{ kind: "roundIntro", roundNumber: 2, title: "Julmat" }, "Julmat", "Omgång 2"],
-    [{ kind: "question", isTrip: false, roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", description: "", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
-    [{ kind: "question", isTrip: false, roundNumber: 2, questionNumber: 4, prompt: "Baka ett pepparkakshus", description: "", answeredInApp: false, shown: null }, "Baka ett pepparkakshus", "Omgång 2 · Aktivitet"],
-    [{ kind: "answer", isTrip: false, roundNumber: 2, questionNumber: 3, prompt: "Vilken krydda?", description: "", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
-    [{ kind: "film", roundNumber: 4 }, "Film", "Omgång 4"],
+    [{ kind: "question", isTrip: false, roundNumber: 2, filmNumber: null, questionNumber: 3, prompt: "Vilken krydda?", description: "", answeredInApp: true, shown: null }, "Vilken krydda?", "Omgång 2 · Fråga 3"],
+    [{ kind: "question", isTrip: false, roundNumber: 2, filmNumber: null, questionNumber: 4, prompt: "Baka ett pepparkakshus", description: "", answeredInApp: false, shown: null }, "Baka ett pepparkakshus", "Omgång 2 · Aktivitet"],
+    [{ kind: "answer", isTrip: false, roundNumber: 2, filmNumber: null, questionNumber: 3, prompt: "Vilken krydda?", description: "", revealed: null }, "Vilken krydda?", "Omgång 2 · Svar på fråga 3"],
+    [{ kind: "film", roundNumber: 4, filmNumber: 2 }, "Frågefilm 2", null],
+    [{ kind: "question", isTrip: false, roundNumber: 4, filmNumber: 2, questionNumber: 1, prompt: "Vilken färg?", description: "", answeredInApp: true, shown: null }, "Vilken färg?", "Frågefilm 2 · Fråga 1"],
     [{ kind: "leaderboard", roundNumber: 1 }, "Topplista efter omgång 1", null],
     [{ kind: "finalLeaderboard" }, "Slutresultat", null],
   ])("shows the %o screen", (view, title, eyebrow) => {
@@ -77,8 +78,10 @@ describe("TvScreen", () => {
 
   it("plays a På spåret film on its film screen", async () => {
     const film: ShownMedia = { kind: "video", screen: { kind: "rules" }, posterUrl: null, durationSeconds: null, showsCluePoints: false };
-    const { container } = renderView({ kind: "film", roundNumber: 4 }, { media: film });
+    const { container } = renderView({ kind: "film", roundNumber: 4, filmNumber: 1 }, { media: film });
     expect(container.querySelector("video")).toBeInTheDocument();
+    // Only the small line over the film, no heading of its own.
+    expect(screen.getAllByRole("heading").map((heading) => heading.textContent)).toEqual(["Frågefilm 1"]);
     await act(async () => {});
   });
 
