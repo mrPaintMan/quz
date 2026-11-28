@@ -7,6 +7,7 @@ import type { Playback } from "@convex/games/playback";
 import type { Screen } from "@convex/games/screen";
 import { CluePointsOverlay } from "./CluePointsOverlay";
 import { FilmFrame } from "./FilmFrame";
+import { usePreloadedFilm } from "./preloadedFilms";
 import { SoundBlockedButton } from "./SoundBlockedButton";
 import { useCluePoints } from "./useCluePoints";
 import { usePlaybackSync } from "./usePlaybackSync";
@@ -16,11 +17,15 @@ const WIDESCREEN = 16 / 9;
 
 type TvVideoProps = { screen: Screen; posterUrl: string | null; playback: Playback | null; showsCluePoints: boolean };
 
-// The film is asked for when its screen shows, since its links expire (D32); its still shows
-// until it plays. The trip's film has its points in the corner.
+// Plays the film the TV downloaded ahead when it was ready as the screen showed (D73); otherwise
+// the film is asked for now, since its links expire (D32), and streams. Its still shows until it
+// plays. The trip's film has its points in the corner.
 export function TvVideo({ screen, posterUrl, playback, showsCluePoints }: TvVideoProps) {
   const getFilmUrl = useMutation(api.media.mutations.getShowingFilmUrl);
-  const [filmUrl, setFilmUrl] = useState<string | null>(null);
+  // Only what was ready as the screen showed: switching to it mid-film would start the film over.
+  const preloaded = usePreloadedFilm(screen);
+  const [preloadedUrl] = useState(preloaded);
+  const [filmUrl, setFilmUrl] = useState<string | null>(preloadedUrl);
   const [aspectRatio, setAspectRatio] = useState(WIDESCREEN);
   const { ref, blocked, sync } = usePlaybackSync<HTMLVideoElement>(playback);
   const { points, handlers } = useCluePoints();
@@ -28,6 +33,7 @@ export function TvVideo({ screen, posterUrl, playback, showsCluePoints }: TvVide
   const screenKey = JSON.stringify(screen);
 
   useEffect(() => {
+    if (preloadedUrl !== null) return;
     let isCurrent = true;
     getFilmUrl({ screen: JSON.parse(screenKey) as Screen }).then((url) => {
       if (isCurrent) setFilmUrl(url);
@@ -35,7 +41,7 @@ export function TvVideo({ screen, posterUrl, playback, showsCluePoints }: TvVide
     return () => {
       isCurrent = false;
     };
-  }, [getFilmUrl, screenKey]);
+  }, [getFilmUrl, preloadedUrl, screenKey]);
 
   return (
     <FilmFrame aspectRatio={aspectRatio}>

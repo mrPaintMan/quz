@@ -9,6 +9,8 @@ import type { TvTeam } from "@/features/shared/tvScreens/TeamList";
 import { TvScreen } from "@/features/shared/tvScreens/TvScreen";
 import { TvStage } from "./TvStage";
 import { useJoinUrl } from "@/features/shared/tvScreens/useJoinUrl";
+import { PreloadedFilms } from "@/features/shared/tvScreens/preloadedFilms";
+import { usePreloadFilms } from "./usePreloadFilms";
 import { usePreloadPictures } from "./usePreloadPictures";
 import type { RunningGame } from "@/features/shared/game/RunningGame";
 
@@ -44,21 +46,24 @@ function CurrentScreen() {
 
 function RunningGameScreen({ game, teams, joinUrl }: { game: RunningGame; teams: TvTeam[]; joinUrl: URL }) {
   usePreloadPictures();
+  const preloadedFilms = usePreloadFilms(game.screen);
   const answeredTeamIds = useAnsweredTeamIds(game._id, game.screen);
   // Only the leaderboards show scores, so the TV follows them only there.
   const scores = useScores(game._id, game.view.kind === "leaderboard" || game.view.kind === "finalLeaderboard");
   return (
-    <TvScreen
-      view={game.view}
-      quizTitle={game.quizTitle}
-      joinUrl={joinUrl}
-      teams={teams}
-      scores={scores}
-      media={game.media}
-      imageUrls={game.imageUrls}
-      answeredCount={answeredTeamIds?.length ?? null}
-      timer={game.timer}
-      playback={game.playback}
-    />
+    <PreloadedFilms value={preloadedFilms}>
+      <TvScreen
+        view={game.view}
+        quizTitle={game.quizTitle}
+        joinUrl={joinUrl}
+        teams={teams}
+        scores={scores}
+        media={game.media}
+        imageUrls={game.imageUrls}
+        answeredCount={answeredTeamIds?.length ?? null}
+        timer={game.timer}
+        playback={game.playback}
+      />
+    </PreloadedFilms>
   );
 }

@@ -98,6 +98,48 @@ describe("getShowingFilmUrl", () => {
   });
 });
 
+describe("getNextFilmUrl", () => {
+  const video = { kind: "video" as const, r2Key: "film-key", posterId: null, durationSeconds: 10 };
+
+  // A quiz of one round with one question, shown on `showing`; the sequence is lobby, rules,
+  // round intro, question, answer and the final leaderboard.
+  async function gameShowing(showing: "roundIntro" | "question", media: typeof video | null = video) {
+    const { t, quizId, questionId } = await setupQuestionWithFile();
+    if (media) await t.mutation(api.media.mutations.setQuestionMedia, { ...host, questionId, media });
+    const roundId = (await t.run((ctx) => ctx.db.get("questions", questionId)))!.roundId;
+    const screen = showing === "roundIntro" ? { kind: "roundIntro" as const, roundId } : { kind: "question" as const, questionId };
+    await t.run((ctx) => ctx.db.insert("games", { quizId, endedAt: null, screen, screenIndex: showing === "roundIntro" ? 2 : 3 }));
+    return { t, questionId, screen };
+  }
+
+  it("gives the TV the next screen and a link to its film", async () => {
+    const { t, questionId, screen } = await gameShowing("roundIntro");
+    const next = await t.mutation(api.media.mutations.getNextFilmUrl, { screen });
+    expect(next?.screen).toEqual({ kind: "question", questionId });
+    expect(next?.url).toContain("film-key");
+  });
+
+  it("gives nothing when the next screen has no film", async () => {
+    const { t, screen } = await gameShowing("question");
+    await expect(t.mutation(api.media.mutations.getNextFilmUrl, { screen })).resolves.toBeNull();
+  });
+
+  it("gives nothing when the next screen's question has no video", async () => {
+    const { t, screen } = await gameShowing("roundIntro", null);
+    await expect(t.mutation(api.media.mutations.getNextFilmUrl, { screen })).resolves.toBeNull();
+  });
+
+  it("gives nothing for a screen that no longer shows", async () => {
+    const { t, questionId } = await gameShowing("question");
+    await expect(t.mutation(api.media.mutations.getNextFilmUrl, { screen: { kind: "answer", questionId } })).resolves.toBeNull();
+  });
+
+  it("gives nothing when no game is running", async () => {
+    const { t } = await setupQuestionWithFile();
+    await expect(t.mutation(api.media.mutations.getNextFilmUrl, { screen: { kind: "lobby" } })).resolves.toBeNull();
+  });
+});
+
 describe("setQuestionMedia", () => {
   it("attaches an uploaded file to the question", async () => {
     const { t, questionId, storageId, mediaOf } = await setupQuestionWithFile();

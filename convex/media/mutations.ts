@@ -47,6 +47,22 @@ export const getShowingFilmUrl = mutation({
   },
 });
 
+// Public, for the TV to download the next screen's film while the screen before it shows, so it
+// plays at once (D73). Only while `screen` shows, so a link comes at most one screen early, which
+// the user accepts. The next screen names only ids, never its text. null when it has no film.
+export const getNextFilmUrl = mutation({
+  args: { screen: screenValidator },
+  handler: async (ctx, { screen }) => {
+    const game = await findRunningGame(ctx);
+    if (game === null) return null;
+    const { rounds, sequence, screenIndex } = await placeOfGame(ctx, game);
+    const next = sequence[screenIndex + 1];
+    if (!isSameScreen(sequence[screenIndex], screen) || next === undefined) return null;
+    const video = videoPlayedOn(next, rounds);
+    return video && { screen: next, url: await filmStorage.getUrl(video.r2Key, { expiresIn: FILM_LINK_SECONDS }) };
+  },
+});
+
 export const setQuestionMedia = hostMutation({
   args: {
     questionId: v.id("questions"),
