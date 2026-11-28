@@ -1,15 +1,18 @@
 import { QRCodeSVG } from "qrcode.react";
+import { PineBed } from "@/features/shared/julquiz/TvDecor";
 import { TeamList, type TvTeam } from "./TeamList";
 import { TvFrame } from "./TvFrame";
 
-type LobbyScreenProps = { quizTitle: string; joinUrl: URL; teams: TvTeam[] };
+type LobbyScreenProps = { quizTitle: string; joinUrl: URL; teams: TvTeam[]; isChristmas?: boolean };
 
 // Phones join by scanning the code, or by typing the address under it (D34).
-export function LobbyScreen({ quizTitle, joinUrl, teams }: LobbyScreenProps) {
+export function LobbyScreen({ quizTitle, joinUrl, teams, isChristmas = false }: LobbyScreenProps) {
   return (
     <TvFrame eyebrow="Välkomna till" title={quizTitle} titleCentered>
       <div className="flex flex-1 gap-[4cqw]">
-        <section className="flex w-[32cqw] shrink-0 flex-col items-center gap-[1.6cqw] rounded-[1.6cqw] border-2 bg-card p-[2.4cqw]">
+        {/* On a Julquiz the code's box lies on a bed of pine (D75). */}
+        <section className="relative flex w-[32cqw] shrink-0 flex-col items-center gap-[1.6cqw] rounded-[1.6cqw] border-2 bg-card p-[2.4cqw]">
+          {isChristmas && <PineBed />}
           <h2 className="text-[2.2cqw] font-semibold">Skanna för att gå med</h2>
           <div className="rounded-[1.2cqw] bg-foreground p-[1.4cqw]">
             <QRCodeSVG value={joinUrl.href} title={`QR-kod till ${joinUrl.host}`} bgColor="transparent" fgColor="var(--background)" className="size-[16cqw]" />

@@ -3,30 +3,32 @@ import { describe, expect, it, vi } from "vitest";
 import type { Timer } from "@convex/games/timer";
 import type { ShownMedia } from "@convex/media/linkScreenMedia";
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
+import type { TeamScore } from "@/features/shared/scores/useScores";
 import { TvScreen } from "./TvScreen";
 
 vi.mock("convex/react", () => ({ useMutation: () => vi.fn().mockResolvedValue(null) }));
 
-type Extras = { media?: ShownMedia | null; timer?: Timer | null; answeredCount?: number | null };
+type Extras = { media?: ShownMedia | null; timer?: Timer | null; answeredCount?: number | null; isChristmas?: boolean; scores?: TeamScore[] };
 
 const teams = [
   { _id: "t1", name: "Röda", colour: "red" as const },
   { _id: "t2", name: "Blå", colour: "blue" as const },
 ];
 
-const renderView = (view: ScreenView, { media = null, timer = null, answeredCount = null }: Extras = {}) =>
+const renderView = (view: ScreenView, { media = null, timer = null, answeredCount = null, isChristmas, scores = [] }: Extras = {}) =>
   render(
     <TvScreen
       view={view}
       quizTitle="Julquiz 2026"
       joinUrl={new URL("https://quz.nu/")}
       teams={teams}
-      scores={[]}
+      scores={scores}
       media={media}
       imageUrls={{}}
       answeredCount={answeredCount}
       timer={timer}
       playback={null}
+      isChristmas={isChristmas}
     />,
   );
 
@@ -106,5 +108,27 @@ describe("TvScreen", () => {
     const revealed = { type: "multipleChoice" as const, options: [{ text: "Sverige", imageId: null }], correctIndex: 0 };
     renderView({ ...answer, revealed } as ScreenView);
     expect(screen.getByText("Sverige")).toBeInTheDocument();
+  });
+
+  it("draws no Christmas decorations on a quiz that isn't a Julquiz", () => {
+    const { container } = renderView(question);
+    expect(screen.queryByTestId("julquiz-decor")).not.toBeInTheDocument();
+    expect(container.querySelector("[data-julquiz]")).toBeNull();
+  });
+
+  it.each<[ScreenView, number, boolean]>([
+    [question, 2, false],
+    [answer, 2, false],
+    [{ kind: "roundIntro", roundNumber: 2, title: "Julmat" }, 2, false],
+    [{ kind: "film", roundNumber: 4, filmNumber: 2 }, 0, false],
+    [{ kind: "lobby" }, 0, true],
+    [{ kind: "leaderboard", roundNumber: 1 }, 0, true],
+  ])("dresses a Julquiz's %o screen: %i pine corners, a pine bed %s (D75)", (view, cornerCount, hasBed) => {
+    const scores = [{ _id: "t1", name: "Röda", colour: "red", points: 3, rank: 1 }] as TeamScore[];
+    const { container } = renderView(view, { isChristmas: true, scores });
+    expect(screen.getByTestId("julquiz-decor")).toBeInTheDocument();
+    expect(container.querySelector("[data-julquiz]")).not.toBeNull();
+    expect(container.querySelectorAll('img[src="/julquiz/pine-corner.webp"]')).toHaveLength(cornerCount);
+    expect(screen.queryByTestId("julquiz-pine-bed") !== null).toBe(hasBed);
   });
 });

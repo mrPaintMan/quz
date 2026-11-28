@@ -49,7 +49,7 @@ type GameState = {
   isLocked?: boolean; screenNow?: Screen; view?: ScreenView; media?: ShownMedia | null; timer?: Timer | null; playback?: Playback | null };
 
 function renderControl({ screenNow = { kind: "lobby" }, view = { kind: "lobby" }, media = null, timer = null, playback = null, isLocked = false }: GameState = {}) {
-  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false, isQuestionLocked: isLocked };
+  const game = { _id: gameId, quizId: "quiz1" as Id<"quizzes">, quizTitle: "Julquiz 2026", isChristmas: false, screen: screenNow, view, media, imageUrls: {}, timer, playback, isQuestionClosed: false, isQuestionLocked: isLocked };
   render(
     <HostSessionProvider session={{ passphrase: "p", logOut: vi.fn() }}>
       <ActionErrorProvider>

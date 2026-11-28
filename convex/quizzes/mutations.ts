@@ -14,12 +14,13 @@ export const createQuiz = hostMutation({
 });
 
 export const updateQuiz = hostMutation({
-  args: { quizId: v.id("quizzes"), title: v.optional(v.string()), year: v.optional(v.number()) },
-  handler: async (ctx, { quizId, title, year }) => {
+  args: { quizId: v.id("quizzes"), title: v.optional(v.string()), year: v.optional(v.number()), isChristmas: v.optional(v.boolean()) },
+  handler: async (ctx, { quizId, title, year, isChristmas }) => {
     await getOrThrow(ctx, "quizzes", quizId);
     await ctx.db.patch("quizzes", quizId, {
       ...(title === undefined ? {} : { title }),
       ...(year === undefined ? {} : { year }),
+      ...(isChristmas === undefined ? {} : { isChristmas }),
       updatedAt: Date.now(),
     });
   },
@@ -40,8 +41,13 @@ async function copyRounds(ctx: MutationCtx, fromQuizId: Id<"quizzes">, toQuizId:
 export const copyQuiz = hostMutation({
   args: { quizId: v.id("quizzes"), title: v.string(), year: v.number() },
   handler: async (ctx, { quizId, title, year }) => {
-    await getOrThrow(ctx, "quizzes", quizId);
-    const newQuizId = await ctx.db.insert("quizzes", { title, year, updatedAt: Date.now() });
+    const original = await getOrThrow(ctx, "quizzes", quizId);
+    const newQuizId = await ctx.db.insert("quizzes", {
+      title,
+      year,
+      updatedAt: Date.now(),
+      ...(original.isChristmas === undefined ? {} : { isChristmas: original.isChristmas }),
+    });
     await copyRounds(ctx, quizId, newQuizId);
     return newQuizId;
   },

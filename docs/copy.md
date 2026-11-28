@@ -6,6 +6,7 @@ The words Quz uses in its Swedish UI, so every screen says the same thing. Add t
 |---|---|---|
 | A round of the quiz | **omgång** (omgången, omgångar, omgångarna) | rond |
 | The ordinary kind of round | **Frågeomgång** | Frågerond |
+| A quiz with the Christmas look (D75) | **Julquiz**, the editor's switch with the hint **Julbelysning, granar och granris på TV:n och mobilerna** | Juläge, Jultema |
 | The kind of a round | **Typ av omgång** | Sorts rond |
 | The people answering, in explanatory texts | **deltagarna** | lagen |
 | A team as a unit (team names, "Anmälda lag", scores) | **lag** | deltagare |

@@ -11,7 +11,7 @@ The dates are internal targets. Code quality (`docs/engineering.md`) wins if the
 
 ## Next up
 
-The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. The second test night (2026-11-15) gave a new feedback round, done in this order, one PR each: bugs (D64), the admin view, the TV screens, the phones' results, descriptions on every question and Rita judged before its answer screen, Swedish provinces and US states on the map (D69), and På spåret's films without a cap and grouped more clearly in the editor (D70). Then M4's score graph and M5's polish.
+The feedback round from the user's test night (2026-11-11) is done, and the phone's result is drawn like each type's input (D59). Points by hand (D61), Rita (D62) and På spåret (D63) are done: every question type now has all four pieces, so M3's answering is complete. The second test night (2026-11-15) gave a new feedback round, done in this order, one PR each: bugs (D64), the admin view, the TV screens, the phones' results, descriptions on every question and Rita judged before its answer screen, Swedish provinces and US states on the map (D69), and På spåret's films without a cap and grouped more clearly in the editor (D70). M5's Christmas look is in as the Julquiz switch (D75); the score graph is postponed. Next: the dry run with friends on real phones, then whatever it turns up.
 
 ## Milestones
 
@@ -91,10 +91,10 @@ Agreed with the user, in this order:
 - [x] På spåret: clue reveal and emergency brake (D40, D63)
 - [x] Map pin answer input and reveal with radius, reusing `BorderMap` (D27, D60)
 - [x] Drawing answers shown on the TV (D62)
-- [ ] Score history and score graph on the TV
+- [ ] Score history and score graph on the TV (postponed by the user, 2026-11-28)
 
 ### M5 · Polish and launch (late November)
-- [ ] Final visual design and Christmas theme, TV-sized layout
+- [x] Final visual design and Christmas theme: the Julquiz look, per quiz (D75)
 - [x] Custom domain (quz.nu)
 - [ ] Dry run with a few friends on real phones
 
@@ -162,3 +162,4 @@ Agreed with the user, in this order:
 - 2026-11-24: An answer the key spells always counts: "Visa alla svar" shows it as a fixed "✓ Rätt", and only verdicts (the AI's and the hosts') can be changed (D72). Not tried in a browser with data.
 - 2026-11-28: The TV downloads the next screen's film while the screen before it shows and plays the copy at once, streaming as before if it isn't ready (D73). Tried on dev in the browser: the trip and a film played from their copies, and a reload streamed.
 - 2026-11-28: På spåret's films go by **Frågefilm 1** on the TV and in the admin, without a heading, and their questions by **Frågefilm 1 · Fråga 1** (D74). Tried on dev in the browser.
+- 2026-11-28: M5, the Julquiz look: a switch per quiz dresses the TV and the phones for Christmas, with a tree pattern, slowly twinkling lights, pine with snow and serif titles (D75). Checked with screenshots of the real components; not tried in a browser with data.

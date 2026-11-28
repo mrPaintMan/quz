@@ -79,7 +79,7 @@ export function LiveControl({ game }: { game: RunningGame }) {
   // The address is null only while rendering on the server, and the game loads only in the
   // browser, so this never shows.
   if (joinUrl === null) return null;
-  const screenProps = { quizTitle: game.quizTitle, teams, scores, joinUrl };
+  const screenProps = { quizTitle: game.quizTitle, teams, scores, joinUrl, isChristmas: game.isChristmas };
 
   return (
     <div className="flex min-h-svh flex-col">

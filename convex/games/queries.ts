@@ -30,6 +30,8 @@ export const getRunningGame = query({
       _id: game._id,
       quizId: game.quizId,
       quizTitle: quiz.title,
+      // Whether the TV and the phones dress up for Christmas (D75).
+      isChristmas: quiz.isChristmas === true,
       screen,
       ...(await showScreen(ctx, game._id, screen, rounds)),
       timer: isStoredScreen ? (game.timer ?? null) : null,
