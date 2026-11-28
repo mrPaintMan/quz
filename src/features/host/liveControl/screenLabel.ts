@@ -1,5 +1,5 @@
 import type { ScreenView } from "@/domain/screenSequence/describeScreen";
-import { screenEyebrow } from "@/features/shared/tvScreens/questionPlace";
+import { filmLabel, screenEyebrow } from "@/features/shared/tvScreens/questionPlace";
 
 // A short name for a screen, for the hosts' live control.
 export function screenLabel(view: ScreenView): string {
@@ -14,7 +14,7 @@ export function screenLabel(view: ScreenView): string {
     case "answer":
       return screenEyebrow(view);
     case "film":
-      return `Omgång ${view.roundNumber} · Film`;
+      return filmLabel(view.filmNumber);
     case "leaderboard":
       return `Topplista efter omgång ${view.roundNumber}`;
     case "finalLeaderboard":

@@ -5,10 +5,11 @@ import type { ReactNode } from "react";
 // `corner` sits on the right, level with the title's first line, such as the timer. `centered` makes the title a large
 // heading in the middle, for a round's intro and an activity. `titleCentered` centres the title at
 // the top over the content below, for the screens that aren't questions (D66). `description` is a
-// question's short text, much smaller and dimmed under its title (D68).
+// question's short text, much smaller and dimmed under its title (D68). Without a title, the
+// eyebrow is the screen's only line and its heading, such as over a På spåret film (D74).
 type TvFrameProps = {
   eyebrow?: string;
-  title: string;
+  title?: string;
   description?: string;
   corner?: ReactNode;
   centered?: boolean;
@@ -33,11 +34,15 @@ export function TvFrame({ eyebrow, title, description = "", corner, centered = f
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-[3cqw] px-[5cqw] py-[3cqw]">
       <header className={`flex flex-col gap-[0.5cqw] ${titleCentered ? "items-center text-center" : ""}`}>
-        {eyebrow && <p className="text-[1.6cqw] text-muted-foreground">{eyebrow}</p>}
-        <div className={`flex items-start gap-[3cqw] ${titleCentered ? "justify-center" : "justify-between"}`}>
-          <h1 className="text-[5cqw] leading-none font-bold tracking-tight">{title}</h1>
-          {corner}
-        </div>
+        {eyebrow && title !== undefined && <p className="text-[1.6cqw] text-muted-foreground">{eyebrow}</p>}
+        {title === undefined ? (
+          <h1 className="text-[1.6cqw] font-normal text-muted-foreground">{eyebrow}</h1>
+        ) : (
+          <div className={`flex items-start gap-[3cqw] ${titleCentered ? "justify-center" : "justify-between"}`}>
+            <h1 className="text-[5cqw] leading-none font-bold tracking-tight">{title}</h1>
+            {corner}
+          </div>
+        )}
         {description !== "" && <p className="mt-[0.5cqw] max-w-[80cqw] text-[2cqw] whitespace-pre-line text-muted-foreground">{description}</p>}
       </header>
       {children}

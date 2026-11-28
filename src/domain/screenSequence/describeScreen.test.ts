@@ -20,6 +20,7 @@ const rounds = [
   },
   { _id: roundId("julfilm"), title: "Julfilm", questions: [{ _id: questionId("q3"), prompt: "Rita en tomte", content: drawing }] },
 ];
+const video = { kind: "video" as const, r2Key: "film", posterId: null, durationSeconds: 10 };
 
 describe("describeScreen", () => {
   it("describes the lobby and the final leaderboard by their kind alone", () => {
@@ -38,13 +39,13 @@ describe("describeScreen", () => {
       title: "Julfilm",
     });
     expect(describeScreen({ kind: "leaderboard", roundId: roundId("julmat") }, rounds)).toEqual({ kind: "leaderboard", roundNumber: 1 });
-    expect(describeScreen({ kind: "film", roundId: roundId("julfilm"), filmId: "f1" }, rounds)).toEqual({ kind: "film", roundNumber: 2 });
   });
 
   it("gives a question's place and prompt but no answer, and says whether teams answer it in the app", () => {
     expect(describeScreen({ kind: "question", questionId: questionId("q2") }, rounds)).toEqual({
       kind: "question",
       roundNumber: 1,
+      filmNumber: null,
       questionNumber: 1,
       prompt: "Baka ett pepparkakshus",
       answeredInApp: false,
@@ -55,6 +56,7 @@ describe("describeScreen", () => {
     expect(describeScreen({ kind: "answer", questionId: questionId("q3") }, rounds)).toEqual({
       kind: "answer",
       roundNumber: 2,
+      filmNumber: null,
       questionNumber: 1,
       prompt: "Rita en tomte",
       description: "",
@@ -99,6 +101,31 @@ describe("describeScreen", () => {
     ];
     expect(describeScreen({ kind: "question", questionId: questionId("b") }, quiz)).toMatchObject({ questionNumber: 1 });
     expect(describeScreen({ kind: "answer", questionId: questionId("b") }, quiz)).toMatchObject({ questionNumber: 1 });
+  });
+
+  it("numbers På spåret's films, and each film's questions from 1 under it", () => {
+    const trip: QuestionContent = { type: "paSparet", acceptedAnswers: ["Kiruna"], fuzzy: true, clues: ["a", "b", "c", "d", "e"] };
+    const quiz = [
+      {
+        _id: roundId("resa"),
+        title: "På spåret",
+        films: [
+          { id: "f1", video },
+          { id: "f2", video },
+        ],
+        questions: [
+          { _id: questionId("t"), prompt: "Vart?", content: trip },
+          { _id: questionId("a"), prompt: "Vilken färg?", filmId: "f1", content: freeText },
+          { _id: questionId("b"), prompt: "Vilken stad?", filmId: "f2", content: freeText },
+          { _id: questionId("c"), prompt: "Vilket år?", filmId: "f2", content: freeText },
+        ],
+      },
+    ];
+    expect(describeScreen({ kind: "film", roundId: roundId("resa"), filmId: "f2" }, quiz)).toEqual({ kind: "film", roundNumber: 1, filmNumber: 2 });
+    expect(describeScreen({ kind: "question", questionId: questionId("a") }, quiz)).toMatchObject({ filmNumber: 1, questionNumber: 1 });
+    expect(describeScreen({ kind: "question", questionId: questionId("c") }, quiz)).toMatchObject({ filmNumber: 2, questionNumber: 2 });
+    expect(describeScreen({ kind: "answer", questionId: questionId("b") }, quiz)).toMatchObject({ filmNumber: 2, questionNumber: 1 });
+    expect(describeScreen({ kind: "question", questionId: questionId("t") }, quiz)).toMatchObject({ filmNumber: null, questionNumber: 1 });
   });
 
   it("refuses a screen whose round or question isn't in the quiz", () => {
